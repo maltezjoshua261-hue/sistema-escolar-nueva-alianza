@@ -15,14 +15,24 @@
 
         body {
             min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        /* =========================
+           PANTALLA DE LOGIN
+        ========================== */
+
+        #login {
+            min-height: 100vh;
             background: linear-gradient(135deg, #0d47a1, #1976d2, #42a5f5);
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
-        .contenedor {
-            width: 90%;
+        .contenedor-login {
+            width: 100%;
             max-width: 420px;
             background: white;
             border-radius: 20px;
@@ -46,7 +56,7 @@
 
         h1 {
             color: #0d47a1;
-            font-size: 24px;
+            font-size: 25px;
             margin-bottom: 8px;
         }
 
@@ -64,7 +74,7 @@
             font-size: 16px;
         }
 
-        button {
+        .boton-login {
             width: 100%;
             padding: 14px;
             border: none;
@@ -76,8 +86,15 @@
             cursor: pointer;
         }
 
-        button:hover {
+        .boton-login:hover {
             background: #0d47a1;
+        }
+
+        .mensaje-error {
+            color: #d32f2f;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
         }
 
         .pie {
@@ -85,12 +102,205 @@
             font-size: 12px;
             color: #888;
         }
+
+        /* =========================
+           PANEL PRINCIPAL
+        ========================== */
+
+        #panel {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .encabezado {
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .titulo-panel h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .titulo-panel p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .boton-salir {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .boton-salir:hover {
+            background: #b71c1c;
+        }
+
+        .contenido {
+            padding: 30px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .bienvenida {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .bienvenida h3 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+        }
+
+        .bienvenida p {
+            color: #666;
+        }
+
+        /* =========================
+           TARJETAS
+        ========================== */
+
+        .estadisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .tarjeta-estadistica {
+            background: white;
+            padding: 22px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .icono-estadistica {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+
+        .numero {
+            font-size: 30px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .texto-estadistica {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           MODULOS
+        ========================== */
+
+        .titulo-seccion {
+            color: #0d47a1;
+            margin-bottom: 18px;
+            font-size: 22px;
+        }
+
+        .modulos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .modulo {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .modulo:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .modulo-icono {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .modulo h4 {
+            color: #0d47a1;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .modulo p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* =========================
+           MENSAJE DEL MODULO
+        ========================== */
+
+        #mensajeModulo {
+            display: none;
+            margin-top: 25px;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        #mensajeModulo h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        #mensajeModulo p {
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+
+            .encabezado {
+                padding: 18px;
+            }
+
+            .contenido {
+                padding: 18px;
+            }
+
+            .titulo-panel h2 {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="contenedor">
+<!-- =========================
+     LOGIN
+========================== -->
+
+<div id="login">
+
+    <div class="contenedor-login">
 
         <div class="logo">🏫</div>
 
@@ -100,13 +310,27 @@
             Centro Escolar Nueva Alianza
         </p>
 
-        <input type="text" id="usuario" placeholder="Usuario">
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Usuario"
+            autocomplete="username"
+        >
 
-        <input type="password" id="clave" placeholder="Contraseña">
+        <input
+            type="password"
+            id="clave"
+            placeholder="Contraseña"
+            autocomplete="current-password"
+        >
 
-        <button onclick="iniciarSesion()">
+        <button class="boton-login" onclick="iniciarSesion()">
             Iniciar sesión
         </button>
+
+        <p id="error" class="mensaje-error">
+            Usuario o contraseña incorrectos.
+        </p>
 
         <p class="pie">
             Sistema de Gestión Escolar · 2026
@@ -114,19 +338,341 @@
 
     </div>
 
-    <script>
-        function iniciarSesion() {
+</div>
 
-            const usuario = document.getElementById("usuario").value;
-            const clave = document.getElementById("clave").value;
 
-            if (usuario === "admin" && clave === "1234") {
-                alert("Bienvenido al Sistema Escolar Nueva Alianza");
-            } else {
-                alert("Usuario o contraseña incorrectos");
-            }
+<!-- =========================
+     PANEL DEL DIRECTOR
+========================== -->
+
+<div id="panel">
+
+    <header class="encabezado">
+
+        <div class="titulo-panel">
+
+            <h2>🏫 Sistema Escolar Nueva Alianza</h2>
+
+            <p>
+                Panel de Administración del Director
+            </p>
+
+        </div>
+
+        <button class="boton-salir" onclick="cerrarSesion()">
+            🚪 Cerrar sesión
+        </button>
+
+    </header>
+
+
+    <main class="contenido">
+
+        <section class="bienvenida">
+
+            <h3>
+                ¡Bienvenido, Director!
+            </h3>
+
+            <p>
+                Desde este panel podrá administrar estudiantes,
+                docentes, asistencia, calificaciones y reportes
+                del Centro Escolar Nueva Alianza.
+            </p>
+
+        </section>
+
+
+        <!-- ESTADISTICAS -->
+
+        <section class="estadisticas">
+
+            <div class="tarjeta-estadistica">
+
+                <div class="icono-estadistica">
+                    👨‍🎓
+                </div>
+
+                <div class="numero">
+                    0
+                </div>
+
+                <div class="texto-estadistica">
+                    Estudiantes
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-estadistica">
+
+                <div class="icono-estadistica">
+                    👨‍🏫
+                </div>
+
+                <div class="numero">
+                    0
+                </div>
+
+                <div class="texto-estadistica">
+                    Docentes
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-estadistica">
+
+                <div class="icono-estadistica">
+                    📋
+                </div>
+
+                <div class="numero">
+                    0%
+                </div>
+
+                <div class="texto-estadistica">
+                    Asistencia
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-estadistica">
+
+                <div class="icono-estadistica">
+                    📝
+                </div>
+
+                <div class="numero">
+                    0
+                </div>
+
+                <div class="texto-estadistica">
+                    Calificaciones
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- MODULOS -->
+
+        <h3 class="titulo-seccion">
+            Módulos del sistema
+        </h3>
+
+
+        <section class="modulos">
+
+
+            <div class="modulo" onclick="mostrarModulo('Estudiantes')">
+
+                <div class="modulo-icono">
+                    👨‍🎓
+                </div>
+
+                <h4>
+                    Estudiantes
+                </h4>
+
+                <p>
+                    Registrar y consultar estudiantes.
+                </p>
+
+            </div>
+
+
+            <div class="modulo" onclick="mostrarModulo('Docentes')">
+
+                <div class="modulo-icono">
+                    👨‍🏫
+                </div>
+
+                <h4>
+                    Docentes
+                </h4>
+
+                <p>
+                    Registrar y administrar docentes.
+                </p>
+
+            </div>
+
+
+            <div class="modulo" onclick="mostrarModulo('Asistencia')">
+
+                <div class="modulo-icono">
+                    📋
+                </div>
+
+                <h4>
+                    Asistencia
+                </h4>
+
+                <p>
+                    Controlar entrada, salida y asistencia.
+                </p>
+
+            </div>
+
+
+            <div class="modulo" onclick="mostrarModulo('Calificaciones')">
+
+                <div class="modulo-icono">
+                    📝
+                </div>
+
+                <h4>
+                    Calificaciones
+                </h4>
+
+                <p>
+                    Registrar y consultar calificaciones.
+                </p>
+
+            </div>
+
+
+            <div class="modulo" onclick="mostrarModulo('Reportes')">
+
+                <div class="modulo-icono">
+                    📊
+                </div>
+
+                <h4>
+                    Reportes
+                </h4>
+
+                <p>
+                    Consultar información y reportes.
+                </p>
+
+            </div>
+
+
+            <div class="modulo" onclick="mostrarModulo('Configuración')">
+
+                <div class="modulo-icono">
+                    ⚙️
+                </div>
+
+                <h4>
+                    Configuración
+                </h4>
+
+                <p>
+                    Configurar el sistema escolar.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- MENSAJE -->
+
+        <section id="mensajeModulo">
+
+            <h3 id="tituloModulo">
+                Módulo
+            </h3>
+
+            <p id="textoModulo">
+                Este módulo será desarrollado en el siguiente paso.
+            </p>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       INICIAR SESION
+    ========================== */
+
+    function iniciarSesion() {
+
+        const usuario =
+            document.getElementById("usuario").value.trim();
+
+        const clave =
+            document.getElementById("clave").value.trim();
+
+        const error =
+            document.getElementById("error");
+
+
+        if (usuario === "admin" && clave === "1234") {
+
+            document.getElementById("login").style.display = "none";
+
+            document.getElementById("panel").style.display = "block";
+
+            error.style.display = "none";
+
+        } else {
+
+            error.style.display = "block";
+
         }
-    </script>
+
+    }
+
+
+    /* =========================
+       CERRAR SESION
+    ========================== */
+
+    function cerrarSesion() {
+
+        document.getElementById("panel").style.display = "none";
+
+        document.getElementById("login").style.display = "flex";
+
+        document.getElementById("usuario").value = "";
+
+        document.getElementById("clave").value = "";
+
+    }
+
+
+    /* =========================
+       MOSTRAR MODULO
+    ========================== */
+
+    function mostrarModulo(nombre) {
+
+        const mensaje =
+            document.getElementById("mensajeModulo");
+
+        const titulo =
+            document.getElementById("tituloModulo");
+
+        const texto =
+            document.getElementById("textoModulo");
+
+
+        titulo.textContent = "📌 Módulo de " + nombre;
+
+        texto.textContent =
+            "El módulo de " + nombre +
+            " será desarrollado en el siguiente paso del sistema.";
+
+        mensaje.style.display = "block";
+
+        mensaje.scrollIntoView({
+            behavior: "smooth"
+        });
+
+    }
+
+</script>
 
 </body>
 </html>
