@@ -18,27 +18,32 @@ body{
     color:#1e293b;
 }
 
-.login-container{
+.hidden{
+    display:none !important;
+}
+
+/* LOGIN */
+#loginScreen{
     min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#0f4c81,#2563eb);
+    background:linear-gradient(135deg,#2563eb,#0f766e);
     padding:20px;
 }
 
 .login-box{
+    background:white;
     width:100%;
     max-width:420px;
-    background:white;
     padding:35px;
-    border-radius:18px;
+    border-radius:20px;
     box-shadow:0 15px 40px rgba(0,0,0,.25);
     text-align:center;
 }
 
 .login-box h1{
-    color:#0f4c81;
+    color:#1d4ed8;
     margin-bottom:8px;
 }
 
@@ -47,21 +52,59 @@ body{
     margin-bottom:25px;
 }
 
-.login-box input{
-    width:100%;
-    padding:13px;
+.logo{
+    width:80px;
+    height:80px;
+    margin:auto;
     margin-bottom:15px;
-    border:1px solid #cbd5e1;
-    border-radius:8px;
-    font-size:15px;
+    border-radius:50%;
+    background:#2563eb;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:35px;
+    font-weight:bold;
 }
 
-button{
-    border:none;
+.form-group{
+    margin-bottom:15px;
+    text-align:left;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
     border-radius:8px;
-    padding:11px 16px;
+    outline:none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    border-color:#2563eb;
+}
+
+.btn{
+    border:none;
+    padding:11px 18px;
+    border-radius:8px;
     cursor:pointer;
     font-weight:bold;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
 }
 
 .btn-primary{
@@ -69,17 +112,8 @@ button{
     color:white;
 }
 
-.btn-primary:hover{
-    background:#1d4ed8;
-}
-
 .btn-success{
     background:#16a34a;
-    color:white;
-}
-
-.btn-warning{
-    background:#f59e0b;
     color:white;
 }
 
@@ -88,183 +122,169 @@ button{
     color:white;
 }
 
+.btn-warning{
+    background:#f59e0b;
+    color:white;
+}
+
 .btn-secondary{
     background:#64748b;
     color:white;
 }
 
-.hidden{
-    display:none !important;
+.error{
+    color:#dc2626;
+    margin-top:12px;
+    font-weight:bold;
 }
 
-.app{
+/* APP */
+#app{
     min-height:100vh;
 }
 
-.header{
-    background:#0f4c81;
+.topbar{
+    height:65px;
+    background:#1e40af;
     color:white;
-    padding:16px 25px;
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    flex-wrap:wrap;
+    justify-content:space-between;
+    padding:0 22px;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+}
+
+.topbar h2{
+    font-size:20px;
+}
+
+.user-info{
+    display:flex;
+    align-items:center;
     gap:15px;
-}
-
-.header h1{
-    font-size:22px;
-}
-
-.header small{
-    opacity:.9;
 }
 
 .logout{
     background:#dc2626;
     color:white;
-}
-
-.layout{
-    display:flex;
-    min-height:calc(100vh - 75px);
+    border:none;
+    padding:9px 14px;
+    border-radius:7px;
+    cursor:pointer;
 }
 
 .sidebar{
+    position:fixed;
+    top:65px;
+    left:0;
+    bottom:0;
     width:240px;
-    background:#172554;
-    color:white;
+    background:#0f172a;
     padding:20px 12px;
-}
-
-.sidebar h3{
-    text-align:center;
-    margin-bottom:20px;
-    color:#bfdbfe;
+    overflow-y:auto;
 }
 
 .sidebar button{
     width:100%;
-    margin-bottom:8px;
-    text-align:left;
+    border:none;
     background:transparent;
-    color:white;
-    border-radius:7px;
+    color:#cbd5e1;
+    text-align:left;
+    padding:13px;
+    margin-bottom:5px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
 }
 
 .sidebar button:hover,
 .sidebar button.active{
-    background:#2563eb;
+    background:#1d4ed8;
+    color:white;
 }
 
-.content{
-    flex:1;
-    padding:25px;
-    overflow:auto;
+.main{
+    margin-left:240px;
+    padding:90px 25px 30px;
 }
 
-.page-title{
+/* DASHBOARD */
+.dashboard-title{
     margin-bottom:20px;
 }
 
-.page-title h2{
-    color:#0f4c81;
-    margin-bottom:5px;
-}
-
-.page-title p{
-    color:#64748b;
-}
-
-.stats{
+.cards{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    grid-template-columns:repeat(4,1fr);
     gap:18px;
     margin-bottom:25px;
 }
 
-.stat-card{
-    background:white;
-    padding:22px;
-    border-radius:14px;
-    box-shadow:0 3px 12px rgba(0,0,0,.08);
-}
-
-.stat-card h3{
-    color:#64748b;
-    font-size:15px;
-    margin-bottom:10px;
-}
-
-.stat-card strong{
-    font-size:30px;
-    color:#2563eb;
-}
-
 .card{
     background:white;
-    padding:22px;
     border-radius:14px;
+    padding:22px;
     box-shadow:0 3px 12px rgba(0,0,0,.08);
-    margin-bottom:20px;
 }
 
 .card h3{
-    margin-bottom:18px;
-    color:#0f4c81;
+    font-size:15px;
+    color:#64748b;
+    margin-bottom:10px;
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
-}
-
-.form-group{
-    display:flex;
-    flex-direction:column;
-}
-
-.form-group label{
+.card .number{
+    font-size:30px;
     font-weight:bold;
-    margin-bottom:6px;
-    font-size:14px;
+    color:#1d4ed8;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea{
-    padding:11px;
-    border:1px solid #cbd5e1;
-    border-radius:7px;
-    font-size:14px;
+/* MODULE */
+.modulo{
+    background:white;
+    border-radius:14px;
+    padding:25px;
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
 }
 
-.form-group textarea{
-    min-height:80px;
-    resize:vertical;
-}
-
-.form-actions{
-    margin-top:20px;
+.modulo-header{
     display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
     gap:10px;
     flex-wrap:wrap;
 }
 
-.search-box{
-    margin-bottom:18px;
+.modulo-header h2{
+    color:#1e3a8a;
 }
 
-.search-box input{
-    width:100%;
-    padding:12px;
-    border:1px solid #cbd5e1;
-    border-radius:8px;
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
 }
 
+.full{
+    grid-column:1/-1;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+
+/* TABLE */
 .table-container{
     overflow-x:auto;
+    margin-top:25px;
 }
 
 table{
@@ -273,16 +293,16 @@ table{
     min-width:800px;
 }
 
-th,td{
+th{
+    background:#1d4ed8;
+    color:white;
     padding:11px;
-    border-bottom:1px solid #e2e8f0;
     text-align:left;
-    font-size:13px;
 }
 
-th{
-    background:#eff6ff;
-    color:#1e3a8a;
+td{
+    padding:10px;
+    border-bottom:1px solid #e2e8f0;
 }
 
 tr:hover{
@@ -297,110 +317,176 @@ tr:hover{
     font-weight:bold;
 }
 
-.badge-active{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.badge-inactive{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.badge-present{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.badge-absent{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.badge-late{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.badge-justified{
+.badge-blue{
     background:#dbeafe;
-    color:#1e40af;
+    color:#1d4ed8;
 }
 
-.action-buttons{
+.badge-green{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.badge-red{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.badge-yellow{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.badge-gray{
+    background:#e2e8f0;
+    color:#475569;
+}
+
+/* ASISTENCIA */
+.attendance-summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin:20px 0;
+}
+
+.summary-box{
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.summary-total{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.summary-present{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.summary-absent{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.summary-late{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.student-attendance{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:12px;
+    background:#f8fafc;
+}
+
+.student-attendance-header{
     display:flex;
-    gap:5px;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
     flex-wrap:wrap;
 }
 
-.action-buttons button{
-    padding:6px 9px;
-    font-size:12px;
+.attendance-options{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:12px;
 }
 
-.attendance-summary{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:15px;
-    margin-bottom:20px;
+.attendance-options label{
+    cursor:pointer;
+    padding:7px 12px;
+    border-radius:7px;
+    background:white;
+    border:1px solid #cbd5e1;
 }
 
-.attendance-box{
-    padding:18px;
-    background:#f8fafc;
-    border-radius:10px;
-    text-align:center;
-    border:1px solid #e2e8f0;
+.attendance-options input{
+    margin-right:5px;
 }
 
-.attendance-box strong{
-    display:block;
-    font-size:27px;
-    margin-top:5px;
-}
-
+/* MENSAJES */
 .message{
     padding:12px;
     border-radius:8px;
     margin-bottom:15px;
-    display:none;
+    font-weight:bold;
 }
 
-.message.success{
-    display:block;
+.message-success{
     background:#dcfce7;
     color:#166534;
 }
 
-.message.error{
-    display:block;
+.message-error{
     background:#fee2e2;
     color:#991b1b;
 }
 
-.empty{
-    text-align:center;
-    padding:30px;
-    color:#64748b;
+.message-info{
+    background:#dbeafe;
+    color:#1e40af;
 }
 
-@media(max-width:800px){
-    .layout{
-        flex-direction:column;
+/* RESPONSIVE */
+@media(max-width:1000px){
+    .cards{
+        grid-template-columns:repeat(2,1fr);
     }
 
+    .attendance-summary{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:700px){
     .sidebar{
+        width:190px;
+    }
+
+    .main{
+        margin-left:190px;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .topbar h2{
+        font-size:15px;
+    }
+}
+
+@media(max-width:550px){
+    .sidebar{
+        position:static;
         width:100%;
+        margin-top:65px;
+        height:auto;
     }
 
-    .sidebar button{
-        width:auto;
-        display:inline-block;
-        margin-right:5px;
+    .main{
+        margin-left:0;
+        padding-top:20px;
     }
 
-    .content{
-        padding:15px;
+    .topbar{
+        position:fixed;
+    }
+
+    .attendance-summary{
+        grid-template-columns:1fr;
     }
 }
 </style>
@@ -409,35 +495,31 @@ tr:hover{
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen" class="login-container">
+<div id="loginScreen">
 
     <div class="login-box">
 
-        <h1>🏫 Nueva Alianza</h1>
+        <div class="logo">NA</div>
+
+        <h1>Nueva Alianza</h1>
 
         <p>Sistema de Gestión Escolar</p>
 
-        <input
-            type="text"
-            id="username"
-            placeholder="Usuario"
-        >
+        <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" id="usuario" placeholder="Ingrese usuario">
+        </div>
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Contraseña"
-        >
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="password" placeholder="Ingrese contraseña">
+        </div>
 
-        <button
-            class="btn-primary"
-            style="width:100%;"
-            onclick="login()"
-        >
-            Ingresar
+        <button class="btn btn-primary" style="width:100%;" onclick="iniciarSesion()">
+            Ingresar al sistema
         </button>
 
-        <div id="loginMessage" class="message"></div>
+        <div id="loginError"></div>
 
     </div>
 
@@ -445,959 +527,809 @@ tr:hover{
 
 
 <!-- APLICACIÓN -->
-<div id="app" class="app hidden">
+<div id="app" class="hidden">
 
-    <!-- ENCABEZADO -->
-    <header class="header">
+    <!-- TOPBAR -->
+    <div class="topbar">
 
-        <div>
-            <h1>🏫 Sistema Escolar Nueva Alianza</h1>
-            <small>Gestión académica y administrativa</small>
+        <h2>🏫 Sistema Escolar Nueva Alianza</h2>
+
+        <div class="user-info">
+            <span>👤 Director</span>
+            <button class="logout" onclick="cerrarSesion()">Cerrar sesión</button>
         </div>
 
-        <button
-            class="logout"
-            onclick="logout()"
-        >
-            Cerrar sesión
+    </div>
+
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <button class="active" onclick="mostrarModulo('inicio',this)">
+            🏠 Inicio
         </button>
 
-    </header>
+        <button onclick="mostrarModulo('estudiantes',this)">
+            👨‍🎓 Estudiantes
+        </button>
+
+        <button onclick="mostrarModulo('docentes',this)">
+            👩‍🏫 Docentes
+        </button>
+
+        <button onclick="mostrarModulo('asistencia',this)">
+            📋 Asistencia
+        </button>
+
+        <button onclick="mostrarModulo('calificaciones',this)">
+            📝 Calificaciones
+        </button>
+
+        <button onclick="mostrarModulo('reportes',this)">
+            📊 Reportes
+        </button>
+
+        <button onclick="mostrarModulo('configuracion',this)">
+            ⚙️ Configuración
+        </button>
+
+    </aside>
 
 
-    <div class="layout">
-
-        <!-- MENÚ -->
-        <aside class="sidebar">
-
-            <h3>MENÚ PRINCIPAL</h3>
-
-            <button
-                class="active"
-                onclick="mostrarModulo('inicio',this)"
-            >
-                🏠 Inicio
-            </button>
-
-            <button
-                onclick="mostrarModulo('estudiantes',this)"
-            >
-                👨‍🎓 Estudiantes
-            </button>
-
-            <button
-                onclick="mostrarModulo('docentes',this)"
-            >
-                👨‍🏫 Docentes
-            </button>
-
-            <button
-                onclick="mostrarModulo('asistencia',this)"
-            >
-                📋 Asistencia
-            </button>
-
-            <button
-                onclick="mostrarModulo('calificaciones',this)"
-            >
-                📊 Calificaciones
-            </button>
-
-            <button
-                onclick="mostrarModulo('reportes',this)"
-            >
-                📄 Reportes
-            </button>
-
-            <button
-                onclick="mostrarModulo('configuracion',this)"
-            >
-                ⚙️ Configuración
-            </button>
-
-        </aside>
+    <!-- CONTENIDO -->
+    <main class="main">
 
 
-        <!-- CONTENIDO -->
-        <main class="content">
+        <!-- INICIO -->
+        <section id="inicio" class="modulo">
 
-            <!-- INICIO -->
-            <section id="inicio" class="modulo">
+            <div class="dashboard-title">
+                <h1>Panel principal</h1>
+                <p>Bienvenido al Sistema de Gestión Escolar del Centro Escolar Nueva Alianza.</p>
+            </div>
 
-                <div class="page-title">
-
-                    <h2>Panel principal</h2>
-
-                    <p>
-                        Bienvenido al Sistema Escolar Nueva Alianza.
-                    </p>
-
-                </div>
-
-
-                <div class="stats">
-
-                    <div class="stat-card">
-                        <h3>👨‍🎓 Estudiantes</h3>
-                        <strong id="totalEstudiantes">0</strong>
-                    </div>
-
-                    <div class="stat-card">
-                        <h3>👨‍🏫 Docentes</h3>
-                        <strong id="totalDocentes">0</strong>
-                    </div>
-
-                    <div class="stat-card">
-                        <h3>📋 Asistencias</h3>
-                        <strong id="totalAsistencias">0</strong>
-                    </div>
-
-                    <div class="stat-card">
-                        <h3>📊 Calificaciones</h3>
-                        <strong>0</strong>
-                    </div>
-
-                </div>
-
+            <div class="cards">
 
                 <div class="card">
-
-                    <h3>Información del sistema</h3>
-
-                    <p>
-                        Sistema de gestión escolar del
-                        Centro Escolar Nueva Alianza.
-                    </p>
-
-                    <br>
-
-                    <p>
-                        <strong>Niveles:</strong>
-                    </p>
-
-                    <p>
-                        Educación Inicial: I, II y III Nivel
-                    </p>
-
-                    <p>
-                        Educación Primaria: 1.º a 6.º grado
-                    </p>
-
-                    <p>
-                        Educación Secundaria: 7.º a 11.º grado
-                    </p>
-
+                    <h3>Estudiantes</h3>
+                    <div class="number" id="totalEstudiantes">0</div>
                 </div>
-
-            </section>
-
-
-            <!-- ESTUDIANTES -->
-            <section id="estudiantes" class="modulo hidden">
-
-                <div class="page-title">
-
-                    <h2>👨‍🎓 Estudiantes</h2>
-
-                    <p>
-                        Registro y administración de estudiantes.
-                    </p>
-
-                </div>
-
 
                 <div class="card">
-
-                    <h3>Registrar estudiante</h3>
-
-                    <div id="studentMessage" class="message"></div>
-
-                    <input
-                        type="hidden"
-                        id="studentEditIndex"
-                    >
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-                            <label>Código</label>
-                            <input id="studentCodigo">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nombre completo</label>
-                            <input id="studentNombre">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nivel o grado</label>
-
-                            <select id="studentGrado">
-
-                                <option value="">
-                                    Seleccione
-                                </option>
-
-                                <optgroup label="Educación Inicial">
-                                    <option>I Nivel</option>
-                                    <option>II Nivel</option>
-                                    <option>III Nivel</option>
-                                </optgroup>
-
-                                <optgroup label="Educación Primaria">
-                                    <option>1.º grado</option>
-                                    <option>2.º grado</option>
-                                    <option>3.º grado</option>
-                                    <option>4.º grado</option>
-                                    <option>5.º grado</option>
-                                    <option>6.º grado</option>
-                                </optgroup>
-
-                                <optgroup label="Educación Secundaria">
-                                    <option>7.º grado</option>
-                                    <option>8.º grado</option>
-                                    <option>9.º grado</option>
-                                    <option>10.º grado</option>
-                                    <option>11.º grado</option>
-                                </optgroup>
-
-                            </select>
-
-                        </div>
-
-                        <div class="form-group">
-                            <label>Sección</label>
-                            <input id="studentSeccion">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Sexo</label>
-
-                            <select id="studentSexo">
-                                <option value="">Seleccione</option>
-                                <option>Masculino</option>
-                                <option>Femenino</option>
-                            </select>
-
-                        </div>
-
-                        <div class="form-group">
-                            <label>Fecha de nacimiento</label>
-                            <input
-                                type="date"
-                                id="studentNacimiento"
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label>Responsable</label>
-                            <input id="studentResponsable">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input id="studentTelefono">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Comunidad</label>
-                            <input id="studentComunidad">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Estado</label>
-
-                            <select id="studentEstado">
-                                <option>Activo</option>
-                                <option>Inactivo</option>
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-actions">
-
-                        <button
-                            class="btn-primary"
-                            onclick="guardarEstudiante()"
-                        >
-                            💾 Guardar estudiante
-                        </button>
-
-                        <button
-                            class="btn-secondary"
-                            onclick="limpiarEstudiante()"
-                        >
-                            Limpiar
-                        </button>
-
-                    </div>
-
+                    <h3>Docentes</h3>
+                    <div class="number" id="totalDocentes">0</div>
                 </div>
-
 
                 <div class="card">
-
-                    <h3>Listado de estudiantes</h3>
-
-                    <div class="search-box">
-
-                        <input
-                            id="buscarEstudiante"
-                            placeholder="🔎 Buscar estudiante..."
-                            oninput="mostrarEstudiantes()"
-                        >
-
-                    </div>
-
-                    <div
-                        id="tablaEstudiantes"
-                        class="table-container"
-                    ></div>
-
+                    <h3>Asistencias</h3>
+                    <div class="number" id="totalAsistencias">0</div>
                 </div>
-
-            </section>
-
-
-            <!-- DOCENTES -->
-            <section id="docentes" class="modulo hidden">
-
-                <div class="page-title">
-
-                    <h2>👨‍🏫 Docentes</h2>
-
-                    <p>
-                        Registro y administración del personal docente.
-                    </p>
-
-                </div>
-
 
                 <div class="card">
+                    <h3>Calificaciones</h3>
+                    <div class="number">0</div>
+                </div>
 
-                    <h3>Registrar docente</h3>
+            </div>
 
-                    <div id="teacherMessage" class="message"></div>
+            <div class="message message-info">
+                💡 Utilice el menú de la izquierda para administrar estudiantes, docentes y asistencia.
+            </div>
 
-                    <input
-                        type="hidden"
-                        id="teacherEditIndex"
-                    >
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-                            <label>Código del docente</label>
-                            <input id="teacherCodigo">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nombre completo</label>
-                            <input id="teacherNombre">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Cédula</label>
-                            <input id="teacherCedula">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input id="teacherTelefono">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Correo electrónico</label>
-                            <input
-                                type="email"
-                                id="teacherCorreo"
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label>Especialidad</label>
-                            <input id="teacherEspecialidad">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Cargo</label>
-                            <input id="teacherCargo">
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Nivel educativo</label>
-
-                            <select
-                                id="teacherNivel"
-                                onchange="actualizarGradosDocente()"
-                            >
-
-                                <option value="">
-                                    Seleccione
-                                </option>
-
-                                <option>
-                                    Educación Inicial
-                                </option>
-
-                                <option>
-                                    Educación Primaria
-                                </option>
-
-                                <option>
-                                    Educación Secundaria
-                                </option>
-
-                            </select>
-
-                        </div>
+        </section>
 
 
-                        <div class="form-group">
+        <!-- ESTUDIANTES -->
+        <section id="estudiantes" class="modulo hidden">
 
-                            <label>Grado o nivel que atiende</label>
+            <div class="modulo-header">
+                <div>
+                    <h2>👨‍🎓 Registro de Estudiantes</h2>
+                    <p>Administración de estudiantes del centro escolar.</p>
+                </div>
 
-                            <select id="teacherGrado">
+                <button class="btn btn-success" onclick="mostrarFormularioEstudiante()">
+                    ➕ Nuevo estudiante
+                </button>
+            </div>
 
-                                <option value="">
-                                    Seleccione primero el nivel
-                                </option>
+            <div id="formEstudiante" class="hidden">
 
-                            </select>
+                <div class="form-grid">
 
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Asignatura</label>
-
-                            <input id="teacherAsignatura">
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Turno</label>
-
-                            <select id="teacherTurno">
-
-                                <option value="">
-                                    Seleccione
-                                </option>
-
-                                <option>Matutino</option>
-                                <option>Vespertino</option>
-                                <option>Sabatino</option>
-                                <option>Dominical</option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Comunidad</label>
-
-                            <input id="teacherComunidad">
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Estado</label>
-
-                            <select id="teacherEstado">
-
-                                <option>Activo</option>
-                                <option>Inactivo</option>
-
-                            </select>
-
-                        </div>
-
+                    <div class="form-group">
+                        <label>Código del estudiante</label>
+                        <input type="text" id="codigoEstudiante">
                     </div>
 
+                    <div class="form-group">
+                        <label>Nombres</label>
+                        <input type="text" id="nombresEstudiante">
+                    </div>
 
-                    <div class="form-actions">
+                    <div class="form-group">
+                        <label>Apellidos</label>
+                        <input type="text" id="apellidosEstudiante">
+                    </div>
 
-                        <button
-                            class="btn-primary"
-                            onclick="guardarDocente()"
-                        >
-                            💾 Guardar docente
-                        </button>
+                    <div class="form-group">
+                        <label>Fecha de nacimiento</label>
+                        <input type="date" id="fechaNacimiento">
+                    </div>
 
-                        <button
-                            class="btn-secondary"
-                            onclick="limpiarDocente()"
-                        >
-                            Limpiar
-                        </button>
+                    <div class="form-group">
+                        <label>Nivel educativo</label>
+                        <select id="nivelEstudiante" onchange="actualizarGradosEstudiante()">
+                            <option value="">Seleccione</option>
+                            <option value="Educación Inicial">Educación Inicial</option>
+                            <option value="Primaria">Primaria</option>
+                            <option value="Secundaria">Secundaria</option>
+                        </select>
+                    </div>
 
+                    <div class="form-group">
+                        <label>Grado / Nivel</label>
+                        <select id="gradoEstudiante">
+                            <option value="">Seleccione nivel educativo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sección</label>
+                        <input type="text" id="seccionEstudiante" placeholder="Ej. A">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sexo</label>
+                        <select id="sexoEstudiante">
+                            <option value="">Seleccione</option>
+                            <option>Masculino</option>
+                            <option>Femenino</option>
+                        </select>
                     </div>
 
                 </div>
 
+                <div class="actions">
+                    <button class="btn btn-success" onclick="guardarEstudiante()">
+                        💾 Guardar estudiante
+                    </button>
 
-                <div class="card">
+                    <button class="btn btn-secondary" onclick="cancelarEstudiante()">
+                        Cancelar
+                    </button>
+                </div>
 
-                    <h3>Listado de docentes</h3>
+                <div id="mensajeEstudiante"></div>
 
-                    <div class="search-box">
+            </div>
 
-                        <input
-                            id="buscarDocente"
-                            placeholder="🔎 Buscar docente..."
-                            oninput="mostrarDocentes()"
-                        >
+            <div class="table-container">
 
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre completo</th>
+                            <th>Nivel</th>
+                            <th>Grado / Nivel</th>
+                            <th>Sección</th>
+                            <th>Sexo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tablaEstudiantes"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- DOCENTES -->
+        <section id="docentes" class="modulo hidden">
+
+            <div class="modulo-header">
+
+                <div>
+                    <h2>👩‍🏫 Registro de Docentes</h2>
+                    <p>Administración del personal docente.</p>
+                </div>
+
+                <button class="btn btn-success" onclick="mostrarFormularioDocente()">
+                    ➕ Nuevo docente
+                </button>
+
+            </div>
+
+            <div id="formDocente" class="hidden">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Código / Cédula</label>
+                        <input type="text" id="codigoDocente">
                     </div>
 
-                    <div
-                        id="tablaDocentes"
-                        class="table-container"
-                    ></div>
+                    <div class="form-group">
+                        <label>Nombres</label>
+                        <input type="text" id="nombresDocente">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apellidos</label>
+                        <input type="text" id="apellidosDocente">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Especialidad</label>
+                        <input type="text" id="especialidadDocente">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nivel educativo</label>
+                        <select id="nivelDocente" onchange="actualizarGradosDocente()">
+                            <option value="">Seleccione</option>
+                            <option value="Educación Inicial">Educación Inicial</option>
+                            <option value="Primaria">Primaria</option>
+                            <option value="Secundaria">Secundaria</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Grado / Nivel</label>
+                        <select id="gradoDocente">
+                            <option value="">Seleccione nivel educativo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="telefonoDocente">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="estadoDocente">
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
 
                 </div>
 
-            </section>
+                <div class="actions">
+
+                    <button class="btn btn-success" onclick="guardarDocente()">
+                        💾 Guardar docente
+                    </button>
+
+                    <button class="btn btn-secondary" onclick="cancelarDocente()">
+                        Cancelar
+                    </button>
+
+                </div>
+
+                <div id="mensajeDocente"></div>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre completo</th>
+                            <th>Especialidad</th>
+                            <th>Nivel</th>
+                            <th>Grado / Nivel</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tablaDocentes"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
 
 
-            <!-- ASISTENCIA -->
-            <section id="asistencia" class="modulo hidden">
+        <!-- ASISTENCIA -->
+        <section id="asistencia" class="modulo hidden">
 
-                <div class="page-title">
+            <div class="modulo-header">
 
+                <div>
                     <h2>📋 Control de Asistencia</h2>
+                    <p>Registro diario de asistencia de los estudiantes.</p>
+                </div>
 
-                    <p>
-                        Registro diario de asistencia de estudiantes.
-                    </p>
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fechaAsistencia">
+                </div>
+
+                <div class="form-group">
+                    <label>Nivel educativo</label>
+
+                    <select id="nivelAsistencia" onchange="actualizarGradosAsistencia()">
+
+                        <option value="">Seleccione</option>
+
+                        <option value="Educación Inicial">
+                            Educación Inicial
+                        </option>
+
+                        <option value="Primaria">
+                            Primaria
+                        </option>
+
+                        <option value="Secundaria">
+                            Secundaria
+                        </option>
+
+                    </select>
 
                 </div>
 
 
-                <div class="card">
+                <div class="form-group">
 
-                    <h3>Registrar asistencia</h3>
+                    <label>Grado / Nivel</label>
 
-                    <div id="attendanceMessage" class="message"></div>
+                    <select id="gradoAsistencia" onchange="cargarEstudiantesAsistencia()">
+
+                        <option value="">
+                            Seleccione nivel educativo
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Sección</label>
 
                     <input
-                        type="hidden"
-                        id="attendanceEditIndex"
+                        type="text"
+                        id="seccionAsistencia"
+                        placeholder="Ej. A"
+                        oninput="cargarEstudiantesAsistencia()"
                     >
 
-                    <div class="form-grid">
-
-                        <div class="form-group">
-
-                            <label>Fecha</label>
-
-                            <input
-                                type="date"
-                                id="attendanceFecha"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Nivel educativo</label>
-
-                            <select
-                                id="attendanceNivel"
-                                onchange="actualizarGradosAsistencia()"
-                            >
-
-                                <option value="">
-                                    Seleccione
-                                </option>
-
-                                <option>
-                                    Educación Inicial
-                                </option>
-
-                                <option>
-                                    Educación Primaria
-                                </option>
-
-                                <option>
-                                    Educación Secundaria
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Grado o nivel</label>
-
-                            <select
-                                id="attendanceGrado"
-                                onchange="cargarEstudiantesParaAsistencia()"
-                            >
-
-                                <option value="">
-                                    Seleccione primero el nivel
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Sección</label>
-
-                            <input
-                                id="attendanceSeccion"
-                                placeholder="Ejemplo: A"
-                            >
-
-                        </div>
-
-                    </div>
-
                 </div>
 
-
-                <div
-                    id="attendanceStudentCard"
-                    class="card hidden"
-                >
-
-                    <h3>Estudiantes del grupo</h3>
-
-                    <div class="attendance-summary">
-
-                        <div class="attendance-box">
-
-                            Presentes
-
-                            <strong
-                                id="summaryPresent"
-                            >
-                                0
-                            </strong>
-
-                        </div>
+            </div>
 
 
-                        <div class="attendance-box">
+            <div class="actions">
 
-                            Ausentes
+                <button class="btn btn-primary" onclick="cargarEstudiantesAsistencia()">
+                    👥 Cargar estudiantes
+                </button>
 
-                            <strong
-                                id="summaryAbsent"
-                            >
-                                0
-                            </strong>
-
-                        </div>
+            </div>
 
 
-                        <div class="attendance-box">
-
-                            Tardanzas
-
-                            <strong
-                                id="summaryLate"
-                            >
-                                0
-                            </strong>
-
-                        </div>
+            <div id="mensajeAsistencia"></div>
 
 
-                        <div class="attendance-box">
+            <div class="attendance-summary">
 
-                            Justificados
-
-                            <strong
-                                id="summaryJustified"
-                            >
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="attendanceStudents"
-                        class="table-container"
-                    ></div>
-
-
-                    <div class="form-actions">
-
-                        <button
-                            class="btn-success"
-                            onclick="guardarAsistencia()"
-                        >
-                            💾 Guardar asistencia
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="card">
-
-                    <h3>Registros guardados</h3>
-
-                    <div class="search-box">
-
-                        <input
-                            id="buscarAsistencia"
-                            placeholder="🔎 Buscar por estudiante, fecha o grado..."
-                            oninput="mostrarAsistencias()"
-                        >
-
-                    </div>
-
-                    <div
-                        id="tablaAsistencias"
-                        class="table-container"
-                    ></div>
-
-                </div>
-
-            </section>
-
-
-            <!-- CALIFICACIONES -->
-            <section id="calificaciones" class="modulo hidden">
-
-                <div class="page-title">
-
-                    <h2>📊 Calificaciones</h2>
-
-                    <p>
-                        Módulo preparado para el registro académico.
-                    </p>
-
-                </div>
-
-                <div class="card">
-
-                    <h3>Próxima etapa</h3>
-
-                    <p>
-                        Aquí incorporaremos el registro de calificaciones
-                        por estudiante, asignatura, corte evaluativo,
-                        período y nivel educativo.
-                    </p>
-
+                <div class="summary-box summary-total">
+                    Total
                     <br>
-
-                    <p>
-                        La estructura respetará Educación Inicial,
-                        Primaria de 1.º a 6.º y Secundaria de 7.º a 11.º.
-                    </p>
-
+                    <span id="resumenTotal">0</span>
                 </div>
 
-            </section>
-
-
-            <!-- REPORTES -->
-            <section id="reportes" class="modulo hidden">
-
-                <div class="page-title">
-
-                    <h2>📄 Reportes</h2>
-
-                    <p>
-                        Generación de reportes del sistema.
-                    </p>
-
+                <div class="summary-box summary-present">
+                    Presentes
+                    <br>
+                    <span id="resumenPresentes">0</span>
                 </div>
 
-                <div class="card">
-
-                    <h3>Próxima etapa</h3>
-
-                    <p>
-                        Aquí construiremos los reportes de estudiantes,
-                        docentes, asistencia y posteriormente
-                        calificaciones.
-                    </p>
-
+                <div class="summary-box summary-absent">
+                    Ausentes
+                    <br>
+                    <span id="resumenAusentes">0</span>
                 </div>
 
-            </section>
+                <div class="summary-box summary-late">
+                    Tardanzas
+                    <br>
+                    <span id="resumenTardanzas">0</span>
+                </div>
+
+            </div>
 
 
-            <!-- CONFIGURACIÓN -->
-            <section id="configuracion" class="modulo hidden">
+            <div id="listaEstudiantesAsistencia"></div>
 
-                <div class="page-title">
 
+            <div class="actions">
+
+                <button
+                    class="btn btn-success"
+                    onclick="guardarAsistencia()"
+                >
+                    💾 Guardar asistencia
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <h3>📚 Registros guardados</h3>
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Nivel</th>
+                            <th>Grado / Nivel</th>
+                            <th>Sección</th>
+                            <th>Total</th>
+                            <th>Presentes</th>
+                            <th>Ausentes</th>
+                            <th>Tardanzas</th>
+                            <th>Acción</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tablaAsistencias"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- CALIFICACIONES -->
+        <section id="calificaciones" class="modulo hidden">
+
+            <div class="modulo-header">
+
+                <div>
+                    <h2>📝 Calificaciones</h2>
+                    <p>Módulo preparado para registrar las evaluaciones de los estudiantes.</p>
+                </div>
+
+            </div>
+
+            <div class="message message-info">
+
+                📌 El módulo de calificaciones será desarrollado en la siguiente versión.
+
+                <br><br>
+
+                Se conservará la estructura:
+
+                <strong>
+                    Educación Inicial I, II y III Nivel;
+                    Primaria 1.º a 6.º;
+                    Secundaria 7.º a 11.º.
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- REPORTES -->
+        <section id="reportes" class="modulo hidden">
+
+            <div class="modulo-header">
+
+                <div>
+                    <h2>📊 Reportes</h2>
+                    <p>Generación de reportes escolares.</p>
+                </div>
+
+            </div>
+
+            <div class="message message-info">
+
+                📌 El módulo de reportes será desarrollado posteriormente.
+
+                <br><br>
+
+                Aquí podremos generar reportes de:
+
+                <br>• Estudiantes
+                <br>• Docentes
+                <br>• Asistencia
+                <br>• Calificaciones
+                <br>• Matrícula
+                <br>• Resumen escolar
+
+            </div>
+
+        </section>
+
+
+        <!-- CONFIGURACIÓN -->
+        <section id="configuracion" class="modulo hidden">
+
+            <div class="modulo-header">
+
+                <div>
                     <h2>⚙️ Configuración</h2>
-
-                    <p>
-                        Configuración general del sistema.
-                    </p>
-
+                    <p>Configuración general del sistema escolar.</p>
                 </div>
 
-                <div class="card">
+            </div>
 
-                    <h3>Centro Escolar</h3>
+            <div class="card">
 
-                    <p>
-                        <strong>Centro:</strong>
-                        Nueva Alianza
-                    </p>
+                <h3>Centro Escolar</h3>
 
-                    <p>
-                        <strong>Municipio:</strong>
-                        El Cuá
-                    </p>
+                <p>
+                    <strong>Nombre:</strong>
+                    Centro Escolar Nueva Alianza
+                </p>
 
-                    <p>
-                        <strong>Sistema:</strong>
-                        Gestión Escolar
-                    </p>
+                <br>
 
-                </div>
+                <p>
+                    <strong>Ubicación:</strong>
+                    Nicaragua
+                </p>
 
-            </section>
+                <br>
 
-        </main>
+                <p>
+                    <strong>Director:</strong>
+                    Evert Josue Maltez Sanchez
+                </p>
 
-    </div>
+                <br>
+
+                <p>
+                    <strong>Año escolar:</strong>
+                    2026
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
 
 </div>
 
 
 <script>
 
-/* ================================
-   LOGIN
-================================ */
+/* =========================================
+   DATOS GENERALES
+========================================= */
 
-function login(){
+const STORAGE_ESTUDIANTES = "estudiantesNuevaAlianza";
+const STORAGE_DOCENTES = "docentesNuevaAlianza";
+const STORAGE_ASISTENCIA = "asistenciasNuevaAlianza";
+
+
+/* =========================================
+   INICIO DE SESIÓN
+========================================= */
+
+function iniciarSesion(){
 
     const usuario =
-        document.getElementById("username").value.trim();
+        document.getElementById("usuario").value.trim();
 
     const password =
         document.getElementById("password").value.trim();
 
-    const mensaje =
-        document.getElementById("loginMessage");
+    const error =
+        document.getElementById("loginError");
 
-    if(
-        usuario === "admin" &&
-        password === "1234"
-    ){
 
-        document
-            .getElementById("loginScreen")
+    if(usuario === "admin" && password === "1234"){
+
+        document.getElementById("loginScreen")
             .classList.add("hidden");
 
-        document
-            .getElementById("app")
+        document.getElementById("app")
             .classList.remove("hidden");
 
-        actualizarContador();
+        actualizarDashboard();
+
+        establecerFechaActual();
 
     }else{
 
-        mensaje.className =
-            "message error";
-
-        mensaje.textContent =
-            "Usuario o contraseña incorrectos.";
+        error.innerHTML =
+            '<div class="error">❌ Usuario o contraseña incorrectos.</div>';
 
     }
 
 }
 
 
-function logout(){
+function cerrarSesion(){
 
-    document
-        .getElementById("app")
+    document.getElementById("app")
         .classList.add("hidden");
 
-    document
-        .getElementById("loginScreen")
+    document.getElementById("loginScreen")
         .classList.remove("hidden");
 
-    document.getElementById("username").value = "";
+    document.getElementById("usuario").value = "";
     document.getElementById("password").value = "";
 
 }
 
 
-/* ================================
+/* =========================================
    NAVEGACIÓN
-================================ */
+========================================= */
 
-function mostrarModulo(id, boton){
+function mostrarModulo(nombre, boton){
 
-    document
-        .querySelectorAll(".modulo")
-        .forEach(modulo => {
-            modulo.classList.add("hidden");
-        });
+    const modulos =
+        document.querySelectorAll(".modulo");
 
-    document
-        .getElementById(id)
-        .classList.remove("hidden");
+    modulos.forEach(function(modulo){
 
-    document
-        .querySelectorAll(".sidebar button")
-        .forEach(btn => {
-            btn.classList.remove("active");
-        });
+        modulo.classList.add("hidden");
 
-    boton.classList.add("active");
+    });
 
-    if(id === "estudiantes"){
-        mostrarEstudiantes();
+
+    const moduloSeleccionado =
+        document.getElementById(nombre);
+
+    if(moduloSeleccionado){
+
+        moduloSeleccionado.classList.remove("hidden");
+
     }
 
-    if(id === "docentes"){
-        mostrarDocentes();
+
+    const botones =
+        document.querySelectorAll(".sidebar button");
+
+    botones.forEach(function(btn){
+
+        btn.classList.remove("active");
+
+    });
+
+
+    if(boton){
+
+        boton.classList.add("active");
+
     }
 
-    if(id === "asistencia"){
-        mostrarAsistencias();
+
+    if(nombre === "estudiantes"){
+
+        cargarTablaEstudiantes();
+
+    }
+
+    if(nombre === "docentes"){
+
+        cargarTablaDocentes();
+
+    }
+
+    if(nombre === "asistencia"){
+
+        cargarTablaAsistencias();
+
+        establecerFechaActual();
+
     }
 
 }
 
 
-/* ================================
-   UTILIDADES
-================================ */
+/* =========================================
+   FUNCIONES DE GRADOS
+========================================= */
+
+function obtenerGrados(nivel){
+
+    if(nivel === "Educación Inicial"){
+
+        return [
+            "I Nivel",
+            "II Nivel",
+            "III Nivel"
+        ];
+
+    }
+
+    if(nivel === "Primaria"){
+
+        return [
+            "1.º grado",
+            "2.º grado",
+            "3.º grado",
+            "4.º grado",
+            "5.º grado",
+            "6.º grado"
+        ];
+
+    }
+
+    if(nivel === "Secundaria"){
+
+        return [
+            "7.º grado",
+            "8.º grado",
+            "9.º grado",
+            "10.º grado",
+            "11.º grado"
+        ];
+
+    }
+
+    return [];
+
+}
+
+
+function llenarGrados(idSelect, nivel){
+
+    const select =
+        document.getElementById(idSelect);
+
+    select.innerHTML =
+        '<option value="">Seleccione</option>';
+
+    const grados =
+        obtenerGrados(nivel);
+
+    grados.forEach(function(grado){
+
+        const option =
+            document.createElement("option");
+
+        option.value = grado;
+        option.textContent = grado;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+
+/* =========================================
+   ESTUDIANTES
+========================================= */
 
 function obtenerEstudiantes(){
 
     return JSON.parse(
-        localStorage.getItem(
-            "estudiantesNuevaAlianza"
-        ) || "[]"
-    );
+        localStorage.getItem(STORAGE_ESTUDIANTES)
+    ) || [];
 
 }
 
@@ -1405,157 +1337,93 @@ function obtenerEstudiantes(){
 function guardarEstudiantes(datos){
 
     localStorage.setItem(
-        "estudiantesNuevaAlianza",
+        STORAGE_ESTUDIANTES,
         JSON.stringify(datos)
     );
 
 }
 
 
-function obtenerDocentes(){
+function mostrarFormularioEstudiante(){
 
-    return JSON.parse(
-        localStorage.getItem(
-            "docentesNuevaAlianza"
-        ) || "[]"
+    document
+        .getElementById("formEstudiante")
+        .classList.remove("hidden");
+
+}
+
+
+function cancelarEstudiante(){
+
+    document
+        .getElementById("formEstudiante")
+        .classList.add("hidden");
+
+    limpiarFormularioEstudiante();
+
+}
+
+
+function actualizarGradosEstudiante(){
+
+    const nivel =
+        document.getElementById("nivelEstudiante").value;
+
+    llenarGrados(
+        "gradoEstudiante",
+        nivel
     );
 
 }
 
 
-function guardarDocentes(datos){
+function limpiarFormularioEstudiante(){
 
-    localStorage.setItem(
-        "docentesNuevaAlianza",
-        JSON.stringify(datos)
-    );
-
-}
-
-
-function obtenerAsistencias(){
-
-    return JSON.parse(
-        localStorage.getItem(
-            "asistenciasNuevaAlianza"
-        ) || "[]"
-    );
+    document.getElementById("codigoEstudiante").value = "";
+    document.getElementById("nombresEstudiante").value = "";
+    document.getElementById("apellidosEstudiante").value = "";
+    document.getElementById("fechaNacimiento").value = "";
+    document.getElementById("nivelEstudiante").value = "";
+    document.getElementById("gradoEstudiante").innerHTML =
+        '<option value="">Seleccione nivel educativo</option>';
+    document.getElementById("seccionEstudiante").value = "";
+    document.getElementById("sexoEstudiante").value = "";
 
 }
 
-
-function guardarAsistencias(datos){
-
-    localStorage.setItem(
-        "asistenciasNuevaAlianza",
-        JSON.stringify(datos)
-    );
-
-}
-
-
-/* ================================
-   CONTADORES
-================================ */
-
-function actualizarContador(){
-
-    const estudiantes =
-        obtenerEstudiantes();
-
-    const docentes =
-        obtenerDocentes();
-
-    const asistencias =
-        obtenerAsistencias();
-
-    document.getElementById(
-        "totalEstudiantes"
-    ).textContent = estudiantes.length;
-
-    document.getElementById(
-        "totalDocentes"
-    ).textContent = docentes.length;
-
-    document.getElementById(
-        "totalAsistencias"
-    ).textContent = asistencias.length;
-
-}
-
-
-/* ================================
-   ESTUDIANTES
-================================ */
 
 function guardarEstudiante(){
 
-    const datos = obtenerEstudiantes();
+    const codigo =
+        document.getElementById("codigoEstudiante").value.trim();
 
-    const estudiante = {
+    const nombres =
+        document.getElementById("nombresEstudiante").value.trim();
 
-        codigo:
-            document.getElementById(
-                "studentCodigo"
-            ).value.trim(),
+    const apellidos =
+        document.getElementById("apellidosEstudiante").value.trim();
 
-        nombre:
-            document.getElementById(
-                "studentNombre"
-            ).value.trim(),
+    const fechaNacimiento =
+        document.getElementById("fechaNacimiento").value;
 
-        grado:
-            document.getElementById(
-                "studentGrado"
-            ).value,
+    const nivel =
+        document.getElementById("nivelEstudiante").value;
 
-        seccion:
-            document.getElementById(
-                "studentSeccion"
-            ).value.trim(),
+    const grado =
+        document.getElementById("gradoEstudiante").value;
 
-        sexo:
-            document.getElementById(
-                "studentSexo"
-            ).value,
+    const seccion =
+        document.getElementById("seccionEstudiante").value.trim();
 
-        nacimiento:
-            document.getElementById(
-                "studentNacimiento"
-            ).value,
-
-        responsable:
-            document.getElementById(
-                "studentResponsable"
-            ).value.trim(),
-
-        telefono:
-            document.getElementById(
-                "studentTelefono"
-            ).value.trim(),
-
-        comunidad:
-            document.getElementById(
-                "studentComunidad"
-            ).value.trim(),
-
-        estado:
-            document.getElementById(
-                "studentEstado"
-            ).value
-
-    };
+    const sexo =
+        document.getElementById("sexoEstudiante").value;
 
 
-    if(
-        !estudiante.codigo ||
-        !estudiante.nombre ||
-        !estudiante.grado
-    ){
+    if(!codigo || !nombres || !apellidos || !nivel || !grado){
 
         mostrarMensaje(
-            "studentMessage",
-            "Complete código, nombre y nivel o grado.",
+            "mensajeEstudiante",
+            "Complete los campos obligatorios.",
             "error"
         );
 
@@ -1564,34 +1432,60 @@ function guardarEstudiante(){
     }
 
 
-    const editIndex =
-        document.getElementById(
-            "studentEditIndex"
-        ).value;
+    const estudiantes =
+        obtenerEstudiantes();
 
 
-    if(editIndex !== ""){
+    const existe =
+        estudiantes.some(function(estudiante){
 
-        datos[parseInt(editIndex)] =
-            estudiante;
+            return estudiante.codigo === codigo;
 
-    }else{
+        });
 
-        datos.push(estudiante);
+
+    if(existe){
+
+        mostrarMensaje(
+            "mensajeEstudiante",
+            "Ya existe un estudiante con ese código.",
+            "error"
+        );
+
+        return;
 
     }
 
 
-    guardarEstudiantes(datos);
+    estudiantes.push({
 
-    limpiarEstudiante();
+        codigo,
+        nombres,
+        apellidos,
+        fechaNacimiento,
+        nivel,
+        grado,
+        seccion,
+        sexo
 
-    mostrarEstudiantes();
+    });
 
-    actualizarContador();
+
+    guardarEstudiantes(estudiantes);
+
+    cargarTablaEstudiantes();
+
+    actualizarDashboard();
+
+    limpiarFormularioEstudiante();
+
+    document
+        .getElementById("formEstudiante")
+        .classList.add("hidden");
+
 
     mostrarMensaje(
-        "studentMessage",
+        "mensajeEstudiante",
         "Estudiante guardado correctamente.",
         "success"
     );
@@ -1599,403 +1493,201 @@ function guardarEstudiante(){
 }
 
 
-function limpiarEstudiante(){
+function cargarTablaEstudiantes(){
 
-    document
-        .querySelectorAll(
-            "#estudiantes input"
-        )
-        .forEach(input => {
+    const estudiantes =
+        obtenerEstudiantes();
 
-            if(input.type !== "hidden"){
-                input.value = "";
-            }
+    const tabla =
+        document.getElementById("tablaEstudiantes");
+
+    tabla.innerHTML = "";
+
+
+    estudiantes.forEach(function(estudiante){
+
+        const fila =
+            document.createElement("tr");
+
+        fila.innerHTML = `
+
+            <td>${escaparHTML(estudiante.codigo)}</td>
+
+            <td>
+                ${escaparHTML(estudiante.nombres)}
+                ${escaparHTML(estudiante.apellidos)}
+            </td>
+
+            <td>
+                <span class="badge badge-blue">
+                    ${escaparHTML(estudiante.nivel)}
+                </span>
+            </td>
+
+            <td>
+                ${escaparHTML(estudiante.grado)}
+            </td>
+
+            <td>
+                ${escaparHTML(estudiante.seccion || "-")}
+            </td>
+
+            <td>
+                ${escaparHTML(estudiante.sexo || "-")}
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="eliminarEstudiante('${encodeURIComponent(estudiante.codigo)}')"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        `;
+
+        tabla.appendChild(fila);
+
+    });
+
+}
+
+
+function eliminarEstudiante(codigoCodificado){
+
+    const codigo =
+        decodeURIComponent(codigoCodificado);
+
+    if(!confirm("¿Desea eliminar este estudiante?")){
+
+        return;
+
+    }
+
+
+    const estudiantes =
+        obtenerEstudiantes().filter(function(estudiante){
+
+            return estudiante.codigo !== codigo;
 
         });
 
 
-    document.getElementById(
-        "studentGrado"
-    ).value = "";
+    guardarEstudiantes(estudiantes);
 
-    document.getElementById(
-        "studentSexo"
-    ).value = "";
+    cargarTablaEstudiantes();
 
-    document.getElementById(
-        "studentEstado"
-    ).value = "Activo";
-
-    document.getElementById(
-        "studentEditIndex"
-    ).value = "";
+    actualizarDashboard();
 
 }
 
 
-function mostrarEstudiantes(){
-
-    const datos =
-        obtenerEstudiantes();
-
-    const buscar =
-        document
-        .getElementById(
-            "buscarEstudiante"
-        )
-        .value
-        .toLowerCase();
-
-    const filtrados =
-        datos.filter(e =>
-            Object.values(e)
-                .join(" ")
-                .toLowerCase()
-                .includes(buscar)
-        );
-
-
-    const contenedor =
-        document.getElementById(
-            "tablaEstudiantes"
-        );
-
-
-    if(filtrados.length === 0){
-
-        contenedor.innerHTML =
-            '<div class="empty">No hay estudiantes registrados.</div>';
-
-        return;
-
-    }
-
-
-    let html = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Grado/Nivel</th>
-                    <th>Sección</th>
-                    <th>Sexo</th>
-                    <th>Responsable</th>
-                    <th>Comunidad</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-    `;
-
-
-    filtrados.forEach((e) => {
-
-        const index =
-            datos.indexOf(e);
-
-        const estadoClase =
-            e.estado === "Activo"
-            ? "badge-active"
-            : "badge-inactive";
-
-
-        html += `
-
-            <tr>
-
-                <td>${escapeHTML(e.codigo)}</td>
-
-                <td>${escapeHTML(e.nombre)}</td>
-
-                <td>${escapeHTML(e.grado)}</td>
-
-                <td>${escapeHTML(e.seccion)}</td>
-
-                <td>${escapeHTML(e.sexo)}</td>
-
-                <td>${escapeHTML(e.responsable)}</td>
-
-                <td>${escapeHTML(e.comunidad)}</td>
-
-                <td>
-                    <span class="badge ${estadoClase}">
-                        ${escapeHTML(e.estado)}
-                    </span>
-                </td>
-
-                <td>
-
-                    <div class="action-buttons">
-
-                        <button
-                            class="btn-warning"
-                            onclick="editarEstudiante(${index})"
-                        >
-                            Editar
-                        </button>
-
-                        <button
-                            class="btn-danger"
-                            onclick="eliminarEstudiante(${index})"
-                        >
-                            Eliminar
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
-
-
-    html += `
-            </tbody>
-        </table>
-    `;
-
-
-    contenedor.innerHTML = html;
-
-}
-
-
-function editarEstudiante(index){
-
-    const datos =
-        obtenerEstudiantes();
-
-    const e = datos[index];
-
-
-    document.getElementById(
-        "studentCodigo"
-    ).value = e.codigo || "";
-
-    document.getElementById(
-        "studentNombre"
-    ).value = e.nombre || "";
-
-    document.getElementById(
-        "studentGrado"
-    ).value = e.grado || "";
-
-    document.getElementById(
-        "studentSeccion"
-    ).value = e.seccion || "";
-
-    document.getElementById(
-        "studentSexo"
-    ).value = e.sexo || "";
-
-    document.getElementById(
-        "studentNacimiento"
-    ).value = e.nacimiento || "";
-
-    document.getElementById(
-        "studentResponsable"
-    ).value = e.responsable || "";
-
-    document.getElementById(
-        "studentTelefono"
-    ).value = e.telefono || "";
-
-    document.getElementById(
-        "studentComunidad"
-    ).value = e.comunidad || "";
-
-    document.getElementById(
-        "studentEstado"
-    ).value = e.estado || "Activo";
-
-    document.getElementById(
-        "studentEditIndex"
-    ).value = index;
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-}
-
-
-function eliminarEstudiante(index){
-
-    if(!confirm(
-        "¿Está seguro de eliminar este estudiante?"
-    )){
-        return;
-    }
-
-    const datos =
-        obtenerEstudiantes();
-
-    datos.splice(index,1);
-
-    guardarEstudiantes(datos);
-
-    mostrarEstudiantes();
-
-    actualizarContador();
-
-}
-
-
-/* ================================
+/* =========================================
    DOCENTES
-================================ */
+========================================= */
+
+function obtenerDocentes(){
+
+    return JSON.parse(
+        localStorage.getItem(STORAGE_DOCENTES)
+    ) || [];
+
+}
+
+
+function guardarDocentes(datos){
+
+    localStorage.setItem(
+        STORAGE_DOCENTES,
+        JSON.stringify(datos)
+    );
+
+}
+
+
+function mostrarFormularioDocente(){
+
+    document
+        .getElementById("formDocente")
+        .classList.remove("hidden");
+
+}
+
+
+function cancelarDocente(){
+
+    document
+        .getElementById("formDocente")
+        .classList.add("hidden");
+
+    limpiarFormularioDocente();
+
+}
+
 
 function actualizarGradosDocente(){
 
     const nivel =
-        document.getElementById(
-            "teacherNivel"
-        ).value;
+        document.getElementById("nivelDocente").value;
 
-    const select =
-        document.getElementById(
-            "teacherGrado"
-        );
+    llenarGrados(
+        "gradoDocente",
+        nivel
+    );
 
-    select.innerHTML =
-        '<option value="">Seleccione</option>';
+}
 
 
-    if(nivel === "Educación Inicial"){
+function limpiarFormularioDocente(){
 
-        ["I Nivel","II Nivel","III Nivel"]
-        .forEach(g => {
-
-            select.innerHTML +=
-                `<option>${g}</option>`;
-
-        });
-
-    }
-
-
-    if(nivel === "Educación Primaria"){
-
-        for(let i=1;i<=6;i++){
-
-            select.innerHTML +=
-                `<option>${i}.º grado</option>`;
-
-        }
-
-    }
-
-
-    if(nivel === "Educación Secundaria"){
-
-        for(let i=7;i<=11;i++){
-
-            select.innerHTML +=
-                `<option>${i}.º grado</option>`;
-
-        }
-
-    }
+    document.getElementById("codigoDocente").value = "";
+    document.getElementById("nombresDocente").value = "";
+    document.getElementById("apellidosDocente").value = "";
+    document.getElementById("especialidadDocente").value = "";
+    document.getElementById("nivelDocente").value = "";
+    document.getElementById("gradoDocente").innerHTML =
+        '<option value="">Seleccione nivel educativo</option>';
+    document.getElementById("telefonoDocente").value = "";
+    document.getElementById("estadoDocente").value = "Activo";
 
 }
 
 
 function guardarDocente(){
 
-    const datos =
-        obtenerDocentes();
+    const codigo =
+        document.getElementById("codigoDocente").value.trim();
 
-    const docente = {
+    const nombres =
+        document.getElementById("nombresDocente").value.trim();
 
-        codigo:
-            document.getElementById(
-                "teacherCodigo"
-            ).value.trim(),
+    const apellidos =
+        document.getElementById("apellidosDocente").value.trim();
 
-        nombre:
-            document.getElementById(
-                "teacherNombre"
-            ).value.trim(),
+    const especialidad =
+        document.getElementById("especialidadDocente").value.trim();
 
-        cedula:
-            document.getElementById(
-                "teacherCedula"
-            ).value.trim(),
+    const nivel =
+        document.getElementById("nivelDocente").value;
 
-        telefono:
-            document.getElementById(
-                "teacherTelefono"
-            ).value.trim(),
+    const grado =
+        document.getElementById("gradoDocente").value;
 
-        correo:
-            document.getElementById(
-                "teacherCorreo"
-            ).value.trim(),
+    const telefono =
+        document.getElementById("telefonoDocente").value.trim();
 
-        especialidad:
-            document.getElementById(
-                "teacherEspecialidad"
-            ).value.trim(),
-
-        cargo:
-            document.getElementById(
-                "teacherCargo"
-            ).value.trim(),
-
-        nivel:
-            document.getElementById(
-                "teacherNivel"
-            ).value,
-
-        grado:
-            document.getElementById(
-                "teacherGrado"
-            ).value,
-
-        asignatura:
-            document.getElementById(
-                "teacherAsignatura"
-            ).value.trim(),
-
-        turno:
-            document.getElementById(
-                "teacherTurno"
-            ).value,
-
-        comunidad:
-            document.getElementById(
-                "teacherComunidad"
-            ).value.trim(),
-
-        estado:
-            document.getElementById(
-                "teacherEstado"
-            ).value
-
-    };
+    const estado =
+        document.getElementById("estadoDocente").value;
 
 
-    if(
-        !docente.codigo ||
-        !docente.nombre ||
-        !docente.nivel ||
-        !docente.grado
-    ){
+    if(!codigo || !nombres || !apellidos || !nivel || !grado){
 
         mostrarMensaje(
-            "teacherMessage",
-            "Complete código, nombre, nivel y grado.",
+            "mensajeDocente",
+            "Complete los campos obligatorios.",
             "error"
         );
 
@@ -2004,34 +1696,60 @@ function guardarDocente(){
     }
 
 
-    const editIndex =
-        document.getElementById(
-            "teacherEditIndex"
-        ).value;
+    const docentes =
+        obtenerDocentes();
 
 
-    if(editIndex !== ""){
+    const existe =
+        docentes.some(function(docente){
 
-        datos[parseInt(editIndex)] =
-            docente;
+            return docente.codigo === codigo;
 
-    }else{
+        });
 
-        datos.push(docente);
+
+    if(existe){
+
+        mostrarMensaje(
+            "mensajeDocente",
+            "Ya existe un docente con ese código.",
+            "error"
+        );
+
+        return;
 
     }
 
 
-    guardarDocentes(datos);
+    docentes.push({
 
-    limpiarDocente();
+        codigo,
+        nombres,
+        apellidos,
+        especialidad,
+        nivel,
+        grado,
+        telefono,
+        estado
 
-    mostrarDocentes();
+    });
 
-    actualizarContador();
+
+    guardarDocentes(docentes);
+
+    cargarTablaDocentes();
+
+    actualizarDashboard();
+
+    limpiarFormularioDocente();
+
+    document
+        .getElementById("formDocente")
+        .classList.add("hidden");
+
 
     mostrarMensaje(
-        "teacherMessage",
+        "mensajeDocente",
         "Docente guardado correctamente.",
         "success"
     );
@@ -2039,378 +1757,199 @@ function guardarDocente(){
 }
 
 
-function limpiarDocente(){
+function cargarTablaDocentes(){
 
-    document
-        .querySelectorAll(
-            "#docentes input"
-        )
-        .forEach(input => {
+    const docentes =
+        obtenerDocentes();
 
-            if(input.type !== "hidden"){
-                input.value = "";
-            }
+    const tabla =
+        document.getElementById("tablaDocentes");
+
+    tabla.innerHTML = "";
+
+
+    docentes.forEach(function(docente){
+
+        const fila =
+            document.createElement("tr");
+
+        const claseEstado =
+            docente.estado === "Activo"
+            ? "badge-green"
+            : "badge-gray";
+
+
+        fila.innerHTML = `
+
+            <td>${escaparHTML(docente.codigo)}</td>
+
+            <td>
+                ${escaparHTML(docente.nombres)}
+                ${escaparHTML(docente.apellidos)}
+            </td>
+
+            <td>
+                ${escaparHTML(docente.especialidad || "-")}
+            </td>
+
+            <td>
+                ${escaparHTML(docente.nivel)}
+            </td>
+
+            <td>
+                ${escaparHTML(docente.grado)}
+            </td>
+
+            <td>
+                ${escaparHTML(docente.telefono || "-")}
+            </td>
+
+            <td>
+                <span class="badge ${claseEstado}">
+                    ${escaparHTML(docente.estado)}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="eliminarDocente('${encodeURIComponent(docente.codigo)}')"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        `;
+
+        tabla.appendChild(fila);
+
+    });
+
+}
+
+
+function eliminarDocente(codigoCodificado){
+
+    const codigo =
+        decodeURIComponent(codigoCodificado);
+
+    if(!confirm("¿Desea eliminar este docente?")){
+
+        return;
+
+    }
+
+
+    const docentes =
+        obtenerDocentes().filter(function(docente){
+
+            return docente.codigo !== codigo;
 
         });
 
 
-    document.getElementById(
-        "teacherNivel"
-    ).value = "";
+    guardarDocentes(docentes);
 
-    document.getElementById(
-        "teacherGrado"
-    ).innerHTML =
-        '<option value="">Seleccione primero el nivel</option>';
+    cargarTablaDocentes();
 
-    document.getElementById(
-        "teacherTurno"
-    ).value = "";
-
-    document.getElementById(
-        "teacherEstado"
-    ).value = "Activo";
-
-    document.getElementById(
-        "teacherEditIndex"
-    ).value = "";
+    actualizarDashboard();
 
 }
 
 
-function mostrarDocentes(){
-
-    const datos =
-        obtenerDocentes();
-
-    const buscar =
-        document
-        .getElementById(
-            "buscarDocente"
-        )
-        .value
-        .toLowerCase();
-
-
-    const filtrados =
-        datos.filter(d =>
-            Object.values(d)
-                .join(" ")
-                .toLowerCase()
-                .includes(buscar)
-        );
-
-
-    const contenedor =
-        document.getElementById(
-            "tablaDocentes"
-        );
-
-
-    if(filtrados.length === 0){
-
-        contenedor.innerHTML =
-            '<div class="empty">No hay docentes registrados.</div>';
-
-        return;
-
-    }
-
-
-    let html = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Nivel</th>
-                    <th>Grado</th>
-                    <th>Asignatura</th>
-                    <th>Turno</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-    `;
-
-
-    filtrados.forEach(d => {
-
-        const index =
-            datos.indexOf(d);
-
-        const estadoClase =
-            d.estado === "Activo"
-            ? "badge-active"
-            : "badge-inactive";
-
-
-        html += `
-
-            <tr>
-
-                <td>${escapeHTML(d.codigo)}</td>
-
-                <td>${escapeHTML(d.nombre)}</td>
-
-                <td>${escapeHTML(d.cedula)}</td>
-
-                <td>${escapeHTML(d.nivel)}</td>
-
-                <td>${escapeHTML(d.grado)}</td>
-
-                <td>${escapeHTML(d.asignatura)}</td>
-
-                <td>${escapeHTML(d.turno)}</td>
-
-                <td>
-                    <span class="badge ${estadoClase}">
-                        ${escapeHTML(d.estado)}
-                    </span>
-                </td>
-
-                <td>
-
-                    <div class="action-buttons">
-
-                        <button
-                            class="btn-warning"
-                            onclick="editarDocente(${index})"
-                        >
-                            Editar
-                        </button>
-
-                        <button
-                            class="btn-danger"
-                            onclick="eliminarDocente(${index})"
-                        >
-                            Eliminar
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
-
-
-    html += `
-            </tbody>
-        </table>
-    `;
-
-
-    contenedor.innerHTML = html;
-
-}
-
-
-function editarDocente(index){
-
-    const datos =
-        obtenerDocentes();
-
-    const d = datos[index];
-
-
-    document.getElementById(
-        "teacherCodigo"
-    ).value = d.codigo || "";
-
-    document.getElementById(
-        "teacherNombre"
-    ).value = d.nombre || "";
-
-    document.getElementById(
-        "teacherCedula"
-    ).value = d.cedula || "";
-
-    document.getElementById(
-        "teacherTelefono"
-    ).value = d.telefono || "";
-
-    document.getElementById(
-        "teacherCorreo"
-    ).value = d.correo || "";
-
-    document.getElementById(
-        "teacherEspecialidad"
-    ).value = d.especialidad || "";
-
-    document.getElementById(
-        "teacherCargo"
-    ).value = d.cargo || "";
-
-    document.getElementById(
-        "teacherNivel"
-    ).value = d.nivel || "";
-
-    actualizarGradosDocente();
-
-    document.getElementById(
-        "teacherGrado"
-    ).value = d.grado || "";
-
-    document.getElementById(
-        "teacherAsignatura"
-    ).value = d.asignatura || "";
-
-    document.getElementById(
-        "teacherTurno"
-    ).value = d.turno || "";
-
-    document.getElementById(
-        "teacherComunidad"
-    ).value = d.comunidad || "";
-
-    document.getElementById(
-        "teacherEstado"
-    ).value = d.estado || "Activo";
-
-    document.getElementById(
-        "teacherEditIndex"
-    ).value = index;
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-}
-
-
-function eliminarDocente(index){
-
-    if(!confirm(
-        "¿Está seguro de eliminar este docente?"
-    )){
-        return;
-    }
-
-    const datos =
-        obtenerDocentes();
-
-    datos.splice(index,1);
-
-    guardarDocentes(datos);
-
-    mostrarDocentes();
-
-    actualizarContador();
-
-}
-
-
-/* ================================
+/* =========================================
    ASISTENCIA
-================================ */
+========================================= */
+
+function obtenerAsistencias(){
+
+    return JSON.parse(
+        localStorage.getItem(STORAGE_ASISTENCIA)
+    ) || [];
+
+}
+
+
+function guardarAsistencias(datos){
+
+    localStorage.setItem(
+        STORAGE_ASISTENCIA,
+        JSON.stringify(datos)
+    );
+
+}
+
+
+function establecerFechaActual(){
+
+    const hoy =
+        new Date();
+
+    const year =
+        hoy.getFullYear();
+
+    const month =
+        String(hoy.getMonth()+1).padStart(2,"0");
+
+    const day =
+        String(hoy.getDate()).padStart(2,"0");
+
+    const fecha =
+        `${year}-${month}-${day}`;
+
+
+    const campo =
+        document.getElementById("fechaAsistencia");
+
+    if(campo && !campo.value){
+
+        campo.value = fecha;
+
+    }
+
+}
+
 
 function actualizarGradosAsistencia(){
 
     const nivel =
-        document.getElementById(
-            "attendanceNivel"
-        ).value;
+        document.getElementById("nivelAsistencia").value;
 
-    const select =
-        document.getElementById(
-            "attendanceGrado"
-        );
+    llenarGrados(
+        "gradoAsistencia",
+        nivel
+    );
 
-    select.innerHTML =
-        '<option value="">Seleccione</option>';
+    document
+        .getElementById("listaEstudiantesAsistencia")
+        .innerHTML = "";
 
-
-    if(nivel === "Educación Inicial"){
-
-        ["I Nivel","II Nivel","III Nivel"]
-        .forEach(g => {
-
-            select.innerHTML +=
-                `<option>${g}</option>`;
-
-        });
-
-    }
-
-
-    if(nivel === "Educación Primaria"){
-
-        for(let i=1;i<=6;i++){
-
-            select.innerHTML +=
-                `<option>${i}.º grado</option>`;
-
-        }
-
-    }
-
-
-    if(nivel === "Educación Secundaria"){
-
-        for(let i=7;i<=11;i++){
-
-            select.innerHTML +=
-                `<option>${i}.º grado</option>`;
-
-        }
-
-    }
+    actualizarResumen();
 
 }
 
 
-function cargarEstudiantesParaAsistencia(){
+function cargarEstudiantesAsistencia(){
+
+    const nivel =
+        document.getElementById("nivelAsistencia").value;
 
     const grado =
-        document.getElementById(
-            "attendanceGrado"
-        ).value;
+        document.getElementById("gradoAsistencia").value;
 
     const seccion =
-        document.getElementById(
-            "attendanceSeccion"
-        ).value.trim()
-        .toLowerCase();
+        document.getElementById("seccionAsistencia").value.trim();
 
 
-    const fecha =
-        document.getElementById(
-            "attendanceFecha"
-        ).value;
-
-
-    if(!fecha){
+    if(!nivel || !grado){
 
         mostrarMensaje(
-            "attendanceMessage",
-            "Seleccione primero la fecha.",
+            "mensajeAsistencia",
+            "Seleccione el nivel educativo y el grado o nivel.",
             "error"
         );
-
-        return;
-
-    }
-
-
-    if(!grado){
-
-        document
-            .getElementById(
-                "attendanceStudentCard"
-            )
-            .classList.add("hidden");
 
         return;
 
@@ -2421,256 +1960,274 @@ function cargarEstudiantesParaAsistencia(){
         obtenerEstudiantes();
 
 
-    let filtrados =
-        estudiantes.filter(e =>
-            e.grado === grado &&
-            e.estado === "Activo"
-        );
+    const encontrados =
+        estudiantes.filter(function(estudiante){
+
+            const coincideNivel =
+                estudiante.nivel === nivel;
+
+            const coincideGrado =
+                estudiante.grado === grado;
+
+            const coincideSeccion =
+                !seccion ||
+                estudiante.seccion.toLowerCase() ===
+                seccion.toLowerCase();
+
+            return
+                coincideNivel &&
+                coincideGrado &&
+                coincideSeccion;
+
+        });
 
 
-    if(seccion){
+    mostrarListaAsistencia(encontrados);
 
-        filtrados =
-            filtrados.filter(e =>
-                (e.seccion || "")
-                .toLowerCase() === seccion
-            );
+}
 
-    }
 
+function mostrarListaAsistencia(estudiantes){
 
     const contenedor =
         document.getElementById(
-            "attendanceStudents"
+            "listaEstudiantesAsistencia"
         );
 
-
-    document
-        .getElementById(
-            "attendanceStudentCard"
-        )
-        .classList.remove("hidden");
+    contenedor.innerHTML = "";
 
 
-    if(filtrados.length === 0){
+    if(estudiantes.length === 0){
 
-        contenedor.innerHTML =
-            '<div class="empty">No hay estudiantes activos registrados en este grupo.</div>';
+        contenedor.innerHTML = `
 
-        actualizarResumenAsistencia();
+            <div class="message message-info">
+
+                No se encontraron estudiantes para los datos seleccionados.
+
+                <br><br>
+
+                Primero registre estudiantes en el módulo
+                <strong>Estudiantes</strong>.
+
+            </div>
+
+        `;
+
+        actualizarResumen();
 
         return;
 
     }
 
 
-    const registros =
-        obtenerAsistencias();
+    estudiantes.forEach(function(estudiante,index){
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "student-attendance";
 
 
-    let html = `
+        div.innerHTML = `
 
-        <table>
+            <div class="student-attendance-header">
 
-            <thead>
+                <strong>
+                    ${index + 1}.
+                    ${escaparHTML(estudiante.nombres)}
+                    ${escaparHTML(estudiante.apellidos)}
+                </strong>
 
-                <tr>
-                    <th>Código</th>
-                    <th>Estudiante</th>
-                    <th>Estado</th>
-                    <th>Entrada</th>
-                    <th>Salida</th>
-                    <th>Observación</th>
-                </tr>
+                <span class="badge badge-blue">
+                    ${escaparHTML(estudiante.codigo)}
+                </span>
 
-            </thead>
-
-            <tbody>
-    `;
+            </div>
 
 
-    filtrados.forEach(e => {
+            <div class="attendance-options">
 
-        const registro =
-            registros.find(r =>
-                r.fecha === fecha &&
-                r.estudianteCodigo === e.codigo
-            );
-
-
-        const estado =
-            registro
-            ? registro.estado
-            : "Presente";
-
-        const entrada =
-            registro
-            ? registro.entrada
-            : "";
-
-        const salida =
-            registro
-            ? registro.salida
-            : "";
-
-        const observacion =
-            registro
-            ? registro.observacion
-            : "";
-
-
-        html += `
-
-            <tr>
-
-                <td>
-                    ${escapeHTML(e.codigo)}
-                </td>
-
-                <td>
-                    ${escapeHTML(e.nombre)}
-                </td>
-
-                <td>
-
-                    <select
-                        class="attendance-status"
-                        data-codigo="${escapeHTML(e.codigo)}"
-                        onchange="actualizarResumenAsistencia()"
+                <label>
+                    <input
+                        type="radio"
+                        name="asistencia_${escapeAttribute(estudiante.codigo)}"
+                        value="Presente"
+                        checked
+                        onchange="actualizarResumen()"
                     >
+                    ✅ Presente
+                </label>
 
-                        <option
-                            ${estado === "Presente" ? "selected" : ""}
-                        >
-                            Presente
-                        </option>
+                <label>
+                    <input
+                        type="radio"
+                        name="asistencia_${escapeAttribute(estudiante.codigo)}"
+                        value="Ausente"
+                        onchange="actualizarResumen()"
+                    >
+                    ❌ Ausente
+                </label>
 
-                        <option
-                            ${estado === "Ausente" ? "selected" : ""}
-                        >
-                            Ausente
-                        </option>
+                <label>
+                    <input
+                        type="radio"
+                        name="asistencia_${escapeAttribute(estudiante.codigo)}"
+                        value="Tardanza"
+                        onchange="actualizarResumen()"
+                    >
+                    ⏰ Tardanza
+                </label>
 
-                        <option
-                            ${estado === "Tardanza" ? "selected" : ""}
-                        >
-                            Tardanza
-                        </option>
+                <label>
+                    <input
+                        type="radio"
+                        name="asistencia_${escapeAttribute(estudiante.codigo)}"
+                        value="Justificado"
+                        onchange="actualizarResumen()"
+                    >
+                    📄 Justificado
+                </label>
 
-                        <option
-                            ${estado === "Justificado" ? "selected" : ""}
-                        >
-                            Justificado
-                        </option>
+            </div>
 
-                    </select>
 
-                </td>
+            <div class="form-grid" style="margin-top:12px;">
 
-                <td>
+                <div class="form-group">
+
+                    <label>Hora de entrada</label>
 
                     <input
                         type="time"
-                        class="attendance-entry"
-                        data-codigo="${escapeHTML(e.codigo)}"
-                        value="${escapeHTML(entrada)}"
+                        id="entrada_${escapeAttribute(estudiante.codigo)}"
                     >
 
-                </td>
+                </div>
 
-                <td>
+
+                <div class="form-group">
+
+                    <label>Hora de salida</label>
 
                     <input
                         type="time"
-                        class="attendance-exit"
-                        data-codigo="${escapeHTML(e.codigo)}"
-                        value="${escapeHTML(salida)}"
+                        id="salida_${escapeAttribute(estudiante.codigo)}"
                     >
 
-                </td>
+                </div>
 
-                <td>
+
+                <div class="form-group full">
+
+                    <label>Observación</label>
 
                     <input
                         type="text"
-                        class="attendance-observation"
-                        data-codigo="${escapeHTML(e.codigo)}"
-                        value="${escapeHTML(observacion)}"
-                        placeholder="Observación"
+                        id="observacion_${escapeAttribute(estudiante.codigo)}"
+                        placeholder="Observación opcional"
                     >
 
-                </td>
+                </div>
 
-            </tr>
+            </div>
 
         `;
+
+
+        contenedor.appendChild(div);
 
     });
 
 
-    html += `
-            </tbody>
-        </table>
-    `;
-
-
-    contenedor.innerHTML = html;
-
-    actualizarResumenAsistencia();
+    actualizarResumen();
 
 }
 
 
-function actualizarResumenAsistencia(){
+function obtenerEstadoEstudiante(codigo){
 
-    const estados =
+    const radios =
         document.querySelectorAll(
-            ".attendance-status"
+            `input[name="asistencia_${escapeSelector(codigo)}"]`
+        );
+
+
+    for(let i=0;i<radios.length;i++){
+
+        if(radios[i].checked){
+
+            return radios[i].value;
+
+        }
+
+    }
+
+
+    return "Presente";
+
+}
+
+
+function actualizarResumen(){
+
+    const contenedor =
+        document.getElementById(
+            "listaEstudiantesAsistencia"
+        );
+
+    const radios =
+        contenedor.querySelectorAll(
+            'input[type="radio"]:checked'
         );
 
 
     let presentes = 0;
     let ausentes = 0;
     let tardanzas = 0;
-    let justificados = 0;
 
 
-    estados.forEach(select => {
+    radios.forEach(function(radio){
 
-        if(select.value === "Presente"){
+        if(radio.value === "Presente"){
+
             presentes++;
+
         }
 
-        if(select.value === "Ausente"){
+        if(radio.value === "Ausente"){
+
             ausentes++;
+
         }
 
-        if(select.value === "Tardanza"){
+        if(radio.value === "Tardanza"){
+
             tardanzas++;
-        }
 
-        if(select.value === "Justificado"){
-            justificados++;
         }
 
     });
 
 
-    document.getElementById(
-        "summaryPresent"
-    ).textContent = presentes;
+    const total =
+        contenedor.querySelectorAll(
+            ".student-attendance"
+        ).length;
 
-    document.getElementById(
-        "summaryAbsent"
-    ).textContent = ausentes;
 
-    document.getElementById(
-        "summaryLate"
-    ).textContent = tardanzas;
+    document.getElementById("resumenTotal").textContent =
+        total;
 
-    document.getElementById(
-        "summaryJustified"
-    ).textContent = justificados;
+    document.getElementById("resumenPresentes").textContent =
+        presentes;
+
+    document.getElementById("resumenAusentes").textContent =
+        ausentes;
+
+    document.getElementById("resumenTardanzas").textContent =
+        tardanzas;
 
 }
 
@@ -2678,31 +2235,23 @@ function actualizarResumenAsistencia(){
 function guardarAsistencia(){
 
     const fecha =
-        document.getElementById(
-            "attendanceFecha"
-        ).value;
+        document.getElementById("fechaAsistencia").value;
 
     const nivel =
-        document.getElementById(
-            "attendanceNivel"
-        ).value;
+        document.getElementById("nivelAsistencia").value;
 
     const grado =
-        document.getElementById(
-            "attendanceGrado"
-        ).value;
+        document.getElementById("gradoAsistencia").value;
 
     const seccion =
-        document.getElementById(
-            "attendanceSeccion"
-        ).value.trim();
+        document.getElementById("seccionAsistencia").value.trim();
 
 
     if(!fecha || !nivel || !grado){
 
         mostrarMensaje(
-            "attendanceMessage",
-            "Complete fecha, nivel y grado.",
+            "mensajeAsistencia",
+            "Complete la fecha, nivel educativo y grado.",
             "error"
         );
 
@@ -2711,19 +2260,264 @@ function guardarAsistencia(){
     }
 
 
-    const selects =
+    const elementos =
         document.querySelectorAll(
-            ".attendance-status"
+            "#listaEstudiantesAsistencia .student-attendance"
         );
 
 
-    if(selects.length === 0){
+    if(elementos.length === 0){
 
         mostrarMensaje(
-            "attendanceMessage",
-            "No hay estudiantes para registrar.",
+            "mensajeAsistencia",
+            "Primero cargue los estudiantes.",
             "error"
         );
+
+        return;
+
+    }
+
+
+    const estudiantes =
+        obtenerEstudiantes();
+
+
+    const registros = [];
+
+
+    elementos.forEach(function(elemento){
+
+        const codigoElemento =
+            elemento.querySelector(".badge");
+
+        const codigo =
+            codigoElemento
+            ? codigoElemento.textContent.trim()
+            : "";
+
+
+        const estado =
+            obtenerEstadoEstudiante(codigo);
+
+
+        const entradaElemento =
+            document.getElementById(
+                "entrada_" + codigo
+            );
+
+        const salidaElemento =
+            document.getElementById(
+                "salida_" + codigo
+            );
+
+        const observacionElemento =
+            document.getElementById(
+                "observacion_" + codigo
+            );
+
+
+        const estudiante =
+            estudiantes.find(function(item){
+
+                return item.codigo === codigo;
+
+            });
+
+
+        registros.push({
+
+            codigo: codigo,
+
+            nombre:
+                estudiante
+                ? estudiante.nombres + " " + estudiante.apellidos
+                : "",
+
+            estado: estado,
+
+            entrada:
+                entradaElemento
+                ? entradaElemento.value
+                : "",
+
+            salida:
+                salidaElemento
+                ? salidaElemento.value
+                : "",
+
+            observacion:
+                observacionElemento
+                ? observacionElemento.value.trim()
+                : ""
+
+        });
+
+    });
+
+
+    const presentes =
+        registros.filter(
+            r => r.estado === "Presente"
+        ).length;
+
+    const ausentes =
+        registros.filter(
+            r => r.estado === "Ausente"
+        ).length;
+
+    const tardanzas =
+        registros.filter(
+            r => r.estado === "Tardanza"
+        ).length;
+
+    const justificados =
+        registros.filter(
+            r => r.estado === "Justificado"
+        ).length;
+
+
+    const asistencias =
+        obtenerAsistencias();
+
+
+    asistencias.push({
+
+        id: Date.now(),
+
+        fecha,
+
+        nivel,
+
+        grado,
+
+        seccion,
+
+        total: registros.length,
+
+        presentes,
+
+        ausentes,
+
+        tardanzas,
+
+        justificados,
+
+        estudiantes: registros
+
+    });
+
+
+    guardarAsistencias(asistencias);
+
+    cargarTablaAsistencias();
+
+    actualizarDashboard();
+
+
+    mostrarMensaje(
+        "mensajeAsistencia",
+        "✅ La asistencia fue guardada correctamente.",
+        "success"
+    );
+
+
+    document
+        .getElementById(
+            "listaEstudiantesAsistencia"
+        )
+        .innerHTML = "";
+
+    actualizarResumen();
+
+}
+
+
+function cargarTablaAsistencias(){
+
+    const asistencias =
+        obtenerAsistencias();
+
+    const tabla =
+        document.getElementById(
+            "tablaAsistencias"
+        );
+
+    tabla.innerHTML = "";
+
+
+    asistencias.forEach(function(registro){
+
+        const fila =
+            document.createElement("tr");
+
+
+        fila.innerHTML = `
+
+            <td>
+                ${escaparHTML(registro.fecha)}
+            </td>
+
+            <td>
+                ${escaparHTML(registro.nivel)}
+            </td>
+
+            <td>
+                ${escaparHTML(registro.grado)}
+            </td>
+
+            <td>
+                ${escaparHTML(registro.seccion || "-")}
+            </td>
+
+            <td>
+                ${registro.total}
+            </td>
+
+            <td>
+                <span class="badge badge-green">
+                    ${registro.presentes}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge badge-red">
+                    ${registro.ausentes}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge badge-yellow">
+                    ${registro.tardanzas}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="eliminarAsistencia(${registro.id})"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        `;
+
+
+        tabla.appendChild(fila);
+
+    });
+
+}
+
+
+function eliminarAsistencia(id){
+
+    if(!confirm(
+        "¿Desea eliminar este registro de asistencia?"
+    )){
 
         return;
 
@@ -2731,339 +2525,108 @@ function guardarAsistencia(){
 
 
     const asistencias =
-        obtenerAsistencias();
+        obtenerAsistencias().filter(function(registro){
 
-    const estudiantes =
-        obtenerEstudiantes();
+            return registro.id !== id;
 
-
-    selects.forEach(select => {
-
-        const codigo =
-            select.dataset.codigo;
-
-        const estado =
-            select.value;
+        });
 
 
-        const entradaElement =
-            document.querySelector(
-                `.attendance-entry[data-codigo="${CSS.escape(codigo)}"]`
-            );
+    guardarAsistencias(asistencias);
 
-        const salidaElement =
-            document.querySelector(
-                `.attendance-exit[data-codigo="${CSS.escape(codigo)}"]`
-            );
+    cargarTablaAsistencias();
 
-        const observacionElement =
-            document.querySelector(
-                `.attendance-observation[data-codigo="${CSS.escape(codigo)}"]`
-            );
-
-
-        const estudiante =
-            estudiantes.find(
-                e => e.codigo === codigo
-            );
-
-
-        const nuevoRegistro = {
-
-            fecha:fecha,
-
-            estudianteCodigo:codigo,
-
-            estudianteNombre:
-                estudiante
-                ? estudiante.nombre
-                : "",
-
-            nivel:nivel,
-
-            grado:grado,
-
-            seccion:seccion,
-
-            estado:estado,
-
-            entrada:
-                entradaElement
-                ? entradaElement.value
-                : "",
-
-            salida:
-                salidaElement
-                ? salidaElement.value
-                : "",
-
-            observacion:
-                observacionElement
-                ? observacionElement.value.trim()
-                : ""
-
-        };
-
-
-        const indice =
-            asistencias.findIndex(r =>
-                r.fecha === fecha &&
-                r.estudianteCodigo === codigo
-            );
-
-
-        if(indice >= 0){
-
-            asistencias[indice] =
-                nuevoRegistro;
-
-        }else{
-
-            asistencias.push(
-                nuevoRegistro
-            );
-
-        }
-
-    });
-
-
-    guardarAsistencias(
-        asistencias
-    );
-
-    mostrarAsistencias();
-
-    actualizarContador();
-
-    mostrarMensaje(
-        "attendanceMessage",
-        "Asistencia guardada correctamente.",
-        "success"
-    );
+    actualizarDashboard();
 
 }
 
 
-function mostrarAsistencias(){
+/* =========================================
+   DASHBOARD
+========================================= */
 
-    const datos =
-        obtenerAsistencias();
+function actualizarDashboard(){
 
-
-    const buscar =
-        document
-        .getElementById(
-            "buscarAsistencia"
-        )
-        .value
-        .toLowerCase();
+    document.getElementById(
+        "totalEstudiantes"
+    ).textContent =
+        obtenerEstudiantes().length;
 
 
-    const filtrados =
-        datos.filter(a =>
-            Object.values(a)
-                .join(" ")
-                .toLowerCase()
-                .includes(buscar)
-        );
+    document.getElementById(
+        "totalDocentes"
+    ).textContent =
+        obtenerDocentes().length;
 
+
+    document.getElementById(
+        "totalAsistencias"
+    ).textContent =
+        obtenerAsistencias().length;
+
+}
+
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+function mostrarMensaje(id, texto, tipo){
 
     const contenedor =
-        document.getElementById(
-            "tablaAsistencias"
-        );
-
-
-    if(filtrados.length === 0){
-
-        contenedor.innerHTML =
-            '<div class="empty">No hay registros de asistencia.</div>';
-
-        return;
-
-    }
-
-
-    let html = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Fecha</th>
-                    <th>Estudiante</th>
-                    <th>Nivel</th>
-                    <th>Grado</th>
-                    <th>Sección</th>
-                    <th>Estado</th>
-                    <th>Entrada</th>
-                    <th>Salida</th>
-                    <th>Observación</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-    `;
-
-
-    filtrados.forEach(a => {
-
-        const index =
-            datos.indexOf(a);
-
-
-        let badgeClass =
-            "badge-present";
-
-
-        if(a.estado === "Ausente"){
-            badgeClass =
-                "badge-absent";
-        }
-
-        if(a.estado === "Tardanza"){
-            badgeClass =
-                "badge-late";
-        }
-
-        if(a.estado === "Justificado"){
-            badgeClass =
-                "badge-justified";
-        }
-
-
-        html += `
-
-            <tr>
-
-                <td>${escapeHTML(a.fecha)}</td>
-
-                <td>${escapeHTML(a.estudianteNombre)}</td>
-
-                <td>${escapeHTML(a.nivel)}</td>
-
-                <td>${escapeHTML(a.grado)}</td>
-
-                <td>${escapeHTML(a.seccion)}</td>
-
-                <td>
-
-                    <span class="badge ${badgeClass}">
-                        ${escapeHTML(a.estado)}
-                    </span>
-
-                </td>
-
-                <td>${escapeHTML(a.entrada)}</td>
-
-                <td>${escapeHTML(a.salida)}</td>
-
-                <td>${escapeHTML(a.observacion)}</td>
-
-                <td>
-
-                    <button
-                        class="btn-danger"
-                        onclick="eliminarAsistencia(${index})"
-                    >
-                        Eliminar
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
-
-
-    html += `
-            </tbody>
-        </table>
-    `;
-
-
-    contenedor.innerHTML = html;
-
-}
-
-
-function eliminarAsistencia(index){
-
-    if(!confirm(
-        "¿Está seguro de eliminar este registro de asistencia?"
-    )){
-        return;
-    }
-
-
-    const datos =
-        obtenerAsistencias();
-
-    datos.splice(index,1);
-
-    guardarAsistencias(datos);
-
-    mostrarAsistencias();
-
-    actualizarContador();
-
-}
-
-
-/* ================================
-   MENSAJES
-================================ */
-
-function mostrarMensaje(
-    id,
-    texto,
-    tipo
-){
-
-    const elemento =
         document.getElementById(id);
 
-    elemento.className =
-        "message " + tipo;
+    if(!contenedor){
 
-    elemento.textContent =
-        texto;
+        return;
+
+    }
 
 
-    setTimeout(() => {
+    let clase =
+        "message-info";
 
-        elemento.className =
-            "message";
 
-        elemento.textContent =
-            "";
+    if(tipo === "success"){
+
+        clase = "message-success";
+
+    }
+
+    if(tipo === "error"){
+
+        clase = "message-error";
+
+    }
+
+
+    contenedor.innerHTML =
+        `<div class="message ${clase}">${texto}</div>`;
+
+
+    setTimeout(function(){
+
+        contenedor.innerHTML = "";
 
     },4000);
 
 }
 
 
-/* ================================
-   SEGURIDAD HTML
-================================ */
+/* =========================================
+   SEGURIDAD BÁSICA DE TEXTO
+========================================= */
 
-function escapeHTML(valor){
+function escaparHTML(texto){
 
-    if(valor === undefined ||
-       valor === null){
+    if(texto === undefined || texto === null){
 
         return "";
 
     }
 
 
-    return String(valor)
+    return String(texto)
         .replace(/&/g,"&amp;")
         .replace(/</g,"&lt;")
         .replace(/>/g,"&gt;")
@@ -3073,38 +2636,38 @@ function escapeHTML(valor){
 }
 
 
-/* ================================
-   FECHA ACTUAL
-================================ */
+function escapeAttribute(texto){
+
+    return String(texto)
+        .replace(/[^a-zA-Z0-9_-]/g,"_");
+
+}
+
+
+function escapeSelector(texto){
+
+    return escapeAttribute(texto);
+
+}
+
+
+/* =========================================
+   INICIO
+========================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     function(){
 
-        const fecha =
-            new Date();
+        actualizarDashboard();
 
-        const año =
-            fecha.getFullYear();
+        establecerFechaActual();
 
-        const mes =
-            String(
-                fecha.getMonth()+1
-            ).padStart(2,"0");
+        cargarTablaEstudiantes();
 
-        const dia =
-            String(
-                fecha.getDate()
-            ).padStart(2,"0");
+        cargarTablaDocentes();
 
-
-        document.getElementById(
-            "attendanceFecha"
-        ).value =
-            `${año}-${mes}-${dia}`;
-
-
-        actualizarContador();
+        cargarTablaAsistencias();
 
     }
 );
