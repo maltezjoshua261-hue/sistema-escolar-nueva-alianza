@@ -1,676 +1,1112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Escolar Nueva Alianza</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+<title>Sistema Escolar Nueva Alianza</title>
 
-        body {
-            min-height: 100vh;
-            background: #f1f5f9;
-        }
+<style>
 
-        /* =========================
-           PANTALLA DE LOGIN
-        ========================== */
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
 
-        #login {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0d47a1, #1976d2, #42a5f5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+body{
+    min-height:100vh;
+    background:#f1f5f9;
+}
 
-        .contenedor-login {
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-            text-align: center;
-        }
+/* LOGIN */
 
-        .logo {
-            width: 85px;
-            height: 85px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            background: #1976d2;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 38px;
-        }
+#login{
+    min-height:100vh;
+    background:linear-gradient(135deg,#0d47a1,#1976d2,#42a5f5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
 
-        h1 {
-            color: #0d47a1;
-            font-size: 25px;
-            margin-bottom: 8px;
-        }
+.contenedor-login{
+    width:100%;
+    max-width:420px;
+    background:white;
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+    text-align:center;
+}
 
-        .subtitulo {
-            color: #666;
-            margin-bottom: 25px;
-        }
+.logo{
+    width:85px;
+    height:85px;
+    margin:0 auto 15px;
+    border-radius:50%;
+    background:#1976d2;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+}
 
-        input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-        }
+.contenedor-login h1{
+    color:#0d47a1;
+    margin-bottom:8px;
+}
 
-        .boton-login {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            background: #1976d2;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.subtitulo{
+    color:#666;
+    margin-bottom:25px;
+}
 
-        .boton-login:hover {
-            background: #0d47a1;
-        }
+input,select{
+    width:100%;
+    padding:13px;
+    margin-bottom:14px;
+    border:1px solid #ddd;
+    border-radius:9px;
+    font-size:15px;
+}
 
-        .mensaje-error {
-            color: #d32f2f;
-            margin-top: 15px;
-            font-size: 14px;
-            display: none;
-        }
+.boton{
+    border:none;
+    border-radius:9px;
+    padding:12px 18px;
+    cursor:pointer;
+    font-weight:bold;
+}
 
-        .pie {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
-        }
+.boton-principal{
+    width:100%;
+    background:#1976d2;
+    color:white;
+    font-size:16px;
+}
 
-        /* =========================
-           PANEL PRINCIPAL
-        ========================== */
+.boton-principal:hover{
+    background:#0d47a1;
+}
 
-        #panel {
-            display: none;
-            min-height: 100vh;
-        }
+.error{
+    color:#d32f2f;
+    margin-top:12px;
+    display:none;
+}
 
-        .encabezado {
-            background: linear-gradient(135deg, #0d47a1, #1976d2);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+/* PANEL */
 
-        .titulo-panel h2 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
+#panel{
+    display:none;
+    min-height:100vh;
+}
 
-        .titulo-panel p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+.encabezado{
+    background:linear-gradient(135deg,#0d47a1,#1976d2);
+    color:white;
+    padding:20px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
 
-        .boton-salir {
-            background: #d32f2f;
-            color: white;
-            border: none;
-            padding: 11px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+.encabezado h2{
+    margin-bottom:5px;
+}
 
-        .boton-salir:hover {
-            background: #b71c1c;
-        }
+.boton-salir{
+    background:#d32f2f;
+    color:white;
+}
 
-        .contenido {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
+.contenido{
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+}
 
-        .bienvenida {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
+.bienvenida{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:25px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
 
-        .bienvenida h3 {
-            color: #0d47a1;
-            margin-bottom: 8px;
-        }
+.bienvenida h3{
+    color:#0d47a1;
+    margin-bottom:8px;
+}
 
-        .bienvenida p {
-            color: #666;
-        }
+/* ESTADISTICAS */
 
-        /* =========================
-           TARJETAS
-        ========================== */
+.estadisticas{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:18px;
+    margin-bottom:30px;
+}
 
-        .estadisticas {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
-        }
+.tarjeta{
+    background:white;
+    padding:22px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
 
-        .tarjeta-estadistica {
-            background: white;
-            padding: 22px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: center;
-        }
+.tarjeta .icono{
+    font-size:35px;
+}
 
-        .icono-estadistica {
-            font-size: 35px;
-            margin-bottom: 10px;
-        }
+.numero{
+    font-size:30px;
+    font-weight:bold;
+    color:#1976d2;
+    margin:7px;
+}
 
-        .numero {
-            font-size: 30px;
-            font-weight: bold;
-            color: #1976d2;
-        }
+.texto{
+    color:#666;
+}
 
-        .texto-estadistica {
-            color: #666;
-            margin-top: 5px;
-        }
+/* MODULOS */
 
-        /* =========================
-           MODULOS
-        ========================== */
+.titulo-seccion{
+    color:#0d47a1;
+    margin-bottom:18px;
+}
 
-        .titulo-seccion {
-            color: #0d47a1;
-            margin-bottom: 18px;
-            font-size: 22px;
-        }
+.modulos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:20px;
+}
 
-        .modulos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
+.modulo{
+    background:white;
+    border-radius:15px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+    cursor:pointer;
+    transition:.2s;
+}
 
-        .modulo {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: 0.2s;
-        }
+.modulo:hover{
+    transform:translateY(-4px);
+}
 
-        .modulo:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
+.modulo-icono{
+    font-size:45px;
+    margin-bottom:10px;
+}
 
-        .modulo-icono {
-            font-size: 45px;
-            margin-bottom: 12px;
-        }
+.modulo h4{
+    color:#0d47a1;
+    margin-bottom:8px;
+}
 
-        .modulo h4 {
-            color: #0d47a1;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
+/* ESTUDIANTES */
 
-        .modulo p {
-            color: #777;
-            font-size: 14px;
-        }
+#estudiantes{
+    display:none;
+    margin-top:30px;
+}
 
-        /* =========================
-           MENSAJE DEL MODULO
-        ========================== */
+.cabecera-modulo{
+    background:white;
+    padding:22px;
+    border-radius:15px 15px 0 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+}
 
-        #mensajeModulo {
-            display: none;
-            margin-top: 25px;
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: center;
-        }
+.cabecera-modulo h3{
+    color:#0d47a1;
+}
 
-        #mensajeModulo h3 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
+.boton-agregar{
+    background:#2e7d32;
+    color:white;
+}
 
-        #mensajeModulo p {
-            color: #666;
-        }
+.boton-volver{
+    background:#607d8b;
+    color:white;
+}
 
-        @media (max-width: 600px) {
+/* FORMULARIO */
 
-            .encabezado {
-                padding: 18px;
-            }
+.formulario{
+    background:white;
+    padding:25px;
+    display:none;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+}
 
-            .contenido {
-                padding: 18px;
-            }
+.formulario h3{
+    color:#1976d2;
+    margin-bottom:18px;
+}
 
-            .titulo-panel h2 {
-                font-size: 20px;
-            }
-        }
-    </style>
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+}
+
+.acciones-formulario{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.guardar{
+    background:#1976d2;
+    color:white;
+}
+
+.cancelar{
+    background:#757575;
+    color:white;
+}
+
+/* TABLA */
+
+.tabla-contenedor{
+    background:white;
+    padding:20px;
+    overflow-x:auto;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+}
+
+#buscar{
+    margin-bottom:15px;
+    max-width:400px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+
+th{
+    background:#1976d2;
+    color:white;
+    padding:12px;
+    text-align:left;
+}
+
+td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+
+tr:hover{
+    background:#f5f5f5;
+}
+
+.btn-editar{
+    background:#f9a825;
+    color:white;
+    margin-right:5px;
+}
+
+.btn-eliminar{
+    background:#d32f2f;
+    color:white;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:600px){
+
+    .contenido{
+        padding:15px;
+    }
+
+    .encabezado{
+        padding:18px;
+    }
+
+}
+
+</style>
 </head>
 
 <body>
 
-<!-- =========================
-     LOGIN
-========================== -->
+<!-- LOGIN -->
 
 <div id="login">
 
-    <div class="contenedor-login">
+<div class="contenedor-login">
 
-        <div class="logo">🏫</div>
+<div class="logo">🏫</div>
 
-        <h1>Sistema Escolar</h1>
+<h1>Sistema Escolar</h1>
 
-        <p class="subtitulo">
-            Centro Escolar Nueva Alianza
-        </p>
+<p class="subtitulo">
+Centro Escolar Nueva Alianza
+</p>
 
-        <input
-            type="text"
-            id="usuario"
-            placeholder="Usuario"
-            autocomplete="username"
-        >
+<input type="text" id="usuario" placeholder="Usuario">
 
-        <input
-            type="password"
-            id="clave"
-            placeholder="Contraseña"
-            autocomplete="current-password"
-        >
+<input type="password" id="clave" placeholder="Contraseña">
 
-        <button class="boton-login" onclick="iniciarSesion()">
-            Iniciar sesión
-        </button>
+<button class="boton boton-principal" onclick="iniciarSesion()">
+Iniciar sesión
+</button>
 
-        <p id="error" class="mensaje-error">
-            Usuario o contraseña incorrectos.
-        </p>
+<p id="error" class="error">
+Usuario o contraseña incorrectos.
+</p>
 
-        <p class="pie">
-            Sistema de Gestión Escolar · 2026
-        </p>
+<p style="margin-top:20px;font-size:12px;color:#888;">
+Sistema de Gestión Escolar · 2026
+</p>
 
-    </div>
+</div>
 
 </div>
 
 
-<!-- =========================
-     PANEL DEL DIRECTOR
-========================== -->
+<!-- PANEL -->
 
 <div id="panel">
 
-    <header class="encabezado">
+<header class="encabezado">
 
-        <div class="titulo-panel">
+<div>
+<h2>🏫 Sistema Escolar Nueva Alianza</h2>
+<p>Panel de Administración del Director</p>
+</div>
 
-            <h2>🏫 Sistema Escolar Nueva Alianza</h2>
+<button class="boton boton-salir" onclick="cerrarSesion()">
+🚪 Cerrar sesión
+</button>
 
-            <p>
-                Panel de Administración del Director
-            </p>
+</header>
 
-        </div>
 
-        <button class="boton-salir" onclick="cerrarSesion()">
-            🚪 Cerrar sesión
-        </button>
+<main class="contenido">
 
-    </header>
+<div class="bienvenida">
 
+<h3>¡Bienvenido, Director!</h3>
 
-    <main class="contenido">
+<p>
+Administre estudiantes, docentes, asistencia,
+calificaciones y reportes desde este sistema.
+</p>
 
-        <section class="bienvenida">
+</div>
 
-            <h3>
-                ¡Bienvenido, Director!
-            </h3>
 
-            <p>
-                Desde este panel podrá administrar estudiantes,
-                docentes, asistencia, calificaciones y reportes
-                del Centro Escolar Nueva Alianza.
-            </p>
+<!-- ESTADISTICAS -->
 
-        </section>
+<section class="estadisticas">
 
+<div class="tarjeta">
 
-        <!-- ESTADISTICAS -->
+<div class="icono">👨‍🎓</div>
 
-        <section class="estadisticas">
+<div class="numero" id="totalEstudiantes">
+0
+</div>
 
-            <div class="tarjeta-estadistica">
+<div class="texto">
+Estudiantes
+</div>
 
-                <div class="icono-estadistica">
-                    👨‍🎓
-                </div>
+</div>
 
-                <div class="numero">
-                    0
-                </div>
 
-                <div class="texto-estadistica">
-                    Estudiantes
-                </div>
+<div class="tarjeta">
 
-            </div>
+<div class="icono">👨‍🏫</div>
 
+<div class="numero">0</div>
 
-            <div class="tarjeta-estadistica">
+<div class="texto">
+Docentes
+</div>
 
-                <div class="icono-estadistica">
-                    👨‍🏫
-                </div>
+</div>
 
-                <div class="numero">
-                    0
-                </div>
 
-                <div class="texto-estadistica">
-                    Docentes
-                </div>
+<div class="tarjeta">
 
-            </div>
+<div class="icono">📋</div>
 
+<div class="numero">0%</div>
 
-            <div class="tarjeta-estadistica">
+<div class="texto">
+Asistencia
+</div>
 
-                <div class="icono-estadistica">
-                    📋
-                </div>
+</div>
 
-                <div class="numero">
-                    0%
-                </div>
 
-                <div class="texto-estadistica">
-                    Asistencia
-                </div>
+<div class="tarjeta">
 
-            </div>
+<div class="icono">📝</div>
 
+<div class="numero">0</div>
 
-            <div class="tarjeta-estadistica">
+<div class="texto">
+Calificaciones
+</div>
 
-                <div class="icono-estadistica">
-                    📝
-                </div>
+</div>
 
-                <div class="numero">
-                    0
-                </div>
+</section>
 
-                <div class="texto-estadistica">
-                    Calificaciones
-                </div>
 
-            </div>
+<h3 class="titulo-seccion">
+Módulos del sistema
+</h3>
 
-        </section>
 
+<section class="modulos">
 
-        <!-- MODULOS -->
+<div class="modulo" onclick="abrirEstudiantes()">
 
-        <h3 class="titulo-seccion">
-            Módulos del sistema
-        </h3>
+<div class="modulo-icono">👨‍🎓</div>
 
+<h4>Estudiantes</h4>
 
-        <section class="modulos">
+<p>
+Registrar y consultar estudiantes.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Estudiantes')">
 
-                <div class="modulo-icono">
-                    👨‍🎓
-                </div>
+<div class="modulo">
 
-                <h4>
-                    Estudiantes
-                </h4>
+<div class="modulo-icono">👨‍🏫</div>
 
-                <p>
-                    Registrar y consultar estudiantes.
-                </p>
+<h4>Docentes</h4>
 
-            </div>
+<p>
+Próximamente.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Docentes')">
 
-                <div class="modulo-icono">
-                    👨‍🏫
-                </div>
+<div class="modulo">
 
-                <h4>
-                    Docentes
-                </h4>
+<div class="modulo-icono">📋</div>
 
-                <p>
-                    Registrar y administrar docentes.
-                </p>
+<h4>Asistencia</h4>
 
-            </div>
+<p>
+Próximamente.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Asistencia')">
 
-                <div class="modulo-icono">
-                    📋
-                </div>
+<div class="modulo">
 
-                <h4>
-                    Asistencia
-                </h4>
+<div class="modulo-icono">📝</div>
 
-                <p>
-                    Controlar entrada, salida y asistencia.
-                </p>
+<h4>Calificaciones</h4>
 
-            </div>
+<p>
+Próximamente.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Calificaciones')">
 
-                <div class="modulo-icono">
-                    📝
-                </div>
+<div class="modulo">
 
-                <h4>
-                    Calificaciones
-                </h4>
+<div class="modulo-icono">📊</div>
 
-                <p>
-                    Registrar y consultar calificaciones.
-                </p>
+<h4>Reportes</h4>
 
-            </div>
+<p>
+Próximamente.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Reportes')">
 
-                <div class="modulo-icono">
-                    📊
-                </div>
+<div class="modulo">
 
-                <h4>
-                    Reportes
-                </h4>
+<div class="modulo-icono">⚙️</div>
 
-                <p>
-                    Consultar información y reportes.
-                </p>
+<h4>Configuración</h4>
 
-            </div>
+<p>
+Próximamente.
+</p>
 
+</div>
 
-            <div class="modulo" onclick="mostrarModulo('Configuración')">
+</section>
 
-                <div class="modulo-icono">
-                    ⚙️
-                </div>
 
-                <h4>
-                    Configuración
-                </h4>
+<!-- MODULO ESTUDIANTES -->
 
-                <p>
-                    Configurar el sistema escolar.
-                </p>
+<section id="estudiantes">
 
-            </div>
+<div class="cabecera-modulo">
 
-        </section>
+<h3>👨‍🎓 Registro de Estudiantes</h3>
 
+<div>
 
-        <!-- MENSAJE -->
+<button class="boton boton-agregar" onclick="mostrarFormulario()">
+➕ Nuevo estudiante
+</button>
 
-        <section id="mensajeModulo">
+<button class="boton boton-volver" onclick="cerrarEstudiantes()">
+↩ Volver
+</button>
 
-            <h3 id="tituloModulo">
-                Módulo
-            </h3>
+</div>
 
-            <p id="textoModulo">
-                Este módulo será desarrollado en el siguiente paso.
-            </p>
+</div>
 
-        </section>
 
-    </main>
+<!-- FORMULARIO -->
+
+<div id="formulario" class="formulario">
+
+<h3 id="tituloFormulario">
+Registrar estudiante
+</h3>
+
+<div class="form-grid">
+
+<input type="text" id="codigo" placeholder="Código del estudiante">
+
+<input type="text" id="nombre" placeholder="Nombre completo">
+
+<select id="grado">
+
+<option value="">Seleccione grado</option>
+<option>Educación Inicial</option>
+<option>1ro</option>
+<option>2do</option>
+<option>3ro</option>
+<option>4to</option>
+<option>5to</option>
+<option>6to</option>
+<option>7mo</option>
+<option>8vo</option>
+<option>9no</option>
+<option>10mo</option>
+<option>11mo</option>
+
+</select>
+
+
+<select id="seccion">
+
+<option value="">Seleccione sección</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>Única</option>
+
+</select>
+
+
+<select id="sexo">
+
+<option value="">Seleccione sexo</option>
+<option>Masculino</option>
+<option>Femenino</option>
+
+</select>
+
+
+<input type="date" id="fechaNacimiento">
+
+<input type="text" id="responsable" placeholder="Nombre del responsable">
+
+<input type="tel" id="telefono" placeholder="Teléfono del responsable">
+
+<input type="text" id="comunidad" placeholder="Comunidad">
+
+<select id="estado">
+
+<option value="Activo">Activo</option>
+<option value="Inactivo">Inactivo</option>
+
+</select>
+
+</div>
+
+
+<div class="acciones-formulario">
+
+<button class="boton guardar" onclick="guardarEstudiante()">
+💾 Guardar estudiante
+</button>
+
+<button class="boton cancelar" onclick="cancelarFormulario()">
+Cancelar
+</button>
+
+</div>
+
+</div>
+
+
+<!-- TABLA -->
+
+<div class="tabla-contenedor">
+
+<input
+type="text"
+id="buscar"
+placeholder="🔎 Buscar estudiante..."
+onkeyup="buscarEstudiante()"
+>
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Código</th>
+<th>Nombre</th>
+<th>Grado</th>
+<th>Sección</th>
+<th>Sexo</th>
+<th>Responsable</th>
+<th>Comunidad</th>
+<th>Estado</th>
+<th>Acciones</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tablaEstudiantes">
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+</main>
 
 </div>
 
 
 <script>
 
-    /* =========================
-       INICIAR SESION
-    ========================== */
+/* DATOS */
 
-    function iniciarSesion() {
+let estudiantes =
+JSON.parse(localStorage.getItem("estudiantesNuevaAlianza")) || [];
 
-        const usuario =
-            document.getElementById("usuario").value.trim();
-
-        const clave =
-            document.getElementById("clave").value.trim();
-
-        const error =
-            document.getElementById("error");
+let estudianteEditando = null;
 
 
-        if (usuario === "admin" && clave === "1234") {
+/* LOGIN */
 
-            document.getElementById("login").style.display = "none";
+function iniciarSesion(){
 
-            document.getElementById("panel").style.display = "block";
+const usuario =
+document.getElementById("usuario").value.trim();
 
-            error.style.display = "none";
+const clave =
+document.getElementById("clave").value.trim();
 
-        } else {
+if(usuario === "admin" && clave === "1234"){
 
-            error.style.display = "block";
+document.getElementById("login").style.display="none";
 
-        }
+document.getElementById("panel").style.display="block";
 
-    }
+document.getElementById("error").style.display="none";
 
+actualizarContador();
 
-    /* =========================
-       CERRAR SESION
-    ========================== */
+}else{
 
-    function cerrarSesion() {
+document.getElementById("error").style.display="block";
 
-        document.getElementById("panel").style.display = "none";
+}
 
-        document.getElementById("login").style.display = "flex";
-
-        document.getElementById("usuario").value = "";
-
-        document.getElementById("clave").value = "";
-
-    }
+}
 
 
-    /* =========================
-       MOSTRAR MODULO
-    ========================== */
+/* CERRAR SESION */
 
-    function mostrarModulo(nombre) {
+function cerrarSesion(){
 
-        const mensaje =
-            document.getElementById("mensajeModulo");
+document.getElementById("panel").style.display="none";
 
-        const titulo =
-            document.getElementById("tituloModulo");
+document.getElementById("login").style.display="flex";
 
-        const texto =
-            document.getElementById("textoModulo");
+document.getElementById("usuario").value="";
+
+document.getElementById("clave").value="";
+
+}
 
 
-        titulo.textContent = "📌 Módulo de " + nombre;
+/* ABRIR ESTUDIANTES */
 
-        texto.textContent =
-            "El módulo de " + nombre +
-            " será desarrollado en el siguiente paso del sistema.";
+function abrirEstudiantes(){
 
-        mensaje.style.display = "block";
+document.getElementById("estudiantes").style.display="block";
 
-        mensaje.scrollIntoView({
-            behavior: "smooth"
-        });
+document.getElementById("estudiantes").scrollIntoView({
+behavior:"smooth"
+});
 
-    }
+mostrarEstudiantes();
+
+}
+
+
+/* CERRAR ESTUDIANTES */
+
+function cerrarEstudiantes(){
+
+document.getElementById("estudiantes").style.display="none";
+
+}
+
+
+/* MOSTRAR FORMULARIO */
+
+function mostrarFormulario(){
+
+document.getElementById("formulario").style.display="block";
+
+document.getElementById("tituloFormulario").textContent=
+"Registrar estudiante";
+
+limpiarFormulario();
+
+}
+
+
+/* CANCELAR */
+
+function cancelarFormulario(){
+
+document.getElementById("formulario").style.display="none";
+
+limpiarFormulario();
+
+estudianteEditando=null;
+
+}
+
+
+/* LIMPIAR */
+
+function limpiarFormulario(){
+
+document.getElementById("codigo").value="";
+document.getElementById("nombre").value="";
+document.getElementById("grado").value="";
+document.getElementById("seccion").value="";
+document.getElementById("sexo").value="";
+document.getElementById("fechaNacimiento").value="";
+document.getElementById("responsable").value="";
+document.getElementById("telefono").value="";
+document.getElementById("comunidad").value="";
+document.getElementById("estado").value="Activo";
+
+}
+
+
+/* GUARDAR */
+
+function guardarEstudiante(){
+
+const codigo =
+document.getElementById("codigo").value.trim();
+
+const nombre =
+document.getElementById("nombre").value.trim();
+
+const grado =
+document.getElementById("grado").value;
+
+const seccion =
+document.getElementById("seccion").value;
+
+const sexo =
+document.getElementById("sexo").value;
+
+const fechaNacimiento =
+document.getElementById("fechaNacimiento").value;
+
+const responsable =
+document.getElementById("responsable").value.trim();
+
+const telefono =
+document.getElementById("telefono").value.trim();
+
+const comunidad =
+document.getElementById("comunidad").value.trim();
+
+const estado =
+document.getElementById("estado").value;
+
+
+if(!codigo || !nombre || !grado || !seccion){
+
+alert(
+"Complete como mínimo: código, nombre, grado y sección."
+);
+
+return;
+
+}
+
+
+const estudiante = {
+
+codigo,
+nombre,
+grado,
+seccion,
+sexo,
+fechaNacimiento,
+responsable,
+telefono,
+comunidad,
+estado
+
+};
+
+
+if(estudianteEditando !== null){
+
+estudiantes[estudianteEditando] = estudiante;
+
+estudianteEditando=null;
+
+alert("Estudiante actualizado correctamente.");
+
+}else{
+
+estudiantes.push(estudiante);
+
+alert("Estudiante registrado correctamente.");
+
+}
+
+
+localStorage.setItem(
+"estudiantesNuevaAlianza",
+JSON.stringify(estudiantes)
+);
+
+
+mostrarEstudiantes();
+
+actualizarContador();
+
+cancelarFormulario();
+
+}
+
+
+/* MOSTRAR ESTUDIANTES */
+
+function mostrarEstudiantes(){
+
+const tabla =
+document.getElementById("tablaEstudiantes");
+
+tabla.innerHTML="";
+
+
+if(estudiantes.length === 0){
+
+tabla.innerHTML=`
+<tr>
+<td colspan="9" style="text-align:center;padding:25px;">
+No hay estudiantes registrados.
+</td>
+</tr>
+`;
+
+return;
+
+}
+
+
+estudiantes.forEach((estudiante,index)=>{
+
+const fila=document.createElement("tr");
+
+fila.innerHTML=`
+
+<td>${estudiante.codigo}</td>
+
+<td>${estudiante.nombre}</td>
+
+<td>${estudiante.grado}</td>
+
+<td>${estudiante.seccion}</td>
+
+<td>${estudiante.sexo}</td>
+
+<td>${estudiante.responsable}</td>
+
+<td>${estudiante.comunidad}</td>
+
+<td>${estudiante.estado}</td>
+
+<td>
+
+<button
+class="boton btn-editar"
+onclick="editarEstudiante(${index})">
+✏️
+</button>
+
+<button
+class="boton btn-eliminar"
+onclick="eliminarEstudiante(${index})">
+🗑️
+</button>
+
+</td>
+
+`;
+
+tabla.appendChild(fila);
+
+});
+
+}
+
+
+/* EDITAR */
+
+function editarEstudiante(index){
+
+const estudiante=estudiantes[index];
+
+document.getElementById("formulario").style.display="block";
+
+document.getElementById("tituloFormulario").textContent=
+"Editar estudiante";
+
+document.getElementById("codigo").value=estudiante.codigo;
+
+document.getElementById("nombre").value=estudiante.nombre;
+
+document.getElementById("grado").value=estudiante.grado;
+
+document.getElementById("seccion").value=estudiante.seccion;
+
+document.getElementById("sexo").value=estudiante.sexo;
+
+document.getElementById("fechaNacimiento").value=
+estudiante.fechaNacimiento;
+
+document.getElementById("responsable").value=
+estudiante.responsable;
+
+document.getElementById("telefono").value=
+estudiante.telefono;
+
+document.getElementById("comunidad").value=
+estudiante.comunidad;
+
+document.getElementById("estado").value=
+estudiante.estado;
+
+estudianteEditando=index;
+
+}
+
+
+/* ELIMINAR */
+
+function eliminarEstudiante(index){
+
+const confirmar =
+confirm(
+"¿Está seguro de eliminar este estudiante?"
+);
+
+if(confirmar){
+
+estudiantes.splice(index,1);
+
+localStorage.setItem(
+"estudiantesNuevaAlianza",
+JSON.stringify(estudiantes)
+);
+
+mostrarEstudiantes();
+
+actualizarContador();
+
+}
+
+}
+
+
+/* CONTADOR */
+
+function actualizarContador(){
+
+document.getElementById("totalEstudiantes").textContent=
+estudiantes.length;
+
+}
+
+
+/* BUSCAR */
+
+function buscarEstudiante(){
+
+const texto =
+document.getElementById("buscar").value.toLowerCase();
+
+const filas =
+document.querySelectorAll("#tablaEstudiantes tr");
+
+filas.forEach(fila=>{
+
+const contenido =
+fila.textContent.toLowerCase();
+
+fila.style.display =
+contenido.includes(texto) ? "" : "none";
+
+});
+
+}
 
 </script>
 
