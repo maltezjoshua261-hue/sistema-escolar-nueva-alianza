@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Escolar Nueva Alianza</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0d47a1, #1976d2, #42a5f5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 420px;
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+
+        .logo {
+            width: 85px;
+            height: 85px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: #1976d2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+        }
+
+        h1 {
+            color: #0d47a1;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .subtitulo {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0d47a1;
+        }
+
+        .pie {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <div class="logo">🏫</div>
+
+        <h1>Sistema Escolar</h1>
+
+        <p class="subtitulo">
+            Centro Escolar Nueva Alianza
+        </p>
+
+        <input type="text" id="usuario" placeholder="Usuario">
+
+        <input type="password" id="clave" placeholder="Contraseña">
+
+        <button onclick="iniciarSesion()">
+            Iniciar sesión
+        </button>
+
+        <p class="pie">
+            Sistema de Gestión Escolar · 2026
+        </p>
+
+    </div>
+
+    <script>
+        function iniciarSesion() {
+
+            const usuario = document.getElementById("usuario").value;
+            const clave = document.getElementById("clave").value;
+
+            if (usuario === "admin" && clave === "1234") {
+                alert("Bienvenido al Sistema Escolar Nueva Alianza");
+            } else {
+                alert("Usuario o contraseña incorrectos");
+            }
+        }
+    </script>
+
+</body>
+</html>
