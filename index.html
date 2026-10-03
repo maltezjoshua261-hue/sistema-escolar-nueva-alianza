@@ -3,152 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Gestión Escolar - Nueva Alianza</title>
+<title>Sistema Escolar Nueva Alianza</title>
 
 <style>
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f1f5f9;
-    color:#1e293b;
-}
-
-button,input,select,textarea{
-    font-family:inherit;
+    background:#f3f6fa;
+    color:#1f2937;
 }
 
 .login-container{
     min-height:100vh;
     display:flex;
-    justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#0f4c81,#2563eb,#0ea5e9);
-    padding:20px;
+    justify-content:center;
+    background:linear-gradient(135deg,#0d6efd,#00a884);
 }
 
 .login-box{
-    width:100%;
-    max-width:420px;
+    width:380px;
+    max-width:92%;
     background:white;
     padding:35px;
-    border-radius:20px;
-    box-shadow:0 15px 45px rgba(0,0,0,.25);
+    border-radius:18px;
+    box-shadow:0 10px 35px rgba(0,0,0,.2);
 }
 
 .login-box h1{
     text-align:center;
-    color:#0f4c81;
+    color:#0d6efd;
     margin-bottom:8px;
 }
 
 .login-box p{
     text-align:center;
-    color:#64748b;
+    color:#666;
     margin-bottom:25px;
 }
 
-.logo-login{
-    width:80px;
-    height:80px;
-    margin:0 auto 15px;
-    border-radius:50%;
-    background:#0f4c81;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:30px;
-    font-weight:bold;
-}
-
-.form-group{
-    margin-bottom:15px;
-}
-
-.form-group label{
-    display:block;
-    font-weight:bold;
-    margin-bottom:6px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea{
+input,select,textarea{
     width:100%;
     padding:11px;
-    border:1px solid #cbd5e1;
+    margin:6px 0 12px;
+    border:1px solid #d1d5db;
     border-radius:8px;
-    outline:none;
-    background:white;
+    font-size:14px;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
-    border-color:#2563eb;
+textarea{
+    resize:vertical;
 }
 
-.btn{
-    border:0;
+button{
+    border:none;
     border-radius:8px;
-    padding:11px 18px;
+    padding:10px 15px;
     cursor:pointer;
     font-weight:bold;
 }
 
 .btn-primary{
-    background:#2563eb;
+    background:#0d6efd;
     color:white;
 }
 
 .btn-success{
-    background:#16a34a;
+    background:#198754;
     color:white;
 }
 
 .btn-warning{
-    background:#f59e0b;
-    color:white;
+    background:#ffc107;
+    color:#212529;
 }
 
 .btn-danger{
-    background:#dc2626;
+    background:#dc3545;
     color:white;
 }
 
 .btn-secondary{
-    background:#64748b;
+    background:#6c757d;
     color:white;
 }
 
 .btn-info{
-    background:#0891b2;
-    color:white;
+    background:#0dcaf0;
+    color:#111;
 }
 
-.btn:hover{
-    opacity:.9;
-}
-
-.login-btn{
-    width:100%;
-    margin-top:10px;
-    padding:13px;
-    font-size:16px;
-}
-
-.error{
-    background:#fee2e2;
-    color:#991b1b;
-    padding:10px;
-    border-radius:8px;
-    margin-top:15px;
-    display:none;
+button:hover{
+    opacity:.88;
 }
 
 .app{
@@ -157,28 +108,27 @@ button,input,select,textarea{
 }
 
 .sidebar{
+    width:250px;
+    background:#123b6d;
+    color:white;
     position:fixed;
-    left:0;
     top:0;
     bottom:0;
-    width:250px;
-    background:#0f172a;
-    color:white;
+    left:0;
     overflow-y:auto;
-    z-index:1000;
 }
 
-.sidebar-header{
+.logo{
     padding:22px 15px;
     text-align:center;
-    background:#0f4c81;
+    background:#0d2d52;
 }
 
-.sidebar-header h2{
+.logo h2{
     font-size:21px;
 }
 
-.sidebar-header small{
+.logo small{
     display:block;
     margin-top:5px;
     opacity:.85;
@@ -189,23 +139,17 @@ button,input,select,textarea{
 }
 
 .menu button{
-    display:block;
     width:100%;
-    border:0;
-    background:transparent;
-    color:#cbd5e1;
     text-align:left;
-    padding:13px;
-    border-radius:8px;
-    margin-bottom:5px;
-    cursor:pointer;
-    font-size:15px;
+    background:transparent;
+    color:white;
+    margin:3px 0;
+    padding:12px;
 }
 
 .menu button:hover,
 .menu button.active{
-    background:#1e40af;
-    color:white;
+    background:#0d6efd;
 }
 
 .main{
@@ -215,208 +159,148 @@ button,input,select,textarea{
 
 .topbar{
     background:white;
-    padding:15px 25px;
-    border-bottom:1px solid #e2e8f0;
+    padding:16px 25px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:15px;
-    position:sticky;
-    top:0;
-    z-index:500;
-}
-
-.topbar h1{
-    font-size:23px;
-    color:#0f4c81;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 
 .content{
     padding:25px;
 }
 
-.page{
+.section{
     display:none;
 }
 
-.page.active{
+.section.active{
     display:block;
-}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:18px;
-    margin-bottom:25px;
 }
 
 .card{
     background:white;
-    border-radius:14px;
     padding:20px;
-    box-shadow:0 3px 12px rgba(15,23,42,.08);
+    border-radius:14px;
+    box-shadow:0 3px 12px rgba(0,0,0,.07);
+    margin-bottom:20px;
 }
 
-.stat-card{
-    display:flex;
-    align-items:center;
+.card h2{
+    color:#123b6d;
+    margin-bottom:15px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
     gap:15px;
 }
 
-.stat-icon{
-    width:52px;
-    height:52px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:25px;
-    background:#dbeafe;
+.stat{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 3px 12px rgba(0,0,0,.07);
 }
 
-.stat-card h3{
-    font-size:26px;
-    color:#0f4c81;
-}
-
-.stat-card p{
-    color:#64748b;
+.stat h3{
+    color:#6b7280;
     font-size:14px;
 }
 
-.section-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.section-title h2{
-    color:#0f4c81;
-}
-
-.form-card{
-    background:white;
-    padding:22px;
-    border-radius:14px;
-    box-shadow:0 3px 12px rgba(15,23,42,.08);
-    margin-bottom:22px;
+.stat strong{
+    display:block;
+    font-size:30px;
+    margin-top:8px;
+    color:#0d6efd;
 }
 
 .form-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:15px;
+    gap:12px;
 }
 
-.form-grid-2{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
+.form-group label{
+    font-weight:bold;
+    font-size:13px;
 }
 
 .actions{
     display:flex;
-    gap:10px;
+    gap:8px;
     flex-wrap:wrap;
-    margin-top:15px;
+    margin-top:8px;
 }
 
 .table-container{
     overflow-x:auto;
-    background:white;
-    border-radius:12px;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
+    margin-top:15px;
 }
 
 th,td{
-    padding:11px;
-    border-bottom:1px solid #e2e8f0;
+    border:1px solid #e5e7eb;
+    padding:9px;
     text-align:left;
-    font-size:14px;
+    font-size:13px;
 }
 
 th{
-    background:#eff6ff;
-    color:#0f4c81;
+    background:#123b6d;
+    color:white;
 }
 
 .badge{
     display:inline-block;
     padding:5px 9px;
-    border-radius:20px;
+    border-radius:15px;
     font-size:12px;
     font-weight:bold;
 }
 
 .badge-success{
-    background:#dcfce7;
-    color:#166534;
+    background:#d1e7dd;
+    color:#0f5132;
 }
 
 .badge-warning{
-    background:#fef3c7;
-    color:#92400e;
+    background:#fff3cd;
+    color:#664d03;
 }
 
 .badge-danger{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.badge-info{
-    background:#cffafe;
-    color:#155e75;
-}
-
-.alert{
-    padding:12px 15px;
-    border-radius:9px;
-    margin-bottom:15px;
-}
-
-.alert-info{
-    background:#e0f2fe;
-    color:#075985;
-}
-
-.alert-success{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.alert-warning{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.alert-danger{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.empty{
-    text-align:center;
-    padding:25px;
-    color:#64748b;
+    background:#f8d7da;
+    color:#842029;
 }
 
 .hidden{
-    display:none!important;
+    display:none !important;
 }
 
-.menu-mobile{
-    display:none;
+.notice{
+    padding:12px;
+    border-radius:8px;
+    background:#e7f1ff;
+    border-left:4px solid #0d6efd;
+    margin-bottom:15px;
 }
 
-@media(max-width:1000px){
-    .cards{
+@media(max-width:900px){
+    .sidebar{
+        width:210px;
+    }
+
+    .main{
+        margin-left:210px;
+    }
+
+    .stats{
         grid-template-columns:repeat(2,1fr);
     }
 
@@ -425,36 +309,20 @@ th{
     }
 }
 
-@media(max-width:750px){
+@media(max-width:650px){
     .sidebar{
-        transform:translateX(-100%);
-        transition:.3s;
-    }
-
-    .sidebar.open{
-        transform:translateX(0);
+        position:relative;
+        width:100%;
+        min-height:auto;
     }
 
     .main{
         margin-left:0;
     }
 
-    .menu-mobile{
-        display:block;
-    }
-
-    .cards,
-    .form-grid,
-    .form-grid-2{
+    .stats,
+    .form-grid{
         grid-template-columns:1fr;
-    }
-
-    .content{
-        padding:15px;
-    }
-
-    .topbar{
-        padding:12px 15px;
     }
 }
 </style>
@@ -465,72 +333,63 @@ th{
 <!-- LOGIN -->
 <div id="loginScreen" class="login-container">
     <div class="login-box">
-        <div class="logo-login">NA</div>
-
-        <h1>Nueva Alianza</h1>
+        <h1>🏫 Nueva Alianza</h1>
         <p>Sistema de Gestión Escolar</p>
 
-        <div class="form-group">
-            <label>Usuario</label>
-            <input id="loginUser" type="text" placeholder="Ingrese usuario">
-        </div>
+        <label>Usuario</label>
+        <input type="text" id="loginUser" placeholder="Ingrese usuario">
 
-        <div class="form-group">
-            <label>Contraseña</label>
-            <input id="loginPassword" type="password" placeholder="Ingrese contraseña">
-        </div>
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="Ingrese contraseña">
 
-        <button class="btn btn-primary login-btn" onclick="iniciarSesion()">
-            🔐 Ingresar al sistema
+        <button class="btn-primary" style="width:100%" onclick="iniciarSesion()">
+            Ingresar
         </button>
 
-        <div id="loginError" class="error">
-            Usuario o contraseña incorrectos.
-        </div>
+        <p id="loginError" style="color:#dc3545;margin-top:15px;"></p>
     </div>
 </div>
 
 <!-- APP -->
 <div id="app" class="app">
 
-    <aside id="sidebar" class="sidebar">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-        <div class="sidebar-header">
+        <div class="logo">
             <h2>🏫 Nueva Alianza</h2>
-            <small>Sistema de Gestión Escolar</small>
+            <small>Sistema Escolar</small>
         </div>
 
         <div class="menu">
 
-            <button class="active" onclick="mostrarPagina('inicio',this)">
+            <button class="active" onclick="mostrarSeccion('inicio',this)">
                 🏠 Inicio
             </button>
 
-            <button onclick="mostrarPagina('estudiantes',this)">
+            <button onclick="mostrarSeccion('estudiantes',this)">
                 👨‍🎓 Estudiantes
             </button>
 
-            <button onclick="mostrarPagina('docentes',this)">
-                👩‍🏫 Docentes
+            <button onclick="mostrarSeccion('docentes',this)">
+                👨‍🏫 Docentes
             </button>
 
-            <button onclick="mostrarPagina('asistencia',this)">
+            <button onclick="mostrarSeccion('asistencia',this)">
                 📋 Asistencia
             </button>
 
-            <button onclick="mostrarPagina('calificaciones',this)">
-                📊 Calificaciones
+            <button onclick="mostrarSeccion('calificaciones',this)">
+                📝 Calificaciones
             </button>
 
-            <button onclick="mostrarPagina('reportes',this)">
-                📑 Reportes
+            <button onclick="mostrarSeccion('reportes',this)">
+                📊 Reportes
             </button>
 
-            <button onclick="mostrarPagina('configuracion',this)">
+            <button onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
             </button>
-
-            <hr style="border-color:#334155;margin:15px 0">
 
             <button onclick="cerrarSesion()">
                 🚪 Cerrar sesión
@@ -539,115 +398,87 @@ th{
         </div>
     </aside>
 
+    <!-- MAIN -->
     <main class="main">
 
         <div class="topbar">
-            <button class="btn btn-secondary menu-mobile" onclick="toggleSidebar()">☰</button>
-
-            <h1 id="tituloPagina">Panel principal</h1>
-
-            <span>
-                👤 Director
-            </span>
+            <div>
+                <strong>Panel del Director</strong>
+            </div>
+            <div>
+                Evert Josue Maltez Sanchez
+            </div>
         </div>
 
         <div class="content">
 
             <!-- INICIO -->
-            <section id="inicio" class="page active">
+            <section id="inicio" class="section active">
 
-                <div class="section-title">
-                    <h2>Panel principal</h2>
-                </div>
+                <h1>Panel principal</h1>
+                <p style="margin:8px 0 20px;">
+                    Sistema de gestión escolar - Centro Escolar Nueva Alianza
+                </p>
 
-                <div class="cards">
+                <div class="stats">
 
-                    <div class="card stat-card">
-                        <div class="stat-icon">👨‍🎓</div>
-                        <div>
-                            <h3 id="totalEstudiantes">0</h3>
-                            <p>Estudiantes</p>
-                        </div>
+                    <div class="stat">
+                        <h3>Estudiantes</h3>
+                        <strong id="totalEstudiantes">0</strong>
                     </div>
 
-                    <div class="card stat-card">
-                        <div class="stat-icon">👩‍🏫</div>
-                        <div>
-                            <h3 id="totalDocentes">0</h3>
-                            <p>Docentes</p>
-                        </div>
+                    <div class="stat">
+                        <h3>Docentes</h3>
+                        <strong id="totalDocentes">0</strong>
                     </div>
 
-                    <div class="card stat-card">
-                        <div class="stat-icon">📋</div>
-                        <div>
-                            <h3 id="totalAsistencias">0</h3>
-                            <p>Registros de asistencia</p>
-                        </div>
+                    <div class="stat">
+                        <h3>Asistencias</h3>
+                        <strong id="totalAsistencias">0</strong>
                     </div>
 
-                    <div class="card stat-card">
-                        <div class="stat-icon">📊</div>
-                        <div>
-                            <h3 id="totalCalificaciones">0</h3>
-                            <p>Calificaciones</p>
-                        </div>
+                    <div class="stat">
+                        <h3>Calificaciones</h3>
+                        <strong id="totalCalificaciones">0</strong>
                     </div>
 
-                </div>
-
-                <div class="card">
-                    <h2 style="color:#0f4c81;margin-bottom:10px">
-                        Bienvenido al Sistema de Gestión Escolar
-                    </h2>
-
-                    <p style="line-height:1.7;color:#475569">
-                        Centro Escolar Nueva Alianza. Desde este panel puede
-                        administrar estudiantes, docentes, asistencia,
-                        calificaciones y reportes.
-                    </p>
                 </div>
 
             </section>
 
             <!-- ESTUDIANTES -->
-            <section id="estudiantes" class="page">
+            <section id="estudiantes" class="section">
 
-                <div class="section-title">
+                <div class="card">
+
                     <h2>👨‍🎓 Registro de estudiantes</h2>
-                    <button class="btn btn-primary" onclick="mostrarFormularioEstudiante()">
-                        ➕ Nuevo estudiante
-                    </button>
-                </div>
-
-                <div id="formEstudiante" class="form-card hidden">
-
-                    <h3 style="margin-bottom:15px;color:#0f4c81">
-                        Datos del estudiante
-                    </h3>
 
                     <div class="form-grid">
 
                         <div class="form-group">
-                            <label>Código / Identificación</label>
-                            <input id="estCodigo" type="text" placeholder="Ej. 001">
+                            <label>Nombre completo</label>
+                            <input id="estNombre" type="text">
                         </div>
 
                         <div class="form-group">
-                            <label>Nombres</label>
-                            <input id="estNombres" type="text">
+                            <label>Cédula / Código</label>
+                            <input id="estCodigo" type="text">
                         </div>
 
                         <div class="form-group">
-                            <label>Apellidos</label>
-                            <input id="estApellidos" type="text">
+                            <label>Sexo</label>
+                            <select id="estSexo">
+                                <option value="">Seleccione</option>
+                                <option>Masculino</option>
+                                <option>Femenino</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
                             <label>Nivel educativo</label>
-                            <select id="estNivel" onchange="actualizarGrados('estNivel','estGrado')">
+                            <select id="estNivel" onchange="actualizarGradosEstudiante()">
                                 <option value="">Seleccione</option>
-                                <option value="Educación Inicial">Educación Inicial</option>
+                                <option value="Inicial">Educación Inicial</option>
                                 <option value="Primaria">Primaria</option>
                                 <option value="Secundaria">Secundaria</option>
                             </select>
@@ -662,49 +493,48 @@ th{
 
                         <div class="form-group">
                             <label>Sección</label>
-                            <input id="estSeccion" type="text" placeholder="Ej. A">
+                            <select id="estSeccion">
+                                <option value="">Seleccione</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>Única</option>
+                            </select>
                         </div>
 
                     </div>
 
                     <div class="actions">
-                        <button class="btn btn-success" onclick="guardarEstudiante()">
+                        <button class="btn-success" onclick="guardarEstudiante()">
                             💾 Guardar estudiante
                         </button>
 
-                        <button class="btn btn-secondary" onclick="limpiarFormularioEstudiante()">
+                        <button class="btn-secondary" onclick="limpiarEstudiante()">
                             Limpiar
                         </button>
                     </div>
 
                 </div>
 
-                <div class="form-card">
+                <div class="card">
 
-                    <div class="section-title">
-                        <h3>Estudiantes registrados</h3>
-
-                        <input
-                            id="buscarEstudiante"
-                            type="text"
-                            placeholder="🔎 Buscar estudiante..."
-                            oninput="mostrarEstudiantes()"
-                            style="padding:10px;border:1px solid #cbd5e1;border-radius:8px"
-                        >
-                    </div>
+                    <h2>Estudiantes registrados</h2>
 
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
                                     <th>Código</th>
-                                    <th>Estudiante</th>
+                                    <th>Sexo</th>
                                     <th>Nivel</th>
-                                    <th>Grado / Nivel</th>
+                                    <th>Grado/Nivel</th>
                                     <th>Sección</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
+
                             <tbody id="tablaEstudiantes"></tbody>
                         </table>
                     </div>
@@ -714,32 +544,22 @@ th{
             </section>
 
             <!-- DOCENTES -->
-            <section id="docentes" class="page">
+            <section id="docentes" class="section">
 
-                <div class="section-title">
-                    <h2>👩‍🏫 Registro de docentes</h2>
-                    <button class="btn btn-primary" onclick="mostrarFormularioDocente()">
-                        ➕ Nuevo docente
-                    </button>
-                </div>
+                <div class="card">
 
-                <div id="formDocente" class="form-card hidden">
+                    <h2>👨‍🏫 Registro de docentes</h2>
 
                     <div class="form-grid">
 
                         <div class="form-group">
+                            <label>Nombre completo</label>
+                            <input id="docNombre" type="text">
+                        </div>
+
+                        <div class="form-group">
                             <label>Código / Cédula</label>
                             <input id="docCodigo" type="text">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nombres</label>
-                            <input id="docNombres" type="text">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Apellidos</label>
-                            <input id="docApellidos" type="text">
                         </div>
 
                         <div class="form-group">
@@ -748,51 +568,60 @@ th{
                         </div>
 
                         <div class="form-group">
-                            <label>Teléfono</label>
-                            <input id="docTelefono" type="text">
+                            <label>Nivel educativo</label>
+                            <select id="docNivel">
+                                <option value="">Seleccione</option>
+                                <option>Educación Inicial</option>
+                                <option>Primaria</option>
+                                <option>Secundaria</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
                             <label>Estado</label>
                             <select id="docEstado">
-                                <option value="Activo">Activo</option>
-                                <option value="Inactivo">Inactivo</option>
+                                <option>Activo</option>
+                                <option>Inactivo</option>
                             </select>
                         </div>
 
                     </div>
 
                     <div class="actions">
-                        <button class="btn btn-success" onclick="guardarDocente()">
+
+                        <button class="btn-success" onclick="guardarDocente()">
                             💾 Guardar docente
                         </button>
 
-                        <button class="btn btn-secondary" onclick="limpiarFormularioDocente()">
+                        <button class="btn-secondary" onclick="limpiarDocente()">
                             Limpiar
                         </button>
+
                     </div>
 
                 </div>
 
-                <div class="form-card">
+                <div class="card">
 
-                    <h3 style="margin-bottom:15px;color:#0f4c81">
-                        Docentes registrados
-                    </h3>
+                    <h2>Docentes registrados</h2>
 
                     <div class="table-container">
                         <table>
+
                             <thead>
                                 <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
                                     <th>Código</th>
-                                    <th>Docente</th>
                                     <th>Especialidad</th>
-                                    <th>Teléfono</th>
+                                    <th>Nivel</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
+
                             <tbody id="tablaDocentes"></tbody>
+
                         </table>
                     </div>
 
@@ -801,26 +630,24 @@ th{
             </section>
 
             <!-- ASISTENCIA -->
-            <section id="asistencia" class="page">
+            <section id="asistencia" class="section">
 
-                <div class="section-title">
-                    <h2>📋 Control de asistencia</h2>
-                </div>
+                <div class="card">
 
-                <div class="form-card">
+                    <h2>📋 Registro de asistencia</h2>
 
                     <div class="form-grid">
 
                         <div class="form-group">
                             <label>Fecha</label>
-                            <input id="asiFecha" type="date">
+                            <input id="asisFecha" type="date">
                         </div>
 
                         <div class="form-group">
-                            <label>Nivel educativo</label>
-                            <select id="asiNivel" onchange="actualizarGrados('asiNivel','asiGrado')">
+                            <label>Nivel</label>
+                            <select id="asisNivel" onchange="actualizarGradosAsistencia()">
                                 <option value="">Seleccione</option>
-                                <option value="Educación Inicial">Educación Inicial</option>
+                                <option value="Inicial">Educación Inicial</option>
                                 <option value="Primaria">Primaria</option>
                                 <option value="Secundaria">Secundaria</option>
                             </select>
@@ -828,50 +655,57 @@ th{
 
                         <div class="form-group">
                             <label>Grado / Nivel</label>
-                            <select id="asiGrado">
-                                <option value="">Seleccione nivel</option>
+                            <select id="asisGrado">
+                                <option value="">Seleccione</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Sección</label>
-                            <input id="asiSeccion" type="text">
+                            <select id="asisSeccion">
+                                <option value="">Seleccione</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>Única</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
                             <label>Estudiante</label>
-                            <select id="asiEstudiante">
-                                <option value="">Seleccione estudiante</option>
+                            <select id="asisEstudiante">
+                                <option value="">Seleccione</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Estado</label>
-                            <select id="asiEstado">
-                                <option value="Presente">Presente</option>
-                                <option value="Ausente">Ausente</option>
-                                <option value="Tardanza">Tardanza</option>
+                            <select id="asisEstado">
+                                <option>Presente</option>
+                                <option>Ausente</option>
+                                <option>Tardanza</option>
                             </select>
                         </div>
 
                     </div>
 
                     <div class="actions">
-                        <button class="btn btn-success" onclick="guardarAsistencia()">
+
+                        <button class="btn-success" onclick="guardarAsistencia()">
                             💾 Guardar asistencia
                         </button>
+
                     </div>
 
                 </div>
 
-                <div class="form-card">
+                <div class="card">
 
-                    <h3 style="margin-bottom:15px;color:#0f4c81">
-                        Registros de asistencia
-                    </h3>
+                    <h2>Asistencias registradas</h2>
 
                     <div class="table-container">
                         <table>
+
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
@@ -880,9 +714,12 @@ th{
                                     <th>Grado</th>
                                     <th>Sección</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
+
                             <tbody id="tablaAsistencia"></tbody>
+
                         </table>
                     </div>
 
@@ -891,21 +728,17 @@ th{
             </section>
 
             <!-- CALIFICACIONES -->
-            <section id="calificaciones" class="page">
+            <section id="calificaciones" class="section">
 
-                <div class="section-title">
-                    <h2>📊 Calificaciones</h2>
+                <div class="card">
 
-                    <button class="btn btn-info" onclick="cargarEstudiantesCalificaciones()">
-                        🔄 Actualizar estudiantes
-                    </button>
-                </div>
+                    <h2>📝 Registro de calificaciones</h2>
 
-                <div id="infoEvaluacion" class="alert alert-info">
-                    Seleccione nivel, grado y sección para comenzar.
-                </div>
-
-                <div class="form-card">
+                    <div class="notice">
+                        <strong>Versión 7.1:</strong>
+                        el sistema busca los estudiantes usando nivel, grado y sección,
+                        aceptando diferentes formas de escribir 1.º y 2.º grado.
+                    </div>
 
                     <div class="form-grid">
 
@@ -914,102 +747,151 @@ th{
                             <select id="calAnio">
                                 <option value="2026">2026</option>
                                 <option value="2027">2027</option>
-                                <option value="2028">2028</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Nivel educativo</label>
-                            <select id="calNivel" onchange="configurarCalificaciones()">
+
+                            <select id="calNivel" onchange="actualizarCalificaciones()">
+
                                 <option value="">Seleccione</option>
-                                <option value="Educación Inicial">Educación Inicial</option>
-                                <option value="Primaria">Primaria</option>
-                                <option value="Secundaria">Secundaria</option>
+
+                                <option value="Inicial">
+                                    Educación Inicial
+                                </option>
+
+                                <option value="Primaria">
+                                    Primaria
+                                </option>
+
+                                <option value="Secundaria">
+                                    Secundaria
+                                </option>
+
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Grado / Nivel</label>
-                            <select id="calGrado" onchange="configurarCalificaciones()">
-                                <option value="">Seleccione nivel</option>
+
+                            <select id="calGrado" onchange="actualizarCalificaciones()">
+
+                                <option value="">
+                                    Seleccione nivel primero
+                                </option>
+
                             </select>
                         </div>
 
                         <div class="form-group">
+
                             <label>Sección</label>
-                            <input
-                                id="calSeccion"
-                                type="text"
-                                placeholder="Ej. A"
-                                oninput="cargarEstudiantesCalificaciones()"
-                            >
+
+                            <select id="calSeccion" onchange="actualizarCalificaciones()">
+
+                                <option value="">Seleccione</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>Única</option>
+
+                            </select>
+
                         </div>
 
                         <div class="form-group">
+
                             <label>Estudiante</label>
-                            <select id="calEstudiante">
-                                <option value="">Seleccione estudiante</option>
-                            </select>
-                        </div>
 
-                        <div class="form-group" id="grupoDisciplina">
-                            <label>Disciplina</label>
-                            <select id="calDisciplina" onchange="actualizarTipoEvaluacion()">
-                                <option value="">Seleccione disciplina</option>
+                            <select id="calEstudiante">
+
+                                <option value="">
+                                    Seleccione grado y sección
+                                </option>
+
                             </select>
+
                         </div>
 
                         <div class="form-group">
-                            <label>Corte evaluativo</label>
-                            <select id="calCorte">
-                                <option value="I Corte">I Corte</option>
-                                <option value="II Corte">II Corte</option>
-                                <option value="III Corte">III Corte</option>
-                                <option value="IV Corte">IV Corte</option>
-                                <option value="Calificación Final">Calificación Final</option>
+
+                            <label>Asignatura</label>
+
+                            <select id="calAsignatura"
+                                    onchange="configurarTipoCalificacion()">
+
+                                <option value="">
+                                    Seleccione estudiante primero
+                                </option>
+
                             </select>
+
                         </div>
 
-                    </div>
+                        <div class="form-group">
 
-                    <!-- NOTA NUMERICA -->
-                    <div id="grupoNotaNumerica" class="form-group hidden">
-                        <label>Nota numérica (0 - 100)</label>
-                        <input
-                            id="calNota"
-                            type="number"
-                            min="0"
-                            max="100"
-                            placeholder="Ej. 85"
-                        >
-                    </div>
+                            <label>Corte evaluativo</label>
 
-                    <!-- CATEGORIA CUALITATIVA -->
-                    <div id="grupoCategoria" class="form-group hidden">
+                            <select id="calCorte">
 
-                        <label id="labelCategoria">
-                            Categoría de evaluación
-                        </label>
+                                <option>I Corte</option>
+                                <option>II Corte</option>
+                                <option>III Corte</option>
+                                <option>IV Corte</option>
 
-                        <select id="calCategoria">
-                            <option value="">Seleccione categoría</option>
-                        </select>
+                            </select>
 
-                    </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Observación</label>
-                        <textarea id="calObservacion" rows="3"
-                            placeholder="Observación opcional"></textarea>
+                        <div class="form-group" id="grupoNota">
+
+                            <label>Nota (0 - 100)</label>
+
+                            <input
+                                id="calNota"
+                                type="number"
+                                min="0"
+                                max="100"
+                                placeholder="Ejemplo: 85"
+                            >
+
+                        </div>
+
+                        <div class="form-group hidden" id="grupoCategoria">
+
+                            <label>Categoría</label>
+
+                            <select id="calCategoria"></select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Observación</label>
+
+                            <textarea id="calObservacion"
+                                      rows="2"
+                                      placeholder="Observación opcional"></textarea>
+
+                        </div>
+
                     </div>
 
                     <div class="actions">
 
-                        <button class="btn btn-success" onclick="guardarCalificacion()">
+                        <button class="btn-success"
+                                onclick="guardarCalificacion()">
                             💾 Guardar calificación
                         </button>
 
-                        <button class="btn btn-secondary" onclick="limpiarCalificacion()">
+                        <button class="btn-info"
+                                onclick="actualizarCalificaciones()">
+                            🔄 Actualizar estudiantes
+                        </button>
+
+                        <button class="btn-secondary"
+                                onclick="limpiarCalificacion()">
                             Limpiar
                         </button>
 
@@ -1017,28 +899,30 @@ th{
 
                 </div>
 
-                <div class="form-card">
+                <div class="card">
 
-                    <h3 style="margin-bottom:15px;color:#0f4c81">
-                        Calificaciones registradas
-                    </h3>
+                    <h2>Calificaciones registradas</h2>
 
                     <div class="table-container">
 
                         <table>
+
                             <thead>
+
                                 <tr>
+                                    <th>#</th>
                                     <th>Año</th>
                                     <th>Estudiante</th>
                                     <th>Nivel</th>
                                     <th>Grado</th>
                                     <th>Sección</th>
-                                    <th>Disciplina</th>
+                                    <th>Asignatura</th>
                                     <th>Corte</th>
-                                    <th>Evaluación</th>
+                                    <th>Resultado</th>
                                     <th>Observación</th>
-                                    <th>Acción</th>
+                                    <th>Acciones</th>
                                 </tr>
+
                             </thead>
 
                             <tbody id="tablaCalificaciones"></tbody>
@@ -1052,44 +936,40 @@ th{
             </section>
 
             <!-- REPORTES -->
-            <section id="reportes" class="page">
-
-                <div class="section-title">
-                    <h2>📑 Reportes</h2>
-                </div>
+            <section id="reportes" class="section">
 
                 <div class="card">
 
-                    <div class="alert alert-info">
-                        El módulo de reportes utilizará los datos de estudiantes,
-                        asistencia y calificaciones registrados en el sistema.
-                    </div>
+                    <h2>📊 Reportes</h2>
 
-                    <div class="cards">
+                    <div class="stats">
 
-                        <div class="card">
-                            <h3>👨‍🎓 Estudiantes</h3>
-                            <p id="reporteEstudiantes">0 registrados</p>
+                        <div class="stat">
+                            <h3>Total estudiantes</h3>
+                            <strong id="repEstudiantes">0</strong>
                         </div>
 
-                        <div class="card">
-                            <h3>👩‍🏫 Docentes</h3>
-                            <p id="reporteDocentes">0 registrados</p>
+                        <div class="stat">
+                            <h3>Total docentes</h3>
+                            <strong id="repDocentes">0</strong>
                         </div>
 
-                        <div class="card">
-                            <h3>📋 Asistencia</h3>
-                            <p id="reporteAsistencia">0 registros</p>
+                        <div class="stat">
+                            <h3>Asistencias</h3>
+                            <strong id="repAsistencias">0</strong>
                         </div>
 
-                        <div class="card">
-                            <h3>📊 Calificaciones</h3>
-                            <p id="reporteCalificaciones">0 registros</p>
+                        <div class="stat">
+                            <h3>Calificaciones</h3>
+                            <strong id="repCalificaciones">0</strong>
                         </div>
 
                     </div>
 
-                    <button class="btn btn-primary" onclick="window.print()">
+                    <br>
+
+                    <button class="btn-primary"
+                            onclick="window.print()">
                         🖨️ Imprimir reporte
                     </button>
 
@@ -1098,66 +978,65 @@ th{
             </section>
 
             <!-- CONFIGURACION -->
-            <section id="configuracion" class="page">
+            <section id="configuracion" class="section">
 
-                <div class="section-title">
+                <div class="card">
+
                     <h2>⚙️ Configuración</h2>
-                </div>
-
-                <div class="form-card">
-
-                    <h3 style="color:#0f4c81;margin-bottom:15px">
-                        Datos del centro educativo
-                    </h3>
 
                     <div class="form-grid">
 
                         <div class="form-group">
-                            <label>Centro Escolar</label>
-                            <input value="Nueva Alianza" readonly>
+                            <label>Centro escolar</label>
+                            <input id="configCentro"
+                                   value="Centro Escolar Nueva Alianza">
                         </div>
 
                         <div class="form-group">
                             <label>Director</label>
-                            <input value="Evert Josue Maltez Sanchez" readonly>
+                            <input id="configDirector"
+                                   value="Evert Josue Maltez Sanchez">
                         </div>
 
                         <div class="form-group">
                             <label>Año escolar</label>
-                            <input value="2026" readonly>
+                            <input id="configAnio"
+                                   value="2026">
                         </div>
 
                     </div>
 
+                    <button class="btn-success"
+                            onclick="guardarConfiguracion()">
+                        💾 Guardar configuración
+                    </button>
+
                 </div>
 
-                <div class="form-card">
+                <div class="card">
 
-                    <h3 style="color:#0f4c81;margin-bottom:15px">
-                        Estructura educativa
-                    </h3>
+                    <h2>Estructura educativa</h2>
 
-                    <div class="alert alert-info">
+                    <p>
                         <strong>Educación Inicial:</strong>
-                        I Nivel, II Nivel y III Nivel.
-                    </div>
+                        I Nivel, II Nivel, III Nivel
+                    </p>
 
-                    <div class="alert alert-info">
+                    <p>
                         <strong>Primaria:</strong>
-                        1.º, 2.º, 3.º, 4.º, 5.º y 6.º grado.
-                    </div>
+                        1.º, 2.º, 3.º, 4.º, 5.º y 6.º grado
+                    </p>
 
-                    <div class="alert alert-info">
+                    <p>
                         <strong>Secundaria:</strong>
-                        7.º, 8.º, 9.º, 10.º y 11.º grado.
-                    </div>
+                        7.º, 8.º, 9.º, 10.º y 11.º grado
+                    </p>
 
                 </div>
 
             </section>
 
         </div>
-
     </main>
 
 </div>
@@ -1165,169 +1044,337 @@ th{
 <script>
 
 /* =========================================================
-   CONFIGURACIÓN Y ALMACENAMIENTO
+   CLAVES DE ALMACENAMIENTO
 ========================================================= */
 
 const KEY_ESTUDIANTES = "estudiantesNuevaAlianza";
 const KEY_DOCENTES = "docentesNuevaAlianza";
 const KEY_ASISTENCIAS = "asistenciasNuevaAlianza";
 const KEY_CALIFICACIONES = "calificacionesNuevaAlianza";
-
-let estudiantes = [];
-let docentes = [];
-let asistencias = [];
-let calificaciones = [];
+const KEY_CONFIG = "configNuevaAlianza";
 
 
 /* =========================================================
-   FUNCIONES DE ALMACENAMIENTO
+   FUNCIONES GENERALES
 ========================================================= */
 
 function obtenerDatos(clave){
+
     try{
-        const datos = localStorage.getItem(clave);
-        return datos ? JSON.parse(datos) : [];
-    }catch(e){
-        console.error(e);
+
+        const datos = JSON.parse(localStorage.getItem(clave));
+
+        return Array.isArray(datos) ? datos : [];
+
+    }catch(error){
+
         return [];
+
     }
+
 }
 
-function guardarDatos(clave,datos){
-    localStorage.setItem(clave,JSON.stringify(datos));
+
+function guardarDatos(clave, datos){
+
+    localStorage.setItem(clave, JSON.stringify(datos));
+
 }
 
-function cargarTodo(){
 
-    estudiantes = obtenerDatos(KEY_ESTUDIANTES);
-    docentes = obtenerDatos(KEY_DOCENTES);
-    asistencias = obtenerDatos(KEY_ASISTENCIAS);
-    calificaciones = obtenerDatos(KEY_CALIFICACIONES);
+function escaparHTML(texto){
 
-    mostrarEstudiantes();
-    mostrarDocentes();
-    mostrarAsistencia();
-    mostrarCalificaciones();
-    actualizarEstadisticas();
+    if(texto === undefined || texto === null){
+        return "";
+    }
+
+    return String(texto)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
 }
 
 
 /* =========================================================
-   NORMALIZACIÓN
+   NORMALIZACIÓN 7.1
+   AQUÍ ESTÁ LA CORRECCIÓN PRINCIPAL
 ========================================================= */
 
-function normalizar(texto){
+function limpiarTexto(valor){
 
-    return String(texto || "")
+    return String(valor ?? "")
+        .trim()
+        .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g,"")
-        .toLowerCase()
-        .trim()
+        .replace(/[º°ª]/g,"")
         .replace(/\s+/g," ");
+
 }
+
 
 function normalizarNivel(valor){
 
-    const n = normalizar(valor);
+    const v = limpiarTexto(valor);
 
-    if(n.includes("inicial")) return "educacion inicial";
-    if(n.includes("primaria")) return "primaria";
-    if(n.includes("secundaria")) return "secundaria";
+    if(
+        v.includes("inicial") ||
+        v.includes("preescolar")
+    ){
+        return "inicial";
+    }
 
-    return n;
+    if(v.includes("primaria")){
+        return "primaria";
+    }
+
+    if(v.includes("secundaria")){
+        return "secundaria";
+    }
+
+    return v;
+
 }
+
+
+/*
+   CORRECCIÓN ESPECIAL PARA GRADOS
+   Acepta:
+   1
+   1°
+   1º
+   1ro
+   1ero
+   primero
+   primer grado
+   etc.
+*/
 
 function normalizarGrado(valor){
 
-    const n = normalizar(valor);
+    let v = limpiarTexto(valor);
+
+    v = v
+        .replace(/grado/g,"")
+        .replace(/nivel/g,"")
+        .trim();
 
     const mapa = {
-        "i":"i nivel",
-        "i nivel":"i nivel",
-        "1 nivel":"i nivel",
-        "primer nivel":"i nivel",
-
-        "ii":"ii nivel",
-        "ii nivel":"ii nivel",
-        "2 nivel":"ii nivel",
-        "segundo nivel":"ii nivel",
-
-        "iii":"iii nivel",
-        "iii nivel":"iii nivel",
-        "3 nivel":"iii nivel",
-        "tercer nivel":"iii nivel",
 
         "1":"1",
         "1ro":"1",
-        "1er":"1",
-        "primer grado":"1",
-        "1 grado":"1",
+        "1ero":"1",
+        "primero":"1",
+        "primer":"1",
 
         "2":"2",
         "2do":"2",
+        "2do.":"2",
+        "2ndo":"2",
         "2do grado":"2",
+        "segundo":"2",
         "segundo grado":"2",
-        "2 grado":"2",
 
         "3":"3",
         "3ro":"3",
-        "3er":"3",
-        "tercer grado":"3",
-        "3 grado":"3",
+        "3ero":"3",
+        "tercero":"3",
+        "tercer":"3",
 
         "4":"4",
         "4to":"4",
+        "4to.":"4",
+        "cuarto":"4",
         "cuarto grado":"4",
-        "4 grado":"4",
 
         "5":"5",
         "5to":"5",
+        "5to.":"5",
+        "quinto":"5",
         "quinto grado":"5",
-        "5 grado":"5",
 
         "6":"6",
         "6to":"6",
+        "6to.":"6",
+        "sexto":"6",
         "sexto grado":"6",
-        "6 grado":"6",
 
         "7":"7",
         "7mo":"7",
+        "7mo.":"7",
         "septimo":"7",
-        "séptimo":"7",
+        "septimo grado":"7",
 
         "8":"8",
         "8vo":"8",
+        "8vo.":"8",
         "octavo":"8",
+        "octavo grado":"8",
 
         "9":"9",
         "9no":"9",
+        "9no.":"9",
         "noveno":"9",
+        "noveno grado":"9",
 
         "10":"10",
         "10mo":"10",
+        "10mo.":"10",
         "decimo":"10",
-        "décimo":"10",
+        "decimo grado":"10",
 
         "11":"11",
         "11mo":"11",
-        "onceavo":"11",
+        "11mo.":"11",
+        "once":"11",
         "undecimo":"11",
-        "undécimo":"11"
+        "undecimo grado":"11",
+
+        "i":"I",
+        "i nivel":"I",
+
+        "ii":"II",
+        "ii nivel":"II",
+
+        "iii":"III",
+        "iii nivel":"III",
+
+        "unica":"Unica",
+        "unica":"Unica"
+
     };
 
-    return mapa[n] || n;
+    if(mapa[v] !== undefined){
+        return mapa[v];
+    }
+
+    /* Detectar números aunque vengan con palabras */
+
+    if(/\b1\b/.test(v) || v.includes("primero")){
+        return "1";
+    }
+
+    if(/\b2\b/.test(v) || v.includes("segundo")){
+        return "2";
+    }
+
+    if(/\b3\b/.test(v) || v.includes("tercero")){
+        return "3";
+    }
+
+    if(/\b4\b/.test(v) || v.includes("cuarto")){
+        return "4";
+    }
+
+    if(/\b5\b/.test(v) || v.includes("quinto")){
+        return "5";
+    }
+
+    if(/\b6\b/.test(v) || v.includes("sexto")){
+        return "6";
+    }
+
+    if(/\b7\b/.test(v) || v.includes("septimo")){
+        return "7";
+    }
+
+    if(/\b8\b/.test(v) || v.includes("octavo")){
+        return "8";
+    }
+
+    if(/\b9\b/.test(v) || v.includes("noveno")){
+        return "9";
+    }
+
+    if(/\b10\b/.test(v) || v.includes("decimo")){
+        return "10";
+    }
+
+    if(/\b11\b/.test(v) || v.includes("once") || v.includes("undecimo")){
+        return "11";
+    }
+
+    return v;
+
 }
+
 
 function normalizarSeccion(valor){
 
-    const n = normalizar(valor);
+    let v = limpiarTexto(valor);
 
-    if(n === "unica" || n === "unico" || n === "unica/o"){
+    if(v === "unica"){
         return "unica";
     }
 
-    return n;
+    if(v === "a"){
+        return "a";
+    }
+
+    if(v === "b"){
+        return "b";
+    }
+
+    if(v === "c"){
+        return "c";
+    }
+
+    return v;
+
 }
+
+
+/* =========================================================
+   ESTRUCTURA EDUCATIVA
+========================================================= */
+
+const GRADOS_INICIAL = [
+    "I Nivel",
+    "II Nivel",
+    "III Nivel"
+];
+
+const GRADOS_PRIMARIA = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+];
+
+const GRADOS_SECUNDARIA = [
+    "7",
+    "8",
+    "9",
+    "10",
+    "11"
+];
+
+
+/* =========================================================
+   DISCIPLINAS
+========================================================= */
+
+const BASICAS_NUMERICAS = [
+    "Lengua y Literatura",
+    "Matemática",
+    "Ciencias Sociales",
+    "Ciencias Naturales"
+];
+
+const DISCIPLINAS_CUALITATIVAS = [
+    "Inglés",
+    "Educación Física",
+    "Creciendo en Valores",
+    "Aprender, Emprender y Prosperar",
+    "Derecho y Dignidad de la Mujer",
+    "Taller de Arte y Cultura",
+    "Conociendo Mi Mundo"
+];
 
 
 /* =========================================================
@@ -1337,28 +1384,33 @@ function normalizarSeccion(valor){
 function iniciarSesion(){
 
     const usuario = document.getElementById("loginUser").value.trim();
-    const password = document.getElementById("loginPassword").value;
+    const password = document.getElementById("loginPass").value.trim();
 
     if(usuario === "admin" && password === "1234"){
 
         document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("app").style.display = "block";
+        document.getElementById("app").style.display = "flex";
 
         cargarTodo();
 
     }else{
 
-        document.getElementById("loginError").style.display = "block";
+        document.getElementById("loginError").textContent =
+            "Usuario o contraseña incorrectos.";
 
     }
+
 }
+
 
 function cerrarSesion(){
 
     document.getElementById("app").style.display = "none";
     document.getElementById("loginScreen").style.display = "flex";
 
-    document.getElementById("loginPassword").value = "";
+    document.getElementById("loginUser").value = "";
+    document.getElementById("loginPass").value = "";
+
 }
 
 
@@ -1366,57 +1418,30 @@ function cerrarSesion(){
    NAVEGACIÓN
 ========================================================= */
 
-function mostrarPagina(id,boton){
+function mostrarSeccion(id, boton){
 
-    document.querySelectorAll(".page").forEach(p=>{
-        p.classList.remove("active");
+    document.querySelectorAll(".section").forEach(section=>{
+        section.classList.remove("active");
     });
 
-    const pagina = document.getElementById(id);
+    document.getElementById(id).classList.add("active");
 
-    if(pagina){
-        pagina.classList.add("active");
-    }
-
-    document.querySelectorAll(".menu button").forEach(b=>{
-        b.classList.remove("active");
+    document.querySelectorAll(".menu button").forEach(btn=>{
+        btn.classList.remove("active");
     });
 
     if(boton){
         boton.classList.add("active");
     }
 
-    const titulos = {
-        inicio:"Panel principal",
-        estudiantes:"Estudiantes",
-        docentes:"Docentes",
-        asistencia:"Asistencia",
-        calificaciones:"Calificaciones",
-        reportes:"Reportes",
-        configuracion:"Configuración"
-    };
-
-    document.getElementById("tituloPagina").textContent =
-        titulos[id] || "Sistema Escolar";
-
-    if(id === "calificaciones"){
-        cargarEstudiantesCalificaciones();
-        configurarCalificaciones();
-    }
-
-    if(id === "asistencia"){
-        cargarEstudiantesAsistencia();
-    }
-
     if(id === "reportes"){
         actualizarReportes();
     }
 
-    document.getElementById("sidebar").classList.remove("open");
-}
+    if(id === "calificaciones"){
+        actualizarCalificaciones();
+    }
 
-function toggleSidebar(){
-    document.getElementById("sidebar").classList.toggle("open");
 }
 
 
@@ -1424,131 +1449,154 @@ function toggleSidebar(){
    ESTUDIANTES
 ========================================================= */
 
-function mostrarFormularioEstudiante(){
+function actualizarGradosEstudiante(){
 
-    document.getElementById("formEstudiante").classList.remove("hidden");
+    const nivel = document.getElementById("estNivel").value;
+    const select = document.getElementById("estGrado");
+
+    select.innerHTML = '<option value="">Seleccione</option>';
+
+    let lista = [];
+
+    if(nivel === "Inicial"){
+        lista = GRADOS_INICIAL;
+    }
+
+    if(nivel === "Primaria"){
+        lista = GRADOS_PRIMARIA;
+    }
+
+    if(nivel === "Secundaria"){
+        lista = GRADOS_SECUNDARIA;
+    }
+
+    lista.forEach(grado=>{
+
+        const option = document.createElement("option");
+
+        option.value = grado;
+        option.textContent =
+            nivel === "Primaria" || nivel === "Secundaria"
+            ? grado + "º grado"
+            : grado;
+
+        select.appendChild(option);
+
+    });
 
 }
 
-function limpiarFormularioEstudiante(){
-
-    document.getElementById("estCodigo").value = "";
-    document.getElementById("estNombres").value = "";
-    document.getElementById("estApellidos").value = "";
-    document.getElementById("estNivel").value = "";
-    document.getElementById("estGrado").innerHTML =
-        '<option value="">Seleccione nivel primero</option>';
-    document.getElementById("estSeccion").value = "";
-
-}
 
 function guardarEstudiante(){
 
-    const codigo = document.getElementById("estCodigo").value.trim();
-    const nombres = document.getElementById("estNombres").value.trim();
-    const apellidos = document.getElementById("estApellidos").value.trim();
-    const nivel = document.getElementById("estNivel").value;
-    const grado = document.getElementById("estGrado").value;
-    const seccion = document.getElementById("estSeccion").value.trim();
+    const nombre = document.getElementById("estNombre").value.trim();
 
-    if(!nombres || !apellidos || !nivel || !grado){
-        alert("Complete los datos obligatorios del estudiante.");
+    if(!nombre){
+
+        alert("Ingrese el nombre del estudiante.");
         return;
+
     }
 
     const estudiante = {
 
-        id:Date.now(),
+        id: Date.now(),
 
-        codigo:codigo || String(estudiantes.length + 1).padStart(3,"0"),
+        nombre: nombre,
 
-        nombres,
-        apellidos,
+        codigo:
+            document.getElementById("estCodigo").value.trim(),
 
-        nombre:nombres,
-        apellido:apellidos,
+        sexo:
+            document.getElementById("estSexo").value,
 
-        nivel,
-        nivelEducativo:nivel,
+        nivel:
+            document.getElementById("estNivel").value,
 
-        grado,
-        gradoNivel:grado,
+        grado:
+            document.getElementById("estGrado").value,
 
-        seccion,
-
-        fechaRegistro:new Date().toISOString()
+        seccion:
+            document.getElementById("estSeccion").value
 
     };
 
-    estudiantes.push(estudiante);
+    const datos = obtenerDatos(KEY_ESTUDIANTES);
 
-    guardarDatos(KEY_ESTUDIANTES,estudiantes);
+    datos.push(estudiante);
 
-    mostrarEstudiantes();
+    guardarDatos(KEY_ESTUDIANTES,datos);
+
+    alert("Estudiante guardado correctamente.");
+
+    limpiarEstudiante();
+    cargarEstudiantes();
     actualizarEstadisticas();
-
-    limpiarFormularioEstudiante();
-
-    alert("Estudiante registrado correctamente.");
 
 }
 
-function mostrarEstudiantes(){
 
-    estudiantes = obtenerDatos(KEY_ESTUDIANTES);
+function limpiarEstudiante(){
 
-    const tbody = document.getElementById("tablaEstudiantes");
+    document.getElementById("estNombre").value = "";
+    document.getElementById("estCodigo").value = "";
+    document.getElementById("estSexo").value = "";
+    document.getElementById("estNivel").value = "";
 
-    if(!tbody) return;
+    document.getElementById("estGrado").innerHTML =
+        '<option value="">Seleccione nivel primero</option>';
 
-    const buscar = normalizar(
-        document.getElementById("buscarEstudiante")?.value || ""
-    );
+    document.getElementById("estSeccion").value = "";
 
-    const lista = estudiantes.filter(e=>{
+}
 
-        const nombre = normalizar(
-            `${e.nombres || e.nombre || ""} ${e.apellidos || e.apellido || ""}`
-        );
 
-        return nombre.includes(buscar);
+function cargarEstudiantes(){
+
+    const datos = obtenerDatos(KEY_ESTUDIANTES);
+
+    const tabla = document.getElementById("tablaEstudiantes");
+
+    tabla.innerHTML = "";
+
+    datos.forEach((e,index)=>{
+
+        tabla.innerHTML += `
+
+        <tr>
+
+            <td>${index+1}</td>
+
+            <td>${escaparHTML(e.nombre)}</td>
+
+            <td>${escaparHTML(e.codigo)}</td>
+
+            <td>${escaparHTML(e.sexo)}</td>
+
+            <td>${escaparHTML(e.nivel)}</td>
+
+            <td>${escaparHTML(e.grado)}</td>
+
+            <td>${escaparHTML(e.seccion)}</td>
+
+            <td>
+
+                <button
+                    class="btn-danger"
+                    onclick="eliminarEstudiante(${e.id})">
+                    Eliminar
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
 
     });
 
-    if(lista.length === 0){
-
-        tbody.innerHTML =
-            `<tr><td colspan="6" class="empty">
-            No hay estudiantes registrados.
-            </td></tr>`;
-
-        return;
-    }
-
-    tbody.innerHTML = lista.map(e=>{
-
-        const nombre =
-            `${e.nombres || e.nombre || ""} ${e.apellidos || e.apellido || ""}`;
-
-        return `
-        <tr>
-            <td>${e.codigo || ""}</td>
-            <td><strong>${nombre}</strong></td>
-            <td>${e.nivel || e.nivelEducativo || ""}</td>
-            <td>${e.grado || e.gradoNivel || ""}</td>
-            <td>${e.seccion || "Única"}</td>
-            <td>
-                <button class="btn btn-danger"
-                    onclick="eliminarEstudiante(${e.id})">
-                    🗑️
-                </button>
-            </td>
-        </tr>
-        `;
-
-    }).join("");
-
 }
+
 
 function eliminarEstudiante(id){
 
@@ -1556,12 +1604,16 @@ function eliminarEstudiante(id){
         return;
     }
 
-    estudiantes = estudiantes.filter(e=>e.id !== id);
+    const datos = obtenerDatos(KEY_ESTUDIANTES);
 
-    guardarDatos(KEY_ESTUDIANTES,estudiantes);
+    const nuevos = datos.filter(e => e.id !== id);
 
-    mostrarEstudiantes();
+    guardarDatos(KEY_ESTUDIANTES,nuevos);
+
+    cargarEstudiantes();
     actualizarEstadisticas();
+
+    actualizarCalificaciones();
 
 }
 
@@ -1570,122 +1622,107 @@ function eliminarEstudiante(id){
    DOCENTES
 ========================================================= */
 
-function mostrarFormularioDocente(){
-
-    document.getElementById("formDocente").classList.remove("hidden");
-
-}
-
-function limpiarFormularioDocente(){
-
-    document.getElementById("docCodigo").value = "";
-    document.getElementById("docNombres").value = "";
-    document.getElementById("docApellidos").value = "";
-    document.getElementById("docEspecialidad").value = "";
-    document.getElementById("docTelefono").value = "";
-    document.getElementById("docEstado").value = "Activo";
-
-}
-
 function guardarDocente(){
 
-    const codigo = document.getElementById("docCodigo").value.trim();
-    const nombres = document.getElementById("docNombres").value.trim();
-    const apellidos = document.getElementById("docApellidos").value.trim();
+    const nombre = document.getElementById("docNombre").value.trim();
 
-    if(!nombres || !apellidos){
-        alert("Ingrese nombres y apellidos del docente.");
+    if(!nombre){
+
+        alert("Ingrese el nombre del docente.");
         return;
+
     }
 
-    docentes.push({
+    const docente = {
 
         id:Date.now(),
 
-        codigo,
+        nombre,
 
-        nombres,
-        apellidos,
+        codigo:
+            document.getElementById("docCodigo").value.trim(),
 
         especialidad:
             document.getElementById("docEspecialidad").value.trim(),
 
-        telefono:
-            document.getElementById("docTelefono").value.trim(),
+        nivel:
+            document.getElementById("docNivel").value,
 
         estado:
             document.getElementById("docEstado").value
 
-    });
+    };
 
-    guardarDatos(KEY_DOCENTES,docentes);
+    const datos = obtenerDatos(KEY_DOCENTES);
 
-    mostrarDocentes();
+    datos.push(docente);
+
+    guardarDatos(KEY_DOCENTES,datos);
+
+    alert("Docente guardado correctamente.");
+
+    limpiarDocente();
+    cargarDocentes();
     actualizarEstadisticas();
-
-    limpiarFormularioDocente();
-
-    alert("Docente registrado correctamente.");
 
 }
 
-function mostrarDocentes(){
 
-    docentes = obtenerDatos(KEY_DOCENTES);
+function limpiarDocente(){
 
-    const tbody = document.getElementById("tablaDocentes");
+    document.getElementById("docNombre").value = "";
+    document.getElementById("docCodigo").value = "";
+    document.getElementById("docEspecialidad").value = "";
+    document.getElementById("docNivel").value = "";
+    document.getElementById("docEstado").value = "Activo";
 
-    if(!tbody) return;
+}
 
-    if(docentes.length === 0){
 
-        tbody.innerHTML =
-            `<tr><td colspan="6" class="empty">
-            No hay docentes registrados.
-            </td></tr>`;
+function cargarDocentes(){
 
-        return;
-    }
+    const datos = obtenerDatos(KEY_DOCENTES);
 
-    tbody.innerHTML = docentes.map(d=>{
+    const tabla = document.getElementById("tablaDocentes");
 
-        const nombre =
-            `${d.nombres || ""} ${d.apellidos || ""}`;
+    tabla.innerHTML = "";
 
-        return `
+    datos.forEach((d,index)=>{
+
+        tabla.innerHTML += `
+
         <tr>
 
-            <td>${d.codigo || ""}</td>
+            <td>${index+1}</td>
 
-            <td><strong>${nombre}</strong></td>
+            <td>${escaparHTML(d.nombre)}</td>
 
-            <td>${d.especialidad || ""}</td>
+            <td>${escaparHTML(d.codigo)}</td>
 
-            <td>${d.telefono || ""}</td>
+            <td>${escaparHTML(d.especialidad)}</td>
 
-            <td>
-                <span class="badge ${
-                    d.estado === "Activo"
-                    ? "badge-success"
-                    : "badge-danger"
-                }">
-                    ${d.estado || ""}
-                </span>
-            </td>
+            <td>${escaparHTML(d.nivel)}</td>
+
+            <td>${escaparHTML(d.estado)}</td>
 
             <td>
-                <button class="btn btn-danger"
+
+                <button
+                    class="btn-danger"
                     onclick="eliminarDocente(${d.id})">
-                    🗑️
+                    Eliminar
                 </button>
+
             </td>
 
         </tr>
+
         `;
 
-    }).join("");
+    });
 
 }
+
 
 function eliminarDocente(id){
 
@@ -1693,56 +1730,15 @@ function eliminarDocente(id){
         return;
     }
 
-    docentes = docentes.filter(d=>d.id !== id);
+    const datos = obtenerDatos(KEY_DOCENTES);
 
-    guardarDatos(KEY_DOCENTES,docentes);
+    guardarDatos(
+        KEY_DOCENTES,
+        datos.filter(d=>d.id !== id)
+    );
 
-    mostrarDocentes();
+    cargarDocentes();
     actualizarEstadisticas();
-
-}
-
-
-/* =========================================================
-   GRADOS
-========================================================= */
-
-function actualizarGrados(idNivel,idGrado){
-
-    const nivel = document.getElementById(idNivel).value;
-    const select = document.getElementById(idGrado);
-
-    select.innerHTML =
-        '<option value="">Seleccione grado / nivel</option>';
-
-    if(nivel === "Educación Inicial"){
-
-        ["I Nivel","II Nivel","III Nivel"].forEach(g=>{
-
-            select.innerHTML +=
-                `<option value="${g}">${g}</option>`;
-
-        });
-
-    }else if(nivel === "Primaria"){
-
-        for(let i=1;i<=6;i++){
-
-            select.innerHTML +=
-                `<option value="${i}">${i}.º grado</option>`;
-
-        }
-
-    }else if(nivel === "Secundaria"){
-
-        for(let i=7;i<=11;i++){
-
-            select.innerHTML +=
-                `<option value="${i}">${i}.º grado</option>`;
-
-        }
-
-    }
 
 }
 
@@ -1751,574 +1747,726 @@ function actualizarGrados(idNivel,idGrado){
    ASISTENCIA
 ========================================================= */
 
-function cargarEstudiantesAsistencia(){
+function actualizarGradosAsistencia(){
 
-    const nivel = document.getElementById("asiNivel")?.value;
-    const grado = document.getElementById("asiGrado")?.value;
-    const seccion = document.getElementById("asiSeccion")?.value;
+    const nivel = document.getElementById("asisNivel").value;
 
-    const select = document.getElementById("asiEstudiante");
-
-    if(!select) return;
+    const select = document.getElementById("asisGrado");
 
     select.innerHTML =
-        '<option value="">Seleccione estudiante</option>';
+        '<option value="">Seleccione</option>';
 
-    if(!nivel || !grado){
-        return;
+    let lista=[];
+
+    if(nivel === "Inicial"){
+        lista=GRADOS_INICIAL;
     }
 
-    const lista = obtenerEstudiantesFiltrados(
-        nivel,
-        grado,
-        seccion
-    );
+    if(nivel === "Primaria"){
+        lista=GRADOS_PRIMARIA;
+    }
 
-    lista.forEach(e=>{
+    if(nivel === "Secundaria"){
+        lista=GRADOS_SECUNDARIA;
+    }
 
-        const nombre =
-            `${e.nombres || e.nombre || ""} ${e.apellidos || e.apellido || ""}`;
+    lista.forEach(g=>{
 
-        select.innerHTML +=
-            `<option value="${e.id}">
-                ${nombre} - ${e.codigo || ""}
-            </option>`;
+        const option=document.createElement("option");
+
+        option.value=g;
+        option.textContent=
+            nivel === "Inicial"
+            ? g
+            : g+"º grado";
+
+        select.appendChild(option);
 
     });
 
+    cargarEstudiantesAsistencia();
+
 }
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    const fecha=document.getElementById("asisFecha");
+
+    if(fecha){
+        fecha.value = new Date().toISOString().split("T")[0];
+    }
+
+    const nivel=document.getElementById("asisNivel");
+    const grado=document.getElementById("asisGrado");
+    const seccion=document.getElementById("asisSeccion");
+
+    if(nivel) nivel.addEventListener("change",cargarEstudiantesAsistencia);
+    if(grado) grado.addEventListener("change",cargarEstudiantesAsistencia);
+    if(seccion) seccion.addEventListener("change",cargarEstudiantesAsistencia);
+
+});
+
+
+function cargarEstudiantesAsistencia(){
+
+    const nivel=document.getElementById("asisNivel").value;
+    const grado=document.getElementById("asisGrado").value;
+    const seccion=document.getElementById("asisSeccion").value;
+
+    const select=document.getElementById("asisEstudiante");
+
+    select.innerHTML =
+        '<option value="">Seleccione</option>';
+
+    if(!nivel || !grado || !seccion){
+        return;
+    }
+
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+
+    estudiantes
+        .filter(e =>
+
+            normalizarNivel(e.nivel) ===
+            normalizarNivel(nivel)
+
+            &&
+
+            normalizarGrado(e.grado) ===
+            normalizarGrado(grado)
+
+            &&
+
+            normalizarSeccion(e.seccion) ===
+            normalizarSeccion(seccion)
+
+        )
+        .forEach(e=>{
+
+            const option=document.createElement("option");
+
+            option.value=e.id;
+
+            option.textContent=e.nombre;
+
+            select.appendChild(option);
+
+        });
+
+}
+
 
 function guardarAsistencia(){
 
-    const fecha = document.getElementById("asiFecha").value;
-    const nivel = document.getElementById("asiNivel").value;
-    const grado = document.getElementById("asiGrado").value;
-    const seccion = document.getElementById("asiSeccion").value.trim();
-    const estudianteId = document.getElementById("asiEstudiante").value;
-    const estado = document.getElementById("asiEstado").value;
+    const estudianteId =
+        document.getElementById("asisEstudiante").value;
 
-    if(!fecha || !nivel || !grado || !estudianteId){
+    if(!estudianteId){
 
-        alert("Complete los datos de asistencia.");
-
+        alert("Seleccione un estudiante.");
         return;
+
     }
 
-    const estudiante =
-        estudiantes.find(e=>String(e.id) === String(estudianteId));
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+
+    const estudiante=estudiantes.find(
+        e=>String(e.id) === String(estudianteId)
+    );
 
     if(!estudiante){
+
         alert("No se encontró el estudiante.");
         return;
+
     }
 
-    asistencias.push({
+    const registro={
 
         id:Date.now(),
 
-        fecha,
+        fecha:
+            document.getElementById("asisFecha").value,
 
-        estudianteId,
+        estudianteId:estudiante.id,
 
-        estudiante:
-            `${estudiante.nombres || estudiante.nombre || ""}
-             ${estudiante.apellidos || estudiante.apellido || ""}`.trim(),
+        estudiante:estudiante.nombre,
 
-        nivel,
-        grado,
-        seccion,
-        estado
+        nivel:
+            document.getElementById("asisNivel").value,
 
-    });
+        grado:
+            document.getElementById("asisGrado").value,
 
-    guardarDatos(KEY_ASISTENCIAS,asistencias);
+        seccion:
+            document.getElementById("asisSeccion").value,
 
-    mostrarAsistencia();
-    actualizarEstadisticas();
+        estado:
+            document.getElementById("asisEstado").value
+
+    };
+
+    const datos=obtenerDatos(KEY_ASISTENCIAS);
+
+    datos.push(registro);
+
+    guardarDatos(KEY_ASISTENCIAS,datos);
 
     alert("Asistencia guardada correctamente.");
 
+    cargarAsistencias();
+    actualizarEstadisticas();
+
 }
 
-function mostrarAsistencia(){
 
-    asistencias = obtenerDatos(KEY_ASISTENCIAS);
+function cargarAsistencias(){
 
-    const tbody = document.getElementById("tablaAsistencia");
+    const datos=obtenerDatos(KEY_ASISTENCIAS);
 
-    if(!tbody) return;
+    const tabla=document.getElementById("tablaAsistencia");
 
-    if(asistencias.length === 0){
+    tabla.innerHTML="";
 
-        tbody.innerHTML =
-            `<tr><td colspan="6" class="empty">
-            No hay registros de asistencia.
-            </td></tr>`;
+    datos.forEach((a,index)=>{
 
-        return;
-    }
+        tabla.innerHTML += `
 
-    tbody.innerHTML = asistencias.slice().reverse().map(a=>{
-
-        let clase = "badge-success";
-
-        if(a.estado === "Ausente"){
-            clase = "badge-danger";
-        }else if(a.estado === "Tardanza"){
-            clase = "badge-warning";
-        }
-
-        return `
         <tr>
 
-            <td>${a.fecha || ""}</td>
-
-            <td>${a.estudiante || ""}</td>
-
-            <td>${a.nivel || ""}</td>
-
-            <td>${a.grado || ""}</td>
-
-            <td>${a.seccion || "Única"}</td>
+            <td>${escaparHTML(a.fecha)}</td>
+            <td>${escaparHTML(a.estudiante)}</td>
+            <td>${escaparHTML(a.nivel)}</td>
+            <td>${escaparHTML(a.grado)}</td>
+            <td>${escaparHTML(a.seccion)}</td>
+            <td>${escaparHTML(a.estado)}</td>
 
             <td>
-                <span class="badge ${clase}">
-                    ${a.estado || ""}
-                </span>
+                <button
+                    class="btn-danger"
+                    onclick="eliminarAsistencia(${a.id})">
+                    Eliminar
+                </button>
             </td>
 
         </tr>
+
         `;
 
-    }).join("");
+    });
+
+}
+
+
+function eliminarAsistencia(id){
+
+    if(!confirm("¿Desea eliminar este registro?")){
+        return;
+    }
+
+    const datos=obtenerDatos(KEY_ASISTENCIAS);
+
+    guardarDatos(
+        KEY_ASISTENCIAS,
+        datos.filter(a=>a.id!==id)
+    );
+
+    cargarAsistencias();
+    actualizarEstadisticas();
 
 }
 
 
 /* =========================================================
-   CONFIGURACIÓN DE CALIFICACIONES
+   CALIFICACIONES
 ========================================================= */
 
-const DISCIPLINAS_NUMERICAS = [
-    "Lengua y Literatura",
-    "Matemática",
-    "Ciencias Sociales",
-    "Ciencias Naturales"
-];
+function actualizarCalificaciones(){
 
-const DISCIPLINAS_CUALITATIVAS = [
-    "Taller de Arte y Cultura",
-    "Conociendo Mi Mundo",
-    "Educación Física",
-    "Creciendo en Valores",
-    "Aprender, Emprender y Prosperar",
-    "Derecho y Dignidad de la Mujer"
-];
+    const nivel =
+        document.getElementById("calNivel").value;
 
-const DISCIPLINAS_SECUNDARIA = [
-    "Lengua y Literatura",
-    "Matemática",
-    "Ciencias Sociales",
-    "Ciencias Naturales",
-    "Inglés",
-    "Educación Física",
-    "Creciendo en Valores",
-    "Aprender, Emprender y Prosperar"
-];
+    const grado =
+        document.getElementById("calGrado").value;
 
-function configurarCalificaciones(){
+    const seccion =
+        document.getElementById("calSeccion").value;
 
-    const nivel = document.getElementById("calNivel").value;
-    const grado = document.getElementById("calGrado").value;
-
-    const selectDisciplina =
-        document.getElementById("calDisciplina");
-
-    const grupoDisciplina =
-        document.getElementById("grupoDisciplina");
-
-    const info =
-        document.getElementById("infoEvaluacion");
-
-    selectDisciplina.innerHTML =
-        '<option value="">Seleccione disciplina</option>';
-
-    document.getElementById("grupoNotaNumerica")
-        .classList.add("hidden");
-
-    document.getElementById("grupoCategoria")
-        .classList.add("hidden");
-
-    /*
-       Inicial:
-       NO hay disciplinas.
-       La evaluación es directamente AA / AP.
-    */
-
-    if(nivel === "Educación Inicial"){
-
-        grupoDisciplina.classList.add("hidden");
-
-        cargarCategorias(["AA","AP"]);
-
-        document.getElementById("grupoCategoria")
-            .classList.remove("hidden");
-
-        document.getElementById("labelCategoria").textContent =
-            "Categoría de evaluación";
-
-        info.className = "alert alert-info";
-
-        info.innerHTML =
-            "<strong>Educación Inicial:</strong> " +
-            "la evaluación se realiza mediante las categorías AA y AP.";
-
-        cargarEstudiantesCalificaciones();
-
-        return;
-    }
-
-    /*
-       Primaria:
-       1.º y 2.º = todo cualitativo.
-       3.º a 6.º = cuatro numéricas + demás cualitativas.
-    */
-
-    if(nivel === "Primaria"){
-
-        grupoDisciplina.classList.remove("hidden");
-
-        if(grado === "1" || grado === "2"){
-
-            const todas = DISCIPLINAS_CUALITATIVAS.slice();
-
-            /*
-               Se pueden ampliar las disciplinas desde aquí
-               sin cambiar la lógica de evaluación.
-            */
-
-            todas.forEach(d=>{
-
-                selectDisciplina.innerHTML +=
-                    `<option value="${d}">${d}</option>`;
-
-            });
-
-            info.className = "alert alert-info";
-
-            info.innerHTML =
-                `<strong>${grado}.º Primaria:</strong>
-                 todas las disciplinas se evalúan cualitativamente
-                 mediante AA, AS y AF.`;
-
-        }else if(
-            grado === "3" ||
-            grado === "4" ||
-            grado === "5" ||
-            grado === "6"
-        ){
-
-            const todas = [
-                ...DISCIPLINAS_NUMERICAS,
-                ...DISCIPLINAS_CUALITATIVAS
-            ];
-
-            todas.forEach(d=>{
-
-                selectDisciplina.innerHTML +=
-                    `<option value="${d}">${d}</option>`;
-
-            });
-
-            info.className = "alert alert-info";
-
-            info.innerHTML =
-                `<strong>${grado}.º Primaria:</strong>
-                 Lengua y Literatura, Matemática, Ciencias Sociales
-                 y Ciencias Naturales son numéricas.
-                 Las demás son cualitativas.`;
-
-        }else{
-
-            info.className = "alert alert-warning";
-
-            info.innerHTML =
-                "Seleccione un grado de Primaria.";
-
-        }
-
-    }
-
-    /*
-       Secundaria
-    */
-
-    if(nivel === "Secundaria"){
-
-        grupoDisciplina.classList.remove("hidden");
-
-        DISCIPLINAS_SECUNDARIA.forEach(d=>{
-
-            selectDisciplina.innerHTML +=
-                `<option value="${d}">${d}</option>`;
-
-        });
-
-        info.className = "alert alert-info";
-
-        info.innerHTML =
-            "<strong>Secundaria:</strong> seleccione la disciplina " +
-            "y registre la evaluación correspondiente.";
-
-    }
+    actualizarGradosCalificaciones();
 
     cargarEstudiantesCalificaciones();
 
-    actualizarTipoEvaluacion();
+    cargarAsignaturas();
+
+    configurarTipoCalificacion();
 
 }
 
-function obtenerTipoEvaluacion(){
 
-    const nivel = document.getElementById("calNivel").value;
-    const grado = document.getElementById("calGrado").value;
-    const disciplina = document.getElementById("calDisciplina").value;
+/* =========================================================
+   GRADOS DE CALIFICACIONES
+========================================================= */
 
-    /*
-       Inicial siempre cualitativa.
-    */
+function actualizarGradosCalificaciones(){
 
-    if(nivel === "Educación Inicial"){
-        return "cualitativa-inicial";
+    const nivel =
+        document.getElementById("calNivel").value;
+
+    const select =
+        document.getElementById("calGrado");
+
+    const valorAnterior=select.value;
+
+    select.innerHTML =
+        '<option value="">Seleccione</option>';
+
+    let lista=[];
+
+    if(nivel === "Inicial"){
+        lista=GRADOS_INICIAL;
     }
 
+    else if(nivel === "Primaria"){
+        lista=GRADOS_PRIMARIA;
+    }
+
+    else if(nivel === "Secundaria"){
+        lista=GRADOS_SECUNDARIA;
+    }
+
+    lista.forEach(grado=>{
+
+        const option=document.createElement("option");
+
+        option.value=grado;
+
+        option.textContent =
+            nivel === "Inicial"
+            ? grado
+            : grado+"º grado";
+
+        select.appendChild(option);
+
+    });
+
     /*
-       1.º y 2.º siempre cualitativos.
+       Si el grado anterior sigue existiendo,
+       lo volvemos a seleccionar.
+    */
+
+    if(
+        [...select.options].some(
+            o=>o.value===valorAnterior
+        )
+    ){
+
+        select.value=valorAnterior;
+
+    }
+
+}
+
+
+/* =========================================================
+   CORRECCIÓN PRINCIPAL:
+   CARGAR ESTUDIANTES PARA 1.º Y 2.º
+========================================================= */
+
+function cargarEstudiantesCalificaciones(){
+
+    const select =
+        document.getElementById("calEstudiante");
+
+    select.innerHTML =
+        '<option value="">Seleccione estudiante</option>';
+
+    const nivel =
+        document.getElementById("calNivel").value;
+
+    const grado =
+        document.getElementById("calGrado").value;
+
+    const seccion =
+        document.getElementById("calSeccion").value;
+
+    if(!nivel || !grado || !seccion){
+
+        return;
+
+    }
+
+    const estudiantes =
+        obtenerDatos(KEY_ESTUDIANTES);
+
+    /*
+       NORMALIZAMOS LOS TRES CAMPOS ANTES DE COMPARAR.
+
+       Esto permite que un estudiante guardado como:
+       "1.º"
+       coincida con:
+       "1"
+       o:
+       "Primero"
+       o:
+       "1ro"
+    */
+
+    const nivelBuscado =
+        normalizarNivel(nivel);
+
+    const gradoBuscado =
+        normalizarGrado(grado);
+
+    const seccionBuscada =
+        normalizarSeccion(seccion);
+
+
+    const encontrados = estudiantes.filter(e=>{
+
+        const nivelEstudiante =
+            normalizarNivel(
+                e.nivel
+            );
+
+        const gradoEstudiante =
+            normalizarGrado(
+                e.grado
+            );
+
+        const seccionEstudiante =
+            normalizarSeccion(
+                e.seccion
+            );
+
+        return (
+
+            nivelEstudiante ===
+            nivelBuscado
+
+            &&
+
+            gradoEstudiante ===
+            gradoBuscado
+
+            &&
+
+            seccionEstudiante ===
+            seccionBuscada
+
+        );
+
+    });
+
+
+    /*
+       MOSTRAR RESULTADOS
+    */
+
+    encontrados.forEach(e=>{
+
+        const option =
+            document.createElement("option");
+
+        option.value=e.id;
+
+        option.textContent=e.nombre;
+
+        select.appendChild(option);
+
+    });
+
+
+    /*
+       Mensaje especial para detectar
+       fácilmente el problema durante la prueba.
+    */
+
+    if(encontrados.length === 0){
+
+        const option =
+            document.createElement("option");
+
+        option.value="";
+
+        option.textContent=
+            "⚠️ No hay estudiantes en este grado/sección";
+
+        select.appendChild(option);
+
+    }
+
+}
+
+
+/* =========================================================
+   ASIGNATURAS
+========================================================= */
+
+function cargarAsignaturas(){
+
+    const nivel =
+        document.getElementById("calNivel").value;
+
+    const grado =
+        normalizarGrado(
+            document.getElementById("calGrado").value
+        );
+
+    const select =
+        document.getElementById("calAsignatura");
+
+    select.innerHTML =
+        '<option value="">Seleccione</option>';
+
+    if(!nivel || !grado){
+
+        return;
+
+    }
+
+
+    /* EDUCACIÓN INICIAL
+       No utiliza disciplinas.
+    */
+
+    if(nivel === "Inicial"){
+
+        const option=
+            document.createElement("option");
+
+        option.value="Sin disciplina";
+        option.textContent="Sin disciplina";
+
+        select.appendChild(option);
+
+        return;
+
+    }
+
+
+    /*
+       1.º Y 2.º:
+       TODAS LAS EVALUACIONES SON CUALITATIVAS.
     */
 
     if(
         nivel === "Primaria" &&
         (grado === "1" || grado === "2")
     ){
-        return "cualitativa-primaria";
+
+        DISCIPLINAS_CUALITATIVAS.forEach(asignatura=>{
+
+            const option =
+                document.createElement("option");
+
+            option.value=asignatura;
+            option.textContent=asignatura;
+
+            select.appendChild(option);
+
+        });
+
+        return;
+
     }
 
+
     /*
-       3.º a 6.º:
-       las cuatro básicas son numéricas.
+       3.º A 6.º:
+       BÁSICAS NUMÉRICAS
+       Y RESTO CUALITATIVAS.
     */
 
-    if(
-        nivel === "Primaria" &&
-        ["3","4","5","6"].includes(grado)
-    ){
+    if(nivel === "Primaria"){
 
-        if(DISCIPLINAS_NUMERICAS.includes(disciplina)){
-            return "numerica";
-        }
+        [
+            ...BASICAS_NUMERICAS,
+            ...DISCIPLINAS_CUALITATIVAS
+        ].forEach(asignatura=>{
 
-        return "cualitativa-primaria";
+            const option=
+                document.createElement("option");
+
+            option.value=asignatura;
+            option.textContent=asignatura;
+
+            select.appendChild(option);
+
+        });
+
+        return;
+
     }
 
+
     /*
-       Secundaria:
-       las cuatro básicas se manejan como numéricas
-       y las demás cualitativas.
+       SECUNDARIA
     */
 
     if(nivel === "Secundaria"){
 
-        if(DISCIPLINAS_NUMERICAS.includes(disciplina)){
-            return "numerica";
-        }
+        [
+            ...BASICAS_NUMERICAS,
+            ...DISCIPLINAS_CUALITATIVAS
+        ].forEach(asignatura=>{
 
-        return "cualitativa-primaria";
-    }
+            const option=
+                document.createElement("option");
 
-    return "";
-}
+            option.value=asignatura;
+            option.textContent=asignatura;
 
-function cargarCategorias(categorias){
+            select.appendChild(option);
 
-    const select =
-        document.getElementById("calCategoria");
+        });
 
-    select.innerHTML =
-        '<option value="">Seleccione categoría</option>';
-
-    categorias.forEach(c=>{
-
-        select.innerHTML +=
-            `<option value="${c}">${c}</option>`;
-
-    });
-
-}
-
-function actualizarTipoEvaluacion(){
-
-    const tipo = obtenerTipoEvaluacion();
-
-    const grupoNota =
-        document.getElementById("grupoNotaNumerica");
-
-    const grupoCategoria =
-        document.getElementById("grupoCategoria");
-
-    const nota =
-        document.getElementById("calNota");
-
-    const categoria =
-        document.getElementById("calCategoria");
-
-    grupoNota.classList.add("hidden");
-    grupoCategoria.classList.add("hidden");
-
-    nota.value = "";
-    categoria.value = "";
-
-    if(tipo === "numerica"){
-
-        grupoNota.classList.remove("hidden");
-
-        return;
-    }
-
-    if(tipo === "cualitativa-inicial"){
-
-        cargarCategorias(["AA","AP"]);
-
-        grupoCategoria.classList.remove("hidden");
-
-        document.getElementById("labelCategoria").textContent =
-            "Categoría de Educación Inicial";
-
-        return;
-    }
-
-    if(tipo === "cualitativa-primaria"){
-
-        cargarCategorias(["AA","AS","AF"]);
-
-        grupoCategoria.classList.remove("hidden");
-
-        document.getElementById("labelCategoria").textContent =
-            "Categoría cualitativa";
-
-        return;
     }
 
 }
 
 
 /* =========================================================
-   ESTUDIANTES DE CALIFICACIONES
+   TIPO DE CALIFICACIÓN
 ========================================================= */
 
-function obtenerEstudiantesFiltrados(nivel,grado,seccion){
+function esCalificacionNumerica(){
 
-    estudiantes = obtenerDatos(KEY_ESTUDIANTES);
+    const nivel =
+        document.getElementById("calNivel").value;
 
-    const nNivel = normalizarNivel(nivel);
-    const nGrado = normalizarGrado(grado);
-    const nSeccion = normalizarSeccion(seccion);
+    const grado =
+        normalizarGrado(
+            document.getElementById("calGrado").value
+        );
 
-    return estudiantes.filter(e=>{
+    const asignatura =
+        document.getElementById("calAsignatura").value;
 
-        const nivelE =
-            normalizarNivel(
-                e.nivel ||
-                e.nivelEducativo ||
-                e.nivel_educativo
-            );
 
-        const gradoE =
-            normalizarGrado(
-                e.grado ||
-                e.gradoNivel ||
-                e.grado_nivel
-            );
+    if(nivel === "Inicial"){
+        return false;
+    }
 
-        const seccionE =
-            normalizarSeccion(
-                e.seccion ||
-                e["sección"] ||
-                ""
-            );
 
-        const coincideNivel =
-            nivelE === nNivel;
+    if(
+        nivel === "Primaria" &&
+        (grado === "1" || grado === "2")
+    ){
 
-        const coincideGrado =
-            gradoE === nGrado;
+        return false;
 
-        /*
-           Si el usuario no escribió sección,
-           mostramos todos los del grado.
-        */
+    }
 
-        const coincideSeccion =
-            !nSeccion ||
-            !seccionE ||
-            seccionE === nSeccion;
 
-        return coincideNivel &&
-               coincideGrado &&
-               coincideSeccion;
+    if(
+        nivel === "Primaria" &&
+        ["3","4","5","6"].includes(grado)
+    ){
 
-    });
+        return BASICAS_NUMERICAS.includes(asignatura);
+
+    }
+
+
+    if(nivel === "Secundaria"){
+
+        return BASICAS_NUMERICAS.includes(asignatura);
+
+    }
+
+
+    return false;
 
 }
 
-function cargarEstudiantesCalificaciones(){
+
+function configurarTipoCalificacion(){
+
+    const numerica =
+        esCalificacionNumerica();
+
+    const grupoNota =
+        document.getElementById("grupoNota");
+
+    const grupoCategoria =
+        document.getElementById("grupoCategoria");
+
+    if(numerica){
+
+        grupoNota.classList.remove("hidden");
+
+        grupoCategoria.classList.add("hidden");
+
+    }else{
+
+        grupoNota.classList.add("hidden");
+
+        grupoCategoria.classList.remove("hidden");
+
+        cargarCategorias();
+
+    }
+
+}
+
+
+/* =========================================================
+   CATEGORÍAS
+========================================================= */
+
+function cargarCategorias(){
 
     const nivel =
-        document.getElementById("calNivel")?.value;
-
-    const grado =
-        document.getElementById("calGrado")?.value;
-
-    const seccion =
-        document.getElementById("calSeccion")?.value || "";
+        document.getElementById("calNivel").value;
 
     const select =
-        document.getElementById("calEstudiante");
+        document.getElementById("calCategoria");
 
-    if(!select) return;
+    select.innerHTML="";
 
-    select.innerHTML =
-        '<option value="">Seleccione estudiante</option>';
+    let categorias=[];
 
-    if(!nivel || !grado){
 
-        return;
+    if(nivel === "Inicial"){
+
+        categorias=[
+            "AA",
+            "AP"
+        ];
+
     }
 
-    const lista =
-        obtenerEstudiantesFiltrados(
-            nivel,
-            grado,
-            seccion
-        );
+    else if(nivel === "Primaria"){
 
-    if(lista.length === 0){
+        categorias=[
+            "AA",
+            "AS",
+            "AF"
+        ];
 
-        select.innerHTML =
-            '<option value="">No hay estudiantes para este grado</option>';
-
-        return;
     }
 
-    lista.forEach(e=>{
+    else{
 
-        const nombre =
-            `${e.nombres || e.nombre || ""}
-             ${e.apellidos || e.apellido || ""}`.trim();
+        categorias=[
+            "AA",
+            "AS",
+            "AF"
+        ];
 
-        select.innerHTML +=
-            `<option value="${e.id}">
-                ${nombre} - ${e.codigo || ""}
-            </option>`;
+    }
+
+
+    categorias.forEach(c=>{
+
+        const option=
+            document.createElement("option");
+
+        option.value=c;
+        option.textContent=c;
+
+        select.appendChild(option);
 
     });
 
@@ -2331,8 +2479,8 @@ function cargarEstudiantesCalificaciones(){
 
 function guardarCalificacion(){
 
-    const anio =
-        document.getElementById("calAnio").value;
+    const estudianteId =
+        document.getElementById("calEstudiante").value;
 
     const nivel =
         document.getElementById("calNivel").value;
@@ -2341,299 +2489,289 @@ function guardarCalificacion(){
         document.getElementById("calGrado").value;
 
     const seccion =
-        document.getElementById("calSeccion").value.trim();
+        document.getElementById("calSeccion").value;
 
-    const estudianteId =
-        document.getElementById("calEstudiante").value;
-
-    const disciplina =
-        document.getElementById("calDisciplina").value;
+    const asignatura =
+        document.getElementById("calAsignatura").value;
 
     const corte =
         document.getElementById("calCorte").value;
 
-    const nota =
-        document.getElementById("calNota").value;
-
-    const categoria =
-        document.getElementById("calCategoria").value;
-
-    const observacion =
-        document.getElementById("calObservacion").value.trim();
-
-    const tipo =
-        obtenerTipoEvaluacion();
-
-    if(!anio || !nivel || !grado || !estudianteId || !corte){
-
-        alert("Complete los datos obligatorios.");
-
-        return;
-    }
-
-    /*
-       Inicial no necesita disciplina.
-    */
-
-    if(nivel !== "Educación Inicial" && !disciplina){
-
-        alert("Seleccione una disciplina.");
-
-        return;
-    }
-
-    /*
-       Validación numérica.
-    */
-
-    if(tipo === "numerica"){
-
-        if(
-            nota === "" ||
-            isNaN(Number(nota)) ||
-            Number(nota) < 0 ||
-            Number(nota) > 100
-        ){
-
-            alert("La nota debe estar entre 0 y 100.");
-
-            return;
-        }
-
-    }
-
-    /*
-       Validación cualitativa.
-    */
 
     if(
-        tipo === "cualitativa-inicial" ||
-        tipo === "cualitativa-primaria"
+        !estudianteId ||
+        !nivel ||
+        !grado ||
+        !seccion ||
+        !asignatura
     ){
 
-        if(!categoria){
+        alert(
+            "Complete nivel, grado, sección, estudiante y asignatura."
+        );
 
-            alert("Seleccione una categoría de evaluación.");
-
-            return;
-        }
+        return;
 
     }
+
+
+    const estudiantes =
+        obtenerDatos(KEY_ESTUDIANTES);
 
     const estudiante =
         estudiantes.find(
             e=>String(e.id) === String(estudianteId)
         );
 
+
     if(!estudiante){
 
         alert("No se encontró el estudiante.");
 
         return;
+
     }
 
-    /*
-       Evitar duplicados exactos.
-    */
 
-    const existe =
-        calificaciones.some(c=>
+    const numerica =
+        esCalificacionNumerica();
 
-            String(c.estudianteId) === String(estudianteId) &&
+    let resultado="";
 
-            normalizar(c.anio) === normalizar(anio) &&
 
-            normalizar(c.corte) === normalizar(corte) &&
+    if(numerica){
 
-            normalizar(c.disciplina || "") ===
-            normalizar(disciplina || "")
+        const nota=
+            Number(
+                document.getElementById("calNota").value
+            );
 
-        );
+        if(
+            isNaN(nota) ||
+            nota < 0 ||
+            nota > 100
+        ){
 
-    if(existe){
+            alert(
+                "La nota debe estar entre 0 y 100."
+            );
 
-        alert(
-            "Ya existe una calificación para este estudiante, " +
-            "disciplina y corte evaluativo."
-        );
+            return;
 
-        return;
-    }
+        }
 
-    let valorEvaluacion = "";
-
-    if(tipo === "numerica"){
-
-        valorEvaluacion = Number(nota);
+        resultado=nota;
 
     }else{
 
-        valorEvaluacion = categoria;
+        resultado=
+            document.getElementById("calCategoria").value;
+
+        if(!resultado){
+
+            alert("Seleccione una categoría.");
+
+            return;
+
+        }
 
     }
 
-    const nombre =
-        `${estudiante.nombres || estudiante.nombre || ""}
-         ${estudiante.apellidos || estudiante.apellido || ""}`.trim();
 
-    const registro = {
+    const datos =
+        obtenerDatos(KEY_CALIFICACIONES);
+
+
+    /*
+       EVITAR DUPLICADOS
+    */
+
+    const duplicado =
+        datos.some(c=>
+
+            String(c.estudianteId) ===
+            String(estudiante.id)
+
+            &&
+
+            normalizarGrado(c.grado) ===
+            normalizarGrado(grado)
+
+            &&
+
+            normalizarSeccion(c.seccion) ===
+            normalizarSeccion(seccion)
+
+            &&
+
+            normalizarNivel(c.nivel) ===
+            normalizarNivel(nivel)
+
+            &&
+
+            c.asignatura === asignatura
+
+            &&
+
+            c.corte === corte
+
+        );
+
+
+    if(duplicado){
+
+        alert(
+            "Ya existe una calificación para este estudiante, asignatura y corte."
+        );
+
+        return;
+
+    }
+
+
+    const registro={
 
         id:Date.now(),
 
-        anio,
+        anio:
+            document.getElementById("calAnio").value,
 
-        nivel,
+        estudianteId:
+            estudiante.id,
 
-        grado,
+        estudiante:
+            estudiante.nombre,
 
-        seccion,
+        nivel:nivel,
 
-        estudianteId,
+        grado:grado,
 
-        estudiante:nombre,
+        seccion:seccion,
 
-        codigo:estudiante.codigo || "",
+        asignatura:asignatura,
 
-        disciplina:disciplina || "",
+        corte:corte,
 
-        corte,
+        tipo:
+            numerica
+            ? "Numerica"
+            : "Cualitativa",
 
-        tipoEvaluacion:tipo,
+        resultado:resultado,
 
-        valor:valorEvaluacion,
-
-        nota:tipo === "numerica"
-            ? Number(nota)
-            : null,
-
-        categoria:
-            tipo === "numerica"
-            ? ""
-            : categoria,
-
-        observacion,
-
-        fechaRegistro:new Date().toISOString()
+        observacion:
+            document.getElementById("calObservacion").value.trim()
 
     };
 
-    calificaciones.push(registro);
 
-    guardarDatos(
-        KEY_CALIFICACIONES,
-        calificaciones
+    datos.push(registro);
+
+    guardarDatos(KEY_CALIFICACIONES,datos);
+
+
+    alert(
+        "Calificación guardada correctamente."
     );
 
-    mostrarCalificaciones();
 
-    limpiarCalificacion();
+    cargarCalificaciones();
 
     actualizarEstadisticas();
 
-    alert("Calificación guardada correctamente.");
-
-}
-
-function limpiarCalificacion(){
-
-    document.getElementById("calEstudiante").value = "";
-
-    document.getElementById("calDisciplina").value = "";
-
-    document.getElementById("calNota").value = "";
-
-    document.getElementById("calCategoria").value = "";
-
-    document.getElementById("calObservacion").value = "";
-
-    actualizarTipoEvaluacion();
+    limpiarCalificacion();
 
 }
 
 
 /* =========================================================
-   MOSTRAR CALIFICACIONES
+   TABLA DE CALIFICACIONES
 ========================================================= */
 
-function mostrarCalificaciones(){
+function cargarCalificaciones(){
 
-    calificaciones =
+    const datos =
         obtenerDatos(KEY_CALIFICACIONES);
 
-    const tbody =
+    const tabla =
         document.getElementById("tablaCalificaciones");
 
-    if(!tbody) return;
+    tabla.innerHTML="";
 
-    if(calificaciones.length === 0){
 
-        tbody.innerHTML =
-            `<tr>
-                <td colspan="10" class="empty">
-                    No hay calificaciones registradas.
-                </td>
-            </tr>`;
+    datos.forEach((c,index)=>{
 
-        return;
-    }
+        let resultadoHTML="";
 
-    tbody.innerHTML =
-        calificaciones
-        .slice()
-        .reverse()
-        .map(c=>{
+        if(c.tipo === "Numerica"){
 
-            let evaluacion = "";
+            const nota=Number(c.resultado);
 
-            if(c.tipoEvaluacion === "numerica"){
-                evaluacion =
-                    `<span class="badge badge-info">
-                        ${c.nota}
-                    </span>`;
-            }else{
-                evaluacion =
-                    `<span class="badge badge-success">
-                        ${c.categoria || c.valor || ""}
-                    </span>`;
+            let clase="badge-success";
+
+            if(nota < 60){
+                clase="badge-danger";
+            }else if(nota < 70){
+                clase="badge-warning";
             }
 
-            return `
-            <tr>
+            resultadoHTML=
+                `<span class="badge ${clase}">
+                    ${nota}
+                </span>`;
 
-                <td>${c.anio || ""}</td>
+        }else{
 
-                <td>
-                    <strong>${c.estudiante || ""}</strong>
-                </td>
+            resultadoHTML=
+                `<span class="badge badge-success">
+                    ${escaparHTML(c.resultado)}
+                </span>`;
 
-                <td>${c.nivel || ""}</td>
+        }
 
-                <td>${c.grado || ""}</td>
 
-                <td>${c.seccion || "Única"}</td>
+        tabla.innerHTML += `
 
-                <td>${c.disciplina || "Evaluación Inicial"}</td>
+        <tr>
 
-                <td>${c.corte || ""}</td>
+            <td>${index+1}</td>
 
-                <td>${evaluacion}</td>
+            <td>${escaparHTML(c.anio)}</td>
 
-                <td>${c.observacion || ""}</td>
+            <td>${escaparHTML(c.estudiante)}</td>
 
-                <td>
-                    <button
-                        class="btn btn-danger"
-                        onclick="eliminarCalificacion(${c.id})">
-                        🗑️
-                    </button>
-                </td>
+            <td>${escaparHTML(c.nivel)}</td>
 
-            </tr>
-            `;
+            <td>${escaparHTML(c.grado)}</td>
 
-        }).join("");
+            <td>${escaparHTML(c.seccion)}</td>
+
+            <td>${escaparHTML(c.asignatura)}</td>
+
+            <td>${escaparHTML(c.corte)}</td>
+
+            <td>${resultadoHTML}</td>
+
+            <td>${escaparHTML(c.observacion)}</td>
+
+            <td>
+
+                <button
+                    class="btn-danger"
+                    onclick="eliminarCalificacion(${c.id})">
+                    Eliminar
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
 
 }
+
 
 function eliminarCalificacion(id){
 
@@ -2641,17 +2779,115 @@ function eliminarCalificacion(id){
         return;
     }
 
-    calificaciones =
-        calificaciones.filter(c=>c.id !== id);
+    const datos=
+        obtenerDatos(KEY_CALIFICACIONES);
 
     guardarDatos(
         KEY_CALIFICACIONES,
-        calificaciones
+        datos.filter(c=>c.id!==id)
     );
 
-    mostrarCalificaciones();
+    cargarCalificaciones();
 
     actualizarEstadisticas();
+
+}
+
+
+/* =========================================================
+   LIMPIAR CALIFICACIONES
+========================================================= */
+
+function limpiarCalificacion(){
+
+    document.getElementById("calEstudiante").value="";
+    document.getElementById("calAsignatura").value="";
+    document.getElementById("calNota").value="";
+    document.getElementById("calCategoria").value="";
+    document.getElementById("calObservacion").value="";
+
+    configurarTipoCalificacion();
+
+}
+
+
+/* =========================================================
+   EVENTOS DE CALIFICACIONES
+========================================================= */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    const nivel =
+        document.getElementById("calNivel");
+
+    const grado =
+        document.getElementById("calGrado");
+
+    const seccion =
+        document.getElementById("calSeccion");
+
+
+    if(nivel){
+
+        nivel.addEventListener("change",function(){
+
+            actualizarGradosCalificaciones();
+
+            cargarEstudiantesCalificaciones();
+
+            cargarAsignaturas();
+
+            configurarTipoCalificacion();
+
+        });
+
+    }
+
+
+    if(grado){
+
+        grado.addEventListener("change",function(){
+
+            cargarEstudiantesCalificaciones();
+
+            cargarAsignaturas();
+
+            configurarTipoCalificacion();
+
+        });
+
+    }
+
+
+    if(seccion){
+
+        seccion.addEventListener(
+            "change",
+            cargarEstudiantesCalificaciones
+        );
+
+    }
+
+});
+
+
+/* =========================================================
+   REPORTES
+========================================================= */
+
+function actualizarReportes(){
+
+    document.getElementById("repEstudiantes").textContent =
+        obtenerDatos(KEY_ESTUDIANTES).length;
+
+    document.getElementById("repDocentes").textContent =
+        obtenerDatos(KEY_DOCENTES).length;
+
+    document.getElementById("repAsistencias").textContent =
+        obtenerDatos(KEY_ASISTENCIAS).length;
+
+    document.getElementById("repCalificaciones").textContent =
+        obtenerDatos(KEY_CALIFICACIONES).length;
 
 }
 
@@ -2662,126 +2898,116 @@ function eliminarCalificacion(id){
 
 function actualizarEstadisticas(){
 
-    estudiantes =
-        obtenerDatos(KEY_ESTUDIANTES);
+    document.getElementById("totalEstudiantes").textContent =
+        obtenerDatos(KEY_ESTUDIANTES).length;
 
-    docentes =
-        obtenerDatos(KEY_DOCENTES);
+    document.getElementById("totalDocentes").textContent =
+        obtenerDatos(KEY_DOCENTES).length;
 
-    asistencias =
-        obtenerDatos(KEY_ASISTENCIAS);
+    document.getElementById("totalAsistencias").textContent =
+        obtenerDatos(KEY_ASISTENCIAS).length;
 
-    calificaciones =
-        obtenerDatos(KEY_CALIFICACIONES);
-
-    const elementos = {
-
-        totalEstudiantes:
-            estudiantes.length,
-
-        totalDocentes:
-            docentes.length,
-
-        totalAsistencias:
-            asistencias.length,
-
-        totalCalificaciones:
-            calificaciones.length
-
-    };
-
-    Object.keys(elementos).forEach(id=>{
-
-        const el =
-            document.getElementById(id);
-
-        if(el){
-            el.textContent =
-                elementos[id];
-        }
-
-    });
-
-    actualizarReportes();
-
-}
-
-function actualizarReportes(){
-
-    const valores = {
-
-        reporteEstudiantes:
-            `${obtenerDatos(KEY_ESTUDIANTES).length} registrados`,
-
-        reporteDocentes:
-            `${obtenerDatos(KEY_DOCENTES).length} registrados`,
-
-        reporteAsistencia:
-            `${obtenerDatos(KEY_ASISTENCIAS).length} registros`,
-
-        reporteCalificaciones:
-            `${obtenerDatos(KEY_CALIFICACIONES).length} registros`
-
-    };
-
-    Object.keys(valores).forEach(id=>{
-
-        const el =
-            document.getElementById(id);
-
-        if(el){
-            el.textContent = valores[id];
-        }
-
-    });
+    document.getElementById("totalCalificaciones").textContent =
+        obtenerDatos(KEY_CALIFICACIONES).length;
 
 }
 
 
 /* =========================================================
-   EVENTOS
+   CONFIGURACIÓN
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded",()=>{
+function guardarConfiguracion(){
 
-    document.getElementById("asiFecha").value =
-        new Date().toISOString().split("T")[0];
+    const config={
 
-    document.getElementById("calNivel")
-        .addEventListener("change",()=>{
-            actualizarGrados("calNivel","calGrado");
-            configurarCalificaciones();
-        });
+        centro:
+            document.getElementById("configCentro").value,
 
-    document.getElementById("calGrado")
-        .addEventListener("change",()=>{
-            configurarCalificaciones();
-        });
+        director:
+            document.getElementById("configDirector").value,
 
-    document.getElementById("asiNivel")
-        .addEventListener("change",()=>{
-            actualizarGrados("asiNivel","asiGrado");
-            cargarEstudiantesAsistencia();
-        });
+        anio:
+            document.getElementById("configAnio").value
 
-    document.getElementById("asiGrado")
-        .addEventListener("change",()=>{
-            cargarEstudiantesAsistencia();
-        });
+    };
 
-    document.getElementById("asiSeccion")
-        .addEventListener("input",()=>{
-            cargarEstudiantesAsistencia();
-        });
+    localStorage.setItem(
+        KEY_CONFIG,
+        JSON.stringify(config)
+    );
 
-    document.getElementById("loginPassword")
-        .addEventListener("keydown",(e)=>{
+    alert("Configuración guardada correctamente.");
 
-            if(e.key === "Enter"){
-                iniciarSesion();
-            }
+}
 
-        });
+
+function cargarConfiguracion(){
+
+    try{
+
+        const config=
+            JSON.parse(
+                localStorage.getItem(KEY_CONFIG)
+            );
+
+        if(!config){
+            return;
+        }
+
+        if(config.centro){
+            document.getElementById("configCentro").value=
+                config.centro;
+        }
+
+        if(config.director){
+            document.getElementById("configDirector").value=
+                config.director;
+        }
+
+        if(config.anio){
+            document.getElementById("configAnio").value=
+                config.anio;
+        }
+
+    }catch(error){}
+
+}
+
+
+/* =========================================================
+   CARGAR TODO
+========================================================= */
+
+function cargarTodo(){
+
+    cargarEstudiantes();
+
+    cargarDocentes();
+
+    cargarAsistencias();
+
+    cargarCalificaciones();
+
+    actualizarEstadisticas();
+
+    actualizarReportes();
+
+    cargarConfiguracion();
+
+}
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+window.addEventListener("load",function(){
+
+    /*
+       El sistema queda preparado aunque todavía
+       no se haya iniciado sesión.
+    */
 
 });
 
