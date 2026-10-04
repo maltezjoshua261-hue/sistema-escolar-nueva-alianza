@@ -5861,14 +5861,20 @@ function imprimirSeguimiento(){
     const est=obtenerEstudianteSeguimiento(document.getElementById("segEstudiante")?.value);
     if(!est){alert("Seleccione un estudiante.");return;}
     const d=datosAcademicosSeguimiento(est);
-    const lista=obtenerSeguimientos().filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio)===Number(document.getElementById("segAnio").value));
+    const anio=Number(document.getElementById("segAnio").value);
+    const lista=obtenerSeguimientos().filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio)===anio);
     const area=document.getElementById("seguimiento");
-    const original=area.querySelector(".page-header")?.innerHTML||"";
-    let reporte='<div class="card"><h2>SEGUIMIENTO PEDAGÓGICO INDIVIDUAL</h2>'+
+    const temp=document.createElement("div");
+    temp.className="card";
+    temp.id="impresionSeguimientoTemporal";
+    temp.innerHTML='<div class="page-header"><div><h1>MINISTERIO DE EDUCACIÓN</h1><p>Centro Escolar Nueva Alianza · Seguimiento pedagógico</p></div></div>'+
+        '<h2>SEGUIMIENTO PEDAGÓGICO INDIVIDUAL</h2>'+
+        '<p><strong>Año:</strong> '+anio+'</p>'+
         '<p><strong>Estudiante:</strong> '+escaparHTML(est.nombre)+'</p>'+
         '<p><strong>Nivel:</strong> '+escaparHTML(est.nivel||"")+' &nbsp; <strong>Grado:</strong> '+escaparHTML(est.grado||"")+' &nbsp; <strong>Sección:</strong> '+escaparHTML(est.seccion||"")+'</p>'+
-        '<p><strong>Promedio:</strong> '+(d.promedio??"Sin datos")+' &nbsp; <strong>Asistencia:</strong> '+(d.asistencia===null?"Sin datos":d.asistencia+"%")+'</p></div>';
-    lista.forEach(x=>{reporte+='<div class="card"><h3>'+escaparHTML(x.fecha||"")+' — '+escaparHTML(x.tipo||"")+'</h3>'+
+        '<p><strong>Promedio:</strong> '+(d.promedio??"Sin datos")+' &nbsp; <strong>Asistencia:</strong> '+(d.asistencia===null?"Sin datos":d.asistencia+"%")+'</p>';
+    lista.forEach(x=>{
+        temp.innerHTML+='<hr><h3>'+escaparHTML(x.fecha||"")+' — '+escaparHTML(x.tipo||"")+'</h3>'+
         '<p><strong>Prioridad:</strong> '+escaparHTML(x.prioridad||"")+' &nbsp; <strong>Estado:</strong> '+escaparHTML(x.estado||"")+'</p>'+
         '<p><strong>Dificultades:</strong> '+escaparHTML(x.dificultades||"—")+'</p>'+
         '<p><strong>Fortalezas y avances:</strong> '+escaparHTML(x.fortalezas||"—")+'</p>'+
@@ -5876,11 +5882,14 @@ function imprimirSeguimiento(){
         '<p><strong>Compromisos:</strong> '+escaparHTML(x.compromisos||"—")+'</p>'+
         '<p><strong>Progreso:</strong> '+escaparHTML(x.progreso||"—")+'</p>'+
         '<p><strong>Observación:</strong> '+escaparHTML(x.observacion||"—")+'</p>'+
-        '<p><strong>Próxima revisión:</strong> '+escaparHTML(x.proximaRevision||"—")+'</p></div>';});
-    area.innerHTML='<div class="page-header"><div><h1>MINISTERIO DE EDUCACIÓN</h1><p>Centro Escolar Nueva Alianza · Seguimiento pedagógico</p></div></div>'+reporte;
+        '<p><strong>Próxima revisión:</strong> '+escaparHTML(x.proximaRevision||"—")+'</p>';
+    });
+    temp.innerHTML+='<hr><p><strong>Firma del docente:</strong> ________________________________</p>'+
+        '<p><strong>Firma del director:</strong> ________________________________</p>';
+    area.appendChild(temp);
     document.body.dataset.imprimiendo="seguimiento";
     window.print();
-    setTimeout(()=>{area.innerHTML='<div class="page-header">'+original+'</div>';delete document.body.dataset.imprimiendo;cargarEstudiantesSeguimiento();cargarSeguimientos();},500);
+    setTimeout(()=>{temp.remove();delete document.body.dataset.imprimiendo;},500);
 }
 
 function imprimirReporteSeguimiento(){
