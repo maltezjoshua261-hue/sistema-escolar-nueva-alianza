@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.3</title>
+<title>Sistema Escolar Nueva Alianza - v7.5</title>
 
 <style>
 *{
@@ -291,6 +291,85 @@ th{
     margin-bottom:15px;
 }
 
+/* BOLETA 7.5 */
+.boleta-documento{
+    background:#fff;
+    padding:30px;
+    border:1px solid #d9dee7;
+    border-radius:10px;
+    box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+.boleta-encabezado{
+    text-align:center;
+    border-bottom:3px solid #123b6d;
+    padding-bottom:14px;
+    margin-bottom:18px;
+}
+.boleta-titulo{font-size:22px;font-weight:bold;color:#123b6d;}
+.boleta-subtitulo{font-size:16px;font-weight:bold;margin-top:5px;}
+.boleta-datos{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px 20px;
+    padding:15px;
+    background:#f7f9fc;
+    border:1px solid #e1e5eb;
+    margin-bottom:18px;
+}
+.boleta-datos div{font-size:13px;}
+.boleta-seccion-titulo{
+    background:#123b6d;
+    color:#fff;
+    padding:8px 10px;
+    font-size:14px;
+    margin:16px 0 0;
+}
+.boleta-tabla th,.boleta-tabla td{text-align:center;}
+.boleta-tabla th:first-child,.boleta-tabla td:first-child{text-align:left;}
+.boleta-asistencia{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+    margin-top:10px;
+}
+.boleta-asistencia div{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+    font-size:13px;
+}
+.boleta-observaciones{margin-top:18px;min-height:45px;}
+.boleta-firmas{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    text-align:center;
+    margin-top:55px;
+    font-size:12px;
+}
+.boleta-pie{text-align:center;margin-top:25px;font-size:11px;color:#666;}
+@media(max-width:650px){
+    .boleta-datos{grid-template-columns:1fr;}
+    .boleta-asistencia{grid-template-columns:repeat(2,1fr);}
+    .boleta-firmas{grid-template-columns:1fr;}
+}
+@media print{
+    body{background:#fff;}
+    body *{visibility:hidden !important;}
+    #boletaDocumento,#boletaDocumento *{visibility:visible !important;}
+    #boletaDocumento{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        border:none;
+        box-shadow:none;
+        padding:10px;
+    }
+    .no-print{display:none !important;}
+    .boleta-tabla{font-size:11px;}
+    .boleta-documento{border:none;}
+}
 @media(max-width:900px){
     .sidebar{
         width:210px;
@@ -385,6 +464,10 @@ th{
 
             <button onclick="mostrarSeccion('reportes',this)">
                 📊 Reportes
+            </button>
+            
+            <button onclick="mostrarSeccion('boleta',this)">
+                📄 Boleta del estudiante
             </button>
 
             <button onclick="mostrarSeccion('configuracion',this)">
@@ -1127,6 +1210,98 @@ th{
                             </thead>
                             <tbody id="tablaReporteAsistencia"></tbody>
                         </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- BOLETA DEL ESTUDIANTE 7.5 -->
+            <section id="boleta" class="section">
+
+                <div class="card no-print">
+                    <h2>📄 Boleta del estudiante</h2>
+                    <div class="notice">
+                        Seleccione un estudiante para generar su boleta individual con datos personales,
+                        calificaciones por corte y resumen de asistencia.
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Año escolar</label>
+                            <select id="boletaAnio" onchange="generarBoleta()">
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estudiante</label>
+                            <select id="boletaEstudiante" onchange="generarBoleta()">
+                                <option value="">Seleccione un estudiante</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Filtrar corte</label>
+                            <select id="boletaCorte" onchange="generarBoleta()">
+                                <option value="">Todos los cortes</option>
+                                <option>I Corte</option>
+                                <option>II Corte</option>
+                                <option>III Corte</option>
+                                <option>IV Corte</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-primary" onclick="generarBoleta()">🔄 Generar boleta</button>
+                        <button class="btn-info" onclick="imprimirBoleta()">🖨️ Imprimir boleta</button>
+                    </div>
+                </div>
+
+                <div id="boletaDocumento" class="boleta-documento">
+                    <div class="boleta-encabezado">
+                        <div>
+                            <div class="boleta-titulo">CENTRO ESCOLAR NUEVA ALIANZA</div>
+                            <div class="boleta-subtitulo">BOLETA INDIVIDUAL DEL ESTUDIANTE</div>
+                        </div>
+                    </div>
+
+                    <div id="boletaDatosEstudiante" class="boleta-datos">
+                        Seleccione un estudiante para generar la boleta.
+                    </div>
+
+                    <h3 class="boleta-seccion-titulo">CALIFICACIONES</h3>
+                    <div class="table-container">
+                        <table class="boleta-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Asignatura</th>
+                                    <th>I Corte</th>
+                                    <th>II Corte</th>
+                                    <th>III Corte</th>
+                                    <th>IV Corte</th>
+                                    <th>Resultado final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="boletaTablaCalificaciones"></tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="boleta-seccion-titulo">ASISTENCIA</h3>
+                    <div id="boletaAsistencia" class="boleta-asistencia"></div>
+
+                    <div class="boleta-observaciones">
+                        <strong>Observaciones:</strong>
+                        <span id="boletaObservaciones">—</span>
+                    </div>
+
+                    <div class="boleta-firmas">
+                        <div>______________________________<br><strong>Docente</strong></div>
+                        <div>______________________________<br><strong>Director(a)</strong></div>
+                        <div>______________________________<br><strong>Madre, padre o tutor</strong></div>
+                    </div>
+
+                    <div class="boleta-pie">
+                        Centro Escolar Nueva Alianza · Año escolar <span id="boletaPieAnio">2026</span>
                     </div>
                 </div>
 
@@ -2732,7 +2907,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "7.4",
+        version: "7.5",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -2921,6 +3096,9 @@ function cargarTodo(){
     cargarAsistencias();
 
     cargarCalificaciones();
+
+    cargarEstudiantesBoleta();
+    generarBoleta();
 
     actualizarEstadisticas();
 
