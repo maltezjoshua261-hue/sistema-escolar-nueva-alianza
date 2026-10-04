@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.6</title>
+<title>Sistema Escolar Nueva Alianza - v9.7</title>
 
 <style>
 *{
@@ -519,7 +519,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 }
 <style>
 .alertas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.alerta-kpi{padding:16px;border-radius:14px;background:#fff;border:1px solid #e5e7eb;text-align:center}.alerta-kpi strong{display:block;font-size:28px}.alerta-kpi span{font-size:13px;color:#666}.alerta-alta{border-left:5px solid #dc3545!important}.alerta-media{border-left:5px solid #fd7e14!important}.alerta-baja{border-left:5px solid #ffc107!important}.riesgo-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}.riesgo-alto{background:#f8d7da;color:#842029}.riesgo-medio{background:#ffe5d0;color:#8a3d00}.riesgo-bajo{background:#fff3cd;color:#664d03}.alerta-acciones{display:flex;gap:5px;flex-wrap:wrap}.alerta-acciones button{padding:5px 8px;font-size:12px}.alertas-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:18px}.alerta-detalle{background:#f8fafc;border-radius:12px;padding:16px}.alerta-detalle h3{margin-top:0}.alerta-filtros{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end}.alerta-filtros label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}.alerta-filtros input,.alerta-filtros select{width:100%;padding:9px;border:1px solid #d1d5db;border-radius:8px}@media(max-width:900px){.alertas-kpis{grid-template-columns:repeat(2,1fr)}.alertas-grid{grid-template-columns:1fr}.alerta-filtros{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="alertasPreventivas"] .no-print{display:none!important}body[data-imprimiendo="alertasPreventivas"] .section:not(#alertasPreventivas){display:none!important}body[data-imprimiendo="alertaEstudiante"] .section:not(#alertasPreventivas){display:none!important}}
-/* BITÁCORA V9.6 */
+/* BITÁCORA V9.7 */
 .audit-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:20px;border-radius:14px;margin-bottom:18px}.audit-header h2{color:#fff;margin-bottom:5px}.audit-header p{opacity:.9}.audit-stats{grid-template-columns:repeat(5,1fr)}@media(max-width:900px){.audit-stats{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="bitacora"] *{visibility:hidden!important}body[data-imprimiendo="bitacora"] #bitacora,body[data-imprimiendo="bitacora"] #bitacora *{visibility:visible!important}body[data-imprimiendo="bitacora"] #bitacora{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="bitacora"] #bitacora .actions,body[data-imprimiendo="bitacora"] #bitacora .notice{display:none!important}}
 </style>
 </head>
@@ -2627,7 +2627,7 @@ function guardarDatos(clave, datos){
 
 
 /* =========================================================
-   AUDITORÍA ADMINISTRATIVA V9.6
+   AUDITORÍA ADMINISTRATIVA V9.7
 ========================================================= */
 function obtenerIdentidadAuditoria(){
     const ses=obtenerSesionActual();
@@ -4500,6 +4500,7 @@ function guardarConfiguracion(){
         KEY_CONFIG,
         JSON.stringify(config)
     );
+    registrarAuditoria("Editar","Configuración","Actualización de configuración institucional","CONFIG",{anio:config.anio||new Date().getFullYear()});
 
     alert("Configuración guardada correctamente.");
 
@@ -4547,7 +4548,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "9.6",
+        version: "9.7",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -4706,6 +4707,7 @@ function importarRespaldo(event){
                 KEY_AUDITORIA,
                 Array.isArray(respaldo.auditoria) ? respaldo.auditoria : []
             );
+            registrarAuditoria("Restaurar","Respaldo","Restauración de respaldo del sistema","RESPALDO-"+Date.now(),{anio:new Date().getFullYear()});
 
             if(respaldo.configuracion){
                 localStorage.setItem(
@@ -4783,6 +4785,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_SEGUIMIENTOS);
     localStorage.removeItem(KEY_ALERTAS);
     localStorage.removeItem(KEY_AUDITORIA);
+    registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
     cargarTodo();
 
@@ -5672,6 +5675,7 @@ function cerrarAnioEscolar(){
     if(!confirmar)return;
     const sesion=obtenerSesionActual();
     guardarCierreAnualRegistro({id:Date.now().toString(),anio,estado:"Cerrado",fecha:new Date().toISOString().slice(0,10),usuario:sesion?.usuario||"Director"});
+    registrarAuditoria("Cerrar","Cierre anual","Cierre del año escolar "+anio,"CIERRE-"+anio,{anio:anio});
     cargarCierreAnual();alert("✅ El año escolar "+anio+" fue cerrado correctamente.");
 }
 function reabrirAnioEscolar(){
@@ -5680,6 +5684,7 @@ function reabrirAnioEscolar(){
     if(!cierre||cierre.estado!=="Cerrado"){alert("El año ya está abierto.");return;}
     if(!confirm("⚠️ Reabrir el año escolar "+anio+" permitirá modificar nuevamente sus registros académicos.\n\n¿Desea continuar?"))return;
     guardarCierreAnualRegistro({...cierre,estado:"Abierto",reabierto:new Date().toISOString().slice(0,10),usuarioReapertura:obtenerSesionActual()?.usuario||"Director"});
+    registrarAuditoria("Reabrir","Cierre anual","Reapertura del año escolar "+anio,"CIERRE-"+anio,{anio:anio});
     cargarCierreAnual();alert("🔓 El año escolar "+anio+" fue reabierto.");
 }
 function imprimirCierreAnual(){
