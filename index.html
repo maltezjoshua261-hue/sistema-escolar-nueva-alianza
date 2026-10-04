@@ -5637,7 +5637,20 @@ function cargarDashboardAcademico(){
  let hor=obtenerDatos(KEY_HORARIOS).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e));
  let pla=obtenerDatos(KEY_PLANIFICACIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
  if(ses?.rol==="Docente"){
-   const did=String(ses.docenteId||"");est=[];mat=mat.filter(x=>String(x.docenteId||"")===did||true);cal=cal.filter(x=>String(x.docenteId||"")===did);asi=asi.filter(x=>String(x.docenteId||"")===did);pro=[];car=car.filter(x=>String(x.docenteId||"")===did);hor=hor.filter(x=>String(x.docenteId||"")===did);pla=pla.filter(x=>String(x.docenteId||"")===did);
+   const did=String(ses.docenteId||"");
+   // El docente solo visualiza los grupos que tiene asignados activamente.
+   car=car.filter(x=>String(x.docenteId||"")===did);
+   const gruposDocente=new Set(car.map(x=>normalizarNivel(x.nivel)+"|"+normalizarGrado(x.grado)+"|"+normalizarSeccion(x.seccion)));
+   const idsEstudiantes=new Set(obtenerDatos(KEY_ESTUDIANTES)
+       .filter(e=>gruposDocente.has(normalizarNivel(e.nivel)+"|"+normalizarGrado(e.grado)+"|"+normalizarSeccion(e.seccion)))
+       .map(e=>String(e.id)));
+   est=est.filter(e=>idsEstudiantes.has(String(e.id)));
+   mat=mat.filter(x=>idsEstudiantes.has(String(x.estudianteId)));
+   cal=cal.filter(x=>String(x.docenteId||"")===did && idsEstudiantes.has(String(x.estudianteId)));
+   asi=asi.filter(x=>String(x.docenteId||"")===did && idsEstudiantes.has(String(x.estudianteId)));
+   pro=pro.filter(x=>idsEstudiantes.has(String(x.estudianteId)));
+   hor=hor.filter(x=>String(x.docenteId||"")===did);
+   pla=pla.filter(x=>String(x.docenteId||"")===did);
  }
  const activos=est.filter(e=>(e.estado||"Activo")==="Activo").length;
  const hombres=est.filter(e=>String(e.sexo||"").toLowerCase().startsWith("m")).length;
