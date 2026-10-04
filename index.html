@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.2</title>
+<title>Sistema Escolar Nueva Alianza - v7.3</title>
 
 <style>
 *{
@@ -764,8 +764,10 @@ th{
 
                     <h2>📝 Registro de calificaciones</h2>
 
+                    <input type="hidden" id="calId">
+
                     <div class="notice">
-                        <strong>Versión 7.1:</strong>
+                        <strong>Versión 7.3:</strong>
                         el sistema busca los estudiantes usando nivel, grado y sección,
                         aceptando diferentes formas de escribir 1.º y 2.º grado.
                     </div>
@@ -910,7 +912,7 @@ th{
 
                     <div class="actions">
 
-                        <button class="btn-success"
+                        <button id="btnGuardarCalificacion" class="btn-success"
                                 onclick="guardarCalificacion()">
                             💾 Guardar calificación
                         </button>
@@ -932,6 +934,29 @@ th{
                 <div class="card">
 
                     <h2>Calificaciones registradas</h2>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Buscar calificación</label>
+                            <input id="buscarCalificacion" type="search"
+                                   placeholder="Estudiante, asignatura, grado, corte o resultado"
+                                   oninput="cargarCalificaciones()">
+                        </div>
+                        <div class="form-group">
+                            <label>Filtrar corte</label>
+                            <select id="filtroCalCorte" onchange="cargarCalificaciones()">
+                                <option value="">Todos los cortes</option>
+                                <option>I Corte</option>
+                                <option>II Corte</option>
+                                <option>III Corte</option>
+                                <option>IV Corte</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="notice" id="resumenCalificaciones">
+                        Seleccione un grupo para registrar y consultar calificaciones.
+                    </div>
 
                     <div class="table-container">
 
@@ -1819,221 +1844,96 @@ function cargarAsistencias(){
     if(!lista.length) tabla.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
 /* =========================================================
-   CALIFICACIONES
+   CALIFICACIONES 7.3
 ========================================================= */
 
 function actualizarCalificaciones(){
 
-    const nivel =
-        document.getElementById("calNivel").value;
-
-    const grado =
-        document.getElementById("calGrado").value;
-
-    const seccion =
-        document.getElementById("calSeccion").value;
-
     actualizarGradosCalificaciones();
-
     cargarEstudiantesCalificaciones();
-
     cargarAsignaturas();
-
     configurarTipoCalificacion();
 
 }
 
 
 /* =========================================================
-   GRADOS DE CALIFICACIONES
+   GRADOS
 ========================================================= */
 
 function actualizarGradosCalificaciones(){
 
-    const nivel =
-        document.getElementById("calNivel").value;
-
-    const select =
-        document.getElementById("calGrado");
-
+    const nivel=document.getElementById("calNivel").value;
+    const select=document.getElementById("calGrado");
     const valorAnterior=select.value;
 
-    select.innerHTML =
-        '<option value="">Seleccione</option>';
+    select.innerHTML='<option value="">Seleccione</option>';
 
     let lista=[];
 
-    if(nivel === "Inicial"){
-        lista=GRADOS_INICIAL;
-    }
-
-    else if(nivel === "Primaria"){
-        lista=GRADOS_PRIMARIA;
-    }
-
-    else if(nivel === "Secundaria"){
-        lista=GRADOS_SECUNDARIA;
-    }
+    if(nivel==="Inicial") lista=GRADOS_INICIAL;
+    else if(nivel==="Primaria") lista=GRADOS_PRIMARIA;
+    else if(nivel==="Secundaria") lista=GRADOS_SECUNDARIA;
 
     lista.forEach(grado=>{
-
         const option=document.createElement("option");
-
         option.value=grado;
-
-        option.textContent =
-            nivel === "Inicial"
-            ? grado
-            : grado+"º grado";
-
+        option.textContent=nivel==="Inicial" ? grado : grado+"º grado";
         select.appendChild(option);
-
     });
 
-    /*
-       Si el grado anterior sigue existiendo,
-       lo volvemos a seleccionar.
-    */
-
-    if(
-        [...select.options].some(
-            o=>o.value===valorAnterior
-        )
-    ){
-
+    if([...select.options].some(o=>o.value===valorAnterior)){
         select.value=valorAnterior;
-
     }
 
 }
 
 
 /* =========================================================
-   CORRECCIÓN PRINCIPAL:
-   CARGAR ESTUDIANTES PARA 1.º Y 2.º
+   ESTUDIANTES DEL GRUPO
 ========================================================= */
 
 function cargarEstudiantesCalificaciones(){
 
-    const select =
-        document.getElementById("calEstudiante");
+    const select=document.getElementById("calEstudiante");
+    const valorAnterior=select.value;
 
-    select.innerHTML =
-        '<option value="">Seleccione estudiante</option>';
+    select.innerHTML='<option value="">Seleccione estudiante</option>';
 
-    const nivel =
-        document.getElementById("calNivel").value;
+    const nivel=document.getElementById("calNivel").value;
+    const grado=document.getElementById("calGrado").value;
+    const seccion=document.getElementById("calSeccion").value;
 
-    const grado =
-        document.getElementById("calGrado").value;
+    if(!nivel || !grado || !seccion) return;
 
-    const seccion =
-        document.getElementById("calSeccion").value;
+    const nivelBuscado=normalizarNivel(nivel);
+    const gradoBuscado=normalizarGrado(grado);
+    const seccionBuscada=normalizarSeccion(seccion);
 
-    if(!nivel || !grado || !seccion){
+    const encontrados=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+        normalizarNivel(e.nivel)===nivelBuscado &&
+        normalizarGrado(e.grado)===gradoBuscado &&
+        normalizarSeccion(e.seccion)===seccionBuscada &&
+        String(e.estado||"Activo").toLowerCase()!=="retirado" &&
+        String(e.estado||"Activo").toLowerCase()!=="trasladado"
+    );
 
-        return;
-
-    }
-
-    const estudiantes =
-        obtenerDatos(KEY_ESTUDIANTES);
-
-    /*
-       NORMALIZAMOS LOS TRES CAMPOS ANTES DE COMPARAR.
-
-       Esto permite que un estudiante guardado como:
-       "1.º"
-       coincida con:
-       "1"
-       o:
-       "Primero"
-       o:
-       "1ro"
-    */
-
-    const nivelBuscado =
-        normalizarNivel(nivel);
-
-    const gradoBuscado =
-        normalizarGrado(grado);
-
-    const seccionBuscada =
-        normalizarSeccion(seccion);
-
-
-    const encontrados = estudiantes.filter(e=>{
-
-        const nivelEstudiante =
-            normalizarNivel(
-                e.nivel
-            );
-
-        const gradoEstudiante =
-            normalizarGrado(
-                e.grado
-            );
-
-        const seccionEstudiante =
-            normalizarSeccion(
-                e.seccion
-            );
-
-        return (
-
-            nivelEstudiante ===
-            nivelBuscado
-
-            &&
-
-            gradoEstudiante ===
-            gradoBuscado
-
-            &&
-
-            seccionEstudiante ===
-            seccionBuscada
-
-        );
-
-    });
-
-
-    /*
-       MOSTRAR RESULTADOS
-    */
+    encontrados.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
 
     encontrados.forEach(e=>{
-
-        const option =
-            document.createElement("option");
-
+        const option=document.createElement("option");
         option.value=e.id;
-
         option.textContent=e.nombre;
-
         select.appendChild(option);
-
     });
 
-
-    /*
-       Mensaje especial para detectar
-       fácilmente el problema durante la prueba.
-    */
-
-    if(encontrados.length === 0){
-
-        const option =
-            document.createElement("option");
-
+    if(encontrados.length===0){
+        const option=document.createElement("option");
         option.value="";
-
-        option.textContent=
-            "⚠️ No hay estudiantes en este grado/sección";
-
+        option.textContent="⚠️ No hay estudiantes activos en este grado/sección";
         select.appendChild(option);
-
+    }else if([...select.options].some(o=>String(o.value)===String(valorAnterior))){
+        select.value=valorAnterior;
     }
 
 }
@@ -2045,123 +1945,30 @@ function cargarEstudiantesCalificaciones(){
 
 function cargarAsignaturas(){
 
-    const nivel =
-        document.getElementById("calNivel").value;
+    const nivel=document.getElementById("calNivel").value;
+    const grado=normalizarGrado(document.getElementById("calGrado").value);
+    const select=document.getElementById("calAsignatura");
 
-    const grado =
-        normalizarGrado(
-            document.getElementById("calGrado").value
-        );
+    select.innerHTML='<option value="">Seleccione</option>';
 
-    const select =
-        document.getElementById("calAsignatura");
+    if(!nivel || !grado) return;
 
-    select.innerHTML =
-        '<option value="">Seleccione</option>';
+    let lista=[];
 
-    if(!nivel || !grado){
-
-        return;
-
+    if(nivel==="Inicial"){
+        lista=["Sin disciplina"];
+    }else if(nivel==="Primaria" && (grado==="1" || grado==="2")){
+        lista=[...DISCIPLINAS_CUALITATIVAS];
+    }else if(nivel==="Primaria" || nivel==="Secundaria"){
+        lista=[...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     }
 
-
-    /* EDUCACIÓN INICIAL
-       No utiliza disciplinas.
-    */
-
-    if(nivel === "Inicial"){
-
-        const option=
-            document.createElement("option");
-
-        option.value="Sin disciplina";
-        option.textContent="Sin disciplina";
-
+    lista.forEach(asignatura=>{
+        const option=document.createElement("option");
+        option.value=asignatura;
+        option.textContent=asignatura;
         select.appendChild(option);
-
-        return;
-
-    }
-
-
-    /*
-       1.º Y 2.º:
-       TODAS LAS EVALUACIONES SON CUALITATIVAS.
-    */
-
-    if(
-        nivel === "Primaria" &&
-        (grado === "1" || grado === "2")
-    ){
-
-        DISCIPLINAS_CUALITATIVAS.forEach(asignatura=>{
-
-            const option =
-                document.createElement("option");
-
-            option.value=asignatura;
-            option.textContent=asignatura;
-
-            select.appendChild(option);
-
-        });
-
-        return;
-
-    }
-
-
-    /*
-       3.º A 6.º:
-       BÁSICAS NUMÉRICAS
-       Y RESTO CUALITATIVAS.
-    */
-
-    if(nivel === "Primaria"){
-
-        [
-            ...BASICAS_NUMERICAS,
-            ...DISCIPLINAS_CUALITATIVAS
-        ].forEach(asignatura=>{
-
-            const option=
-                document.createElement("option");
-
-            option.value=asignatura;
-            option.textContent=asignatura;
-
-            select.appendChild(option);
-
-        });
-
-        return;
-
-    }
-
-
-    /*
-       SECUNDARIA
-    */
-
-    if(nivel === "Secundaria"){
-
-        [
-            ...BASICAS_NUMERICAS,
-            ...DISCIPLINAS_CUALITATIVAS
-        ].forEach(asignatura=>{
-
-            const option=
-                document.createElement("option");
-
-            option.value=asignatura;
-            option.textContent=asignatura;
-
-            select.appendChild(option);
-
-        });
-
-    }
+    });
 
 }
 
@@ -2172,49 +1979,23 @@ function cargarAsignaturas(){
 
 function esCalificacionNumerica(){
 
-    const nivel =
-        document.getElementById("calNivel").value;
+    const nivel=document.getElementById("calNivel").value;
+    const grado=normalizarGrado(document.getElementById("calGrado").value);
+    const asignatura=document.getElementById("calAsignatura").value;
 
-    const grado =
-        normalizarGrado(
-            document.getElementById("calGrado").value
-        );
+    if(nivel==="Inicial") return false;
 
-    const asignatura =
-        document.getElementById("calAsignatura").value;
-
-
-    if(nivel === "Inicial"){
+    if(nivel==="Primaria" && (grado==="1" || grado==="2")){
         return false;
     }
 
-
-    if(
-        nivel === "Primaria" &&
-        (grado === "1" || grado === "2")
-    ){
-
-        return false;
-
-    }
-
-
-    if(
-        nivel === "Primaria" &&
-        ["3","4","5","6"].includes(grado)
-    ){
-
+    if(nivel==="Primaria" && ["3","4","5","6"].includes(grado)){
         return BASICAS_NUMERICAS.includes(asignatura);
-
     }
 
-
-    if(nivel === "Secundaria"){
-
+    if(nivel==="Secundaria"){
         return BASICAS_NUMERICAS.includes(asignatura);
-
     }
-
 
     return false;
 
@@ -2223,29 +2004,17 @@ function esCalificacionNumerica(){
 
 function configurarTipoCalificacion(){
 
-    const numerica =
-        esCalificacionNumerica();
-
-    const grupoNota =
-        document.getElementById("grupoNota");
-
-    const grupoCategoria =
-        document.getElementById("grupoCategoria");
+    const numerica=esCalificacionNumerica();
+    const grupoNota=document.getElementById("grupoNota");
+    const grupoCategoria=document.getElementById("grupoCategoria");
 
     if(numerica){
-
         grupoNota.classList.remove("hidden");
-
         grupoCategoria.classList.add("hidden");
-
     }else{
-
         grupoNota.classList.add("hidden");
-
         grupoCategoria.classList.remove("hidden");
-
         cargarCategorias();
-
     }
 
 }
@@ -2257,267 +2026,124 @@ function configurarTipoCalificacion(){
 
 function cargarCategorias(){
 
-    const nivel =
-        document.getElementById("calNivel").value;
-
-    const select =
-        document.getElementById("calCategoria");
+    const nivel=document.getElementById("calNivel").value;
+    const select=document.getElementById("calCategoria");
+    const anterior=select.value;
 
     select.innerHTML="";
 
-    let categorias=[];
-
-
-    if(nivel === "Inicial"){
-
-        categorias=[
-            "AA",
-            "AP"
-        ];
-
-    }
-
-    else if(nivel === "Primaria"){
-
-        categorias=[
-            "AA",
-            "AS",
-            "AF"
-        ];
-
-    }
-
-    else{
-
-        categorias=[
-            "AA",
-            "AS",
-            "AF"
-        ];
-
-    }
-
+    const categorias=nivel==="Inicial"
+        ? ["AA","AP"]
+        : ["AA","AS","AF"];
 
     categorias.forEach(c=>{
-
-        const option=
-            document.createElement("option");
-
+        const option=document.createElement("option");
         option.value=c;
         option.textContent=c;
-
         select.appendChild(option);
-
     });
+
+    if(categorias.includes(anterior)) select.value=anterior;
 
 }
 
 
 /* =========================================================
-   GUARDAR CALIFICACIÓN
+   GUARDAR / ACTUALIZAR
 ========================================================= */
 
 function guardarCalificacion(){
 
-    const estudianteId =
-        document.getElementById("calEstudiante").value;
+    const calId=document.getElementById("calId").value;
+    const estudianteId=document.getElementById("calEstudiante").value;
+    const nivel=document.getElementById("calNivel").value;
+    const grado=document.getElementById("calGrado").value;
+    const seccion=document.getElementById("calSeccion").value;
+    const asignatura=document.getElementById("calAsignatura").value;
+    const corte=document.getElementById("calCorte").value;
+    const anio=document.getElementById("calAnio").value;
 
-    const nivel =
-        document.getElementById("calNivel").value;
-
-    const grado =
-        document.getElementById("calGrado").value;
-
-    const seccion =
-        document.getElementById("calSeccion").value;
-
-    const asignatura =
-        document.getElementById("calAsignatura").value;
-
-    const corte =
-        document.getElementById("calCorte").value;
-
-
-    if(
-        !estudianteId ||
-        !nivel ||
-        !grado ||
-        !seccion ||
-        !asignatura
-    ){
-
-        alert(
-            "Complete nivel, grado, sección, estudiante y asignatura."
-        );
-
+    if(!estudianteId || !nivel || !grado || !seccion || !asignatura || !corte){
+        alert("Complete año, nivel, grado, sección, estudiante, asignatura y corte.");
         return;
-
     }
 
-
-    const estudiantes =
-        obtenerDatos(KEY_ESTUDIANTES);
-
-    const estudiante =
-        estudiantes.find(
-            e=>String(e.id) === String(estudianteId)
-        );
-
-
-    if(!estudiante){
-
-        alert("No se encontró el estudiante.");
-
-        return;
-
-    }
-
-
-    const numerica =
-        esCalificacionNumerica();
-
-    let resultado="";
-
-
-    if(numerica){
-
-        const nota=
-            Number(
-                document.getElementById("calNota").value
-            );
-
-        if(
-            isNaN(nota) ||
-            nota < 0 ||
-            nota > 100
-        ){
-
-            alert(
-                "La nota debe estar entre 0 y 100."
-            );
-
-            return;
-
-        }
-
-        resultado=nota;
-
-    }else{
-
-        resultado=
-            document.getElementById("calCategoria").value;
-
-        if(!resultado){
-
-            alert("Seleccione una categoría.");
-
-            return;
-
-        }
-
-    }
-
-
-    const datos =
-        obtenerDatos(KEY_CALIFICACIONES);
-
-
-    /*
-       EVITAR DUPLICADOS
-    */
-
-    const duplicado =
-        datos.some(c=>
-
-            String(c.estudianteId) ===
-            String(estudiante.id)
-
-            &&
-
-            normalizarGrado(c.grado) ===
-            normalizarGrado(grado)
-
-            &&
-
-            normalizarSeccion(c.seccion) ===
-            normalizarSeccion(seccion)
-
-            &&
-
-            normalizarNivel(c.nivel) ===
-            normalizarNivel(nivel)
-
-            &&
-
-            c.asignatura === asignatura
-
-            &&
-
-            c.corte === corte
-
-        );
-
-
-    if(duplicado){
-
-        alert(
-            "Ya existe una calificación para este estudiante, asignatura y corte."
-        );
-
-        return;
-
-    }
-
-
-    const registro={
-
-        id:Date.now(),
-
-        anio:
-            document.getElementById("calAnio").value,
-
-        estudianteId:
-            estudiante.id,
-
-        estudiante:
-            estudiante.nombre,
-
-        nivel:nivel,
-
-        grado:grado,
-
-        seccion:seccion,
-
-        asignatura:asignatura,
-
-        corte:corte,
-
-        tipo:
-            numerica
-            ? "Numerica"
-            : "Cualitativa",
-
-        resultado:resultado,
-
-        observacion:
-            document.getElementById("calObservacion").value.trim()
-
-    };
-
-
-    datos.push(registro);
-
-    guardarDatos(KEY_CALIFICACIONES,datos);
-
-
-    alert(
-        "Calificación guardada correctamente."
+    const estudiante=obtenerDatos(KEY_ESTUDIANTES).find(
+        e=>String(e.id)===String(estudianteId)
     );
 
+    if(!estudiante){
+        alert("No se encontró el estudiante.");
+        return;
+    }
 
+    const numerica=esCalificacionNumerica();
+    let resultado="";
+
+    if(numerica){
+        const nota=Number(document.getElementById("calNota").value);
+        if(!Number.isFinite(nota) || nota<0 || nota>100){
+            alert("La nota debe estar entre 0 y 100.");
+            return;
+        }
+        resultado=nota;
+    }else{
+        resultado=document.getElementById("calCategoria").value;
+        if(!resultado){
+            alert("Seleccione una categoría.");
+            return;
+        }
+    }
+
+    const datos=obtenerDatos(KEY_CALIFICACIONES);
+
+    const existe=datos.find(c=>
+        String(c.estudianteId)===String(estudiante.id) &&
+        normalizarNivel(c.nivel)===normalizarNivel(nivel) &&
+        normalizarGrado(c.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(c.seccion)===normalizarSeccion(seccion) &&
+        c.asignatura===asignatura &&
+        c.corte===corte &&
+        String(c.anio||"")===String(anio) &&
+        String(c.id)!==String(calId)
+    );
+
+    if(existe){
+        alert("Ya existe una calificación para este estudiante, asignatura, año y corte. Puede editarla desde la tabla.");
+        return;
+    }
+
+    const registro={
+        id:calId ? Number(calId) : Date.now(),
+        anio:anio,
+        estudianteId:estudiante.id,
+        estudiante:estudiante.nombre,
+        nivel:nivel,
+        grado:grado,
+        seccion:seccion,
+        asignatura:asignatura,
+        corte:corte,
+        tipo:numerica ? "Numerica" : "Cualitativa",
+        resultado:resultado,
+        observacion:document.getElementById("calObservacion").value.trim()
+    };
+
+    if(calId){
+        const indice=datos.findIndex(c=>String(c.id)===String(calId));
+        if(indice<0){
+            alert("No se encontró el registro que desea actualizar.");
+            return;
+        }
+        datos[indice]=registro;
+    }else{
+        datos.push(registro);
+    }
+
+    guardarDatos(KEY_CALIFICACIONES,datos);
     cargarCalificaciones();
-
     actualizarEstadisticas();
+
+    alert(calId ? "Calificación actualizada correctamente." : "Calificación guardada correctamente.");
 
     limpiarCalificacion();
 
@@ -2525,126 +2151,175 @@ function guardarCalificacion(){
 
 
 /* =========================================================
-   TABLA DE CALIFICACIONES
+   TABLA + FILTROS
 ========================================================= */
 
 function cargarCalificaciones(){
 
-    const datos =
-        obtenerDatos(KEY_CALIFICACIONES);
+    const datos=obtenerDatos(KEY_CALIFICACIONES);
+    const tabla=document.getElementById("tablaCalificaciones");
+    const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value || "");
+    const filtroCorte=document.getElementById("filtroCalCorte")?.value || "";
 
-    const tabla =
-        document.getElementById("tablaCalificaciones");
+    const lista=datos.filter(c=>{
+
+        const texto=limpiarTexto([
+            c.anio,c.estudiante,c.nivel,c.grado,c.seccion,
+            c.asignatura,c.corte,c.resultado,c.observacion
+        ].join(" "));
+
+        return (!buscar || texto.includes(buscar)) &&
+               (!filtroCorte || c.corte===filtroCorte);
+
+    }).sort((a,b)=>String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es"));
 
     tabla.innerHTML="";
 
+    if(!lista.length){
+        tabla.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
+    }
 
-    datos.forEach((c,index)=>{
+    lista.forEach((c,index)=>{
 
         let resultadoHTML="";
 
-        if(c.tipo === "Numerica"){
-
+        if(c.tipo==="Numerica"){
             const nota=Number(c.resultado);
-
             let clase="badge-success";
-
-            if(nota < 60){
-                clase="badge-danger";
-            }else if(nota < 70){
-                clase="badge-warning";
-            }
-
-            resultadoHTML=
-                `<span class="badge ${clase}">
-                    ${nota}
-                </span>`;
-
+            if(nota<60) clase="badge-danger";
+            else if(nota<70) clase="badge-warning";
+            resultadoHTML='<span class="badge '+clase+'">'+nota+'</span>';
         }else{
-
-            resultadoHTML=
-                `<span class="badge badge-success">
-                    ${escaparHTML(c.resultado)}
-                </span>`;
-
+            resultadoHTML='<span class="badge badge-success">'+escaparHTML(c.resultado)+'</span>';
         }
 
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${index+1}</td>
-
-            <td>${escaparHTML(c.anio)}</td>
-
-            <td>${escaparHTML(c.estudiante)}</td>
-
-            <td>${escaparHTML(c.nivel)}</td>
-
-            <td>${escaparHTML(c.grado)}</td>
-
-            <td>${escaparHTML(c.seccion)}</td>
-
-            <td>${escaparHTML(c.asignatura)}</td>
-
-            <td>${escaparHTML(c.corte)}</td>
-
-            <td>${resultadoHTML}</td>
-
-            <td>${escaparHTML(c.observacion)}</td>
-
-            <td>
-
-                <button
-                    class="btn-danger"
-                    onclick="eliminarCalificacion(${c.id})">
-                    Eliminar
-                </button>
-
-            </td>
-
-        </tr>
-
-        `;
+        tabla.innerHTML += '<tr>' +
+            '<td>'+String(index+1)+'</td>' +
+            '<td>'+escaparHTML(c.anio)+'</td>' +
+            '<td>'+escaparHTML(c.estudiante)+'</td>' +
+            '<td>'+escaparHTML(c.nivel)+'</td>' +
+            '<td>'+escaparHTML(c.grado)+'</td>' +
+            '<td>'+escaparHTML(c.seccion)+'</td>' +
+            '<td>'+escaparHTML(c.asignatura)+'</td>' +
+            '<td>'+escaparHTML(c.corte)+'</td>' +
+            '<td>'+resultadoHTML+'</td>' +
+            '<td>'+escaparHTML(c.observacion || "")+'</td>' +
+            '<td>' +
+                '<button class="btn-warning" onclick="editarCalificacion('+c.id+')">✏️ Editar</button> ' +
+                '<button class="btn-danger" onclick="eliminarCalificacion('+c.id+')">Eliminar</button>' +
+            '</td>' +
+        '</tr>';
 
     });
+
+    actualizarResumenCalificaciones(lista);
+
+}
+
+
+function actualizarResumenCalificaciones(lista){
+
+    const elemento=document.getElementById("resumenCalificaciones");
+    if(!elemento) return;
+
+    const numericas=lista
+        .filter(c=>c.tipo==="Numerica" && Number.isFinite(Number(c.resultado)))
+        .map(c=>Number(c.resultado));
+
+    const promedio=numericas.length
+        ? (numericas.reduce((a,b)=>a+b,0)/numericas.length).toFixed(1)
+        : "—";
+
+    elemento.innerHTML=
+        "<strong>Registros mostrados:</strong> "+lista.length+
+        " &nbsp; | &nbsp; <strong>Promedio numérico:</strong> "+promedio+
+        (numericas.length ? " &nbsp; | &nbsp; <strong>Notas numéricas:</strong> "+numericas.length : "");
+
+}
+
+
+/* =========================================================
+   EDITAR
+========================================================= */
+
+function editarCalificacion(id){
+
+    const c=obtenerDatos(KEY_CALIFICACIONES).find(
+        registro=>String(registro.id)===String(id)
+    );
+
+    if(!c){
+        alert("No se encontró la calificación.");
+        return;
+    }
+
+    document.getElementById("calId").value=c.id;
+    document.getElementById("calAnio").value=c.anio || "2026";
+    document.getElementById("calNivel").value=c.nivel || "";
+
+    actualizarGradosCalificaciones();
+    document.getElementById("calGrado").value=c.grado || "";
+
+    document.getElementById("calSeccion").value=c.seccion || "";
+
+    cargarEstudiantesCalificaciones();
+    document.getElementById("calEstudiante").value=c.estudianteId;
+
+    cargarAsignaturas();
+    document.getElementById("calAsignatura").value=c.asignatura || "";
+
+    document.getElementById("calCorte").value=c.corte || "I Corte";
+
+    configurarTipoCalificacion();
+
+    if(c.tipo==="Numerica"){
+        document.getElementById("calNota").value=c.resultado;
+    }else{
+        document.getElementById("calCategoria").value=c.resultado;
+    }
+
+    document.getElementById("calObservacion").value=c.observacion || "";
+
+    const boton=document.getElementById("btnGuardarCalificacion");
+    if(boton) boton.textContent="💾 Actualizar calificación";
+
+    document.getElementById("calificaciones").scrollIntoView({behavior:"smooth"});
 
 }
 
 
 function eliminarCalificacion(id){
 
-    if(!confirm("¿Desea eliminar esta calificación?")){
-        return;
-    }
+    if(!confirm("¿Desea eliminar esta calificación?")) return;
 
-    const datos=
-        obtenerDatos(KEY_CALIFICACIONES);
+    const datos=obtenerDatos(KEY_CALIFICACIONES);
 
     guardarDatos(
         KEY_CALIFICACIONES,
-        datos.filter(c=>c.id!==id)
+        datos.filter(c=>String(c.id)!==String(id))
     );
 
     cargarCalificaciones();
-
     actualizarEstadisticas();
 
 }
 
 
 /* =========================================================
-   LIMPIAR CALIFICACIONES
+   LIMPIAR
 ========================================================= */
 
 function limpiarCalificacion(){
 
+    document.getElementById("calId").value="";
     document.getElementById("calEstudiante").value="";
     document.getElementById("calAsignatura").value="";
     document.getElementById("calNota").value="";
     document.getElementById("calCategoria").value="";
     document.getElementById("calObservacion").value="";
+
+    const boton=document.getElementById("btnGuardarCalificacion");
+    if(boton) boton.textContent="💾 Guardar calificación";
 
     configurarTipoCalificacion();
 
@@ -2652,64 +2327,37 @@ function limpiarCalificacion(){
 
 
 /* =========================================================
-   EVENTOS DE CALIFICACIONES
+   EVENTOS
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded",function(){
 
-    const nivel =
-        document.getElementById("calNivel");
-
-    const grado =
-        document.getElementById("calGrado");
-
-    const seccion =
-        document.getElementById("calSeccion");
-
+    const nivel=document.getElementById("calNivel");
+    const grado=document.getElementById("calGrado");
+    const seccion=document.getElementById("calSeccion");
 
     if(nivel){
-
         nivel.addEventListener("change",function(){
-
             actualizarGradosCalificaciones();
-
             cargarEstudiantesCalificaciones();
-
             cargarAsignaturas();
-
             configurarTipoCalificacion();
-
         });
-
     }
-
 
     if(grado){
-
         grado.addEventListener("change",function(){
-
             cargarEstudiantesCalificaciones();
-
             cargarAsignaturas();
-
             configurarTipoCalificacion();
-
         });
-
     }
 
-
     if(seccion){
-
-        seccion.addEventListener(
-            "change",
-            cargarEstudiantesCalificaciones
-        );
-
+        seccion.addEventListener("change",cargarEstudiantesCalificaciones);
     }
 
 });
-
 
 /* =========================================================
    REPORTES
@@ -2823,7 +2471,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "7.2",
+        version: "7.3",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
