@@ -2207,10 +2207,14 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                         </div>
                         <div class="form-group">
                             <label>Rol</label>
-                            <select id="usrRol">
+                            <select id="usrRol" onchange="actualizarSelectorUsuarioDocente()">
                                 <option value="Docente">Docente</option>
                                 <option value="Director">Director</option>
                             </select>
+                        </div>
+                        <div class="form-group" id="grupoUsrDocente">
+                            <label>Vincular con docente</label>
+                            <select id="usrDocente"><option value="">Seleccione docente</option></select>
                         </div>
                     </div>
                     <div class="actions">
@@ -4346,15 +4350,27 @@ function cargarUsuarios(){
     const usuarios=obtenerUsuarios();
     tbody.innerHTML=usuarios.map((u,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(u.usuario)+"</td><td>"+escaparHTML(u.rol)+"</td><td>"+(u.usuario==="admin"?"Principal":"<button class='btn-danger' onclick='eliminarUsuario(&quot;"+escaparHTML(u.id)+"&quot;)'>🗑️</button>")+"</td></tr>").join("");
 }
+function cargarDocentesSelectorUsuario(){
+    const s=document.getElementById("usrDocente");if(!s)return;
+    const prev=s.value,lista=obtenerDatos(KEY_DOCENTES).filter(d=>(d.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    s.innerHTML='<option value="">Seleccione docente</option>';
+    lista.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.nombre+(d.codigo?" · "+d.codigo:"");s.appendChild(o);});
+    if([...s.options].some(o=>String(o.value)===String(prev)))s.value=prev;
+}
+function actualizarSelectorUsuarioDocente(){
+    const rol=document.getElementById("usrRol")?.value,box=document.getElementById("grupoUsrDocente");if(box)box.style.display=rol==="Docente"?"block":"none";
+}
 function guardarUsuario(){
     if(!exigirDirector()) return;
     const usuario=document.getElementById("usrNombre").value.trim();
     const password=document.getElementById("usrPassword").value.trim();
     const rol=document.getElementById("usrRol").value;
+    const docenteId=document.getElementById("usrDocente")?.value||"";
     if(!usuario||!password){alert("Ingrese usuario y contraseña.");return;}
+    if(rol==="Docente"&&!docenteId){alert("Seleccione el docente que utilizará este usuario.");return;}
     const usuarios=obtenerUsuarios();
     if(usuarios.some(u=>u.usuario===usuario)){alert("Ese usuario ya existe.");return;}
-    usuarios.push({id:Date.now().toString(),usuario,password,rol});
+    usuarios.push({id:Date.now().toString(),usuario,password,rol,docenteId:rol==="Docente"?String(docenteId):""});
     guardarDatos(KEY_USUARIOS,usuarios);
     limpiarUsuario(); cargarUsuarios();
 }
@@ -4362,6 +4378,8 @@ function limpiarUsuario(){
     document.getElementById("usrNombre").value="";
     document.getElementById("usrPassword").value="";
     document.getElementById("usrRol").value="Docente";
+    if(document.getElementById("usrDocente"))document.getElementById("usrDocente").value="";
+    actualizarSelectorUsuarioDocente();
 }
 function eliminarUsuario(id){
     if(!exigirDirector()) return;
