@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.2</title>
+<title>Sistema Escolar Nueva Alianza - v8.3</title>
 
 <style>
 *{
@@ -444,6 +444,17 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 }
 
 @media print{body[data-imprimiendo="promocion"] *{visibility:hidden !important;}body[data-imprimiendo="promocion"] #promocionDocumento,body[data-imprimiendo="promocion"] #promocionDocumento *{visibility:visible !important;}body[data-imprimiendo="promocion"] #promocionDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15px;}body[data-imprimiendo="promocion"] #promocionDocumento .no-print{display:none !important;}}
+.grafico-barras{display:flex;align-items:flex-end;gap:14px;min-height:230px;padding:20px 10px 5px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fbfd;overflow-x:auto}
+.grafico-item{min-width:72px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:205px}
+.grafico-columna{width:42px;min-height:4px;background:#0d6efd;border-radius:7px 7px 0 0}
+.grafico-valor{font-size:12px;font-weight:bold;margin-bottom:5px}
+.grafico-etiqueta{font-size:11px;text-align:center;margin-top:7px;white-space:normal}
+.grafico-meses .grafico-item{min-width:55px}
+@media print{
+ body[data-imprimiendo="estadisticas"] *{visibility:hidden !important}
+ body[data-imprimiendo="estadisticas"] #estadisticasDocumento,body[data-imprimiendo="estadisticas"] #estadisticasDocumento *{visibility:visible !important}
+ body[data-imprimiendo="estadisticas"] #estadisticasDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none}
+}
 </style>
 </head>
 
@@ -526,6 +537,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('promocion',this)">
                 🎓 Promoción y traslado
+            </button>
+            <button onclick="mostrarSeccion('estadisticas',this)">
+                📊 Estadísticas y gráficos
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1749,6 +1763,61 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                         </table></div>
                         <div id="proPie" style="margin-top:18px;font-size:12px;color:#555;"></div>
                         <div style="margin-top:70px;text-align:center;font-size:12px;"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:80px;"><div>____________________________<br>Docente responsable</div><div>____________________________<br>Evert Josue Maltez Sanchez<br>Director</div></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESTADÍSTICAS Y GRÁFICOS 8.3 -->
+            <section id="estadisticas" class="section">
+                <div class="card">
+                    <h2>📊 Estadísticas y gráficos</h2>
+                    <div class="notice">Panel consolidado para analizar matrícula, asistencia, rendimiento y promoción. Los datos se calculan a partir de los registros existentes del sistema.</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar</label>
+                            <select id="estAnio" onchange="cargarEstadisticas()">
+                                <option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Nivel educativo</label>
+                            <select id="estNivel" onchange="actualizarGradosEstadisticas();cargarEstadisticas()">
+                                <option value="">Todos los niveles</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Grado</label>
+                            <select id="estGrado" onchange="cargarEstadisticas()"><option value="">Todos los grados</option></select>
+                        </div>
+                    </div>
+                    <div class="actions no-print">
+                        <button class="btn-primary" onclick="cargarEstadisticas()">🔄 Actualizar</button>
+                        <button class="btn-secondary" onclick="imprimirEstadisticas()">🖨️ Imprimir informe</button>
+                    </div>
+                </div>
+                <div id="estadisticasDocumento">
+                    <div class="stats">
+                        <div class="stat"><h3>Total estudiantes</h3><strong id="estTotal">0</strong></div>
+                        <div class="stat"><h3>Hombres</h3><strong id="estHombres">0</strong></div>
+                        <div class="stat"><h3>Mujeres</h3><strong id="estMujeres">0</strong></div>
+                        <div class="stat"><h3>Activos</h3><strong id="estActivos">0</strong></div>
+                        <div class="stat"><h3>Retirados</h3><strong id="estRetirados">0</strong></div>
+                        <div class="stat"><h3>Trasladados</h3><strong id="estTrasladados">0</strong></div>
+                        <div class="stat"><h3>Asistencias</h3><strong id="estAsistencias">0</strong></div>
+                        <div class="stat"><h3>% asistencia</h3><strong id="estTasa">0%</strong></div>
+                    </div>
+                    <div class="card"><h2>📚 Matrícula por grado</h2><div id="graficoGrados" class="grafico-barras"></div></div>
+                    <div class="card"><h2>👥 Matrícula por sexo</h2><div id="graficoSexo" class="grafico-barras"></div></div>
+                    <div class="card"><h2>📅 Asistencia mensual</h2><div id="graficoAsistencia" class="grafico-barras grafico-meses"></div></div>
+                    <div class="card"><h2>📈 Rendimiento académico</h2><div id="graficoRendimiento" class="grafico-barras"></div></div>
+                    <div class="card"><h2>🎓 Promoción, traslado y retiro</h2><div id="graficoPromocion" class="grafico-barras"></div></div>
+                    <div class="card">
+                        <h2>📋 Resumen por grado y sección</h2>
+                        <div class="table-container"><table>
+                            <thead><tr><th>Nivel</th><th>Grado</th><th>Sección</th><th>Total</th><th>Hombres</th><th>Mujeres</th><th>Promedio</th><th>Asistencia</th></tr></thead>
+                            <tbody id="tablaEstadisticasGrupos"></tbody>
+                        </table></div>
+                    </div>
+                    <div class="card" style="text-align:center;font-size:12px;color:#666;">
+                        <div id="estadisticasEncabezado">Año escolar: 2026</div>
+                        <div id="estadisticasPie">Informe estadístico administrativo.</div>
                     </div>
                 </div>
             </section>
@@ -4193,6 +4262,66 @@ function imprimirBoleta(){
     window.print();
 }
 
+/* =========================================================
+   ESTADÍSTICAS Y GRÁFICOS 8.3
+========================================================= */
+function actualizarGradosEstadisticas(){
+    const s=document.getElementById("estGrado"); if(!s)return;
+    const anterior=s.value, nivel=document.getElementById("estNivel")?.value||"";
+    const grados=[];
+    if(nivel==="Inicial")grados.push("I Nivel","II Nivel","III Nivel");
+    else if(nivel==="Primaria")for(let i=1;i<=6;i++)grados.push(String(i));
+    else if(nivel==="Secundaria")for(let i=7;i<=11;i++)grados.push(String(i));
+    else ["I Nivel","II Nivel","III Nivel","1","2","3","4","5","6","7","8","9","10","11"].forEach(g=>grados.push(g));
+    s.innerHTML='<option value="">Todos los grados</option>'+grados.map(g=>'<option value="'+escaparHTML(g)+'">'+escaparHTML(g)+'</option>').join("");
+    if([...s.options].some(o=>o.value===anterior))s.value=anterior;
+}
+function dibujarBarras(id,items){
+    const box=document.getElementById(id);if(!box)return;
+    if(!items.length){box.innerHTML='<div style="padding:30px;text-align:center;color:#777;width:100%;">No hay datos para mostrar.</div>';return;}
+    const max=Math.max(1,...items.map(x=>Number(x.valor)||0));
+    box.innerHTML=items.map(x=>{
+        const v=Number(x.valor)||0,h=v?Math.max(6,Math.round(v/max*165)):3;
+        return '<div class="grafico-item"><div class="grafico-valor">'+escaparHTML(String(x.valor))+'</div><div class="grafico-columna" style="height:'+h+'px" title="'+escaparHTML(String(x.valor))+'"></div><div class="grafico-etiqueta">'+escaparHTML(String(x.etiqueta))+'</div></div>';
+    }).join("");
+}
+function cargarEstadisticas(){
+    const anio=document.getElementById("estAnio")?.value||"2026",nivel=document.getElementById("estNivel")?.value||"",grado=document.getElementById("estGrado")?.value||"";
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.anio)===String(anio)&&(!nivel||limpiarTexto(m.nivel||"")===limpiarTexto(nivel))&&(!grado||normalizarGrado(m.grado)===normalizarGrado(grado)));
+    let base=mats.map(m=>estudiantes.find(e=>String(e.id)===String(m.estudianteId))).filter(Boolean);
+    if(!base.length)base=estudiantes.filter(e=>(!nivel||limpiarTexto(e.nivel||"")===limpiarTexto(nivel))&&(!grado||normalizarGrado(e.grado)===normalizarGrado(grado)));
+    const ids=new Set(base.map(e=>String(e.id)));
+    const total=base.length,hombres=base.filter(e=>limpiarTexto(e.sexo||"")==="masculino").length,mujeres=base.filter(e=>limpiarTexto(e.sexo||"")==="femenino").length;
+    const activos=base.filter(e=>limpiarTexto(e.estado||"activo")==="activo").length,retirados=base.filter(e=>limpiarTexto(e.estado||"")==="retirado").length,trasladados=base.filter(e=>limpiarTexto(e.estado||"")==="trasladado").length;
+    const as=obtenerDatos(KEY_ASISTENCIAS).filter(a=>String(a.fecha||"").slice(0,4)===String(anio)&&ids.has(String(a.estudianteId)));
+    const presentes=as.filter(a=>limpiarTexto(a.estado||"").includes("presente")).length,tardanzas=as.filter(a=>limpiarTexto(a.estado||"").includes("tardanza")).length;
+    const computables=as.length, tasa=computables?((presentes+tardanzas)/computables*100).toFixed(1):"0.0";
+    const el=id=>document.getElementById(id);
+    [["estTotal",total],["estHombres",hombres],["estMujeres",mujeres],["estActivos",activos],["estRetirados",retirados],["estTrasladados",trasladados],["estAsistencias",as.length]].forEach(([id,v])=>{if(el(id))el(id).textContent=v;});
+    if(el("estTasa"))el("estTasa").textContent=tasa+"%";
+
+    const porGrado={};base.forEach(e=>{const k=e.grado||"Sin grado";porGrado[k]=(porGrado[k]||0)+1;});
+    dibujarBarras("graficoGrados",Object.entries(porGrado).sort((a,b)=>String(a[0]).localeCompare(String(b[0]),"es")).map(([etiqueta,valor])=>({etiqueta,valor})));
+    dibujarBarras("graficoSexo",[{etiqueta:"Hombres",valor:hombres},{etiqueta:"Mujeres",valor:mujeres}]);
+    const meses=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+    dibujarBarras("graficoAsistencia",meses.map((m,i)=>({etiqueta:m,valor:as.filter(a=>Number(String(a.fecha||"").slice(5,7))===i+1&&limpiarTexto(a.estado||"").includes("presente")).length})));
+
+    const resultados={Satisfactorio:0,"En proceso":0,"Requiere apoyo":0,"Sin calificaciones":0};
+    base.forEach(e=>{const r=calcularRendimientoEstudiante(e,anio);if(resultados[r.resultado]!==undefined)resultados[r.resultado]++;});
+    dibujarBarras("graficoRendimiento",Object.entries(resultados).map(([etiqueta,valor])=>({etiqueta,valor})));
+
+    const prom=obtenerDatos(KEY_PROMOCIONES).filter(p=>String(p.anio)===String(anio)&&ids.has(String(p.estudianteId))),pc={"Promovido":0,"Reprobado":0,"Pendiente":0,"Trasladado":0,"Retirado":0};
+    prom.forEach(p=>{if(pc[p.resultado]!==undefined)pc[p.resultado]++;});
+    dibujarBarras("graficoPromocion",Object.entries(pc).map(([etiqueta,valor])=>({etiqueta,valor})));
+
+    const grupos={};base.forEach(e=>{const m=mats.find(x=>String(x.estudianteId)===String(e.id))||{},k=[e.nivel||m.nivel||"—",e.grado||m.grado||"—",e.seccion||m.seccion||"—"].join("|");if(!grupos[k])grupos[k]={nivel:e.nivel||m.nivel||"—",grado:e.grado||m.grado||"—",seccion:e.seccion||m.seccion||"—",total:0,h:0,f:0,ids:[]};const g=grupos[k];g.total++;g.ids.push(String(e.id));if(limpiarTexto(e.sexo||"")==="masculino")g.h++;if(limpiarTexto(e.sexo||"")==="femenino")g.f++;});
+    const cal=obtenerDatos(KEY_CALIFICACIONES),tbody=el("tablaEstadisticasGrupos"),arr=Object.values(grupos).sort((a,b)=>(a.nivel+" "+a.grado+" "+a.seccion).localeCompare(b.nivel+" "+b.grado+" "+b.seccion,"es"));
+    if(tbody)tbody.innerHTML=arr.length?arr.map(g=>{const rs=cal.filter(x=>g.ids.includes(String(x.estudianteId))&&String(x.anio||"2026")===String(anio)&&x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado)),pr=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):"—",ga=as.filter(x=>g.ids.includes(String(x.estudianteId))),gp=ga.filter(x=>limpiarTexto(x.estado||"").includes("presente")).length,gt=ga.length?((gp+ga.filter(x=>limpiarTexto(x.estado||"").includes("tardanza")).length)/ga.length*100).toFixed(1)+"%":"—";return '<tr><td>'+escaparHTML(g.nivel)+'</td><td>'+escaparHTML(g.grado)+'</td><td>'+escaparHTML(g.seccion)+'</td><td>'+g.total+'</td><td>'+g.h+'</td><td>'+g.f+'</td><td>'+pr+'</td><td>'+gt+'</td></tr>';}).join(""):'<tr><td colspan="8" style="text-align:center;color:#777;">No hay datos para mostrar.</td></tr>';
+    if(el("estadisticasEncabezado"))el("estadisticasEncabezado").textContent="Año escolar: "+anio+(nivel?" · Nivel: "+nivel:"")+(grado?" · Grado: "+grado:"");
+    if(el("estadisticasPie"))el("estadisticasPie").textContent="Informe generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Herramienta estadística administrativa de referencia.";
+}
+function imprimirEstadisticas(){cargarEstadisticas();document.body.setAttribute("data-imprimiendo","estadisticas");window.print();document.body.removeAttribute("data-imprimiendo");}
 </script>
 
 </body>
