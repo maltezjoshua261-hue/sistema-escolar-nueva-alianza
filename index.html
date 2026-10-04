@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.5</title>
+<title>Sistema Escolar Nueva Alianza - v8.6</title>
 
 <style>
 *{
@@ -459,6 +459,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
 /* DOCUMENTOS OFICIALES 8.5 */
 .documento-oficial{background:#fff;border:1px solid #d9dee7;border-radius:12px;padding:38px;box-shadow:0 3px 12px rgba(0,0,0,.06);max-width:1000px;margin:0 auto;min-height:500px}.doc-encabezado{text-align:center;border-bottom:2px solid #123b6d;padding-bottom:15px;margin-bottom:20px}.doc-encabezado h1{font-size:17px;color:#123b6d}.doc-encabezado h2{font-size:20px;margin:5px 0}.doc-encabezado p{font-size:13px;margin:3px 0}.doc-titulo{text-align:center;font-size:18px;font-weight:bold;text-transform:uppercase;margin:20px 0;color:#123b6d}.doc-cuerpo{font-size:14px;line-height:1.7;text-align:justify}.doc-datos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;background:#f7f9fc;border:1px solid #e1e5eb;padding:15px;margin:15px 0}.doc-datos div{font-size:13px}.doc-tabla{margin-top:15px}.doc-firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;text-align:center;margin-top:70px;font-size:12px}.doc-firma{border-top:1px solid #333;padding-top:7px}.doc-pie{text-align:center;font-size:10px;color:#666;margin-top:30px}.doc-sello{margin-top:18px;text-align:center;font-size:11px;color:#666}.doc-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}.doc-resumen div{border:1px solid #ddd;padding:12px;text-align:center}.doc-resumen strong{display:block;font-size:20px;color:#123b6d;margin-top:5px}@media(max-width:700px){.documento-oficial{padding:20px}.doc-datos{grid-template-columns:1fr}.doc-firmas{grid-template-columns:1fr}.doc-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="documentoOficial"] *{visibility:hidden!important}body[data-imprimiendo="documentoOficial"] #documentoOficial,body[data-imprimiendo="documentoOficial"] #documentoOficial *{visibility:visible!important}body[data-imprimiendo="documentoOficial"] #documentoOficial{position:absolute;left:0;top:0;width:100%;max-width:none;border:none;box-shadow:none;padding:20px}.no-print{display:none!important}}
+
+/* CIERRE ANUAL 8.6 */
+.cierre-estado{display:inline-block;padding:7px 14px;border-radius:20px;font-weight:bold}.cierre-abierto{background:#d1e7dd;color:#0f5132}.cierre-cerrado{background:#f8d7da;color:#842029}.cierre-resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:15px 0}.cierre-resumen .stat-cierre{border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;background:#f9fbfd}.stat-cierre strong{display:block;font-size:25px;color:#0d6efd;margin-top:5px}.cierre-nota{margin-top:15px;padding:12px;border-left:4px solid #198754;background:#eefaf3}.cierre-tabla{margin-top:15px}@media(max-width:800px){.cierre-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="cierreAnual"] *{visibility:hidden!important}body[data-imprimiendo="cierreAnual"] #cierreAnual,body[data-imprimiendo="cierreAnual"] #cierreAnual *{visibility:visible!important}body[data-imprimiendo="cierreAnual"] #cierreAnual{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}.no-print{display:none!important}}
 </style>
 </head>
 
@@ -547,6 +550,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('estadisticas',this)">
                 📊 Estadísticas y gráficos
+            </button>
+
+            <button onclick="mostrarSeccion('cierreAnual',this)">
+                🔒 Cierre del año escolar
             </button>
 
             <button onclick="mostrarSeccion('documentosOficiales',this)">
@@ -1900,6 +1907,46 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </section>
 
             <!-- DOCUMENTOS OFICIALES 8.5 -->
+            <!-- CIERRE DEL AÑO ESCOLAR 8.6 -->
+            <section id="cierreAnual" class="section">
+                <div class="card">
+                    <h2>🔒 Cierre del año escolar</h2>
+                    <div class="notice">
+                        El cierre bloquea la modificación de calificaciones, asistencia, matrícula y promoción del año seleccionado.
+                        Solo el Director puede cerrar o reabrir un año escolar.
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Año escolar</label>
+                            <select id="cierreAnio" onchange="cargarCierreAnual()">
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <input id="cierreEstado" readonly value="Abierto">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de cierre</label>
+                            <input id="cierreFecha" readonly value="—">
+                        </div>
+                    </div>
+                    <div class="actions no-print">
+                        <button class="btn-danger solo-director" onclick="cerrarAnioEscolar()">🔒 Cerrar año escolar</button>
+                        <button class="btn-success solo-director" onclick="reabrirAnioEscolar()">🔓 Reabrir año</button>
+                        <button class="btn-primary" onclick="cargarCierreAnual()">🔄 Actualizar</button>
+                        <button class="btn-secondary" onclick="imprimirCierreAnual()">🖨️ Imprimir resumen</button>
+                    </div>
+                </div>
+
+                <div id="resumenCierreAnual" class="card">
+                    <h2>📊 Resumen de cierre</h2>
+                    <div id="cierreResumenContenido"></div>
+                </div>
+            </section>
+
             <section id="documentosOficiales" class="section">
                 <div class="card">
                     <h2>📑 Documentos oficiales automáticos</h2>
@@ -2068,6 +2115,7 @@ const KEY_MATRICULAS = "matriculasNuevaAlianza";
 const KEY_EXPEDIENTES = "expedientesNuevaAlianza";
 const KEY_PROMOCIONES = "promocionesNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
+const KEY_CIERRES = "cierresAnualesNuevaAlianza";
 
 
 /* =========================================================
@@ -2521,6 +2569,10 @@ function mostrarSeccion(id, boton){
         boton.classList.add("active");
     }
 
+    if(id === "cierreAnual"){
+        cargarCierreAnual();
+    }
+
     if(id === "documentosOficiales"){
         cargarEstudiantesDocumentosOficiales();
         generarDocumentoOficial();
@@ -2811,6 +2863,8 @@ function cargarEstudiantesAsistencia(){
 
 
 function guardarAsistencia(){
+    const fechaCierre=document.getElementById("asisFecha")?.value||"";
+    if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
     const estudianteId=document.getElementById("asisEstudiante").value;
     if(!estudianteId){alert("Seleccione un estudiante.");return;}
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
@@ -2828,6 +2882,8 @@ function guardarAsistencia(){
     cargarAsistencias(); actualizarEstadisticas();
 }
 function registrarAsistenciaGrupo(){
+    const fechaCierre=document.getElementById("asisFecha")?.value||"";
+    if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
     const fecha=document.getElementById("asisFecha").value;
     const nivel=document.getElementById("asisNivel").value;
     const grado=document.getElementById("asisGrado").value;
@@ -3073,6 +3129,8 @@ function cargarCategorias(){
 
 function guardarCalificacion(){
 
+    const anioCierre=document.getElementById("calAnio")?.value||"2026";
+    if(estaCerradoAnio(anioCierre)) return;
     const calId=document.getElementById("calId").value;
     const estudianteId=document.getElementById("calEstudiante").value;
     const nivel=document.getElementById("calNivel").value;
@@ -3309,6 +3367,8 @@ function editarCalificacion(id){
 
 function eliminarCalificacion(id){
 
+    const registro=obtenerDatos(KEY_CALIFICACIONES).find(c=>String(c.id)===String(id));
+    if(registro && estaCerradoAnio(String(registro.anio||"2026"))) return;
     if(!confirm("¿Desea eliminar esta calificación?")) return;
 
     const datos=obtenerDatos(KEY_CALIFICACIONES);
@@ -3661,7 +3721,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "8.1",
+        version: "8.6",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -3670,6 +3730,7 @@ function construirRespaldo(){
         matriculas: obtenerDatos(KEY_MATRICULAS),
         expedientes: obtenerDatos(KEY_EXPEDIENTES),
         promociones: obtenerDatos(KEY_PROMOCIONES),
+        cierresAnuales: obtenerDatos(KEY_CIERRES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -3778,6 +3839,11 @@ function importarRespaldo(event){
             guardarDatos(
                 KEY_PROMOCIONES,
                 Array.isArray(respaldo.promociones) ? respaldo.promociones : []
+            );
+
+            guardarDatos(
+                KEY_CIERRES,
+                Array.isArray(respaldo.cierresAnuales) ? respaldo.cierresAnuales : []
             );
 
             if(respaldo.configuracion){
@@ -3890,6 +3956,7 @@ function cargarTodo(){
     limpiarPromocion();
     cargarControlPromocion();
     cargarUsuarios();
+    cargarCierreAnual();
     aplicarPermisos();
 
     actualizarEstadisticas();
@@ -3973,6 +4040,8 @@ function cargarDatosMatricula(){
     document.getElementById("matDireccion").value=e.direccion||"";
 }
 function guardarMatricula(){
+    const anioCierre=document.getElementById("matAnio")?.value.trim()||"2026";
+    if(estaCerradoAnio(anioCierre)) return;
     const id=document.getElementById("matId").value, estudianteId=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
     if(!estudianteId||!anio){alert("Seleccione estudiante e indique el año escolar.");return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("No se encontró el estudiante.");return;}
@@ -3992,7 +4061,7 @@ function editarMatricula(id){
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("matId").value=m.id;document.getElementById("matEstudiante").value=m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
 }
-function eliminarMatricula(id){if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
+function eliminarMatricula(id){const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
 function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
@@ -4101,6 +4170,8 @@ function limpiarPromocion(){
     if(document.getElementById("proFecha"))document.getElementById("proFecha").value=new Date().toISOString().slice(0,10);cargarDatosPromocion();
 }
 function guardarPromocion(){
+    const anioCierre=document.getElementById("proAnio")?.value||"2026";
+    if(estaCerradoAnio(anioCierre)) return;
     const estudianteId=document.getElementById("proEstudiante")?.value,anio=document.getElementById("proAnio")?.value||"2026";if(!estudianteId){alert("Seleccione un estudiante.");return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId)),datos=obtenerDatos(KEY_PROMOCIONES),idx=datos.findIndex(x=>String(x.estudianteId)===String(estudianteId)&&String(x.anio)===String(anio));
     const r={id:idx>=0?datos[idx].id:Date.now().toString(),estudianteId,estudiante:e?.nombre||"",codigo:e?.codigo||"",anio,grado:document.getElementById("proGrado").value,resultado:document.getElementById("proResultado").value,gradoSiguiente:document.getElementById("proGradoSiguiente").value,fecha:document.getElementById("proFecha").value||new Date().toISOString().slice(0,10),observacion:document.getElementById("proObservacion").value.trim()};
@@ -4115,7 +4186,7 @@ function cargarControlPromocion(){
     document.getElementById("proPie").textContent="Generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Registro administrativo referencial.";
 }
 function editarPromocion(id){const p=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(!p)return;document.getElementById("proAnio").value=p.anio||"2026";cargarEstudiantesPromocion();document.getElementById("proEstudiante").value=p.estudianteId||"";document.getElementById("proResultado").value=p.resultado||"Promovido";document.getElementById("proGrado").value=p.grado||"";document.getElementById("proGradoSiguiente").value=p.gradoSiguiente||"";document.getElementById("proFecha").value=p.fecha||"";document.getElementById("proObservacion").value=p.observacion||"";}
-function eliminarPromocion(id){if(!confirm("¿Eliminar este resultado escolar?"))return;guardarDatos(KEY_PROMOCIONES,obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.id)!==String(id)));cargarControlPromocion();}
+function eliminarPromocion(id){const registro=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar este resultado escolar?"))return;guardarDatos(KEY_PROMOCIONES,obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.id)!==String(id)));cargarControlPromocion();}
 function imprimirControlPromocion(){cargarControlPromocion();document.body.setAttribute("data-imprimiendo","promocion");window.print();document.body.removeAttribute("data-imprimiendo");}
 
 /* =========================================================
@@ -4648,6 +4719,66 @@ function imprimirDocumentoOficial(){
 function limpiarDocumentoOficial(){
     const s=document.getElementById("docOficialEstudiante");if(s)s.value="";
     const b=document.getElementById("documentoOficial");if(b)b.innerHTML='<div style="text-align:center;padding:50px;color:#777;">Seleccione un estudiante y genere un documento.</div>';
+}
+
+
+/* =========================================================
+   CIERRE DEL AÑO ESCOLAR 8.6
+========================================================= */
+function obtenerCierresAnuales(){return obtenerDatos(KEY_CIERRES);}
+function obtenerCierreAnual(anio){return obtenerCierresAnuales().find(x=>String(x.anio)===String(anio));}
+function estaCerradoAnio(anio){
+    const y=String(anio||"").trim();
+    if(!y)return false;
+    const cierre=obtenerCierreAnual(y);
+    if(cierre&&cierre.estado==="Cerrado"){
+        alert("El año escolar "+y+" está cerrado. Solo el Director puede reabrirlo.");
+        return true;
+    }
+    return false;
+}
+function guardarCierreAnualRegistro(registro){
+    const datos=obtenerCierresAnuales(),i=datos.findIndex(x=>String(x.anio)===String(registro.anio));
+    if(i>=0)datos[i]=registro;else datos.push(registro);
+    guardarDatos(KEY_CIERRES,datos);
+}
+function cargarCierreAnual(){
+    const anio=document.getElementById("cierreAnio")?.value||"2026";
+    const estado=document.getElementById("cierreEstado"),fecha=document.getElementById("cierreFecha"),box=document.getElementById("cierreResumenContenido");
+    const cierre=obtenerCierreAnual(anio),cerrado=!!cierre&&cierre.estado==="Cerrado";
+    if(estado){estado.value=cerrado?"Cerrado":"Abierto";estado.className=cerrado?"cierre-cerrado":"cierre-abierto";}
+    if(fecha)fecha.value=cierre?.fecha||"—";
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES),mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.anio)===String(anio)),cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.anio||"2026")===String(anio)),as=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.fecha||"").slice(0,4)===String(anio)),prom=obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.anio)===String(anio));
+    const activos=new Set(mats.filter(x=>limpiarTexto(x.estado||"matriculado")==="matriculado").map(x=>String(x.estudianteId)));
+    const promov=prom.filter(x=>limpiarTexto(x.resultado||"")==="promovido").length,reprob=prom.filter(x=>limpiarTexto(x.resultado||"")==="reprobado").length,pend=prom.filter(x=>limpiarTexto(x.resultado||"")==="pendiente").length,tras=prom.filter(x=>limpiarTexto(x.resultado||"")==="trasladado").length,reti=prom.filter(x=>limpiarTexto(x.resultado||"")==="retirado").length;
+    const numericas=cal.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado)),promedio=numericas.length?(numericas.reduce((a,b)=>a+b,0)/numericas.length).toFixed(1):"—";
+    if(box)box.innerHTML='<div class="cierre-resumen"><div class="stat-cierre">Matrículas<strong>'+mats.length+'</strong></div><div class="stat-cierre">Calificaciones<strong>'+cal.length+'</strong></div><div class="stat-cierre">Asistencias<strong>'+as.length+'</strong></div><div class="stat-cierre">Promedio general<strong>'+promedio+'</strong></div><div class="stat-cierre">Promociones<strong>'+promov+'</strong></div></div>'+
+        '<table class="cierre-tabla"><thead><tr><th>Indicador</th><th>Cantidad</th></tr></thead><tbody><tr><td>Estudiantes con matrícula del año</td><td>'+mats.length+'</td></tr><tr><td>Estudiantes matriculados activos</td><td>'+activos.size+'</td></tr><tr><td>Promovidos</td><td>'+promov+'</td></tr><tr><td>Reprobados</td><td>'+reprob+'</td></tr><tr><td>Pendientes</td><td>'+pend+'</td></tr><tr><td>Trasladados</td><td>'+tras+'</td></tr><tr><td>Retirados</td><td>'+reti+'</td></tr><tr><td>Registros de asistencia</td><td>'+as.length+'</td></tr><tr><td>Registros de calificaciones</td><td>'+cal.length+'</td></tr></tbody></table>'+
+        '<div class="cierre-nota">'+(cerrado?"🔒 Año cerrado el "+escaparHTML(cierre.fecha||"—")+" por "+escaparHTML(cierre.usuario||"Director")+".":"🟢 El año permanece abierto. Antes de cerrarlo, verifique calificaciones, asistencia, matrícula y promoción.")+'</div>';
+}
+function cerrarAnioEscolar(){
+    if(!exigirDirector())return;
+    const anio=document.getElementById("cierreAnio")?.value||"2026";
+    if(obtenerCierreAnual(anio)?.estado==="Cerrado"){alert("El año ya está cerrado.");return;}
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.anio)===String(anio));
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.anio||"2026")===String(anio));
+    const prom=obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.anio)===String(anio));
+    const confirmar=confirm("⚠️ CIERRE DEL AÑO "+anio+"\n\nMatrículas: "+mats.length+"\nCalificaciones: "+cal.length+"\nPromociones: "+prom.length+"\n\nDespués del cierre no se podrán modificar estos registros ni la asistencia del año.\n\n¿Desea cerrar el año?");
+    if(!confirmar)return;
+    const sesion=obtenerSesionActual();
+    guardarCierreAnualRegistro({id:Date.now().toString(),anio,estado:"Cerrado",fecha:new Date().toISOString().slice(0,10),usuario:sesion?.usuario||"Director"});
+    cargarCierreAnual();alert("✅ El año escolar "+anio+" fue cerrado correctamente.");
+}
+function reabrirAnioEscolar(){
+    if(!exigirDirector())return;
+    const anio=document.getElementById("cierreAnio")?.value||"2026",cierre=obtenerCierreAnual(anio);
+    if(!cierre||cierre.estado!=="Cerrado"){alert("El año ya está abierto.");return;}
+    if(!confirm("⚠️ Reabrir el año escolar "+anio+" permitirá modificar nuevamente sus registros académicos.\n\n¿Desea continuar?"))return;
+    guardarCierreAnualRegistro({...cierre,estado:"Abierto",reabierto:new Date().toISOString().slice(0,10),usuarioReapertura:obtenerSesionActual()?.usuario||"Director"});
+    cargarCierreAnual();alert("🔓 El año escolar "+anio+" fue reabierto.");
+}
+function imprimirCierreAnual(){
+    cargarCierreAnual();document.body.setAttribute("data-imprimiendo","cierreAnual");window.print();document.body.removeAttribute("data-imprimiendo");
 }
 
 </script>
