@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.1</title>
+<title>Sistema Escolar Nueva Alianza - v10.2</title>
 
 <style>
 *{
@@ -585,6 +585,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             <button onclick="mostrarSeccion('padresTutores',this)">
                 👨‍👩‍👧 Padres y tutores
+            </button>
+            <button onclick="mostrarSeccion('comunicacionesFamilia',this)">
+                📣 Comunicación familia-escuela
             </button>
 
             <button onclick="mostrarSeccion('docentes',this)">
@@ -2609,7 +2612,49 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 </div>
             </section>
 
-            <section id="bitacora" class="section solo-director">
+            
+<section id="comunicacionesFamilia" class="section">
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap">
+<div><h2>📣 Comunicación familia-escuela</h2><p>Registro de citaciones, reuniones, llamadas, orientaciones y compromisos con madres, padres y tutores.</p></div>
+<button onclick="imprimirComunicacionesFamilia()">🖨️ Imprimir</button>
+</div>
+<div class="stats" style="margin-top:15px">
+<div class="stat"><h3>Total</h3><strong id="comTotal">0</strong></div>
+<div class="stat"><h3>Pendientes</h3><strong id="comPendientes">0</strong></div>
+<div class="stat"><h3>Atendidos</h3><strong id="comAtendidos">0</strong></div>
+<div class="stat"><h3>Compromisos</h3><strong id="comCompromisos">0</strong></div>
+</div>
+<div class="form-grid">
+<div class="form-group"><label>Año</label><select id="comAnio"><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div class="form-group"><label>Fecha</label><input id="comFecha" type="date"></div>
+<div class="form-group"><label>Estudiante</label><select id="comEstudiante" onchange="cargarTutorComunicacion()"></select></div>
+<div class="form-group"><label>Madre, padre o tutor</label><select id="comTutor"></select></div>
+<div class="form-group"><label>Tipo de comunicación</label><select id="comTipo"><option>Citación</option><option>Reunión</option><option>Llamada</option><option>Orientación</option><option>Notificación</option><option>Visita familiar</option><option>Otro</option></select></div>
+<div class="form-group"><label>Estado</label><select id="comEstado"><option>Pendiente</option><option>Atendido</option><option>En seguimiento</option><option>Cerrado</option></select></div>
+<div class="form-group full"><label>Motivo / asunto</label><textarea id="comMotivo" rows="2" placeholder="Describa brevemente el motivo de la comunicación"></textarea></div>
+<div class="form-group full"><label>Acuerdos y compromisos</label><textarea id="comAcuerdos" rows="2"></textarea></div>
+<div class="form-group"><label>Próxima revisión</label><input id="comProxima" type="date"></div>
+<div class="form-group full"><label>Observación</label><textarea id="comObservacion" rows="2"></textarea></div>
+</div>
+<input type="hidden" id="comId">
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+<button onclick="guardarComunicacionFamilia()">💾 Guardar comunicación</button>
+<button onclick="limpiarComunicacionFamilia()">🧹 Limpiar</button>
+</div>
+</div>
+<div class="card">
+<h3>🔎 Historial de comunicación</h3>
+<div class="form-grid">
+<div class="form-group"><label>Buscar</label><input id="comBuscar" oninput="cargarComunicacionesFamilia()" placeholder="Estudiante, asunto, tutor..."></div>
+<div class="form-group"><label>Estado</label><select id="comFiltroEstado" onchange="cargarComunicacionesFamilia()"><option value="">Todos</option><option>Pendiente</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+<div class="form-group"><label>Año</label><select id="comFiltroAnio" onchange="cargarComunicacionesFamilia()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+</div>
+<div class="table-container"><table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Tutor</th><th>Tipo</th><th>Motivo</th><th>Estado</th><th>Próxima revisión</th><th>Acciones</th></tr></thead><tbody id="tablaComunicacionesFamilia"></tbody></table></div>
+</div>
+</section>
+
+<section id="bitacora" class="section solo-director">
                 <div class="card">
                     <div class="audit-header"><h2>📜 Bitácora administrativa</h2><p>Registro de acciones realizadas en el sistema por usuario y rol.</p></div>
                     <div class="stats audit-stats"><div class="stat"><h3>Eventos filtrados</h3><strong id="bitTotal">0</strong></div><div class="stat"><h3>Eventos de hoy</h3><strong id="bitHoy">0</strong></div><div class="stat"><h3>Creaciones</h3><strong id="bitCreados">0</strong></div><div class="stat"><h3>Ediciones</h3><strong id="bitEditados">0</strong></div><div class="stat"><h3>Eliminaciones</h3><strong id="bitEliminados">0</strong></div></div>
@@ -2772,6 +2817,7 @@ const KEY_ALERTAS = "alertasPreventivasNuevaAlianza";
 const KEY_AUDITORIA = "auditoriaNuevaAlianza";
 const KEY_PADRES_TUTORES = "padresTutoresNuevaAlianza";
 const KEY_EVALUACIONES = "evaluacionesAcademicasNuevaAlianza";
+const KEY_COMUNICACIONES = "comunicacionesFamiliaNuevaAlianza";
 
 
 /* =========================================================
@@ -3258,6 +3304,7 @@ function actualizarGradosConsolidacion(){
     (mapa[n.value]||["1","2","3","4","5","6","7","8","9","10","11"]).forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;g.appendChild(o);});
     if([...g.options].some(o=>o.value===prev))g.value=prev;
     cargarConsolidacionEvaluacion();
+    cargarComunicacionesFamiliaInicio();
 }
 function cargarConsolidacionEvaluacion(){
     const tb=document.getElementById("tablaConsolidacionEvaluacion");if(!tb)return;
@@ -3410,6 +3457,71 @@ function cargarPerfilAcademico(){
       '<p class="small-note">Herramienta administrativa/referencial. Las decisiones oficiales de evaluación, promoción y recuperación deben ajustarse a la normativa MINED vigente.</p></div>';
 }
 function imprimirPerfilAcademico(){document.body.setAttribute("data-imprimiendo","perfilAcademico");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
+
+
+function cargarEstudiantesComunicacion(){
+    const sel=document.getElementById("comEstudiante");if(!sel)return;
+    const anio=document.getElementById("comAnio")?.value||new Date().getFullYear(),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo");
+    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    const prev=sel.value;
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+e.id+'">'+escaparHTML(e.nombre)+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
+    if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+    cargarTutorComunicacion();
+}
+function cargarTutorComunicacion(){
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(document.getElementById("comEstudiante")?.value||""));
+    const sel=document.getElementById("comTutor");if(!sel)return;
+    const lista=obtenerDatos(KEY_PADRES_TUTORES).filter(x=>String(x.estudianteId)===String(e?.id));
+    sel.innerHTML=lista.length?lista.map(x=>'<option value="'+x.id+'">'+escaparHTML(x.nombre)+(x.parentesco?' — '+escaparHTML(x.parentesco):"")+'</option>').join(""):'<option value="">Sin tutor registrado</option>';
+}
+function limpiarComunicacionFamilia(){
+    ["comId","comMotivo","comAcuerdos","comObservacion","comProxima"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});
+    const f=document.getElementById("comFecha");if(f)f.value=new Date().toISOString().slice(0,10);
+    const es=document.getElementById("comEstado");if(es)es.value="Pendiente";
+}
+function guardarComunicacionFamilia(){
+    const ses=obtenerSesionActual();if(!ses){alert("Debe iniciar sesión.");return;}
+    const anio=document.getElementById("comAnio").value,estudianteId=document.getElementById("comEstudiante").value;
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("Seleccione un estudiante.");return;}
+    if(ses.rol==="Docente"&&!docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio)){alert("El estudiante no pertenece a un grupo asignado a este docente.");return;}
+    if(String(document.getElementById("comEstado").value)==="Cerrado"&&cierreAnualEstaCerrado(anio)){alert("El año escolar está cerrado.");return;}
+    const id=document.getElementById("comId").value,datos=obtenerDatos(KEY_COMUNICACIONES),idx=datos.findIndex(x=>String(x.id)===String(id));
+    const tutor=obtenerDatos(KEY_PADRES_TUTORES).find(x=>String(x.id)===String(document.getElementById("comTutor").value));
+    const obj={id:id||"COM-"+Date.now(),anio,fecha:document.getElementById("comFecha").value,estudianteId,tutorId:tutor?.id||"",estudiante:e.nombre,tutor:tutor?.nombre||"Sin tutor registrado",tipo:document.getElementById("comTipo").value,estado:document.getElementById("comEstado").value,motivo:document.getElementById("comMotivo").value.trim(),acuerdos:document.getElementById("comAcuerdos").value.trim(),proximaRevision:document.getElementById("comProxima").value,observacion:document.getElementById("comObservacion").value.trim(),docenteId:ses.docenteId||""};
+    if(!obj.motivo){alert("Escriba el motivo o asunto.");return;}
+    if(idx>=0)datos[idx]=obj;else datos.unshift(obj);guardarDatos(KEY_COMUNICACIONES,datos);
+    registrarAuditoria(idx>=0?"Editar":"Crear","Comunicación familia-escuela",idx>=0?"Actualización de comunicación":"Nueva comunicación",obj.id,{anio});
+    limpiarComunicacionFamilia();cargarComunicacionesFamilia();alert("Comunicación guardada correctamente.");
+}
+function cargarComunicacionesFamilia(){
+    const tbody=document.getElementById("tablaComunicacionesFamilia");if(!tbody)return;
+    const anio=document.getElementById("comFiltroAnio")?.value||"",estado=document.getElementById("comFiltroEstado")?.value||"",q=limpiarTexto(document.getElementById("comBuscar")?.value||""),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_COMUNICACIONES).filter(x=>(!anio||String(x.anio)===anio)&&(!estado||x.estado===estado)&&(!q||limpiarTexto([x.estudiante,x.tutor,x.motivo,x.acuerdos].join(" ")).includes(q)));
+    if(ses?.rol==="Docente")lista=lista.filter(x=>String(x.docenteId||"")===String(ses.docenteId||""));
+    tbody.innerHTML=lista.length?lista.map(x=>'<tr><td>'+escaparHTML(x.fecha)+'</td><td>'+escaparHTML(x.estudiante)+'</td><td>'+escaparHTML(x.tutor)+'</td><td>'+escaparHTML(x.tipo)+'</td><td>'+escaparHTML(x.motivo)+'</td><td>'+escaparHTML(x.estado)+'</td><td>'+escaparHTML(x.proximaRevision||"—")+'</td><td><button onclick="editarComunicacionFamilia(\''+String(x.id).replace(/'/g,"\\'")+'\')">✏️</button> <button class="btn-danger" onclick="eliminarComunicacionFamilia(\''+String(x.id).replace(/'/g,"\\'")+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="8" style="text-align:center;padding:20px">No hay comunicaciones registradas.</td></tr>';
+    const t=lista.length,p=lista.filter(x=>x.estado==="Pendiente"||x.estado==="En seguimiento").length,a=lista.filter(x=>x.estado==="Atendido"||x.estado==="Cerrado").length,c=lista.filter(x=>x.acuerdos).length;
+    ["comTotal","comPendientes","comAtendidos","comCompromisos"].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[t,p,a,c][i]});
+}
+function editarComunicacionFamilia(id){
+    const x=obtenerDatos(KEY_COMUNICACIONES).find(a=>String(a.id)===String(id));if(!x)return;
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(a=>String(a.id)===String(x.estudianteId));if(obtenerSesionActual()?.rol==="Docente"&&!e||obtenerSesionActual()?.rol==="Docente"&&!docenteTieneGrupo(e.nivel,e.grado,e.seccion,x.anio))return;
+    document.getElementById("comId").value=x.id;document.getElementById("comAnio").value=x.anio;document.getElementById("comFecha").value=x.fecha;document.getElementById("comEstudiante").value=x.estudianteId;cargarTutorComunicacion();document.getElementById("comTutor").value=x.tutorId;document.getElementById("comTipo").value=x.tipo;document.getElementById("comEstado").value=x.estado;document.getElementById("comMotivo").value=x.motivo;document.getElementById("comAcuerdos").value=x.acuerdos;document.getElementById("comProxima").value=x.proximaRevision||"";document.getElementById("comObservacion").value=x.observacion||"";
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+function eliminarComunicacionFamilia(id){
+    const ses=obtenerSesionActual(),datos=obtenerDatos(KEY_COMUNICACIONES),x=datos.find(a=>String(a.id)===String(id));if(!x)return;
+    if(cierreAnualEstaCerrado(x.anio)){alert("El año escolar está cerrado.");return;}
+    if(ses?.rol==="Docente"&&String(x.docenteId||"")!==String(ses.docenteId||"")){alert("No puede eliminar esta comunicación.");return;}
+    if(!confirm("¿Eliminar esta comunicación?"))return;
+    guardarDatos(KEY_COMUNICACIONES,datos.filter(a=>String(a.id)!==String(id)));
+    registrarAuditoria("Eliminar","Comunicación familia-escuela","Eliminación de comunicación",id,{anio:x.anio});cargarComunicacionesFamilia();
+}
+function imprimirComunicacionesFamilia(){
+    document.body.setAttribute("data-imprimiendo","comunicacionesFamilia");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);
+}
+function cargarComunicacionesFamiliaInicio(){cargarEstudiantesComunicacion();limpiarComunicacionFamilia();cargarComunicacionesFamilia();}
+
 
 /* =========================================================
    NAVEGACIÓN
@@ -4940,6 +5052,7 @@ function construirRespaldo(){
         auditoria: obtenerDatos(KEY_AUDITORIA),
         padresTutores: obtenerDatos(KEY_PADRES_TUTORES),
         evaluacionesAcademicas: obtenerDatos(KEY_EVALUACIONES),
+        comunicacionesFamilia: obtenerDatos(KEY_COMUNICACIONES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -5019,6 +5132,8 @@ function importarRespaldo(event){
                 KEY_ESTUDIANTES,
                 Array.isArray(respaldo.estudiantes) ? respaldo.estudiantes : []
             );
+            guardarDatos(KEY_COMUNICACIONES,Array.isArray(respaldo.comunicacionesFamilia)?respaldo.comunicacionesFamilia:[]);
+
 
             guardarDatos(
                 KEY_DOCENTES,
@@ -5172,6 +5287,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_AUDITORIA);
     localStorage.removeItem(KEY_PADRES_TUTORES);
     localStorage.removeItem(KEY_EVALUACIONES);
+    localStorage.removeItem(KEY_COMUNICACIONES);
     registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
     cargarTodo();
