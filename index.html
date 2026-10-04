@@ -994,40 +994,140 @@ th{
             <section id="reportes" class="section">
 
                 <div class="card">
-
-                    <h2>📊 Reportes</h2>
+                    <h2>📊 Reportes escolares</h2>
 
                     <div class="stats">
-
                         <div class="stat">
-                            <h3>Total estudiantes</h3>
+                            <h3>Estudiantes</h3>
                             <strong id="repEstudiantes">0</strong>
                         </div>
-
                         <div class="stat">
-                            <h3>Total docentes</h3>
+                            <h3>Docentes</h3>
                             <strong id="repDocentes">0</strong>
                         </div>
-
                         <div class="stat">
                             <h3>Asistencias</h3>
                             <strong id="repAsistencias">0</strong>
                         </div>
-
                         <div class="stat">
                             <h3>Calificaciones</h3>
                             <strong id="repCalificaciones">0</strong>
                         </div>
+                    </div>
+                </div>
 
+                <div class="card">
+                    <h2>🔎 Reporte por grupo</h2>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nivel educativo</label>
+                            <select id="repNivel" onchange="actualizarGradosReporte(); generarReporte()">
+                                <option value="">Todos</option>
+                                <option value="Inicial">Educación Inicial</option>
+                                <option value="Primaria">Primaria</option>
+                                <option value="Secundaria">Secundaria</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Grado</label>
+                            <select id="repGrado" onchange="generarReporte()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sección</label>
+                            <select id="repSeccion" onchange="generarReporte()">
+                                <option value="">Todas</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>Única</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Buscar estudiante</label>
+                            <input id="repBuscar" type="search"
+                                   placeholder="Nombre o código"
+                                   oninput="generarReporte()">
+                        </div>
                     </div>
 
-                    <br>
+                    <div class="actions">
+                        <button class="btn-primary" onclick="generarReporte()">
+                            🔄 Generar reporte
+                        </button>
+                        <button class="btn-info" onclick="window.print()">
+                            🖨️ Imprimir reporte
+                        </button>
+                    </div>
+                </div>
 
-                    <button class="btn-primary"
-                            onclick="window.print()">
-                        🖨️ Imprimir reporte
-                    </button>
+                <div class="card">
+                    <h2>👨‍🎓 Resumen de estudiantes</h2>
+                    <div id="resumenGrupoReporte" class="notice">
+                        Seleccione los filtros para consultar el grupo.
+                    </div>
 
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Estudiante</th>
+                                    <th>Código</th>
+                                    <th>Nivel</th>
+                                    <th>Grado</th>
+                                    <th>Sección</th>
+                                    <th>Estado</th>
+                                    <th>Asistencia</th>
+                                    <th>Calificaciones</th>
+                                    <th>Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaReporteEstudiantes"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📝 Detalle de calificaciones</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Asignatura</th>
+                                    <th>Corte</th>
+                                    <th>Resultado</th>
+                                    <th>Observación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaReporteCalificaciones"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📅 Resumen de asistencia</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Presente</th>
+                                    <th>Ausente</th>
+                                    <th>Tardanza</th>
+                                    <th>Justificada</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaReporteAsistencia"></tbody>
+                        </table>
+                    </div>
                 </div>
 
             </section>
@@ -2360,26 +2460,187 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 /* =========================================================
-   REPORTES
+   REPORTES 7.4
 ========================================================= */
 
 function actualizarReportes(){
 
-    document.getElementById("repEstudiantes").textContent =
-        obtenerDatos(KEY_ESTUDIANTES).length;
+    document.getElementById("repEstudiantes").textContent=obtenerDatos(KEY_ESTUDIANTES).length;
+    document.getElementById("repDocentes").textContent=obtenerDatos(KEY_DOCENTES).length;
+    document.getElementById("repAsistencias").textContent=obtenerDatos(KEY_ASISTENCIAS).length;
+    document.getElementById("repCalificaciones").textContent=obtenerDatos(KEY_CALIFICACIONES).length;
 
-    document.getElementById("repDocentes").textContent =
-        obtenerDatos(KEY_DOCENTES).length;
-
-    document.getElementById("repAsistencias").textContent =
-        obtenerDatos(KEY_ASISTENCIAS).length;
-
-    document.getElementById("repCalificaciones").textContent =
-        obtenerDatos(KEY_CALIFICACIONES).length;
+    actualizarGradosReporte();
+    generarReporte();
 
 }
 
 
+function actualizarGradosReporte(){
+
+    const nivel=document.getElementById("repNivel")?.value || "";
+    const select=document.getElementById("repGrado");
+    if(!select) return;
+
+    const anterior=select.value;
+    let lista=[];
+
+    if(nivel==="Inicial") lista=GRADOS_INICIAL;
+    else if(nivel==="Primaria") lista=GRADOS_PRIMARIA;
+    else if(nivel==="Secundaria") lista=GRADOS_SECUNDARIA;
+
+    select.innerHTML='<option value="">Todos</option>';
+
+    lista.forEach(grado=>{
+        const option=document.createElement("option");
+        option.value=grado;
+        option.textContent=nivel==="Inicial" ? grado : grado+"º grado";
+        select.appendChild(option);
+    });
+
+    if([...select.options].some(o=>o.value===anterior)) select.value=anterior;
+
+}
+
+
+function obtenerEstudiantesReporte(){
+
+    const nivel=document.getElementById("repNivel")?.value || "";
+    const grado=document.getElementById("repGrado")?.value || "";
+    const seccion=document.getElementById("repSeccion")?.value || "";
+    const buscar=limpiarTexto(document.getElementById("repBuscar")?.value || "");
+
+    return obtenerDatos(KEY_ESTUDIANTES).filter(e=>{
+
+        const texto=limpiarTexto([e.nombre,e.codigo,e.cedula,e.nivel,e.grado,e.seccion].join(" "));
+
+        return (!nivel || normalizarNivel(e.nivel)===normalizarNivel(nivel)) &&
+               (!grado || normalizarGrado(e.grado)===normalizarGrado(grado)) &&
+               (!seccion || normalizarSeccion(e.seccion)===normalizarSeccion(seccion)) &&
+               (!buscar || texto.includes(buscar));
+
+    }).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+
+}
+
+
+function calcularAsistenciaEstudiante(id){
+
+    const registros=obtenerDatos(KEY_ASISTENCIAS).filter(a=>String(a.estudianteId)===String(id));
+    const r={presente:0,ausente:0,tardanza:0,justificada:0,total:registros.length};
+
+    registros.forEach(a=>{
+        const estado=limpiarTexto(a.estado);
+        if(estado.includes("presente")) r.presente++;
+        else if(estado.includes("ausente")) r.ausente++;
+        else if(estado.includes("tardanza")) r.tardanza++;
+        else if(estado.includes("justificada")) r.justificada++;
+    });
+
+    return r;
+
+}
+
+
+function calcularPromedioEstudiante(id){
+
+    const notas=obtenerDatos(KEY_CALIFICACIONES)
+        .filter(c=>String(c.estudianteId)===String(id) && c.tipo==="Numerica")
+        .map(c=>Number(c.resultado))
+        .filter(Number.isFinite);
+
+    if(!notas.length) return "—";
+
+    return (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1);
+
+}
+
+
+function generarReporte(){
+
+    const estudiantes=obtenerEstudiantesReporte();
+    const calificaciones=obtenerDatos(KEY_CALIFICACIONES);
+    const asistencias=obtenerDatos(KEY_ASISTENCIAS);
+
+    const ids=new Set(estudiantes.map(e=>String(e.id)));
+
+    const calFiltradas=calificaciones.filter(c=>ids.has(String(c.estudianteId)));
+    const asisFiltradas=asistencias.filter(a=>ids.has(String(a.estudianteId)));
+
+    const resumen=document.getElementById("resumenGrupoReporte");
+    if(resumen){
+        resumen.innerHTML=
+            "<strong>Estudiantes:</strong> "+estudiantes.length+
+            " &nbsp; | &nbsp; <strong>Asistencias:</strong> "+asisFiltradas.length+
+            " &nbsp; | &nbsp; <strong>Calificaciones:</strong> "+calFiltradas.length;
+    }
+
+    const tabla=document.getElementById("tablaReporteEstudiantes");
+    tabla.innerHTML="";
+
+    estudiantes.forEach((e,i)=>{
+
+        const a=calcularAsistenciaEstudiante(e.id);
+        const promedio=calcularPromedioEstudiante(e.id);
+
+        tabla.innerHTML += "<tr>"+
+            "<td>"+(i+1)+"</td>"+
+            "<td>"+escaparHTML(e.nombre||"")+"</td>"+
+            "<td>"+escaparHTML(e.codigo||e.cedula||"")+"</td>"+
+            "<td>"+escaparHTML(e.nivel||"")+"</td>"+
+            "<td>"+escaparHTML(e.grado||"")+"</td>"+
+            "<td>"+escaparHTML(e.seccion||"")+"</td>"+
+            "<td>"+escaparHTML(e.estado||"Activo")+"</td>"+
+            "<td>"+a.total+" ("+a.presente+" P / "+a.ausente+" A / "+a.tardanza+" T)"+"</td>"+
+            "<td>"+calificaciones.filter(c=>String(c.estudianteId)===String(e.id)).length+"</td>"+
+            "<td>"+promedio+"</td>"+
+        "</tr>";
+
+    });
+
+    if(!estudiantes.length){
+        tabla.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:#777;">No hay estudiantes con los filtros seleccionados.</td></tr>';
+    }
+
+    const tablaCal=document.getElementById("tablaReporteCalificaciones");
+    tablaCal.innerHTML="";
+
+    calFiltradas.sort((a,b)=>String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es"))
+        .forEach(c=>{
+            let resultado=c.tipo==="Numerica" ? String(c.resultado) : String(c.resultado||"");
+            tablaCal.innerHTML += "<tr>"+
+                "<td>"+escaparHTML(c.estudiante||"")+"</td>"+
+                "<td>"+escaparHTML(c.asignatura||"")+"</td>"+
+                "<td>"+escaparHTML(c.corte||"")+"</td>"+
+                "<td>"+escaparHTML(resultado)+"</td>"+
+                "<td>"+escaparHTML(c.observacion||"")+"</td>"+
+            "</tr>";
+        });
+
+    if(!calFiltradas.length){
+        tablaCal.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:#777;">No hay calificaciones para este grupo.</td></tr>';
+    }
+
+    const tablaAsis=document.getElementById("tablaReporteAsistencia");
+    tablaAsis.innerHTML="";
+
+    estudiantes.forEach(e=>{
+        const a=calcularAsistenciaEstudiante(e.id);
+        tablaAsis.innerHTML += "<tr>"+
+            "<td>"+escaparHTML(e.nombre||"")+"</td>"+
+            "<td>"+a.presente+"</td>"+
+            "<td>"+a.ausente+"</td>"+
+            "<td>"+a.tardanza+"</td>"+
+            "<td>"+a.justificada+"</td>"+
+            "<td>"+a.total+"</td>"+
+        "</tr>";
+    });
+
+    if(!estudiantes.length){
+        tablaAsis.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#777;">No hay datos de asistencia para este grupo.</td></tr>';
+    }
+
+}
 /* =========================================================
    ESTADÍSTICAS
 ========================================================= */
@@ -2471,7 +2732,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "7.3",
+        version: "7.4",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
