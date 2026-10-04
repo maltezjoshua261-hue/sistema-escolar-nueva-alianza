@@ -525,6 +525,8 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 /* v10.0 Evaluación académica avanzada */
 .eval10-header{background:linear-gradient(135deg,#123b6d,#6f42c1);color:#fff;padding:22px;border-radius:16px;margin-bottom:18px}.eval10-header h2{color:#fff;margin-bottom:6px}.eval10-header p{opacity:.92}.eval10-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.eval10-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:15px;text-align:center}.eval10-kpi strong{display:block;font-size:26px;color:#123b6d}.eval10-kpi span{font-size:12px;color:#6b7280}.eval10-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.eval10-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.eval10-form .full{grid-column:1/-1}.eval10-result{padding:12px;border-radius:10px;border-left:5px solid #6f42c1;background:#f7f3ff}.eval10-ok{border-left-color:#198754;background:#f1fbf5}.eval10-warn{border-left-color:#ffc107;background:#fffaf0}.eval10-danger{border-left-color:#dc3545;background:#fff5f5}.eval10-table{font-size:12px}.eval10-table th{background:#123b6d;color:#fff}.eval10-filtros{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end}.eval10-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-weight:bold;font-size:11px}.eval10-badge.verde{background:#d1e7dd;color:#0f5132}.eval10-badge.amarillo{background:#fff3cd;color:#664d03}.eval10-badge.rojo{background:#f8d7da;color:#842029}.eval10-badge.azul{background:#cff4fc;color:#055160}.eval10-print-head{display:none}@media(max-width:1000px){.eval10-kpis{grid-template-columns:repeat(3,1fr)}.eval10-grid{grid-template-columns:1fr}.eval10-filtros{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.eval10-kpis,.eval10-form,.eval10-filtros{grid-template-columns:1fr}.eval10-form .full{grid-column:auto}}@media print{body[data-imprimiendo="evaluacionAcademica"] *{visibility:hidden!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica,body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica *{visibility:visible!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="evaluacionAcademica"] .no-print{display:none!important}.eval10-print-head{display:block;text-align:center;margin-bottom:15px}}
 body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!important}body[data-imprimiendo="planesMejora"] #planesMejora{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="planesMejora"] .no-print{display:none!important}
+
+body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){display:none!important}body[data-imprimiendo="expedienteIntegral"] #expedienteIntegral{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="expedienteIntegral"] .no-print{display:none!important}
 </style>
 </head>
 
@@ -592,6 +594,9 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
             </button>
             <button onclick="mostrarSeccion('convivencia',this)">
                 🤝 Convivencia y conducta
+            </button>
+            <button onclick="mostrarSeccion('expedienteIntegral',this)">
+                🗂️ Expediente pedagógico integral
             </button>
 
             <button onclick="mostrarSeccion('docentes',this)">
@@ -762,7 +767,7 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
                 </div>
             </section>
 
-            <!-- V10.1 CONSOLIDACIÓN DE EVALUACIÓN POR CORTE -->
+            <!-- V10.6 CONSOLIDACIÓN DE EVALUACIÓN POR CORTE -->
             <section id="consolidacionEvaluacion" class="section">
                 <div class="card">
                     <h2>📋 Consolidación de evaluación por corte</h2>
@@ -2126,7 +2131,7 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
                 <div id="perfilAcademicoContenido"><div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div></div>
             </section>
 
-            <!-- V10.3 PLAN DE MEJORA ACADÉMICA -->
+            <!-- V10.6 PLAN DE MEJORA ACADÉMICA -->
             <section id="planesMejora" class="section">
                 <div class="card">
                     <h2>🛠️ Plan de mejora académica</h2>
@@ -2719,7 +2724,7 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
 </div>
 </section>
 
-<!-- V10.4 CONVIVENCIA Y CONDUCTA -->
+<!-- V10.6 CONVIVENCIA Y CONDUCTA -->
 <section id="convivencia" class="section">
 <div class="card">
 <h2>🤝 Convivencia y conducta escolar</h2>
@@ -2773,6 +2778,22 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
 </div>
 <div class="table-container"><table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Valoración</th><th>Estado</th><th>Familia</th><th>Responsable</th><th class="no-print">Acciones</th></tr></thead><tbody id="tablaConvivencia"></tbody></table></div>
 </div>
+</section>
+
+<section id="expedienteIntegral" class="section">
+<div class="card">
+<h2>🗂️ Expediente pedagógico integral</h2>
+<p>Consolida en una sola vista la trayectoria académica, asistencia, evaluación, recuperación, familia y convivencia del estudiante. Herramienta administrativa/referencial.</p>
+</div>
+<div class="card no-print">
+<div class="form-grid">
+<div><label>Año</label><select id="expIntAnio" onchange="cargarEstudiantesExpedienteIntegral();generarExpedienteIntegral()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div><label>Estudiante</label><select id="expIntEstudiante" onchange="generarExpedienteIntegral()"></select></div>
+<div><label>Buscar</label><input id="expIntBuscar" oninput="cargarEstudiantesExpedienteIntegral()" placeholder="Nombre del estudiante"></div>
+</div>
+<div style="margin-top:12px"><button onclick="generarExpedienteIntegral()">🔎 Generar expediente</button> <button onclick="imprimirExpedienteIntegral()">🖨️ Imprimir expediente</button></div>
+</div>
+<div id="expedienteIntegralContenido"><div class="card"><p>Seleccione un estudiante para generar el expediente integral.</p></div></div>
 </section>
 
 <section id="bitacora" class="section solo-director">
@@ -3524,7 +3545,7 @@ function imprimirEvaluacion10(){document.body.setAttribute("data-imprimiendo","e
 
 
 /* =========================================================
-   V10.1 PERFIL ACADÉMICO INDIVIDUAL
+   V10.6 PERFIL ACADÉMICO INDIVIDUAL
 ========================================================= */
 function cargarEstudiantesPerfilAcademico(){
     const sel=document.getElementById("perfilAcadEstudiante"); if(!sel)return;
@@ -3648,7 +3669,7 @@ function cargarComunicacionesFamiliaInicio(){cargarEstudiantesComunicacion();lim
 
 
 /* =========================================================
-   V10.3 PLAN DE MEJORA ACADÉMICA
+   V10.6 PLAN DE MEJORA ACADÉMICA
 ========================================================= */
 function cargarEstudiantesMejora(){
     const sel=document.getElementById("mejoraEstudiante");if(!sel)return;
@@ -3699,7 +3720,7 @@ function imprimirPlanesMejora(){document.body.setAttribute("data-imprimiendo","p
 
 
 /* =========================================================
-   V10.4 CONVIVENCIA Y CONDUCTA
+   V10.6 CONVIVENCIA Y CONDUCTA
 ========================================================= */
 function cargarEstudiantesConvivencia(){
     const sel=document.getElementById("convEstudiante"); if(!sel)return;
@@ -3769,6 +3790,60 @@ function eliminarConvivencia(id){
 function imprimirConvivencia(){document.body.setAttribute("data-imprimiendo","convivencia");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
 
 /* =========================================================
+   V10.6 EXPEDIENTE PEDAGÓGICO INTEGRAL
+========================================================= */
+function cargarEstudiantesExpedienteIntegral(){
+    const sel=document.getElementById("expIntEstudiante"); if(!sel)return;
+    const anio=document.getElementById("expIntAnio")?.value||new Date().getFullYear();
+    const q=limpiarTexto(document.getElementById("expIntBuscar")?.value||"");
+    const ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")!=="Retirado"&&String(e.estado||"Activo")!=="Trasladado");
+    lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
+    if(q) lista=lista.filter(e=>limpiarTexto(e.nombre).includes(q));
+    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre)+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
+}
+function generarExpedienteIntegral(){
+    const cont=document.getElementById("expedienteIntegralContenido");if(!cont)return;
+    const anio=document.getElementById("expIntAnio")?.value||new Date().getFullYear();
+    const id=document.getElementById("expIntEstudiante")?.value||"";
+    if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar el expediente integral.</p></div>';return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
+    if(!e||!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||anio)===String(anio));
+    const asi=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(id)&&String((x.fecha||"").slice(0,4))===String(anio));
+    const ev=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const mej=obtenerDatos(KEY_PLANES_MEJORA).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const com=obtenerDatos(KEY_COMUNICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const conv=obtenerDatos(KEY_CONVIVENCIA).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const obs=obtenerDatos(KEY_EXPEDIENTES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||anio)===String(anio));
+    const present=asi.filter(x=>x.estado==="Presente").length,tard=asi.filter(x=>x.estado==="Tardanza").length,aus=asi.filter(x=>x.estado==="Ausente").length,just=asi.filter(x=>x.estado==="Justificada").length;
+    const evalSat=ev.filter(x=>x.resultado==="Satisfactorio"||x.resultado==="AA").length;
+    const evalProc=ev.filter(x=>x.resultado==="En proceso"||x.resultado==="AS"||x.resultado==="AP").length;
+    const evalAp=ev.filter(x=>x.resultado==="Requiere apoyo"||x.resultado==="AF").length;
+    const esc=escaparHTML;
+    const filas=(arr,cols,empty)=>arr.length?arr.map(x=>'<tr>'+cols.map(k=>'<td>'+esc(x[k]??"")+'</td>').join("")+'</tr>').join(""):'<tr><td colspan="'+cols.length+'">'+empty+'</td></tr>';
+    cont.innerHTML='<div class="card">'+
+      '<div class="print-header" style="text-align:center"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br><strong>EXPEDIENTE PEDAGÓGICO INTEGRAL</strong><br>Año lectivo '+esc(anio)+'</div>'+
+      '<div class="stats"><div class="stat"><h3>Estudiante</h3><strong style="font-size:18px">'+esc(e.nombre)+'</strong></div><div class="stat"><h3>Grupo</h3><strong>'+esc(e.nivel||"")+' · '+esc(e.grado||"")+' '+esc(e.seccion||"")+'</strong></div><div class="stat"><h3>Matrícula</h3><strong>'+mats.length+'</strong></div><div class="stat"><h3>Evaluaciones</h3><strong>'+ev.length+'</strong></div></div>'+
+      '<h3>👤 Datos personales</h3><div class="table-container"><table><tbody><tr><th>Código/Cédula</th><td>'+esc(e.codigo||"")+'</td><th>Sexo</th><td>'+esc(e.sexo||"")+'</td></tr><tr><th>Fecha de nacimiento</th><td>'+esc(e.fechaNacimiento||"")+'</td><th>Responsable</th><td>'+esc(e.responsable||"")+'</td></tr><tr><th>Teléfono</th><td>'+esc(e.telefonoResponsable||"")+'</td><th>Comunidad</th><td>'+esc(e.direccion||e.comunidad||"")+'</td></tr></tbody></table></div>'+
+      '<h3>📝 Matrícula</h3><div class="table-container"><table><thead><tr><th>Año</th><th>Grado</th><th>Sección</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+filas(mats,["anio","grado","seccion","estado","fecha"])+'</tbody></table></div>'+
+      '<h3>📊 Situación académica</h3><div class="stats"><div class="stat"><h3>Satisfactorio</h3><strong>'+evalSat+'</strong></div><div class="stat"><h3>En proceso</h3><strong>'+evalProc+'</strong></div><div class="stat"><h3>Requiere apoyo</h3><strong>'+evalAp+'</strong></div><div class="stat"><h3>Calificaciones</h3><strong>'+cal.length+'</strong></div></div>'+
+      '<h3>🎯 Evaluación por cortes</h3><div class="table-container"><table><thead><tr><th>Fecha</th><th>Asignatura</th><th>Corte</th><th>Resultado</th><th>Competencia/indicador</th><th>Dificultades</th></tr></thead><tbody>'+filas(ev,["fecha","asignatura","corte","resultado","competencia","dificultades"])+'</tbody></table></div>'+
+      '<h3>📈 Asistencia</h3><div class="stats"><div class="stat"><h3>Presente</h3><strong>'+present+'</strong></div><div class="stat"><h3>Tardanza</h3><strong>'+tard+'</strong></div><div class="stat"><h3>Ausente</h3><strong>'+aus+'</strong></div><div class="stat"><h3>Justificada</h3><strong>'+just+'</strong></div></div>'+
+      '<h3>🛠️ Planes de mejora y reforzamiento</h3><div class="table-container"><table><thead><tr><th>Asignatura</th><th>Necesidad</th><th>Objetivo</th><th>Estado</th><th>Progreso</th></tr></thead><tbody>'+filas(mej,["asignatura","necesidad","objetivo","estado","progreso"])+'</tbody></table></div>'+
+      '<h3>👨‍👩‍👧 Familia</h3><div class="table-container"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Estado</th><th>Acuerdos</th></tr></thead><tbody>'+filas(com,["fecha","tipo","motivo","estado","acuerdos"])+'</tbody></table></div>'+
+      '<h3>🤝 Convivencia</h3><div class="table-container"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Valoración</th><th>Estado</th><th>Acuerdo</th></tr></thead><tbody>'+filas(conv,["fecha","tipo","valoracion","estado","acuerdo"])+'</tbody></table></div>'+
+      '<h3>📁 Observaciones del expediente</h3><div class="table-container"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Observación</th></tr></thead><tbody>'+filas(obs,["fecha","tipo","observacion"])+'</tbody></table></div>'+
+      '<div class="eval10-profile-grid"><div><h3>Fortalezas</h3><p>'+esc([...new Set(ev.map(x=>x.fortalezas).filter(Boolean))].join(" • ")||"No registradas.")+'</p></div><div><h3>Dificultades</h3><p>'+esc([...new Set(ev.map(x=>x.dificultades).filter(Boolean))].join(" • ")||"No registradas.")+'</p></div><div><h3>Recomendaciones</h3><p>'+esc([...new Set(mej.map(x=>x.objetivo||x.acciones).filter(Boolean))].join(" • ")||"No registradas.")+'</p></div></div>'+
+      '<p class="small-note">Herramienta administrativa/referencial. La información debe manejarse conforme a las normas institucionales de protección y confidencialidad de los expedientes escolares.</p>'+
+      '<div style="margin-top:35px;display:flex;justify-content:space-around;text-align:center"><div>________________________<br>Docente</div><div>________________________<br>Director(a)</div><div>________________________<br>Madre/Padre/Tutor</div></div></div>';
+}
+function imprimirExpedienteIntegral(){document.body.setAttribute("data-imprimiendo","expedienteIntegral");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
+ 
+
+/* =========================================================
    NAVEGACIÓN
 ========================================================= */
 
@@ -3792,6 +3867,8 @@ function mostrarSeccion(id, boton){
     if(boton){
         boton.classList.add("active");
     }
+
+    if(id === "expedienteIntegral"){cargarEstudiantesExpedienteIntegral();generarExpedienteIntegral();}
 
     if(id === "planesMejora"){
         cargarEstudiantesMejora();
