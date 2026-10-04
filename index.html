@@ -2428,15 +2428,7 @@ function cerrarSesion(){
 }
 
 
-function cerrarSesion(){
 
-    document.getElementById("app").style.display = "none";
-    document.getElementById("loginScreen").style.display = "flex";
-
-    document.getElementById("loginUser").value = "";
-    document.getElementById("loginPass").value = "";
-
-}
 
 
 /* =========================================================
@@ -3844,7 +3836,7 @@ function cargarUsuarios(){
     const tbody=document.getElementById("tablaUsuarios");
     if(!tbody) return;
     const usuarios=obtenerUsuarios();
-    tbody.innerHTML=usuarios.map((u,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(u.usuario)+"</td><td>"+escaparHTML(u.rol)+"</td><td>"+(u.usuario==="admin"?"Principal":"<button class='btn-danger' onclick='eliminarUsuario(""+escaparHTML(u.id)+"")'>🗑️</button>")+"</td></tr>").join("");
+    tbody.innerHTML=usuarios.map((u,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(u.usuario)+"</td><td>"+escaparHTML(u.rol)+"</td><td>"+(u.usuario==="admin"?"Principal":"<button class='btn-danger' onclick='eliminarUsuario(&quot;"+escaparHTML(u.id)+"&quot;)'>🗑️</button>")+"</td></tr>").join("");
 }
 function guardarUsuario(){
     const usuario=document.getElementById("usrNombre").value.trim();
