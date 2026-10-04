@@ -3677,19 +3677,19 @@ function esAsignaturaNumericaPorGrado(nivel,grado,asignatura){
     const g=normalizarGrado(grado);
     const a=String(asignatura||"").trim();
 
-    // Inicial: AA / AP.
-    if(n==="Inicial") return false;
+    // Educación Inicial: todas las evaluaciones son cualitativas AA / AP.
+    if(n==="inicial") return false;
 
     // 1.º y 2.º de Primaria: todas las disciplinas son cualitativas.
-    if(n==="Primaria" && ["1","2"].includes(g)) return false;
+    if(n==="primaria" && ["1","2"].includes(g)) return false;
 
-    // 3.º a 6.º: las cuatro disciplinas básicas son numéricas.
-    if(n==="Primaria" && ["3","4","5","6"].includes(g)){
+    // 3.º a 6.º de Primaria: las cuatro disciplinas básicas son numéricas.
+    if(n==="primaria" && ["3","4","5","6"].includes(g)){
         return BASICAS_NUMERICAS.includes(a);
     }
 
-    // Regla vigente del sistema para Secundaria.
-    if(n==="Secundaria") return BASICAS_NUMERICAS.includes(a);
+    // Secundaria: las cuatro disciplinas básicas son numéricas.
+    if(n==="secundaria") return BASICAS_NUMERICAS.includes(a);
 
     return false;
 }
@@ -3698,8 +3698,12 @@ function categoriasPorNivelGrado(nivel,grado){
     const n=normalizarNivel(nivel);
     const g=normalizarGrado(grado);
 
-    if(n==="Inicial") return ["AA","AP"];
-    if(n==="Primaria" && ["1","2","3","4","5","6"].includes(g)) return ["AA","AS","AF"];
+    // Educación Inicial (I, II y III Nivel): solamente AA / AP.
+    if(n==="inicial") return ["AA","AP"];
+
+    // Primaria 1.º a 6.º: las disciplinas cualitativas usan AA / AS / AF.
+    if(n==="primaria" && ["1","2","3","4","5","6"].includes(g)) return ["AA","AS","AF"];
+
     return ["AA","AS","AF"];
 }
 
