@@ -3122,6 +3122,81 @@ window.addEventListener("load",function(){
 
 });
 
+/* =========================================================
+   BOLETA DEL ESTUDIANTE 7.5
+========================================================= */
+function cargarEstudiantesBoleta(){
+    const select=document.getElementById("boletaEstudiante");
+    if(!select) return;
+    const anterior=select.value;
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    select.innerHTML='<option value="">Seleccione un estudiante</option>';
+    estudiantes.forEach(e=>{
+        const o=document.createElement("option");
+        o.value=e.id;
+        o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"")+(e.grado?" · "+e.grado:"");
+        select.appendChild(o);
+    });
+    if([...select.options].some(o=>String(o.value)===String(anterior))) select.value=anterior;
+}
+function generarBoleta(){
+    const id=document.getElementById("boletaEstudiante")?.value;
+    const anio=document.getElementById("boletaAnio")?.value||"2026";
+    const corteFiltro=document.getElementById("boletaCorte")?.value||"";
+    const datos=document.getElementById("boletaDatosEstudiante");
+    const tabla=document.getElementById("boletaTablaCalificaciones");
+    const asistencia=document.getElementById("boletaAsistencia");
+    const observaciones=document.getElementById("boletaObservaciones");
+    const pie=document.getElementById("boletaPieAnio");
+    if(pie) pie.textContent=anio;
+    if(!id){
+        if(datos) datos.innerHTML="Seleccione un estudiante para generar la boleta.";
+        if(tabla) tabla.innerHTML='<tr><td colspan="6" style="text-align:center;">No hay estudiante seleccionado.</td></tr>';
+        if(asistencia) asistencia.innerHTML="";
+        if(observaciones) observaciones.textContent="—";
+        return;
+    }
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
+    if(!e) return;
+    datos.innerHTML=
+        "<div><strong>Estudiante:</strong> "+escaparHTML(e.nombre||"")+"</div>"+
+        "<div><strong>Código / Cédula:</strong> "+escaparHTML(e.codigo||e.cedula||"—")+"</div>"+
+        "<div><strong>Sexo:</strong> "+escaparHTML(e.sexo||"—")+"</div>"+
+        "<div><strong>Fecha de nacimiento:</strong> "+escaparHTML(e.nacimiento||"—")+"</div>"+
+        "<div><strong>Nivel:</strong> "+escaparHTML(e.nivel||"—")+"</div>"+
+        "<div><strong>Grado:</strong> "+escaparHTML(e.grado||"—")+"</div>"+
+        "<div><strong>Sección:</strong> "+escaparHTML(e.seccion||"—")+"</div>"+
+        "<div><strong>Responsable:</strong> "+escaparHTML(e.responsable||"—")+"</div>"+
+        "<div><strong>Año escolar:</strong> "+escaparHTML(anio)+"</div>";
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||"2026")===String(anio)&&(!corteFiltro||String(x.corte||"")===corteFiltro));
+    const asignaturas=[...new Set(cal.map(x=>x.asignatura).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"es"));
+    tabla.innerHTML="";
+    if(!asignaturas.length){
+        tabla.innerHTML='<tr><td colspan="6" style="text-align:center;">No hay calificaciones registradas para este año/corte.</td></tr>';
+    }else asignaturas.forEach(asig=>{
+        const regs=cal.filter(x=>x.asignatura===asig), pc={};
+        regs.forEach(x=>pc[x.corte]=x);
+        const vals=["I Corte","II Corte","III Corte","IV Corte"].map(k=>pc[k]?escaparHTML(pc[k].resultado):"—");
+        const nums=regs.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado));
+        let final="—";
+        if(nums.length) final=(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1);
+        else { const q=regs.map(x=>x.resultado).filter(Boolean); if(q.length) final=escaparHTML(q[q.length-1]); }
+        tabla.innerHTML+="<tr><td>"+escaparHTML(asig)+"</td><td>"+vals[0]+"</td><td>"+vals[1]+"</td><td>"+vals[2]+"</td><td>"+vals[3]+"</td><td><strong>"+final+"</strong></td></tr>";
+    });
+    const ra=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(id));
+    const r={p:0,a:0,t:0,j:0};
+    ra.forEach(x=>{const s=limpiarTexto(x.estado);if(s.includes("presente"))r.p++;else if(s.includes("ausente"))r.a++;else if(s.includes("tardanza"))r.t++;else if(s.includes("justificada"))r.j++;});
+    asistencia.innerHTML="<div><strong>Presentes</strong><br>"+r.p+"</div><div><strong>Ausencias</strong><br>"+r.a+"</div><div><strong>Tardanzas</strong><br>"+r.t+"</div><div><strong>Justificadas</strong><br>"+r.j+"</div><div><strong>Total registros</strong><br>"+ra.length+"</div>";
+    const obs=cal.map(x=>x.observacion).filter(Boolean);
+    observaciones.textContent=obs.length?[...new Set(obs)].join(" · "):"—";
+}
+function imprimirBoleta(){
+    const id=document.getElementById("boletaEstudiante")?.value;
+    if(!id){alert("Seleccione un estudiante antes de imprimir la boleta.");return;}
+    generarBoleta();
+    window.print();
+}
+
 </script>
 
 </body>
