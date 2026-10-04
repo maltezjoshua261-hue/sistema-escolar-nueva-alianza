@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.8</title>
+<title>Sistema Escolar Nueva Alianza - v7.9</title>
 
 <style>
 *{
@@ -418,6 +418,15 @@ body[data-imprimiendo="expediente"] #expedienteDocumento,body[data-imprimiendo="
 body[data-imprimiendo="expediente"] #expedienteDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;}
 body[data-imprimiendo="expediente"] #expedienteDocumento~.card{display:none !important;}
 }
+@media print{
+body[data-imprimiendo="reporteMatricula"] *{visibility:hidden !important;}
+body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento,
+body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento *{visibility:visible !important;}
+body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento{
+position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15px;
+}
+body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento .no-print{display:none !important;}
+}
 </style>
 </head>
 
@@ -488,6 +497,9 @@ body[data-imprimiendo="expediente"] #expedienteDocumento~.card{display:none !imp
             </button>
             <button onclick="mostrarSeccion('expediente',this)">
                 📁 Expediente
+            </button>
+            <button onclick="mostrarSeccion('reporteMatricula',this)">
+                📋 Reporte de matrícula
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1419,6 +1431,126 @@ body[data-imprimiendo="expediente"] #expedienteDocumento~.card{display:none !imp
             </section>
 
             <!-- CONFIGURACION -->
+            <!-- REPORTE OFICIAL DE MATRÍCULA 7.9 -->
+            <section id="reporteMatricula" class="section">
+                <div class="card no-print">
+                    <h2>📋 Reporte oficial de matrícula</h2>
+                    <p style="margin-bottom:15px;color:#666;">Listado administrativo de estudiantes matriculados, retirados y trasladados por año, nivel, grado y sección.</p>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Año escolar</label>
+                            <select id="repMatAnio" onchange="actualizarGradosReporteMatricula();cargarReporteMatricula();">
+                                <option value="">Todos los años</option>
+                                <option>2026</option>
+                                <option>2027</option>
+                                <option>2028</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nivel educativo</label>
+                            <select id="repMatNivel" onchange="actualizarGradosReporteMatricula();cargarReporteMatricula();">
+                                <option value="">Todos los niveles</option>
+                                <option value="Inicial">Educación Inicial</option>
+                                <option value="Primaria">Primaria</option>
+                                <option value="Secundaria">Secundaria</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Grado</label>
+                            <select id="repMatGrado" onchange="cargarReporteMatricula()">
+                                <option value="">Todos los grados</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sección</label>
+                            <select id="repMatSeccion" onchange="cargarReporteMatricula()">
+                                <option value="">Todas</option>
+                                <option>A</option><option>B</option><option>C</option><option>Única</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="repMatEstado" onchange="cargarReporteMatricula()">
+                                <option value="">Todos</option>
+                                <option>Matriculado</option>
+                                <option>Retirado</option>
+                                <option>Trasladado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Buscar estudiante</label>
+                            <input id="repMatBuscar" type="search" placeholder="Nombre o código" oninput="cargarReporteMatricula()">
+                        </div>
+                    </div>
+
+                    <div class="stats" style="grid-template-columns:repeat(5,1fr);">
+                        <div class="stat"><h3>Total</h3><strong id="repMatTotal">0</strong></div>
+                        <div class="stat"><h3>Hombres</h3><strong id="repMatHombres">0</strong></div>
+                        <div class="stat"><h3>Mujeres</h3><strong id="repMatMujeres">0</strong></div>
+                        <div class="stat"><h3>Retirados</h3><strong id="repMatRetirados">0</strong></div>
+                        <div class="stat"><h3>Trasladados</h3><strong id="repMatTrasladados">0</strong></div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-primary" onclick="imprimirReporteMatricula()">🖨️ Imprimir reporte</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="reporteMatriculaDocumento">
+                        <div style="text-align:center;border-bottom:3px solid #123b6d;padding-bottom:12px;margin-bottom:15px;">
+                            <div style="font-size:18px;font-weight:bold;color:#123b6d;">MINISTERIO DE EDUCACIÓN</div>
+                            <div style="font-size:17px;font-weight:bold;">CENTRO ESCOLAR NUEVA ALIANZA</div>
+                            <div style="font-size:14px;margin-top:4px;">REPORTE OFICIAL DE MATRÍCULA ESCOLAR</div>
+                            <div id="repMatEncabezado" style="font-size:13px;margin-top:7px;"></div>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Código</th>
+                                        <th>Estudiante</th>
+                                        <th>Sexo</th>
+                                        <th>Nivel</th>
+                                        <th>Grado</th>
+                                        <th>Sección</th>
+                                        <th>Responsable</th>
+                                        <th>Teléfono</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaReporteMatricula"></tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin-top:22px;">
+                            <h3 style="color:#123b6d;margin-bottom:8px;">Resumen por grado y sección</h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nivel</th><th>Grado</th><th>Sección</th><th>Total</th><th>Hombres</th><th>Mujeres</th><th>Matriculados</th><th>Retirados</th><th>Trasladados</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaResumenGruposMatricula"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="repMatPie" style="margin-top:18px;font-size:12px;color:#555;"></div>
+
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:70px;text-align:center;margin-top:70px;font-size:12px;">
+                            <div>_______________________________<br><strong>Docente / Responsable de matrícula</strong></div>
+                            <div>_______________________________<br><strong>Evert Josue Maltez Sanchez<br>Director</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="configuracion" class="section">
 
                 <div class="card">
@@ -3290,6 +3422,8 @@ function cargarTodo(){
     cargarEstudiantesMatricula();
     cargarMatriculas();
     cargarSelectorConstancia();
+    actualizarGradosReporteMatricula();
+    cargarReporteMatricula();
     cargarEstudiantesExpediente();
     cargarUsuarios();
     aplicarPermisos();
@@ -3403,6 +3537,84 @@ function imprimirConstanciaMatricula(){
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("constanciaMatriculaContenido").innerHTML='<div style="padding:20px;line-height:2;font-size:15px;text-align:justify;">Por medio de la presente se hace constar que <strong>'+escaparHTML(m.estudiante)+'</strong>, código/cédula <strong>'+escaparHTML(m.codigo||"—")+'</strong>, se encuentra registrado(a) en el <strong>Centro Escolar Nueva Alianza</strong>, correspondiente al año escolar <strong>'+escaparHTML(m.anio)+'</strong>, en <strong>'+escaparHTML(m.nivel||"—")+'</strong>, grado/nivel <strong>'+escaparHTML(m.grado||"—")+'</strong>, sección <strong>'+escaparHTML(m.seccion||"—")+'</strong>. Responsable/tutor: <strong>'+escaparHTML(m.responsable||"—")+'</strong>. Fecha de matrícula: <strong>'+escaparHTML(m.fecha||"—")+'</strong>.<br><br>Se extiende la presente constancia para los fines que estime convenientes.</div>';
     const doc=document.getElementById("constanciaMatriculaDocumento");doc.style.display="block";document.body.setAttribute("data-imprimiendo","matricula");window.print();doc.style.display="none";document.body.removeAttribute("data-imprimiendo");
+}
+
+/* =========================================================
+   REPORTE OFICIAL DE MATRÍCULA 7.9
+========================================================= */
+function actualizarGradosReporteMatricula(){
+    const s=document.getElementById("repMatGrado"); if(!s)return;
+    const anterior=s.value, nivel=document.getElementById("repMatNivel")?.value||"";
+    const grados=[];
+    if(nivel==="Inicial") grados.push("I Nivel","II Nivel","III Nivel");
+    else if(nivel==="Primaria") for(let i=1;i<=6;i++)grados.push(String(i));
+    else if(nivel==="Secundaria") for(let i=7;i<=11;i++)grados.push(String(i));
+    else {
+        ["I Nivel","II Nivel","III Nivel","1","2","3","4","5","6","7","8","9","10","11"].forEach(g=>grados.push(g));
+    }
+    s.innerHTML='<option value="">Todos los grados</option>'+grados.map(g=>'<option value="'+escaparHTML(g)+'">'+escaparHTML(g)+'</option>').join("");
+    if([...s.options].some(o=>o.value===anterior))s.value=anterior;
+}
+function cargarReporteMatricula(){
+    const tbody=document.getElementById("tablaReporteMatricula"), resumen=document.getElementById("tablaResumenGruposMatricula");
+    if(!tbody||!resumen)return;
+    const anio=document.getElementById("repMatAnio")?.value||"";
+    const nivel=document.getElementById("repMatNivel")?.value||"";
+    const grado=document.getElementById("repMatGrado")?.value||"";
+    const seccion=document.getElementById("repMatSeccion")?.value||"";
+    const estado=document.getElementById("repMatEstado")?.value||"";
+    const buscar=limpiarTexto(document.getElementById("repMatBuscar")?.value||"");
+
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>{
+        const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));
+        return (!anio||String(m.anio)===String(anio)) &&
+               (!nivel||limpiarTexto(m.nivel)===limpiarTexto(nivel)) &&
+               (!grado||normalizarGrado(m.grado)===normalizarGrado(grado)||limpiarTexto(m.grado).includes(limpiarTexto(grado))) &&
+               (!seccion||limpiarTexto(m.seccion)===limpiarTexto(seccion)) &&
+               (!estado||limpiarTexto(m.estado)===limpiarTexto(estado)) &&
+               (!buscar||texto.includes(buscar));
+    }).sort((a,b)=>{
+        const ga=String(a.grado||"")+" "+String(a.seccion||"");
+        const gb=String(b.grado||"")+" "+String(b.seccion||"");
+        return ga.localeCompare(gb,"es")||String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es");
+    });
+
+    const total=mats.length;
+    const hombres=mats.filter(m=>limpiarTexto(m.sexo||"")==="masculino").length;
+    const mujeres=mats.filter(m=>limpiarTexto(m.sexo||"")==="femenino").length;
+    const retirados=mats.filter(m=>limpiarTexto(m.estado||"")==="retirado").length;
+    const trasladados=mats.filter(m=>limpiarTexto(m.estado||"")==="trasladado").length;
+    const el=(id)=>document.getElementById(id);
+    if(el("repMatTotal"))el("repMatTotal").textContent=total;
+    if(el("repMatHombres"))el("repMatHombres").textContent=hombres;
+    if(el("repMatMujeres"))el("repMatMujeres").textContent=mujeres;
+    if(el("repMatRetirados"))el("repMatRetirados").textContent=retirados;
+    if(el("repMatTrasladados"))el("repMatTrasladados").textContent=trasladados;
+
+    tbody.innerHTML=total?mats.map((m,i)=>'<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(m.codigo||"—")+'</td><td>'+escaparHTML(m.estudiante||"—")+'</td><td>'+escaparHTML(m.sexo||"—")+'</td><td>'+escaparHTML(m.nivel||"—")+'</td><td>'+escaparHTML(m.grado||"—")+'</td><td>'+escaparHTML(m.seccion||"—")+'</td><td>'+escaparHTML(m.responsable||"—")+'</td><td>'+escaparHTML(m.telefono||"—")+'</td><td>'+escaparHTML(m.estado||"—")+'</td><td>'+escaparHTML(m.fecha||"—")+'</td></tr>').join(""):'<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay registros con los filtros seleccionados.</td></tr>';
+
+    const grupos={};
+    mats.forEach(m=>{
+        const k=[m.nivel||"—",m.grado||"—",m.seccion||"—"].join("|");
+        if(!grupos[k])grupos[k]={nivel:m.nivel||"—",grado:m.grado||"—",seccion:m.seccion||"—",total:0,h:0,f:0,mat:0,ret:0,tra:0};
+        const g=grupos[k]; g.total++;
+        if(limpiarTexto(m.sexo||"")==="masculino")g.h++;
+        if(limpiarTexto(m.sexo||"")==="femenino")g.f++;
+        const est=limpiarTexto(m.estado||"");
+        if(est==="matriculado")g.mat++; else if(est==="retirado")g.ret++; else if(est==="trasladado")g.tra++;
+    });
+    const gs=Object.values(grupos).sort((a,b)=>(a.nivel+" "+a.grado+" "+a.seccion).localeCompare(b.nivel+" "+b.grado+" "+b.seccion,"es"));
+    resumen.innerHTML=gs.length?gs.map(g=>'<tr><td>'+escaparHTML(g.nivel)+'</td><td>'+escaparHTML(g.grado)+'</td><td>'+escaparHTML(g.seccion)+'</td><td>'+g.total+'</td><td>'+g.h+'</td><td>'+g.f+'</td><td>'+g.mat+'</td><td>'+g.ret+'</td><td>'+g.tra+'</td></tr>').join(""):'<tr><td colspan="9" style="text-align:center;color:#777;">No hay grupos para mostrar.</td></tr>';
+
+    const desc=[anio?"Año escolar: "+anio:"Todos los años",nivel?"Nivel: "+nivel:"Todos los niveles",grado?"Grado: "+grado:"Todos los grados",seccion?"Sección: "+seccion:"Todas las secciones",estado?"Estado: "+estado:"Todos los estados"].join(" · ");
+    if(el("repMatEncabezado"))el("repMatEncabezado").textContent=desc;
+    if(el("repMatPie"))el("repMatPie").textContent="Generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Total de registros: "+total+".";
+}
+function imprimirReporteMatricula(){
+    cargarReporteMatricula();
+    document.body.setAttribute("data-imprimiendo","reporteMatricula");
+    window.print();
+    document.body.removeAttribute("data-imprimiendo");
 }
 
 /* =========================================================
