@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.6</title>
+<title>Sistema Escolar Nueva Alianza - v7.7</title>
 
 <style>
 *{
@@ -404,6 +404,13 @@ th{
         grid-template-columns:1fr;
     }
 }
+
+@media print{
+    body[data-imprimiendo="matricula"] *{visibility:hidden !important;}
+    body[data-imprimiendo="matricula"] #constanciaMatriculaDocumento,
+    body[data-imprimiendo="matricula"] #constanciaMatriculaDocumento *{visibility:visible !important;}
+    body[data-imprimiendo="matricula"] #constanciaMatriculaDocumento{display:block !important;position:absolute;left:0;top:0;width:100%;border:none;box-shadow:none;padding:20px;}
+}
 </style>
 </head>
 
@@ -468,6 +475,9 @@ th{
             
             <button onclick="mostrarSeccion('boleta',this)">
                 📄 Boleta del estudiante
+            </button>
+            <button onclick="mostrarSeccion('matricula',this)">
+                🧾 Matrícula
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1307,6 +1317,59 @@ th{
 
             </section>
 
+            <!-- MATRÍCULA 7.7 -->
+            <section id="matricula" class="section">
+                <div class="card">
+                    <h2>🧾 Matrícula escolar</h2>
+                    <input type="hidden" id="matId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar *</label><input id="matAnio" type="number" value="2026"></div>
+                        <div class="form-group"><label>Estudiante *</label><select id="matEstudiante" onchange="cargarDatosMatricula()"><option value="">Seleccione un estudiante</option></select></div>
+                        <div class="form-group"><label>Nivel educativo *</label><select id="matNivel"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado / Nivel</label><input id="matGrado" type="text"></div>
+                        <div class="form-group"><label>Sección</label><select id="matSeccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div class="form-group"><label>Fecha de matrícula *</label><input id="matFecha" type="date"></div>
+                        <div class="form-group"><label>Responsable / Tutor</label><input id="matResponsable" type="text"></div>
+                        <div class="form-group"><label>Teléfono</label><input id="matTelefono" type="tel"></div>
+                        <div class="form-group"><label>Dirección / Comunidad</label><input id="matDireccion" type="text"></div>
+                        <div class="form-group"><label>Estado</label><select id="matEstado"><option>Matriculado</option><option>Retirado</option><option>Trasladado</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Observación</label><textarea id="matObservacion" rows="3"></textarea></div>
+                    <div class="actions">
+                        <button id="btnGuardarMatricula" class="btn-success" onclick="guardarMatricula()">💾 Guardar matrícula</button>
+                        <button class="btn-secondary" onclick="limpiarMatricula()">Limpiar</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Matrículas registradas</h2>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año</label><input id="buscarMatAnio" type="search" placeholder="2026" oninput="cargarMatriculas()"></div>
+                        <div class="form-group"><label>Nivel</label><select id="buscarMatNivel" onchange="cargarMatriculas()"><option value="">Todos</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado</label><input id="buscarMatGrado" type="search" oninput="cargarMatriculas()"></div>
+                        <div class="form-group"><label>Sección</label><select id="buscarMatSeccion" onchange="cargarMatriculas()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Buscar estudiante</label><input id="buscarMatricula" type="search" placeholder="Nombre o código" oninput="cargarMatriculas()"></div>
+                    <div class="table-container"><table>
+                        <thead><tr><th>#</th><th>Año</th><th>Estudiante</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaMatriculas"></tbody>
+                    </table></div>
+                </div>
+                <div class="card no-print">
+                    <h2>📄 Constancia de matrícula</h2>
+                    <div class="form-group"><label>Seleccione una matrícula</label><select id="constanciaMatricula"><option value="">Seleccione</option></select></div>
+                    <button class="btn-info" onclick="imprimirConstanciaMatricula()">🖨️ Generar / imprimir constancia</button>
+                </div>
+                <div id="constanciaMatriculaDocumento" class="boleta-documento" style="display:none;">
+                    <div class="boleta-encabezado"><div class="boleta-titulo">CENTRO ESCOLAR NUEVA ALIANZA</div><div class="boleta-subtitulo">CONSTANCIA DE MATRÍCULA</div></div>
+                    <div id="constanciaMatriculaContenido"></div>
+                    <div class="boleta-firmas">
+                        <div>____________________________<br>Madre, padre o tutor</div>
+                        <div>____________________________<br>Docente</div>
+                        <div>____________________________<br>Evert Josue Maltez Sanchez<br>Director</div>
+                    </div>
+                </div>
+            </section>
+
             <!-- CONFIGURACION -->
             <section id="configuracion" class="section">
 
@@ -1439,6 +1502,7 @@ const KEY_DOCENTES = "docentesNuevaAlianza";
 const KEY_ASISTENCIAS = "asistenciasNuevaAlianza";
 const KEY_CALIFICACIONES = "calificacionesNuevaAlianza";
 const KEY_CONFIG = "configNuevaAlianza";
+const KEY_MATRICULAS = "matriculasNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
 
 
@@ -2974,6 +3038,7 @@ function construirRespaldo(){
         docentes: obtenerDatos(KEY_DOCENTES),
         asistencias: obtenerDatos(KEY_ASISTENCIAS),
         calificaciones: obtenerDatos(KEY_CALIFICACIONES),
+        matriculas: obtenerDatos(KEY_MATRICULAS),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -3067,6 +3132,11 @@ function importarRespaldo(event){
                 Array.isArray(respaldo.calificaciones) ? respaldo.calificaciones : []
             );
 
+            guardarDatos(
+                KEY_MATRICULAS,
+                Array.isArray(respaldo.matriculas) ? respaldo.matriculas : []
+            );
+
             if(respaldo.configuracion){
                 localStorage.setItem(
                     KEY_CONFIG,
@@ -3132,6 +3202,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_DOCENTES);
     localStorage.removeItem(KEY_ASISTENCIAS);
     localStorage.removeItem(KEY_CALIFICACIONES);
+    localStorage.removeItem(KEY_MATRICULAS);
 
     cargarTodo();
 
@@ -3160,6 +3231,9 @@ function cargarTodo(){
 
     cargarEstudiantesBoleta();
     generarBoleta();
+    cargarEstudiantesMatricula();
+    cargarMatriculas();
+    cargarSelectorConstancia();
     cargarUsuarios();
     aplicarPermisos();
 
@@ -3212,6 +3286,66 @@ function eliminarUsuario(id){
     if(!confirm("¿Eliminar este usuario?")) return;
     guardarDatos(KEY_USUARIOS,obtenerUsuarios().filter(u=>String(u.id)!==String(id)));
     cargarUsuarios();
+}
+
+/* =========================================================
+   MATRÍCULA ESCOLAR 7.7
+========================================================= */
+function cargarEstudiantesMatricula(){
+    const select=document.getElementById("matEstudiante"); if(!select)return;
+    const anterior=select.value;
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    select.innerHTML='<option value="">Seleccione un estudiante</option>';
+    estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
+    if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
+}
+function cargarDatosMatricula(){
+    const id=document.getElementById("matEstudiante")?.value;if(!id)return;
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    document.getElementById("matNivel").value=e.nivel||"";
+    document.getElementById("matGrado").value=e.grado||"";
+    document.getElementById("matSeccion").value=e.seccion||"";
+    document.getElementById("matResponsable").value=e.responsable||"";
+    document.getElementById("matTelefono").value=e.telefono||"";
+    document.getElementById("matDireccion").value=e.direccion||"";
+}
+function guardarMatricula(){
+    const id=document.getElementById("matId").value, estudianteId=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
+    if(!estudianteId||!anio){alert("Seleccione estudiante e indique el año escolar.");return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("No se encontró el estudiante.");return;}
+    const mats=obtenerDatos(KEY_MATRICULAS), dup=mats.find(m=>String(m.estudianteId)===String(estudianteId)&&String(m.anio)===String(anio)&&String(m.id)!==String(id));
+    if(dup){alert("El estudiante ya tiene una matrícula registrada para ese año escolar.");return;}
+    const registro={id:id||Date.now().toString(),estudianteId,estudiante:e.nombre||"",codigo:e.codigo||e.cedula||"",anio,nivel:document.getElementById("matNivel").value,grado:document.getElementById("matGrado").value.trim(),seccion:document.getElementById("matSeccion").value,fecha:document.getElementById("matFecha").value,responsable:document.getElementById("matResponsable").value.trim(),telefono:document.getElementById("matTelefono").value.trim(),direccion:document.getElementById("matDireccion").value.trim(),estado:document.getElementById("matEstado").value,observacion:document.getElementById("matObservacion").value.trim()};
+    if(!registro.fecha){alert("Indique la fecha de matrícula.");return;}
+    const pos=mats.findIndex(m=>String(m.id)===String(id));if(pos>=0)mats[pos]=registro;else mats.push(registro);
+    guardarDatos(KEY_MATRICULAS,mats);limpiarMatricula();cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();
+    alert(pos>=0?"Matrícula actualizada correctamente.":"Matrícula registrada correctamente.");
+}
+function limpiarMatricula(){
+    ["matId","matGrado","matResponsable","matTelefono","matDireccion","matObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    document.getElementById("matEstudiante").value="";document.getElementById("matNivel").value="";document.getElementById("matSeccion").value="";document.getElementById("matEstado").value="Matriculado";document.getElementById("matAnio").value="2026";document.getElementById("matFecha").value=new Date().toISOString().slice(0,10);document.getElementById("btnGuardarMatricula").textContent="💾 Guardar matrícula";
+}
+function editarMatricula(id){
+    const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
+    document.getElementById("matId").value=m.id;document.getElementById("matEstudiante").value=m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
+}
+function eliminarMatricula(id){if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
+function cargarMatriculas(){
+    const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
+    const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));}).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
+    tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.estado)+"</td><td><button class='btn-warning' onclick='editarMatricula(""+escaparHTML(m.id)+"")'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(""+escaparHTML(m.id)+"")'>🗑️</button></td></tr>").join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
+}
+function cargarSelectorConstancia(){
+    const s=document.getElementById("constanciaMatricula");if(!s)return;const anterior=s.value;s.innerHTML='<option value="">Seleccione</option>';
+    obtenerDatos(KEY_MATRICULAS).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es")).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.estudiante+" · "+m.anio+" · "+(m.grado||m.nivel);s.appendChild(o);});
+    if([...s.options].some(o=>o.value===anterior))s.value=anterior;
+}
+function imprimirConstanciaMatricula(){
+    const id=document.getElementById("constanciaMatricula")?.value;if(!id){alert("Seleccione una matrícula.");return;}
+    const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
+    document.getElementById("constanciaMatriculaContenido").innerHTML='<div style="padding:20px;line-height:2;font-size:15px;text-align:justify;">Por medio de la presente se hace constar que <strong>'+escaparHTML(m.estudiante)+'</strong>, código/cédula <strong>'+escaparHTML(m.codigo||"—")+'</strong>, se encuentra registrado(a) en el <strong>Centro Escolar Nueva Alianza</strong>, correspondiente al año escolar <strong>'+escaparHTML(m.anio)+'</strong>, en <strong>'+escaparHTML(m.nivel||"—")+'</strong>, grado/nivel <strong>'+escaparHTML(m.grado||"—")+'</strong>, sección <strong>'+escaparHTML(m.seccion||"—")+'</strong>. Responsable/tutor: <strong>'+escaparHTML(m.responsable||"—")+'</strong>. Fecha de matrícula: <strong>'+escaparHTML(m.fecha||"—")+'</strong>.<br><br>Se extiende la presente constancia para los fines que estime convenientes.</div>';
+    const doc=document.getElementById("constanciaMatriculaDocumento");doc.style.display="block";document.body.setAttribute("data-imprimiendo","matricula");window.print();doc.style.display="none";document.body.removeAttribute("data-imprimiendo");
 }
 
 /* =========================================================
