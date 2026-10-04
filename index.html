@@ -5640,7 +5640,7 @@ function cargarDashboardAcademico(){
  const mujeres=est.filter(e=>String(e.sexo||"").toLowerCase().startsWith("f")).length;
  const pres=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("pres")).length,aus=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("aus")).length,tar=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("tar")).length;
  const tasa=asi.length?Math.round(pres/asi.length*100):0;
- const num=cal.filter(x=>x.nota!==""&&x.nota!==undefined&&!isNaN(Number(x.nota))).map(x=>Number(x.nota)),prom=num.length?(num.reduce((a,b)=>a+b,0)/num.length).toFixed(1):"—";
+ const num=cal.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado)),prom=num.length?(num.reduce((a,b)=>a+b,0)/num.length).toFixed(1):"—";
  const ejecutadas=pla.filter(x=>x.estado==="Ejecutada").length,cumPla=pla.length?Math.round(ejecutadas/pla.length*100):0;
  const promovidos=pro.filter(x=>x.resultado==="Promovido").length,reprobados=pro.filter(x=>x.resultado==="Reprobado").length,pendientes=pro.filter(x=>x.resultado==="Pendiente").length,tras=pro.filter(x=>x.resultado==="Trasladado").length,ret=pro.filter(x=>x.resultado==="Retirado").length;
  const grupos=[...new Set(est.map(e=>normalizarNivel(e.nivel)+"|"+normalizarGrado(e.grado)+"|"+normalizarSeccion(e.seccion)))].filter(Boolean);
@@ -5692,7 +5692,7 @@ function estudianteVisibleAlerta(est){return estudianteVisibleSeguimiento(est);}
 function datosRiesgoAlerta(est,anio){
     const grades=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio||anio)===Number(anio));
     const asis=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(est.id)&&String(x.fecha||"").startsWith(String(anio)));
-    let suma=0,n=0;grades.forEach(g=>{const v=Number(g.notaFinal??g.nota??g.valor);if(Number.isFinite(v)){suma+=v;n++;}});
+    let suma=0,n=0;grades.filter(g=>g.tipo==="Numerica").forEach(g=>{const v=Number(g.resultado);if(Number.isFinite(v)){suma+=v;n++;}});
     const promedio=n?Math.round(suma/n*100)/100:null;
     const asistencia=asis.length?Math.round(asis.filter(a=>["Presente","Tardanza"].includes(a.estado)).length/asis.length*1000)/10:null;
     const segs=obtenerDatos(KEY_SEGUIMIENTOS).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio)===Number(anio));
@@ -5802,8 +5802,8 @@ function datosAcademicosSeguimiento(est){
         String(x.fecha||"").startsWith(String(anio))
     );
     let suma=0,n=0;
-    grades.forEach(g=>{
-        const v=Number(g.notaFinal ?? g.nota ?? g.valor);
+    grades.filter(g=>g.tipo==="Numerica").forEach(g=>{
+        const v=Number(g.resultado);
         if(Number.isFinite(v)){suma+=v;n++;}
     });
     const promedio=n?Math.round((suma/n)*100)/100:null;
