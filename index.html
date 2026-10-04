@@ -2358,23 +2358,48 @@ const DISCIPLINAS_CUALITATIVAS = [
 
 function obtenerUsuarios(){
     let usuarios=obtenerDatos(KEY_USUARIOS);
-    if(!usuarios.length){
-        usuarios=[
-            {id:"admin",usuario:"admin",password:"1234",rol:"Director"},
-            {id:"docente",usuario:"docente",password:"2026",rol:"Docente"}
-        ];
-        guardarDatos(KEY_USUARIOS,usuarios);
-    }
+
+    // Mantener disponibles las cuentas iniciales aunque exista
+    // información antigua o incompleta en localStorage.
+    const cuentasBase=[
+        {id:"admin",usuario:"admin",password:"1234",rol:"Director"},
+        {id:"docente",usuario:"docente",password:"2026",rol:"Docente"}
+    ];
+
+    if(!Array.isArray(usuarios)) usuarios=[];
+
+    cuentasBase.forEach(base=>{
+        const existe=usuarios.some(u=>String(u?.usuario||"").trim().toLowerCase()===base.usuario);
+        if(!existe) usuarios.push(base);
+    });
+
+    // Limpiar registros de usuario incompletos sin eliminar cuentas válidas.
+    usuarios=usuarios.filter(u=>u && String(u.usuario||"").trim() && String(u.password??"").trim());
+
+    guardarDatos(KEY_USUARIOS,usuarios);
     return usuarios;
 }
 
 function iniciarSesion(){
     const usuario=document.getElementById("loginUser").value.trim();
     const password=document.getElementById("loginPass").value.trim();
-    const encontrado=obtenerUsuarios().find(u=>u.usuario===usuario&&u.password===password);
+
+    if(!usuario || !password){
+        document.getElementById("loginError").textContent="Ingrese el usuario y la contraseña.";
+        return;
+    }
+
+    const usuarios=obtenerUsuarios();
+    const encontrado=usuarios.find(u=>
+        String(u.usuario||"").trim().toLowerCase()===usuario.toLowerCase() &&
+        String(u.password??"").trim()===password
+    );
 
     if(encontrado){
-        sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({usuario:encontrado.usuario,rol:encontrado.rol}));
+        sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
+            usuario:encontrado.usuario,
+            rol:encontrado.rol||"Docente"
+        }));
         document.getElementById("loginError").textContent="";
         document.getElementById("loginScreen").style.display="none";
         document.getElementById("app").style.display="flex";
@@ -3801,12 +3826,18 @@ function cargarTodo(){
 ========================================================= */
 
 window.addEventListener("load",function(){
+    // Inicializa las cuentas base al abrir el sistema.
+    obtenerUsuarios();
 
-    /*
-       El sistema queda preparado aunque todavía
-       no se haya iniciado sesión.
-    */
-
+    // Permite iniciar sesión presionando Enter desde cualquier campo del login.
+    ["loginUser","loginPass"].forEach(id=>{
+        const campo=document.getElementById(id);
+        if(campo){
+            campo.addEventListener("keydown",function(e){
+                if(e.key==="Enter") iniciarSesion();
+            });
+        }
+    });
 });
 
 function cargarUsuarios(){
