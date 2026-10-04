@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.5</title>
+<title>Sistema Escolar Nueva Alianza - v9.6</title>
 
 <style>
 *{
@@ -519,6 +519,8 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 }
 <style>
 .alertas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.alerta-kpi{padding:16px;border-radius:14px;background:#fff;border:1px solid #e5e7eb;text-align:center}.alerta-kpi strong{display:block;font-size:28px}.alerta-kpi span{font-size:13px;color:#666}.alerta-alta{border-left:5px solid #dc3545!important}.alerta-media{border-left:5px solid #fd7e14!important}.alerta-baja{border-left:5px solid #ffc107!important}.riesgo-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}.riesgo-alto{background:#f8d7da;color:#842029}.riesgo-medio{background:#ffe5d0;color:#8a3d00}.riesgo-bajo{background:#fff3cd;color:#664d03}.alerta-acciones{display:flex;gap:5px;flex-wrap:wrap}.alerta-acciones button{padding:5px 8px;font-size:12px}.alertas-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:18px}.alerta-detalle{background:#f8fafc;border-radius:12px;padding:16px}.alerta-detalle h3{margin-top:0}.alerta-filtros{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end}.alerta-filtros label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}.alerta-filtros input,.alerta-filtros select{width:100%;padding:9px;border:1px solid #d1d5db;border-radius:8px}@media(max-width:900px){.alertas-kpis{grid-template-columns:repeat(2,1fr)}.alertas-grid{grid-template-columns:1fr}.alerta-filtros{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="alertasPreventivas"] .no-print{display:none!important}body[data-imprimiendo="alertasPreventivas"] .section:not(#alertasPreventivas){display:none!important}body[data-imprimiendo="alertaEstudiante"] .section:not(#alertasPreventivas){display:none!important}}
+/* BITÁCORA V9.6 */
+.audit-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:20px;border-radius:14px;margin-bottom:18px}.audit-header h2{color:#fff;margin-bottom:5px}.audit-header p{opacity:.9}.audit-stats{grid-template-columns:repeat(5,1fr)}@media(max-width:900px){.audit-stats{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="bitacora"] *{visibility:hidden!important}body[data-imprimiendo="bitacora"] #bitacora,body[data-imprimiendo="bitacora"] #bitacora *{visibility:visible!important}body[data-imprimiendo="bitacora"] #bitacora{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="bitacora"] #bitacora .actions,body[data-imprimiendo="bitacora"] #bitacora .notice{display:none!important}}
 </style>
 </head>
 
@@ -637,6 +639,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 📑 Documentos oficiales
             </button>
 
+            <button class="solo-director" onclick="mostrarSeccion('bitacora',this)">📜 Bitácora administrativa</button>
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
             </button>
@@ -2432,6 +2435,17 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             </section>
 
+            <section id="bitacora" class="section solo-director">
+                <div class="card">
+                    <div class="audit-header"><h2>📜 Bitácora administrativa</h2><p>Registro de acciones realizadas en el sistema por usuario y rol.</p></div>
+                    <div class="stats audit-stats"><div class="stat"><h3>Eventos filtrados</h3><strong id="bitTotal">0</strong></div><div class="stat"><h3>Eventos de hoy</h3><strong id="bitHoy">0</strong></div><div class="stat"><h3>Creaciones</h3><strong id="bitCreados">0</strong></div><div class="stat"><h3>Ediciones</h3><strong id="bitEditados">0</strong></div><div class="stat"><h3>Eliminaciones</h3><strong id="bitEliminados">0</strong></div></div>
+                    <div class="form-grid"><div class="form-group"><label>Año</label><select id="bitAnio"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div><div class="form-group"><label>Módulo</label><select id="bitModulo"><option value="">Todos</option><option>Calificaciones</option><option>Asistencia</option><option>Matrícula</option><option>Expediente</option><option>Promoción</option><option>Carga académica</option><option>Horario</option><option>Planificación</option><option>Seguimiento</option></select></div><div class="form-group"><label>Acción</label><select id="bitAccion"><option value="">Todas</option><option>Crear</option><option>Editar</option><option>Eliminar</option></select></div><div class="form-group"><label>Usuario</label><input id="bitUsuario" placeholder="Buscar usuario"></div><div class="form-group"><label>Desde</label><input id="bitDesde" type="date"></div><div class="form-group"><label>Hasta</label><input id="bitHasta" type="date"></div><div class="form-group"><label>Buscar</label><input id="bitBuscar" placeholder="Módulo, detalle, ID..."></div></div>
+                    <div class="actions"><button class="btn-primary" onclick="cargarBitacora()">🔎 Filtrar</button><button class="btn-secondary" onclick="limpiarFiltrosBitacora()">Limpiar</button><button class="btn-secondary" onclick="imprimirBitacora()">🖨️ Imprimir</button></div>
+                    <div class="table-container"><table><thead><tr><th>Fecha/hora</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Módulo</th><th>ID</th><th>Detalle</th></tr></thead><tbody id="tablaBitacora"></tbody></table></div>
+                    <div class="notice">La bitácora se conserva en este navegador y registra hasta los últimos 5,000 eventos.</div>
+                </div>
+            </section>
+
             <section id="configuracion" class="section">
 
                 <div class="card">
@@ -2581,6 +2595,7 @@ const KEY_HORARIOS = "horariosNuevaAlianza";
 const KEY_PLANIFICACIONES = "planificacionesNuevaAlianza";
 const KEY_SEGUIMIENTOS = "seguimientosPedagogicosNuevaAlianza";
 const KEY_ALERTAS = "alertasPreventivasNuevaAlianza";
+const KEY_AUDITORIA = "auditoriaNuevaAlianza";
 
 
 /* =========================================================
@@ -2611,6 +2626,33 @@ function guardarDatos(clave, datos){
 }
 
 
+/* =========================================================
+   AUDITORÍA ADMINISTRATIVA V9.6
+========================================================= */
+function obtenerIdentidadAuditoria(){
+    const ses=obtenerSesionActual();
+    return {usuario:ses?.usuario||"Sistema",rol:ses?.rol||"Sistema",docenteId:ses?.docenteId||""};
+}
+function registrarAuditoria(accion,modulo,detalle,registroId="",extra={}){
+    try{
+        const identidad=obtenerIdentidadAuditoria(),ahora=new Date();
+        const evento={id:"AUD-"+ahora.getTime()+"-"+Math.random().toString(36).slice(2,7),fechaHora:ahora.toISOString(),fecha:ahora.toLocaleDateString("es-NI"),hora:ahora.toLocaleTimeString("es-NI",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),anio:String(extra.anio||ahora.getFullYear()),usuario:identidad.usuario,rol:identidad.rol,docenteId:identidad.docenteId,accion:String(accion||""),modulo:String(modulo||""),registroId:String(registroId||""),detalle:String(detalle||"")};
+        const datos=obtenerDatos(KEY_AUDITORIA);datos.unshift(evento);if(datos.length>5000)datos.length=5000;guardarDatos(KEY_AUDITORIA,datos);
+    }catch(error){}
+}
+function cargarBitacora(){
+    const tbody=document.getElementById("tablaBitacora");if(!tbody)return;
+    if(!esDirectorActual()){tbody.innerHTML="<tr><td colspan='7'>Acceso exclusivo del Director.</td></tr>";return;}
+    const anio=document.getElementById("bitAnio")?.value||"",modulo=document.getElementById("bitModulo")?.value||"",accion=document.getElementById("bitAccion")?.value||"",usuario=limpiarTexto(document.getElementById("bitUsuario")?.value||""),buscar=limpiarTexto(document.getElementById("bitBuscar")?.value||""),desde=document.getElementById("bitDesde")?.value||"",hasta=document.getElementById("bitHasta")?.value||"";
+    let lista=obtenerDatos(KEY_AUDITORIA);
+    if(anio)lista=lista.filter(x=>String(x.anio)===String(anio));if(modulo)lista=lista.filter(x=>x.modulo===modulo);if(accion)lista=lista.filter(x=>x.accion===accion);if(usuario)lista=lista.filter(x=>limpiarTexto(x.usuario).includes(usuario));if(desde)lista=lista.filter(x=>String(x.fechaHora).slice(0,10)>=desde);if(hasta)lista=lista.filter(x=>String(x.fechaHora).slice(0,10)<=hasta);if(buscar)lista=lista.filter(x=>limpiarTexto([x.usuario,x.modulo,x.accion,x.detalle,x.registroId].join(" ")).includes(buscar));
+    lista.sort((a,b)=>String(b.fechaHora).localeCompare(String(a.fechaHora)));
+    const hoy=new Date().toISOString().slice(0,10);
+    document.getElementById("bitTotal").textContent=lista.length;document.getElementById("bitHoy").textContent=lista.filter(x=>String(x.fechaHora).slice(0,10)===hoy).length;document.getElementById("bitCreados").textContent=lista.filter(x=>x.accion==="Crear").length;document.getElementById("bitEditados").textContent=lista.filter(x=>x.accion==="Editar").length;document.getElementById("bitEliminados").textContent=lista.filter(x=>x.accion==="Eliminar").length;
+    tbody.innerHTML=lista.length?lista.map(x=>"<tr><td>"+escaparHTML(x.fecha||"")+"<br><small>"+escaparHTML(x.hora||"")+"</small></td><td>"+escaparHTML(x.usuario||"")+"</td><td>"+escaparHTML(x.rol||"")+"</td><td>"+escaparHTML(x.accion||"")+"</td><td>"+escaparHTML(x.modulo||"")+"</td><td>"+escaparHTML(x.registroId||"")+"</td><td>"+escaparHTML(x.detalle||"")+"</td></tr>").join(""):"<tr><td colspan='7'>No hay eventos con los filtros seleccionados.</td></tr>";
+}
+function limpiarFiltrosBitacora(){["bitAnio","bitModulo","bitAccion","bitUsuario","bitBuscar","bitDesde","bitHasta"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});cargarBitacora();}
+function imprimirBitacora(){if(!exigirDirector())return;cargarBitacora();document.body.dataset.imprimiendo="bitacora";window.print();setTimeout(()=>delete document.body.dataset.imprimiendo,500);}
 function escaparHTML(texto){
 
     if(texto === undefined || texto === null){
@@ -4492,6 +4534,7 @@ function construirRespaldo(){
         planificaciones: obtenerDatos(KEY_PLANIFICACIONES),
         seguimientosPedagogicos: obtenerDatos(KEY_SEGUIMIENTOS),
         alertasPreventivas: obtenerDatos(KEY_ALERTAS),
+        auditoria: obtenerDatos(KEY_AUDITORIA),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4631,6 +4674,10 @@ function importarRespaldo(event){
                 KEY_ALERTAS,
                 Array.isArray(respaldo.alertasPreventivas) ? respaldo.alertasPreventivas : []
             );
+            guardarDatos(
+                KEY_AUDITORIA,
+                Array.isArray(respaldo.auditoria) ? respaldo.auditoria : []
+            );
 
             if(respaldo.configuracion){
                 localStorage.setItem(
@@ -4707,6 +4754,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_PLANIFICACIONES);
     localStorage.removeItem(KEY_SEGUIMIENTOS);
     localStorage.removeItem(KEY_ALERTAS);
+    localStorage.removeItem(KEY_AUDITORIA);
 
     cargarTodo();
 
@@ -4736,6 +4784,7 @@ function cargarTodo(){
     cargarEstudiantesSeguimiento();
     cargarSeguimientos();
     generarAlertasPreventivas(false);
+    cargarBitacora();
 
     cargarAsistencias();
 
