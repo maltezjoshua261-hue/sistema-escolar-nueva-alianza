@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.7</title>
+<title>Sistema Escolar Nueva Alianza - v8.8</title>
 
 <style>
 *{
@@ -462,6 +462,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
 /* CIERRE ANUAL 8.6 */
 .cierre-estado{display:inline-block;padding:7px 14px;border-radius:20px;font-weight:bold}.cierre-abierto{background:#d1e7dd;color:#0f5132}.cierre-cerrado{background:#f8d7da;color:#842029}.cierre-resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:15px 0}.cierre-resumen .stat-cierre{border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;background:#f9fbfd}.stat-cierre strong{display:block;font-size:25px;color:#0d6efd;margin-top:5px}.cierre-nota{margin-top:15px;padding:12px;border-left:4px solid #198754;background:#eefaf3}.cierre-tabla{margin-top:15px}@media(max-width:800px){.cierre-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="cierreAnual"] *{visibility:hidden!important}body[data-imprimiendo="cierreAnual"] #cierreAnual,body[data-imprimiendo="cierreAnual"] #cierreAnual *{visibility:visible!important}body[data-imprimiendo="cierreAnual"] #cierreAnual{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}.no-print{display:none!important}}
+
+/* HORARIO ESCOLAR 8.8 */
+.horario-contenedor{overflow-x:auto}.horario-grid{min-width:850px}.horario-grid th{text-align:center}.horario-grid td{vertical-align:top;min-width:145px;height:85px}.horario-celda{background:#eef5ff;border-left:4px solid #0d6efd;border-radius:7px;padding:7px;margin:2px 0;font-size:12px}.horario-celda strong{display:block;color:#123b6d}.horario-celda small{display:block;color:#555;margin-top:3px}.horario-lista{overflow-x:auto}.horario-lista table{min-width:1000px}.horario-alertas{margin:12px 0}.horario-alerta{padding:11px;border-radius:8px;margin:6px 0;border-left:5px solid #dc3545;background:#fff0f1}.horario-alerta.warning{border-left-color:#ffc107;background:#fff8df}.horario-ok{padding:11px;border-radius:8px;border-left:5px solid #198754;background:#eefaf3}.horario-badge{display:inline-block;padding:4px 8px;border-radius:12px;background:#e7f1ff;color:#123b6d;font-weight:bold;font-size:11px}.horario-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.horario-resumen div{border:1px solid #e5e7eb;border-radius:10px;padding:12px;text-align:center;background:#f9fbfd}.horario-resumen strong{display:block;font-size:22px;color:#0d6efd;margin-top:4px}@media(max-width:800px){.horario-resumen{grid-template-columns:repeat(2,1fr)}}
+@media print{body[data-imprimiendo="horarios"] *{visibility:hidden!important}body[data-imprimiendo="horarios"] #horarios,body[data-imprimiendo="horarios"] #horarios *{visibility:visible!important}body[data-imprimiendo="horarios"] #horarios{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="horarios"] #horarios .card:first-child{display:none!important}body[data-imprimiendo="horarios"] #horarios .no-print{display:none!important}}
 </style>
 </head>
 
@@ -516,6 +520,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('asignaciones',this)">
                 📚 Carga académica
+            </button>
+
+            <button onclick="mostrarSeccion('horarios',this)">
+                🗓️ Horario escolar
             </button>
 
             <button onclick="mostrarSeccion('asistencia',this)">
@@ -928,6 +936,54 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                     </div>
                     <div id="resumenAsignaciones" class="notice">No hay asignaciones registradas.</div>
                     <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Docente</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
+                </div>
+            </section>
+
+            <!-- HORARIO ESCOLAR 8.8 -->
+            <section id="horarios" class="section">
+                <div class="card">
+                    <h2>🗓️ Horario escolar y planificación académica</h2>
+                    <div class="notice">El horario se construye a partir de la carga académica de v8.7. El sistema detecta choques de docente, grupo y exceso de horas semanales. La edición es exclusiva del Director; los docentes pueden consultar los horarios.</div>
+                    <input type="hidden" id="horarioId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar</label><select id="horarioAnio" onchange="cargarOpcionesHorario();cargarHorarios()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Nivel educativo</label><select id="horarioNivel" onchange="actualizarGradosHorario();cargarOpcionesHorario()"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado / Nivel</label><select id="horarioGrado" onchange="cargarOpcionesHorario()"><option value="">Seleccione nivel primero</option></select></div>
+                        <div class="form-group"><label>Sección</label><select id="horarioSeccion" onchange="cargarOpcionesHorario()"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div class="form-group"><label>Día</label><select id="horarioDia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option></select></div>
+                        <div class="form-group"><label>Hora de inicio</label><input id="horarioInicio" type="time" value="07:00"></div>
+                        <div class="form-group"><label>Hora de finalización</label><input id="horarioFin" type="time" value="07:45"></div>
+                        <div class="form-group"><label>Asignatura</label><select id="horarioAsignatura"><option value="">Seleccione grupo primero</option></select></div>
+                        <div class="form-group"><label>Docente</label><select id="horarioDocente"><option value="">Seleccione grupo primero</option></select></div>
+                        <div class="form-group"><label>Aula / espacio</label><input id="horarioAula" placeholder="Ej.: Aula 1, cancha, laboratorio"></div>
+                        <div class="form-group"><label>Estado</label><select id="horarioEstado"><option>Activo</option><option>Inactivo</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Observación</label><textarea id="horarioObservacion" rows="2" placeholder="Ej.: bloque, actividad práctica, atención multigrado..."></textarea></div>
+                    <div class="actions">
+                        <button id="btnGuardarHorario" class="btn-success" onclick="guardarHorario()">💾 Guardar horario</button>
+                        <button class="btn-secondary" onclick="limpiarHorario()">Limpiar</button>
+                        <button class="btn-info" onclick="detectarConflictosHorario(true)">⚠️ Revisar conflictos</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔎 Consulta y filtros</h2>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Vista</label><select id="vistaHorario" onchange="cargarHorarios()"><option value="grupo">Horario por grupo</option><option value="docente">Horario por docente</option><option value="lista">Listado completo</option></select></div>
+                        <div class="form-group"><label>Año</label><select id="filtroHorarioAnio" onchange="cargarHorarios()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Nivel</label><select id="filtroHorarioNivel" onchange="actualizarGradosFiltroHorario();cargarHorarios()"><option value="">Todos</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado</label><select id="filtroHorarioGrado" onchange="cargarHorarios()"><option value="">Todos</option></select></div>
+                        <div class="form-group"><label>Sección</label><select id="filtroHorarioSeccion" onchange="cargarHorarios()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div class="form-group"><label>Docente</label><select id="filtroHorarioDocente" onchange="cargarHorarios()"><option value="">Todos</option></select></div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-primary" onclick="imprimirHorarioGrupo()">🖨️ Imprimir horario</button>
+                        <button class="btn-secondary" onclick="imprimirHorarioDocente()">👨‍🏫 Imprimir por docente</button>
+                        <button class="btn-warning" onclick="detectarConflictosHorario(true)">🔍 Detectar conflictos</button>
+                    </div>
+                    <div id="resumenHorarios" class="notice">No hay horarios registrados.</div>
+                    <div id="alertasHorario" class="horario-alertas"></div>
+                    <div id="contenedorHorario" class="horario-contenedor"></div>
                 </div>
             </section>
 
@@ -2163,6 +2219,7 @@ const KEY_PROMOCIONES = "promocionesNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
 const KEY_CIERRES = "cierresAnualesNuevaAlianza";
 const KEY_ASIGNACIONES = "asignacionesAcademicasNuevaAlianza";
+const KEY_HORARIOS = "horariosNuevaAlianza";
 
 
 /* =========================================================
@@ -2621,6 +2678,13 @@ function mostrarSeccion(id, boton){
         cargarDocentesAsignacion();
         actualizarGradosAsignacion();
         actualizarAsignaturasAsignacion();
+    }
+
+    if(id === "horarios"){
+        actualizarGradosHorario();
+        actualizarGradosFiltroHorario();
+        cargarOpcionesHorario();
+        cargarHorarios();
     }
 
     if(id === "cierreAnual"){
@@ -3904,7 +3968,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "8.7",
+        version: "8.8",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -3915,6 +3979,7 @@ function construirRespaldo(){
         promociones: obtenerDatos(KEY_PROMOCIONES),
         cierresAnuales: obtenerDatos(KEY_CIERRES),
         asignacionesAcademicas: obtenerDatos(KEY_ASIGNACIONES),
+        horarios: obtenerDatos(KEY_HORARIOS),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4035,6 +4100,11 @@ function importarRespaldo(event){
                 Array.isArray(respaldo.asignacionesAcademicas) ? respaldo.asignacionesAcademicas : []
             );
 
+            guardarDatos(
+                KEY_HORARIOS,
+                Array.isArray(respaldo.horarios) ? respaldo.horarios : []
+            );
+
             if(respaldo.configuracion){
                 localStorage.setItem(
                     KEY_CONFIG,
@@ -4106,6 +4176,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_PROMOCIONES);
     localStorage.removeItem(KEY_CIERRES);
     localStorage.removeItem(KEY_ASIGNACIONES);
+    localStorage.removeItem(KEY_HORARIOS);
 
     cargarTodo();
 
@@ -4129,6 +4200,8 @@ function cargarTodo(){
     cargarDocentes();
     cargarAsignaciones();
     cargarDocentesAsignacion();
+    cargarOpcionesHorario();
+    cargarHorarios();
 
     cargarAsistencias();
 
@@ -4973,6 +5046,121 @@ function reabrirAnioEscolar(){
 }
 function imprimirCierreAnual(){
     cargarCierreAnual();document.body.setAttribute("data-imprimiendo","cierreAnual");window.print();document.body.removeAttribute("data-imprimiendo");
+}
+
+
+
+/* =========================================================
+   HORARIO ESCOLAR Y PLANIFICACIÓN ACADÉMICA 8.8
+========================================================= */
+function actualizarGradosHorario(){
+    const nivel=document.getElementById("horarioNivel")?.value, sel=document.getElementById("horarioGrado");
+    if(!sel)return;
+    const anterior=sel.value; let lista=[];
+    if(nivel==="Inicial")lista=GRADOS_INICIAL;
+    if(nivel==="Primaria")lista=GRADOS_PRIMARIA;
+    if(nivel==="Secundaria")lista=GRADOS_SECUNDARIA;
+    sel.innerHTML='<option value="">Seleccione</option>';
+    lista.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(nivel==="Primaria"||nivel==="Secundaria")?g+"º grado":g;sel.appendChild(o);});
+    if([...sel.options].some(o=>o.value===anterior))sel.value=anterior;
+}
+function actualizarGradosFiltroHorario(){
+    const nivel=document.getElementById("filtroHorarioNivel")?.value,sel=document.getElementById("filtroHorarioGrado");if(!sel)return;
+    const anterior=sel.value;let lista=[];
+    if(nivel==="Inicial")lista=GRADOS_INICIAL;if(nivel==="Primaria")lista=GRADOS_PRIMARIA;if(nivel==="Secundaria")lista=GRADOS_SECUNDARIA;
+    sel.innerHTML='<option value="">Todos</option>';lista.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(nivel==="Primaria"||nivel==="Secundaria")?g+"º grado":g;sel.appendChild(o);});
+    if([...sel.options].some(o=>o.value===anterior))sel.value=anterior;
+}
+function obtenerAsignacionesGrupoHorario(){
+    const anio=document.getElementById("horarioAnio")?.value||"2026",nivel=document.getElementById("horarioNivel")?.value,grado=document.getElementById("horarioGrado")?.value,seccion=document.getElementById("horarioSeccion")?.value;
+    return obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(a.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+}
+function cargarOpcionesHorario(){
+    const asel=document.getElementById("horarioAsignatura"),dsel=document.getElementById("horarioDocente");if(!asel||!dsel)return;
+    const asign=obtenerAsignacionesGrupoHorario(),subjects=[...new Set(asign.flatMap(a=>a.asignaturas||[]))],prevA=asel.value,prevD=dsel.value;
+    asel.innerHTML='<option value="">Seleccione asignatura</option>';subjects.forEach(a=>{const o=document.createElement("option");o.value=a;o.textContent=a;asel.appendChild(o);});
+    dsel.innerHTML='<option value="">Seleccione docente</option>';const docentes=[...new Map(asign.map(a=>[String(a.docenteId),a])).values()];docentes.forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;asel.value===a.asignatura;dsel.appendChild(o);});
+    if([...asel.options].some(o=>o.value===prevA))asel.value=prevA;if([...dsel.options].some(o=>o.value===prevD))dsel.value=prevD;
+}
+function docentesParaAsignaturaHorario(){
+    const a=obtenerAsignacionesGrupoHorario(),asig=document.getElementById("horarioAsignatura")?.value,dsel=document.getElementById("horarioDocente");if(!dsel)return;
+    const prev=dsel.value,lista=[...new Map(a.filter(x=>!asig||(x.asignaturas||[]).includes(asig)).map(x=>[String(x.docenteId),x])).values()];
+    dsel.innerHTML='<option value="">Seleccione docente</option>';lista.forEach(x=>{const o=document.createElement("option");o.value=x.docenteId;o.textContent=x.docenteNombre;dsel.appendChild(o);});if([...dsel.options].some(o=>o.value===prev))dsel.value=prev;
+}
+function limpiarHorario(){
+    ["horarioId","horarioAula","horarioObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const i=document.getElementById("horarioInicio"),f=document.getElementById("horarioFin");if(i)i.value="07:00";if(f)f.value="07:45";
+    ["horarioNivel","horarioGrado","horarioSeccion","horarioAsignatura","horarioDocente"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const d=document.getElementById("horarioDia");if(d)d.value="Lunes";const es=document.getElementById("horarioEstado");if(es)es.value="Activo";
+    actualizarGradosHorario();cargarOpcionesHorario();const b=document.getElementById("btnGuardarHorario");if(b)b.textContent="💾 Guardar horario";
+}
+function claveHorario(h){return [h.anio,h.dia,h.horaInicio,h.horaFin].join("|");}
+function intervalosSolapan(a,b){return a.horaInicio<b.horaFin&&b.horaInicio<a.horaFin;}
+function conflictosConHorario(nuevo,datos,ignorarId){
+    const conflictos=[];datos.filter(h=>String(h.id)!==String(ignorarId)&&String(h.anio)===String(nuevo.anio)&&String(h.estado||"Activo")==="Activo"&&String(h.dia)===String(nuevo.dia)&&intervalosSolapan(nuevo,h)).forEach(h=>{
+        if(String(h.docenteId)===String(nuevo.docenteId))conflictos.push("Docente ocupado: "+h.docenteNombre+" ya tiene "+h.asignatura+" de "+h.horaInicio+" a "+h.horaFin+" el "+h.dia+".");
+        if(normalizarNivel(h.nivel)===normalizarNivel(nuevo.nivel)&&normalizarGrado(h.grado)===normalizarGrado(nuevo.grado)&&normalizarSeccion(h.seccion)===normalizarSeccion(nuevo.seccion))conflictos.push("Grupo ocupado: "+h.nivel+" "+h.grado+" "+h.seccion+" ya tiene "+h.asignatura+" en ese horario.");
+    });
+    return conflictos;
+}
+function horasProgramadasHorario(anio,docenteId,nivel,grado,seccion){
+    return obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)&&String(h.docenteId)===String(docenteId)&&normalizarNivel(h.nivel)===normalizarNivel(nivel)&&normalizarGrado(h.grado)===normalizarGrado(grado)&&normalizarSeccion(h.seccion)===normalizarSeccion(seccion)&&String(h.estado||"Activo")==="Activo").reduce((s,h)=>{const a=h.horaInicio.split(":").map(Number),b=h.horaFin.split(":").map(Number);return s+Math.max(0,(b[0]*60+b[1]-(a[0]*60+a[1]))/60);},0);
+}
+function horasAsignadasHorario(asig){return Number(asig?.horasSemanales||0);}
+function guardarHorario(){
+    if(!exigirDirector())return;
+    const id=document.getElementById("horarioId")?.value,anio=document.getElementById("horarioAnio")?.value||"2026",nivel=document.getElementById("horarioNivel")?.value,grado=document.getElementById("horarioGrado")?.value,seccion=document.getElementById("horarioSeccion")?.value,dia=document.getElementById("horarioDia")?.value,horaInicio=document.getElementById("horarioInicio")?.value,horaFin=document.getElementById("horarioFin")?.value,asignatura=document.getElementById("horarioAsignatura")?.value,docenteId=document.getElementById("horarioDocente")?.value;
+    if(estaCerradoAnio(anio))return;
+    if(!nivel||!grado||!seccion||!dia||!horaInicio||!horaFin||!asignatura||!docenteId){alert("Complete año, grupo, día, horario, asignatura y docente.");return;}
+    if(horaFin<=horaInicio){alert("La hora de finalización debe ser posterior a la hora de inicio.");return;}
+    const asign=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).includes(asignatura)&&String(a.estado||"Activo")==="Activo");
+    if(!asign){alert("El docente seleccionado no tiene una carga académica activa para esa asignatura y grupo.");return;}
+    const datos=obtenerDatos(KEY_HORARIOS),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
+    const conf=conflictosConHorario(nuevo,datos,id);if(conf.length){alert("⚠️ No se puede guardar por conflicto:\n\n• "+conf.join("\n• "));return;}
+    const i=datos.findIndex(x=>String(x.id)===String(id));if(i>=0)datos[i]=nuevo;else datos.push(nuevo);guardarDatos(KEY_HORARIOS,datos);limpiarHorario();cargarHorarios();detectarConflictosHorario(false);alert(id?"Horario actualizado correctamente.":"Horario guardado correctamente.");
+}
+function cargarHorarios(){
+    const box=document.getElementById("contenedorHorario");if(!box)return;
+    const anio=document.getElementById("filtroHorarioAnio")?.value||"2026",nivel=document.getElementById("filtroHorarioNivel")?.value||"",grado=document.getElementById("filtroHorarioGrado")?.value||"",seccion=document.getElementById("filtroHorarioSeccion")?.value||"",docente=document.getElementById("filtroHorarioDocente")?.value||"",vista=document.getElementById("vistaHorario")?.value||"grupo";
+    let lista=obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)&&(!nivel||normalizarNivel(h.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(h.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(h.seccion)===normalizarSeccion(seccion))&&(!docente||String(h.docenteId)===String(docente))&&String(h.estado||"Activo")==="Activo");
+    const filtroDoc=document.getElementById("filtroHorarioDocente");if(filtroDoc){const prev=filtroDoc.value,ds=[...new Map(obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)).map(h=>[String(h.docenteId),h])).values()];filtroDoc.innerHTML='<option value="">Todos</option>';ds.sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(h=>{const o=document.createElement("option");o.value=h.docenteId;o.textContent=h.docenteNombre;filtroDoc.appendChild(o);});if([...filtroDoc.options].some(o=>o.value===prev))filtroDoc.value=prev;}
+    lista.sort((a,b)=>a.dia.localeCompare(b.dia)||a.horaInicio.localeCompare(b.horaInicio));
+    const horas=lista.reduce((s,h)=>{const a=h.horaInicio.split(":").map(Number),b=h.horaFin.split(":").map(Number);return s+(b[0]*60+b[1]-a[0]*60-a[1])/60;},0),grupos=new Set(lista.map(h=>[h.nivel,h.grado,h.seccion].join("|"))),docs=new Set(lista.map(h=>String(h.docenteId)));
+    document.getElementById("resumenHorarios").innerHTML='<div class="horario-resumen"><div>Clases<strong>'+lista.length+'</strong></div><div>Grupos<strong>'+grupos.size+'</strong></div><div>Docentes<strong>'+docs.size+'</strong></div><div>Horas programadas<strong>'+horas.toFixed(1)+'</strong></div></div>';
+    if(vista==="lista"){renderListaHorarios(box,lista);return;}
+    if(vista==="docente"){renderGridHorarios(box,lista,"docente");return;}
+    renderGridHorarios(box,lista,"grupo");
+}
+function renderGridHorarios(box,lista,tipo){
+    const dias=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],clave=tipo==="docente"?"docenteNombre":"grupo";let entidad="";
+    if(tipo==="grupo"){const g=lista[0];entidad=g?g.nivel+" "+g.grado+" "+g.seccion:"Horario por grupo";}else entidad=lista[0]?.docenteNombre||"Horario por docente";
+    const bloques=[...new Map(lista.map(h=>[h.horaInicio+"-"+h.horaFin,h])).values()].sort((a,b)=>a.horaInicio.localeCompare(b.horaInicio));
+    let html='<h3 style="margin:10px 0;color:#123b6d;">'+escaparHTML(entidad)+'</h3><div class="horario-grid"><table><thead><tr><th>Hora</th>'+dias.map(d=>'<th>'+d+'</th>').join("")+'</tr></thead><tbody>';
+    if(!bloques.length){box.innerHTML='<div class="horario-ok">No hay clases registradas con los filtros seleccionados.</div>';return;}
+    bloques.forEach(b=>{html+='<tr><th>'+b.horaInicio+'–'+b.horaFin+'</th>';dias.forEach(d=>{const hs=lista.filter(h=>h.dia===d&&h.horaInicio===b.horaInicio&&h.horaFin===b.horaFin);html+='<td>'+hs.map(h=>'<div class="horario-celda"><strong>'+escaparHTML(h.asignatura)+'</strong><small>'+escaparHTML(h.docenteNombre)+'</small><small>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</small>'+(h.aula?'<small>📍 '+escaparHTML(h.aula)+'</small>':'')+'<div class="no-print" style="margin-top:5px;"><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></div></div>').join("")+'</td>';});html+='</tr>';});
+    box.innerHTML=html+'</tbody></table></div>';
+}
+function renderListaHorarios(box,lista){
+    let html='<div class="horario-lista"><table><thead><tr><th>#</th><th>Día</th><th>Hora</th><th>Grupo</th><th>Asignatura</th><th>Docente</th><th>Aula</th><th>Acciones</th></tr></thead><tbody>';
+    lista.forEach((h,i)=>html+='<tr><td>'+((i+1))+'</td><td>'+escaparHTML(h.dia)+'</td><td>'+h.horaInicio+'–'+h.horaFin+'</td><td>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</td><td>'+escaparHTML(h.asignatura)+'</td><td>'+escaparHTML(h.docenteNombre)+'</td><td>'+escaparHTML(h.aula||"—")+'</td><td><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></td></tr>');
+    box.innerHTML=html+'</tbody></table></div>';
+}
+function editarHorario(id){
+    if(!exigirDirector())return;const h=obtenerDatos(KEY_HORARIOS).find(x=>String(x.id)===String(id));if(!h)return;document.getElementById("horarioId").value=h.id;document.getElementById("horarioAnio").value=h.anio;document.getElementById("horarioNivel").value=h.nivel;actualizarGradosHorario();document.getElementById("horarioGrado").value=h.grado;document.getElementById("horarioSeccion").value=h.seccion;cargarOpcionesHorario();document.getElementById("horarioDia").value=h.dia;document.getElementById("horarioInicio").value=h.horaInicio;document.getElementById("horarioFin").value=h.horaFin;document.getElementById("horarioAsignatura").value=h.asignatura;docentesParaAsignaturaHorario();document.getElementById("horarioDocente").value=h.docenteId;document.getElementById("horarioAula").value=h.aula||"";document.getElementById("horarioEstado").value=h.estado||"Activo";document.getElementById("horarioObservacion").value=h.observacion||"";document.getElementById("btnGuardarHorario").textContent="✏️ Actualizar horario";document.getElementById("horarios").scrollIntoView({behavior:"smooth"});
+}
+function eliminarHorario(id){if(!exigirDirector())return;const h=obtenerDatos(KEY_HORARIOS).find(x=>String(x.id)===String(id));if(h&&estaCerradoAnio(h.anio))return;if(!confirm("¿Desea eliminar esta clase del horario?"))return;guardarDatos(KEY_HORARIOS,obtenerDatos(KEY_HORARIOS).filter(x=>String(x.id)!==String(id)));cargarHorarios();}
+function detectarConflictosHorario(mostrar=true){
+    const datos=obtenerDatos(KEY_HORARIOS).filter(h=>String(h.estado||"Activo")==="Activo"),conf=[],vistos=new Set();
+    for(let i=0;i<datos.length;i++)for(let j=i+1;j<datos.length;j++){const a=datos[i],b=datos[j];if(String(a.anio)!==String(b.anio)||a.dia!==b.dia||!intervalosSolapan(a,b))continue;if(String(a.docenteId)===String(b.docenteId))conf.push("Docente ocupado el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+": "+a.docenteNombre+" ("+a.asignatura+" / "+b.asignatura+").");if(normalizarNivel(a.nivel)===normalizarNivel(b.nivel)&&normalizarGrado(a.grado)===normalizarGrado(b.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(b.seccion))conf.push("Grupo con dos clases simultáneas: "+a.nivel+" "+a.grado+" "+a.seccion+" el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+".");}
+    const asigs=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.estado||"Activo")==="Activo");asigs.forEach(a=>{const horas=horasProgramadasHorario(a.anio,a.docenteId,a.nivel,a.grado,a.seccion),objetivo=horasAsignadasHorario(a);if(objetivo>0&&horas>objetivo+0.01)conf.push("Exceso de horas: "+a.docenteNombre+" — "+a.nivel+" "+a.grado+" "+a.seccion+" tiene "+horas.toFixed(1)+" h programadas frente a "+objetivo+" h asignadas.");});
+    const box=document.getElementById("alertasHorario");if(box){box.innerHTML=conf.length?conf.map(x=>'<div class="horario-alerta">⚠️ '+escaparHTML(x)+'</div>').join(""):'<div class="horario-ok">✅ No se detectaron conflictos en los horarios activos.</div>';}
+    if(mostrar)alert(conf.length?"⚠️ Se encontraron "+conf.length+" situación(es). Revise el panel de conflictos.":"✅ No se detectaron conflictos en los horarios activos.");return conf;
+}
+function imprimirHorarioGrupo(){
+    const vista=document.getElementById("vistaHorario");if(vista)vista.value="grupo";cargarHorarios();document.body.setAttribute("data-imprimiendo","horarios");window.print();document.body.removeAttribute("data-imprimiendo");
+}
+function imprimirHorarioDocente(){
+    const vista=document.getElementById("vistaHorario");if(vista)vista.value="docente";cargarHorarios();document.body.setAttribute("data-imprimiendo","horarios");window.print();document.body.removeAttribute("data-imprimiendo");
 }
 
 </script>
