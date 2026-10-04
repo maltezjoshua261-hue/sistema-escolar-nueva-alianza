@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.9</title>
+<title>Sistema Escolar Nueva Alianza - v11.0</title>
 
 <style>
 *{
@@ -538,6 +538,9 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 .security-error{color:#dc3545}
 .security-info{color:#0d6efd}
 
+
+/* V11.0 CONSOLIDACIÓN INTEGRAL */
+.v11-header{border-left:5px solid #198754;padding-left:14px;margin-bottom:18px}.v11-header h2{margin-bottom:6px}.v11-header p{color:#667085}.v11-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:16px 0}.v11-card{padding:16px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}.v11-card h3{margin-bottom:8px}.v11-ok{color:#198754;font-weight:700}.v11-warn{color:#b7791f;font-weight:700}.v11-error{color:#dc3545;font-weight:700}.v11-info{color:#0d6efd;font-weight:700}.v11-checks{width:100%;border-collapse:collapse}.v11-checks th,.v11-checks td{padding:9px;border-bottom:1px solid #eee;text-align:left}.v11-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2f7}body[data-imprimiendo="consolidacionV11"] .section:not(#consolidacionV11){display:none!important}body[data-imprimiendo="consolidacionV11"] #consolidacionV11{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="consolidacionV11"] .no-print{display:none!important}
 </style>
 </head>
 
@@ -684,6 +687,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('seguridadMantenimiento',this)">🛡️ Seguridad y mantenimiento</button>
+            <button class="solo-director" onclick="mostrarSeccion('consolidacionV11',this)">🏁 Consolidación V11.0</button>
             <button class="solo-director" onclick="mostrarSeccion('bitacora',this)">📜 Bitácora administrativa</button>
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
@@ -2808,6 +2812,16 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 <div id="expedienteIntegralContenido"><div class="card"><p>Seleccione un estudiante para generar el expediente integral.</p></div></div>
 </section>
 
+<section id="consolidacionV11" class="section solo-director">
+<div class="card"><div class="v11-header"><h2>🏁 V11.0 — Consolidación integral y revisión final</h2><p>Centro de control para verificar integridad, módulos, datos, permisos, respaldo y cierre del sistema.</p></div>
+<div class="v11-grid"><div class="v11-card"><h3>Módulos</h3><strong id="v11Modulos">0</strong><div>módulos detectados</div></div><div class="v11-card"><h3>Estudiantes</h3><strong id="v11Estudiantes">0</strong><div>registros</div></div><div class="v11-card"><h3>Docentes</h3><strong id="v11Docentes">0</strong><div>registros</div></div><div class="v11-card"><h3>Evaluaciones</h3><strong id="v11Evaluaciones">0</strong><div>registros</div></div><div class="v11-card"><h3>Alertas</h3><strong id="v11Alertas">0</strong><div>registros preventivos</div></div><div class="v11-card"><h3>Bitácora</h3><strong id="v11Auditoria">0</strong><div>eventos registrados</div></div></div>
+<div class="form-grid no-print"><div><button onclick="cargarConsolidacionV11()">🔄 Ejecutar revisión</button></div><div><button onclick="imprimirConsolidacionV11()">🖨️ Imprimir revisión</button></div></div>
+<div id="v11EstadoGeneral" class="v11-card">Ejecute la revisión para comprobar el sistema.</div>
+<div class="card" style="margin-top:16px"><h3>🔎 Lista de comprobación</h3><table class="v11-checks"><thead><tr><th>Componente</th><th>Estado</th><th>Detalle</th></tr></thead><tbody id="tablaV11Checks"></tbody></table></div>
+<div class="card" style="margin-top:16px"><h3>📌 Recomendaciones de mantenimiento</h3><div id="v11Recomendaciones">Sin recomendaciones.</div></div>
+<div class="card" style="margin-top:16px"><p><strong>Versión consolidada:</strong> V11.0</p><p>Esta revisión es administrativa y técnica. La aplicación de decisiones académicas oficiales debe mantenerse conforme a la normativa vigente del MINED.</p></div>
+</div></section>
+
 <section id="bitacora" class="section solo-director">
                 <div class="card">
                     <div class="audit-header"><h2>📜 Bitácora administrativa</h2><p>Registro de acciones realizadas en el sistema por usuario y rol.</p></div>
@@ -3991,6 +4005,25 @@ function cargarSeguridadMantenimiento109(){
     if(a)a.value=ses?.ultimaActividad?new Date(ses.ultimaActividad).toLocaleString("es-NI"):"Sesión iniciada";
     ejecutarDiagnostico109();
 }
+
+/* =========================================================
+   V11.0 CONSOLIDACIÓN INTEGRAL
+========================================================= */
+function cargarConsolidacionV11(){
+    if(!exigirDirector()) return;
+    const checks=[], add=(nombre,ok,detalle)=>checks.push({nombre,ok,detalle});
+    const mods=[["Estudiantes",KEY_ESTUDIANTES],["Docentes",KEY_DOCENTES],["Asistencia",KEY_ASISTENCIAS],["Calificaciones",KEY_CALIFICACIONES],["Matrícula",KEY_MATRICULAS],["Expedientes",KEY_EXPEDIENTES],["Promoción",KEY_PROMOCIONES],["Carga académica",KEY_ASIGNACIONES],["Horarios",KEY_HORARIOS],["Planificación",KEY_PLANIFICACIONES],["Seguimiento pedagógico",KEY_SEGUIMIENTOS],["Alertas preventivas",KEY_ALERTAS],["Bitácora",KEY_AUDITORIA],["Padres y tutores",KEY_PADRES_TUTORES],["Evaluación académica",KEY_EVALUACIONES],["Planes de mejora",KEY_PLANES_MEJORA],["Comunicación familia",KEY_COMUNICACIONES],["Convivencia",KEY_CONVIVENCIA]];
+    mods.forEach(([n,k])=>{const raw=localStorage.getItem(k),data=obtenerDatos(k),ok=raw===null||Array.isArray(data);add(n,ok,raw===null?"Sin datos todavía":data.length+" registros")});
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES),docentes=obtenerDatos(KEY_DOCENTES),evaluaciones=obtenerDatos(KEY_EVALUACIONES),alertas=obtenerDatos(KEY_ALERTAS),auditoria=obtenerDatos(KEY_AUDITORIA),usuarios=obtenerDatos(KEY_USUARIOS),config=localStorage.getItem(KEY_CONFIG);
+    add("Usuarios y roles",usuarios.length>0,"Cuentas locales: "+usuarios.length);add("Configuración",!!config,"Configuración "+(config?"disponible":"no registrada"));add("Respaldo",typeof construirRespaldo==="function",typeof construirRespaldo==="function"?"Generador disponible":"Generador no disponible");add("Permisos",typeof exigirDirector==="function"&&typeof esDirectorActual==="function","Control Director/Docente disponible");add("Cierre anual",typeof anioEstaCerrado==="function","Control de cierre disponible");add("Auditoría",typeof registrarAuditoria==="function","Registro de acciones disponible");
+    const correctas=checks.filter(x=>x.ok).length,finalOk=correctas===checks.length;
+    document.getElementById("v11Modulos").textContent=mods.length;document.getElementById("v11Estudiantes").textContent=estudiantes.length;document.getElementById("v11Docentes").textContent=docentes.length;document.getElementById("v11Evaluaciones").textContent=evaluaciones.length;document.getElementById("v11Alertas").textContent=alertas.length;document.getElementById("v11Auditoria").textContent=auditoria.length;
+    document.getElementById("v11EstadoGeneral").innerHTML="<strong class='"+(finalOk?"v11-ok":"v11-warn")+"'>"+(finalOk?"✅ SISTEMA CONSOLIDADO":"⚠️ REVISIÓN CON OBSERVACIONES")+"</strong><br>"+correctas+" de "+checks.length+" comprobaciones correctas.";
+    document.getElementById("tablaV11Checks").innerHTML=checks.map(x=>"<tr><td>"+escaparHTML(x.nombre)+"</td><td><span class='v11-badge "+(x.ok?"v11-ok":"v11-error")+"'>"+(x.ok?"OK":"REVISAR")+"</span></td><td>"+escaparHTML(x.detalle)+"</td></tr>").join("");
+    const rec=[];if(estudiantes.length===0)rec.push("Registrar estudiantes antes del uso operativo.");if(docentes.length===0)rec.push("Registrar docentes y asignarles carga académica.");if(!config)rec.push("Completar la configuración institucional.");if(auditoria.length===0)rec.push("La bitácora aún no contiene eventos.");if(rec.length===0)rec.push("Realizar respaldos periódicos y revisar alertas preventivas antes de cada cierre.");document.getElementById("v11Recomendaciones").innerHTML=rec.map(x=>"<div>• "+escaparHTML(x)+"</div>").join("");
+    registrarAuditoria("Consultar","Consolidación V11.0","Ejecución de revisión integral del sistema","V11-"+Date.now(),{anio:new Date().getFullYear()});
+}
+function imprimirConsolidacionV11(){if(!exigirDirector())return;cargarConsolidacionV11();document.body.setAttribute("data-imprimiendo","consolidacionV11");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
 
 /* =========================================================
    NAVEGACIÓN
@@ -5516,7 +5549,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "10.6",
+        version: "11.0",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -5537,6 +5570,7 @@ function construirRespaldo(){
         planesMejoraAcademica: obtenerDatos(KEY_PLANES_MEJORA),
         comunicacionesFamilia: obtenerDatos(KEY_COMUNICACIONES),
         convivenciaEscolar: obtenerDatos(KEY_CONVIVENCIA),
+        usuarios: obtenerDatos(KEY_USUARIOS),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -5624,6 +5658,8 @@ function importarRespaldo(event){
                 KEY_DOCENTES,
                 Array.isArray(respaldo.docentes) ? respaldo.docentes : []
             );
+
+            guardarDatos(KEY_USUARIOS,Array.isArray(respaldo.usuarios)?respaldo.usuarios:[]);
 
             guardarDatos(
                 KEY_ASISTENCIAS,
@@ -5809,6 +5845,7 @@ function cargarTodo(){
     cargarSeguimientos();
     generarAlertasPreventivas(false);
     cargarBitacora();
+    if(document.getElementById("consolidacionV11")) cargarConsolidacionV11();
     cargarConsolidacionEvaluacion();
     cargarEstudiantesMejora();
     cargarPlanesMejora();
@@ -7366,7 +7403,7 @@ function imprimirPadresTutores(){
 }
 
 
-/* V10.9 control de actividad de sesión */
+/* V11.0 control de actividad de sesión */
 ["click","keydown","mousemove"].forEach(ev=>document.addEventListener(ev,()=>{
     if(obtenerSesionActual()) registrarActividadSesion109();
 },{passive:true}));
