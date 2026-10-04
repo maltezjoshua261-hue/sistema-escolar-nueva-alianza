@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.9</title>
+<title>Sistema Escolar Nueva Alianza - v9.0</title>
 
 <style>
 *{
@@ -463,6 +463,22 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 /* CIERRE ANUAL 8.6 */
 .cierre-estado{display:inline-block;padding:7px 14px;border-radius:20px;font-weight:bold}.cierre-abierto{background:#d1e7dd;color:#0f5132}.cierre-cerrado{background:#f8d7da;color:#842029}.cierre-resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:15px 0}.cierre-resumen .stat-cierre{border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;background:#f9fbfd}.stat-cierre strong{display:block;font-size:25px;color:#0d6efd;margin-top:5px}.cierre-nota{margin-top:15px;padding:12px;border-left:4px solid #198754;background:#eefaf3}.cierre-tabla{margin-top:15px}@media(max-width:800px){.cierre-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="cierreAnual"] *{visibility:hidden!important}body[data-imprimiendo="cierreAnual"] #cierreAnual,body[data-imprimiendo="cierreAnual"] #cierreAnual *{visibility:visible!important}body[data-imprimiendo="cierreAnual"] #cierreAnual{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}.no-print{display:none!important}}
 
+/* DASHBOARD ACADÉMICO V9.0 */
+.dash9-header{background:linear-gradient(135deg,#123b6d,#0d6efd,#198754);color:#fff;padding:24px;border-radius:18px;margin-bottom:20px;box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.dash9-header h2{color:#fff;margin-bottom:7px}.dash9-header p{opacity:.92}
+.dash9-filtros{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.dash9-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:15px 0}
+.dash9-kpi{background:#fff;border-radius:14px;padding:17px;text-align:center;border:1px solid #e5e7eb;box-shadow:0 3px 10px rgba(0,0,0,.05)}
+.dash9-kpi span{display:block;font-size:26px;font-weight:bold;color:#0d6efd;margin:5px 0}.dash9-kpi small{color:#6b7280}
+.dash9-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.dash9-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.dash9-panel{background:#fff;border-radius:14px;padding:18px;border:1px solid #e5e7eb;box-shadow:0 3px 10px rgba(0,0,0,.05);margin-bottom:18px}.dash9-panel h3{color:#123b6d;margin-bottom:14px}
+.dash9-bar{display:flex;align-items:center;gap:10px;margin:10px 0}.dash9-bar label{width:145px;font-size:13px}.dash9-track{flex:1;height:14px;background:#e9ecef;border-radius:10px;overflow:hidden}.dash9-track i{display:block;height:100%;background:#0d6efd}.dash9-value{width:65px;text-align:right;font-weight:bold;font-size:12px}
+.dash9-alert{padding:11px;border-radius:9px;margin:8px 0;background:#fff3cd;border-left:5px solid #ffc107}.dash9-success{background:#d1e7dd;border-left-color:#198754}.dash9-danger{background:#f8d7da;border-left-color:#dc3545}.dash9-info{background:#cff4fc;border-left-color:#0dcaf0}
+.dash9-actions{display:flex;flex-wrap:wrap;gap:8px}.dash9-actions button{margin:0}.dash9-metric{font-size:32px;font-weight:bold;color:#123b6d}.dash9-sub{color:#6b7280;font-size:12px}
+.dash9-progress{height:16px;background:#e9ecef;border-radius:10px;overflow:hidden;margin:8px 0}.dash9-progress span{display:block;height:100%;background:#198754}
+@media(max-width:1100px){.dash9-kpis{grid-template-columns:repeat(3,1fr)}.dash9-filtros{grid-template-columns:repeat(2,1fr)}.dash9-grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.dash9-kpis,.dash9-filtros,.dash9-grid,.dash9-grid-3{grid-template-columns:1fr}}
+@media print{body[data-imprimiendo="dashboardAcademico"] *{visibility:hidden!important}body[data-imprimiendo="dashboardAcademico"] #dashboardAcademico,body[data-imprimiendo="dashboardAcademico"] #dashboardAcademico *{visibility:visible!important}body[data-imprimiendo="dashboardAcademico"] #dashboardAcademico{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}}
+
 /* PLANIFICACIÓN DOCENTE 8.9 */
 .plan-header{background:linear-gradient(135deg,#123b6d,#198754);color:#fff;padding:22px;border-radius:16px;margin-bottom:18px}.plan-header h2{color:#fff;margin-bottom:6px}.plan-header p{opacity:.92}
 .plan-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.plan-actividades{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.plan-actividades textarea{min-height:125px}.plan-indicadores{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
@@ -519,6 +535,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('centroControl',this)">
                 🎯 Centro de Control
+            </button>
+            <button onclick="mostrarSeccion('dashboardAcademico',this)">
+                🚀 Dashboard académico
             </button>
 
             <button onclick="mostrarSeccion('estudiantes',this)">
@@ -644,7 +663,31 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </section>
 
             <!-- CENTRO DE CONTROL DEL DIRECTOR 8.4 -->
-            <section id="centroControl" class="section">
+            <section id="dashboardAcademico" class="section">
+<div class="dash9-header">
+  <h2>🚀 Dashboard académico avanzado</h2>
+  <p>Vista integral para el seguimiento de matrícula, asistencia, rendimiento, promoción, carga académica, horarios y planificación.</p>
+</div>
+<div class="card no-print">
+  <h2>🎛️ Filtros de análisis</h2>
+  <div class="dash9-filtros">
+    <div class="form-group"><label>Año</label><select id="dash9Anio" onchange="cargarDashboardAcademico()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+    <div class="form-group"><label>Nivel</label><select id="dash9Nivel" onchange="cargarDashboardAcademico()"><option value="">Todos los niveles</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+    <div class="form-group"><label>Grado</label><select id="dash9Grado" onchange="cargarDashboardAcademico()"><option value="">Todos los grados</option></select></div>
+    <div class="form-group"><label>Sección</label><select id="dash9Seccion" onchange="cargarDashboardAcademico()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+  </div>
+</div>
+<div id="dash9Contenido"></div>
+<div class="card no-print"><div class="dash9-actions">
+  <button class="btn-primary" onclick="imprimirDashboardAcademico()">🖨️ Imprimir dashboard</button>
+  <button class="btn-info" onclick="mostrarSeccion('centroControl',this)">🎯 Centro de Control</button>
+  <button class="btn-success" onclick="mostrarSeccion('estadisticas',this)">📊 Estadísticas</button>
+  <button class="btn-warning" onclick="mostrarSeccion('rendimiento',this)">📈 Rendimiento</button>
+  <button class="btn-secondary" onclick="mostrarSeccion('planificacion',this)">📘 Planificación</button>
+</div></div>
+</section>
+
+<section id="centroControl" class="section">
                 <div class="control-header">
                     <div>
                         <h1>🎯 Centro de Control del Director</h1>
@@ -2788,6 +2831,10 @@ function mostrarSeccion(id, boton){
 
     if(id === "centroControl"){
         cargarCentroControl();
+    }
+
+    if(id === "dashboardAcademico"){
+        cargarDashboardAcademicoInicial();
     }
 
 }
@@ -5286,6 +5333,72 @@ function detectarPlanificacionesPendientes(){const a=document.getElementById("fi
 function imprimirPlanificacionActual(){const a=document.getElementById("filtroPlanAnio")?.value||"2026",d=document.getElementById("filtroPlanDocente")?.value||"",n=document.getElementById("filtroPlanNivel")?.value||"",g=document.getElementById("filtroPlanGrado")?.value||"",ses=obtenerSesionActual();let l=obtenerDatos(KEY_PLANIFICACIONES).filter(p=>String(p.anio)===String(a)&&(!d||String(p.docenteId)===String(d))&&(!n||normalizarNivel(p.nivel)===normalizarNivel(n))&&(!g||normalizarGrado(p.grado)===normalizarGrado(g)));if(ses?.rol==="Docente")l=l.filter(p=>String(p.docenteId)===String(ses.docenteId||""));if(!l.length){alert("No hay planificación para imprimir con los filtros seleccionados.");return}verPlanificacion(l[0].id);document.body.setAttribute("data-imprimiendo","planificacion");window.print();document.body.removeAttribute("data-imprimiendo")}
 function imprimirReportePlanificacion(){const a=document.getElementById("filtroPlanAnio")?.value||"2026",ses=obtenerSesionActual();let l=obtenerDatos(KEY_PLANIFICACIONES).filter(p=>String(p.anio)===String(a));if(ses?.rol==="Docente")l=l.filter(p=>String(p.docenteId)===String(ses.docenteId||""));const d=document.getElementById("planDocumento");if(!d)return;const por={};l.forEach(p=>{por[p.docenteNombre]=(por[p.docenteNombre]||0)+1});d.style.display="block";d.innerHTML='<h3>📊 Reporte de planificación docente — '+escaparHTML(a)+'</h3><div class="plan-meta"><div><b>Total:</b> '+l.length+'</div><div><b>Ejecutadas:</b> '+l.filter(p=>p.estado==="Ejecutada").length+'</div><div><b>Pendientes:</b> '+l.filter(p=>p.estado==="Pendiente").length+'</div></div><table><thead><tr><th>Docente</th><th>Planificaciones</th><th>Ejecutadas</th><th>Pendientes</th></tr></thead><tbody>'+Object.entries(por).map(([n,t])=>{const q=l.filter(p=>p.docenteNombre===n);return '<tr><td>'+escaparHTML(n)+'</td><td>'+t+'</td><td>'+q.filter(x=>x.estado==="Ejecutada").length+'</td><td>'+q.filter(x=>x.estado!=="Ejecutada").length+'</td></tr>'}).join("")+'</tbody></table>';d.scrollIntoView({behavior:"smooth"});document.body.setAttribute("data-imprimiendo","planificacion");window.print();document.body.removeAttribute("data-imprimiendo")}
 function cargarPlanificacionInicial(){const f=document.getElementById("planFecha");if(f&&!f.value)f.value=new Date().toISOString().slice(0,10);actualizarGradosPlanificacion();actualizarGradosFiltroPlan();cargarOpcionesPlanificacion();cargarPlanificaciones()}
+
+/* DASHBOARD ACADÉMICO V9.0 */
+function actualizarGradosDashboard9(){
+ const n=document.getElementById("dash9Nivel"),s=document.getElementById("dash9Grado");if(!n||!s)return;
+ const prev=s.value,v=n.value,l=v==="Inicial"?GRADOS_INICIAL:v==="Primaria"?GRADOS_PRIMARIA:v==="Secundaria"?GRADOS_SECUNDARIA:[];
+ s.innerHTML='<option value="">Todos los grados</option>';
+ l.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(v==="Primaria"||v==="Secundaria")?g+"º grado":g;s.appendChild(o)});
+ if([...s.options].some(o=>o.value===prev))s.value=prev;
+}
+function cargarDashboardAcademico(){
+ const box=document.getElementById("dash9Contenido");if(!box)return;
+ actualizarGradosDashboard9();
+ const anio=document.getElementById("dash9Anio")?.value||"2026",nivel=document.getElementById("dash9Nivel")?.value||"",grado=document.getElementById("dash9Grado")?.value||"",seccion=document.getElementById("dash9Seccion")?.value||"",ses=obtenerSesionActual();
+ const fil=(e,keys=["nivel","grado","seccion"])=>!e||((!nivel||normalizarNivel(e.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(e.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(e.seccion)===normalizarSeccion(seccion)));
+ let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")!=="Trasladado"&&fil(e));
+ let mat=obtenerDatos(KEY_MATRICULAS).filter(e=>String(e.anio)===String(anio)&&fil(e));
+ let asi=obtenerDatos(KEY_ASISTENCIAS).filter(e=>String((e.fecha||"").slice(0,4))===String(anio)&&fil(e));
+ let cal=obtenerDatos(KEY_CALIFICACIONES).filter(e=>String(e.anio||anio)===String(anio)&&fil(e));
+ let pro=obtenerDatos(KEY_PROMOCIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
+ let car=obtenerDatos(KEY_ASIGNACIONES).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e));
+ let hor=obtenerDatos(KEY_HORARIOS).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e));
+ let pla=obtenerDatos(KEY_PLANIFICACIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
+ if(ses?.rol==="Docente"){
+   const did=String(ses.docenteId||"");est=[];mat=mat.filter(x=>String(x.docenteId||"")===did||true);cal=cal.filter(x=>String(x.docenteId||"")===did);asi=asi.filter(x=>String(x.docenteId||"")===did);pro=[];car=car.filter(x=>String(x.docenteId||"")===did);hor=hor.filter(x=>String(x.docenteId||"")===did);pla=pla.filter(x=>String(x.docenteId||"")===did);
+ }
+ const activos=est.filter(e=>(e.estado||"Activo")==="Activo").length;
+ const hombres=est.filter(e=>String(e.sexo||"").toLowerCase().startsWith("m")).length;
+ const mujeres=est.filter(e=>String(e.sexo||"").toLowerCase().startsWith("f")).length;
+ const pres=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("pres")).length,aus=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("aus")).length,tar=asi.filter(x=>String(x.estado||"").toLowerCase().startsWith("tar")).length;
+ const tasa=asi.length?Math.round(pres/asi.length*100):0;
+ const num=cal.filter(x=>x.nota!==""&&x.nota!==undefined&&!isNaN(Number(x.nota))).map(x=>Number(x.nota)),prom=num.length?(num.reduce((a,b)=>a+b,0)/num.length).toFixed(1):"—";
+ const ejecutadas=pla.filter(x=>x.estado==="Ejecutada").length,cumPla=pla.length?Math.round(ejecutadas/pla.length*100):0;
+ const promovidos=pro.filter(x=>x.resultado==="Promovido").length,reprobados=pro.filter(x=>x.resultado==="Reprobado").length,pendientes=pro.filter(x=>x.resultado==="Pendiente").length,tras=pro.filter(x=>x.resultado==="Trasladado").length,ret=pro.filter(x=>x.resultado==="Retirado").length;
+ const grupos=[...new Set(est.map(e=>normalizarNivel(e.nivel)+"|"+normalizarGrado(e.grado)+"|"+normalizarSeccion(e.seccion)))].filter(Boolean);
+ const nivelCounts={};est.forEach(e=>{const k=e.nivel||"Sin nivel";nivelCounts[k]=(nivelCounts[k]||0)+1});
+ const maxNivel=Math.max(1,...Object.values(nivelCounts));
+ const alertas=[];
+ if(!est.length&&!ses?.rol==="Docente")alertas.push("No hay estudiantes que coincidan con los filtros.");
+ if(!asi.length)alertas.push("No hay registros de asistencia para el período filtrado.");
+ if(!cal.length)alertas.push("No hay calificaciones registradas para el período filtrado.");
+ if(pla.length&&cumPla<70)alertas.push("La ejecución de planificación está por debajo del 70%.");
+ if(asi.length&&tasa<80)alertas.push("La asistencia registrada está por debajo del 80%.");
+ if(pro.length&&pendientes>0)alertas.push("Existen "+pendientes+" procesos de promoción pendientes.");
+ const alertaHTML=alertas.length?alertas.map(a=>'<div class="dash9-alert dash9-danger">⚠️ '+escaparHTML(a)+'</div>').join(""):'<div class="dash9-alert dash9-success">✅ No se detectan alertas críticas en los datos seleccionados.</div>';
+ const niveles=Object.entries(nivelCounts).map(([k,v])=>'<div class="dash9-bar"><label>'+escaparHTML(k)+'</label><div class="dash9-track"><i style="width:'+Math.round(v/maxNivel*100)+'%"></i></div><div class="dash9-value">'+v+'</div></div>').join("");
+ const promTotal=promovidos+reprobados+pendientes+tras+ret;
+ const promPct=promTotal?Math.round(promovidos/promTotal*100):0;
+ const html='<div class="dash9-kpis">'+
+ '<div class="dash9-kpi">👨‍🎓<span>'+activos+'</span><small>Estudiantes activos</small></div>'+
+ '<div class="dash9-kpi">👨<span>'+hombres+'</span><small>Varones</small></div>'+
+ '<div class="dash9-kpi">👩<span>'+mujeres+'</span><small>Mujeres</small></div>'+
+ '<div class="dash9-kpi">📋<span>'+tasa+'%</span><small>Asistencia</small></div>'+
+ '<div class="dash9-kpi">📝<span>'+prom+'</span><small>Promedio numérico</small></div>'+
+ '<div class="dash9-kpi">📘<span>'+cumPla+'%</span><small>Planificación ejecutada</small></div></div>'+
+ '<div class="dash9-grid"><div class="dash9-panel"><h3>🚦 Situación académica</h3>'+
+ '<div class="dash9-metric">'+promPct+'%</div><div class="dash9-sub">Promoción sobre procesos registrados</div><div class="dash9-progress"><span style="width:'+promPct+'%"></span></div>'+
+ '<table><thead><tr><th>Resultado</th><th>Cantidad</th></tr></thead><tbody><tr><td>Promovidos</td><td>'+promovidos+'</td></tr><tr><td>Reprobados</td><td>'+reprobados+'</td></tr><tr><td>Pendientes</td><td>'+pendientes+'</td></tr><tr><td>Trasladados</td><td>'+tras+'</td></tr><tr><td>Retirados</td><td>'+ret+'</td></tr></tbody></table></div>'+
+ '<div class="dash9-panel"><h3>📅 Asistencia</h3><div class="dash9-grid-3"><div><div class="dash9-metric">'+pres+'</div><div class="dash9-sub">Presentes</div></div><div><div class="dash9-metric">'+aus+'</div><div class="dash9-sub">Ausentes</div></div><div><div class="dash9-metric">'+tar+'</div><div class="dash9-sub">Tardanzas</div></div></div><div class="dash9-progress"><span style="width:'+tasa+'%"></span></div><div class="dash9-sub">Tasa de asistencia registrada: '+tasa+'%</div></div></div>'+
+ '<div class="dash9-grid"><div class="dash9-panel"><h3>🎓 Matrícula por nivel</h3>'+niveles+'</div><div class="dash9-panel"><h3>📘 Planificación y cobertura</h3><p>Planificaciones: <b>'+pla.length+'</b></p><p>Ejecutadas: <b>'+ejecutadas+'</b></p><p>Pendientes: <b>'+pla.filter(x=>x.estado==="Pendiente").length+'</b></p><div class="dash9-progress"><span style="width:'+cumPla+'%"></span></div><div class="dash9-sub">Cumplimiento: '+cumPla+'%</div></div></div>'+
+ '<div class="dash9-grid-3"><div class="dash9-panel"><h3>👨‍🏫 Carga académica</h3><div class="dash9-metric">'+car.length+'</div><div class="dash9-sub">Asignaciones activas</div></div><div class="dash9-panel"><h3>🗓️ Horarios</h3><div class="dash9-metric">'+hor.length+'</div><div class="dash9-sub">Clases programadas</div></div><div class="dash9-panel"><h3>👥 Grupos</h3><div class="dash9-metric">'+grupos.length+'</div><div class="dash9-sub">Grupos detectados</div></div></div>'+
+ '<div class="dash9-panel"><h3>🚨 Alertas y seguimiento</h3>'+alertaHTML+'</div>'+
+ '<div class="dash9-panel"><h3>ℹ️ Resumen técnico</h3><p>Registros considerados: matrícula '+mat.length+' · asistencia '+asi.length+' · calificaciones '+cal.length+' · promoción '+pro.length+' · carga '+car.length+' · horarios '+hor.length+' · planificación '+pla.length+'.</p><p class="dash9-sub" style="margin-top:8px">Este dashboard es una herramienta administrativa de seguimiento. Las decisiones oficiales de evaluación y promoción deben ajustarse a la normativa MINED vigente.</p></div>';
+ box.innerHTML=html;
+}
+function imprimirDashboardAcademico(){cargarDashboardAcademico();document.body.setAttribute("data-imprimiendo","dashboardAcademico");window.print();document.body.removeAttribute("data-imprimiendo")}
+function cargarDashboardAcademicoInicial(){const y=document.getElementById("dash9Anio");if(y)y.value=new Date().getFullYear()>=2026&&new Date().getFullYear()<=2028?String(new Date().getFullYear()):"2026";actualizarGradosDashboard9();cargarDashboardAcademico()}
 
 </script>
 
