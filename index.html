@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.7</title>
+<title>Sistema Escolar Nueva Alianza - v7.8</title>
 
 <style>
 *{
@@ -411,6 +411,13 @@ th{
     body[data-imprimiendo="matricula"] #constanciaMatriculaDocumento *{visibility:visible !important;}
     body[data-imprimiendo="matricula"] #constanciaMatriculaDocumento{display:block !important;position:absolute;left:0;top:0;width:100%;border:none;box-shadow:none;padding:20px;}
 }
+
+@media print{
+body[data-imprimiendo="expediente"] *{visibility:hidden !important;}
+body[data-imprimiendo="expediente"] #expedienteDocumento,body[data-imprimiendo="expediente"] #expedienteDocumento *{visibility:visible !important;}
+body[data-imprimiendo="expediente"] #expedienteDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;}
+body[data-imprimiendo="expediente"] #expedienteDocumento~.card{display:none !important;}
+}
 </style>
 </head>
 
@@ -478,6 +485,9 @@ th{
             </button>
             <button onclick="mostrarSeccion('matricula',this)">
                 🧾 Matrícula
+            </button>
+            <button onclick="mostrarSeccion('expediente',this)">
+                📁 Expediente
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1370,6 +1380,44 @@ th{
                 </div>
             </section>
 
+            <!-- EXPEDIENTE 7.8 -->
+            <section id="expediente" class="section">
+                <div class="card">
+                    <h2>📁 Expediente del estudiante</h2>
+                    <div class="notice">Seleccione un estudiante para consultar su expediente integrado: datos personales, matrícula, asistencia, calificaciones e historial de observaciones.</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Estudiante *</label><select id="expEstudiante" onchange="generarExpediente()"><option value="">Seleccione un estudiante</option></select></div>
+                        <div class="form-group"><label>Año escolar</label><select id="expAnio" onchange="generarExpediente()"><option value="">Todos los años</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                    </div>
+                </div>
+
+                <div id="expedienteDocumento" class="card">
+                    <div id="expDatos"></div>
+                    <div class="boleta-seccion-titulo">📚 Historial de matrícula</div>
+                    <div class="table-container"><table><thead><tr><th>Año</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="expMatriculas"></tbody></table></div>
+                    <div class="boleta-seccion-titulo">📋 Resumen de asistencia</div>
+                    <div id="expAsistencia" class="boleta-asistencia"></div>
+                    <div class="boleta-seccion-titulo">📝 Historial académico</div>
+                    <div class="table-container"><table><thead><tr><th>Asignatura</th><th>I Corte</th><th>II Corte</th><th>III Corte</th><th>IV Corte</th><th>Promedio/Resultado</th></tr></thead><tbody id="expCalificaciones"></tbody></table></div>
+                </div>
+
+                <div class="card">
+                    <h2>🗒️ Observaciones del expediente</h2>
+                    <input type="hidden" id="expObsId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Fecha</label><input id="expObsFecha" type="date"></div>
+                        <div class="form-group"><label>Tipo</label><select id="expObsTipo"><option>Académica</option><option>Asistencia</option><option>Conducta</option><option>Orientación</option><option>Administrativa</option><option>Otra</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Observación</label><textarea id="expObsTexto" rows="4" placeholder="Escriba una observación relevante del estudiante"></textarea></div>
+                    <div class="actions"><button class="btn-success" onclick="guardarObservacionExpediente()">💾 Guardar observación</button><button class="btn-secondary" onclick="limpiarObservacionExpediente()">Limpiar</button></div>
+                    <div class="table-container"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Observación</th><th>Acciones</th></tr></thead><tbody id="tablaExpObservaciones"></tbody></table></div>
+                </div>
+
+                <div class="card no-print">
+                    <button class="btn-primary" onclick="imprimirExpediente()">🖨️ Imprimir expediente</button>
+                </div>
+            </section>
+
             <!-- CONFIGURACION -->
             <section id="configuracion" class="section">
 
@@ -1503,6 +1551,7 @@ const KEY_ASISTENCIAS = "asistenciasNuevaAlianza";
 const KEY_CALIFICACIONES = "calificacionesNuevaAlianza";
 const KEY_CONFIG = "configNuevaAlianza";
 const KEY_MATRICULAS = "matriculasNuevaAlianza";
+const KEY_EXPEDIENTES = "expedientesNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
 
 
@@ -3032,13 +3081,14 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "7.7",
+        version: "7.8",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
         asistencias: obtenerDatos(KEY_ASISTENCIAS),
         calificaciones: obtenerDatos(KEY_CALIFICACIONES),
         matriculas: obtenerDatos(KEY_MATRICULAS),
+        expedientes: obtenerDatos(KEY_EXPEDIENTES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -3137,6 +3187,11 @@ function importarRespaldo(event){
                 Array.isArray(respaldo.matriculas) ? respaldo.matriculas : []
             );
 
+            guardarDatos(
+                KEY_EXPEDIENTES,
+                Array.isArray(respaldo.expedientes) ? respaldo.expedientes : []
+            );
+
             if(respaldo.configuracion){
                 localStorage.setItem(
                     KEY_CONFIG,
@@ -3203,6 +3258,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_ASISTENCIAS);
     localStorage.removeItem(KEY_CALIFICACIONES);
     localStorage.removeItem(KEY_MATRICULAS);
+    localStorage.removeItem(KEY_EXPEDIENTES);
 
     cargarTodo();
 
@@ -3234,6 +3290,7 @@ function cargarTodo(){
     cargarEstudiantesMatricula();
     cargarMatriculas();
     cargarSelectorConstancia();
+    cargarEstudiantesExpediente();
     cargarUsuarios();
     aplicarPermisos();
 
@@ -3346,6 +3403,73 @@ function imprimirConstanciaMatricula(){
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("constanciaMatriculaContenido").innerHTML='<div style="padding:20px;line-height:2;font-size:15px;text-align:justify;">Por medio de la presente se hace constar que <strong>'+escaparHTML(m.estudiante)+'</strong>, código/cédula <strong>'+escaparHTML(m.codigo||"—")+'</strong>, se encuentra registrado(a) en el <strong>Centro Escolar Nueva Alianza</strong>, correspondiente al año escolar <strong>'+escaparHTML(m.anio)+'</strong>, en <strong>'+escaparHTML(m.nivel||"—")+'</strong>, grado/nivel <strong>'+escaparHTML(m.grado||"—")+'</strong>, sección <strong>'+escaparHTML(m.seccion||"—")+'</strong>. Responsable/tutor: <strong>'+escaparHTML(m.responsable||"—")+'</strong>. Fecha de matrícula: <strong>'+escaparHTML(m.fecha||"—")+'</strong>.<br><br>Se extiende la presente constancia para los fines que estime convenientes.</div>';
     const doc=document.getElementById("constanciaMatriculaDocumento");doc.style.display="block";document.body.setAttribute("data-imprimiendo","matricula");window.print();doc.style.display="none";document.body.removeAttribute("data-imprimiendo");
+}
+
+/* =========================================================
+   EXPEDIENTE DEL ESTUDIANTE 7.8
+========================================================= */
+function cargarEstudiantesExpediente(){
+    const s=document.getElementById("expEstudiante");if(!s)return;
+    const anterior=s.value;
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    s.innerHTML='<option value="">Seleccione un estudiante</option>';
+    estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");s.appendChild(o);});
+    if([...s.options].some(o=>String(o.value)===String(anterior)))s.value=anterior;
+}
+function generarExpediente(){
+    const id=document.getElementById("expEstudiante")?.value;if(!id)return;
+    const anio=document.getElementById("expAnio")?.value||"";
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    document.getElementById("expDatos").innerHTML='<div class="boleta-datos">'+
+        '<div><strong>Estudiante:</strong> '+escaparHTML(e.nombre||"—")+'</div>'+
+        '<div><strong>Código/Cédula:</strong> '+escaparHTML(e.codigo||e.cedula||"—")+'</div>'+
+        '<div><strong>Sexo:</strong> '+escaparHTML(e.sexo||"—")+'</div>'+
+        '<div><strong>Fecha nacimiento:</strong> '+escaparHTML(e.nacimiento||"—")+'</div>'+
+        '<div><strong>Nivel:</strong> '+escaparHTML(e.nivel||"—")+'</div>'+
+        '<div><strong>Grado:</strong> '+escaparHTML(e.grado||"—")+'</div>'+
+        '<div><strong>Sección:</strong> '+escaparHTML(e.seccion||"—")+'</div>'+
+        '<div><strong>Responsable:</strong> '+escaparHTML(e.responsable||"—")+'</div>'+
+        '<div><strong>Teléfono:</strong> '+escaparHTML(e.telefono||"—")+'</div>'+
+        '<div><strong>Dirección:</strong> '+escaparHTML(e.direccion||"—")+'</div></div>';
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.estudianteId)===String(id)&&(!anio||String(m.anio)===String(anio)));
+    document.getElementById("expMatriculas").innerHTML=mats.length?mats.map(m=>'<tr><td>'+escaparHTML(m.anio)+'</td><td>'+escaparHTML(m.nivel)+'</td><td>'+escaparHTML(m.grado)+'</td><td>'+escaparHTML(m.seccion)+'</td><td>'+escaparHTML(m.fecha)+'</td><td>'+escaparHTML(m.estado)+'</td></tr>').join(""):'<tr><td colspan="6" style="text-align:center;">No hay matrículas registradas.</td></tr>';
+    const as=obtenerDatos(KEY_ASISTENCIAS).filter(a=>String(a.estudianteId)===String(id));
+    const ar={p:0,a:0,t:0,j:0};as.forEach(x=>{const z=limpiarTexto(x.estado);if(z.includes("presente"))ar.p++;else if(z.includes("ausente"))ar.a++;else if(z.includes("tardanza"))ar.t++;else if(z.includes("justificada"))ar.j++;});
+    document.getElementById("expAsistencia").innerHTML='<div><strong>Presentes</strong><br>'+ar.p+'</div><div><strong>Ausencias</strong><br>'+ar.a+'</div><div><strong>Tardanzas</strong><br>'+ar.t+'</div><div><strong>Justificadas</strong><br>'+ar.j+'</div><div><strong>Total</strong><br>'+as.length+'</div>';
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&(!anio||String(x.anio||"2026")===String(anio)));
+    const asign=[...new Set(cal.map(x=>x.asignatura).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"es"));
+    const tc=document.getElementById("expCalificaciones");
+    tc.innerHTML=asign.length?asign.map(a=>{const rs=cal.filter(x=>x.asignatura===a),pc={};rs.forEach(x=>pc[x.corte]=x);const vals=["I Corte","II Corte","III Corte","IV Corte"].map(k=>pc[k]?escaparHTML(pc[k].resultado):"—");const nums=rs.filter(x=>x.tipo==="Numerica").map(x=>Number(x.resultado)).filter(Number.isFinite);let f="—";if(nums.length)f=(nums.reduce((x,y)=>x+y,0)/nums.length).toFixed(1);else if(rs.length)f=escaparHTML(rs[rs.length-1].resultado||"—");return '<tr><td>'+escaparHTML(a)+'</td><td>'+vals[0]+'</td><td>'+vals[1]+'</td><td>'+vals[2]+'</td><td>'+vals[3]+'</td><td><strong>'+f+'</strong></td></tr>';}).join(""):'<tr><td colspan="6" style="text-align:center;">No hay calificaciones registradas.</td></tr>';
+    cargarObservacionesExpediente();
+}
+function guardarObservacionExpediente(){
+    const estudianteId=document.getElementById("expEstudiante")?.value;if(!estudianteId){alert("Seleccione un estudiante.");return;}
+    const texto=document.getElementById("expObsTexto").value.trim();if(!texto){alert("Escriba la observación.");return;}
+    const datos=obtenerDatos(KEY_EXPEDIENTES),id=document.getElementById("expObsId").value;
+    const r={id:id||Date.now().toString(),estudianteId,fecha:document.getElementById("expObsFecha").value||new Date().toISOString().slice(0,10),tipo:document.getElementById("expObsTipo").value,observacion:texto};
+    const p=datos.findIndex(x=>String(x.id)===String(id));if(p>=0)datos[p]=r;else datos.push(r);
+    guardarDatos(KEY_EXPEDIENTES,datos);limpiarObservacionExpediente();generarExpediente();
+}
+function cargarObservacionesExpediente(){
+    const tbody=document.getElementById("tablaExpObservaciones");if(!tbody)return;
+    const id=document.getElementById("expEstudiante")?.value;if(!id){tbody.innerHTML="";return;}
+    const obs=obtenerDatos(KEY_EXPEDIENTES).filter(x=>String(x.estudianteId)===String(id)).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+    tbody.innerHTML=obs.length?obs.map(o=>'<tr><td>'+escaparHTML(o.fecha)+'</td><td>'+escaparHTML(o.tipo)+'</td><td>'+escaparHTML(o.observacion)+'</td><td><button class="btn-warning" onclick="editarObservacionExpediente(\''+escaparHTML(o.id)+'\')">✏️</button> <button class="btn-danger" onclick="eliminarObservacionExpediente(\''+escaparHTML(o.id)+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="4" style="text-align:center;color:#777;">No hay observaciones registradas.</td></tr>';
+}
+function editarObservacionExpediente(id){
+    const o=obtenerDatos(KEY_EXPEDIENTES).find(x=>String(x.id)===String(id));if(!o)return;
+    document.getElementById("expObsId").value=o.id;document.getElementById("expObsFecha").value=o.fecha||"";document.getElementById("expObsTipo").value=o.tipo||"Otra";document.getElementById("expObsTexto").value=o.observacion||"";document.getElementById("expObsTexto").focus();
+}
+function eliminarObservacionExpediente(id){
+    if(!confirm("¿Eliminar esta observación?"))return;
+    guardarDatos(KEY_EXPEDIENTES,obtenerDatos(KEY_EXPEDIENTES).filter(x=>String(x.id)!==String(id)));cargarObservacionesExpediente();
+}
+function limpiarObservacionExpediente(){
+    document.getElementById("expObsId").value="";document.getElementById("expObsFecha").value=new Date().toISOString().slice(0,10);document.getElementById("expObsTipo").value="Académica";document.getElementById("expObsTexto").value="";
+}
+function imprimirExpediente(){
+    if(!document.getElementById("expEstudiante")?.value){alert("Seleccione un estudiante.");return;}
+    generarExpediente();document.body.setAttribute("data-imprimiendo","expediente");window.print();document.body.removeAttribute("data-imprimiendo");
 }
 
 /* =========================================================
