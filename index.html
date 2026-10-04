@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.6</title>
+<title>Sistema Escolar Nueva Alianza - v8.7</title>
 
 <style>
 *{
@@ -514,6 +514,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             <button onclick="mostrarSeccion('docentes',this)">
                 👨‍🏫 Docentes
             </button>
+            <button onclick="mostrarSeccion('asignaciones',this)">
+                📚 Carga académica
+            </button>
 
             <button onclick="mostrarSeccion('asistencia',this)">
                 📋 Asistencia
@@ -897,6 +900,37 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             </section>
 
+            <!-- CARGA ACADÉMICA 8.7 -->
+            <section id="asignaciones" class="section">
+                <div class="card">
+                    <h2>📚 Gestión de docentes y carga académica</h2>
+                    <div class="notice">Asigne a cada docente el nivel, grado, sección, asignaturas y horas semanales que atiende. Estas asignaciones se vinculan automáticamente con los nuevos registros de calificaciones y asistencia.</div>
+                    <input type="hidden" id="asigId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar</label><select id="asigAnio" onchange="cargarAsignaciones()"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
+                        <div class="form-group"><label>Docente</label><select id="asigDocente"><option value="">Seleccione docente</option></select></div>
+                        <div class="form-group"><label>Nivel educativo</label><select id="asigNivel" onchange="actualizarGradosAsignacion()"><option value="">Seleccione</option><option value="Inicial">Educación Inicial</option><option value="Primaria">Primaria</option><option value="Secundaria">Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado / Nivel</label><select id="asigGrado" onchange="actualizarAsignaturasAsignacion()"><option value="">Seleccione nivel primero</option></select></div>
+                        <div class="form-group"><label>Sección</label><select id="asigSeccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div class="form-group"><label>Horas semanales</label><input id="asigHoras" type="number" min="0" max="60" placeholder="Ej.: 5"></div>
+                        <div class="form-group"><label>Turno</label><select id="asigTurno"><option>Matutino</option><option>Vespertino</option><option>Sabatino</option><option>Nocturno</option><option>Diurno</option></select></div>
+                        <div class="form-group"><label>Estado</label><select id="asigEstado"><option>Activo</option><option>Inactivo</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Asignaturas que imparte</label><select id="asigAsignaturas" multiple size="8"></select><small style="color:#666;">Mantenga presionada Ctrl (Windows) para seleccionar varias asignaturas.</small></div>
+                    <div class="form-group"><label>Observación</label><textarea id="asigObservacion" rows="2" placeholder="Ej.: responsable del grupo, multigrado, apoyo, etc."></textarea></div>
+                    <div class="actions"><button id="btnGuardarAsignacion" class="btn-success" onclick="guardarAsignacion()">💾 Guardar asignación</button><button class="btn-secondary" onclick="limpiarAsignacion()">Limpiar</button></div>
+                </div>
+                <div class="card">
+                    <h2>📋 Carga académica registrada</h2>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Buscar</label><input id="buscarAsignacion" type="search" placeholder="Docente, grado, sección o asignatura" oninput="cargarAsignaciones()"></div>
+                        <div class="form-group"><label>Filtrar año</label><select id="filtroAsigAnio" onchange="cargarAsignaciones()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                    </div>
+                    <div id="resumenAsignaciones" class="notice">No hay asignaciones registradas.</div>
+                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Docente</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
+                </div>
+            </section>
+
             <!-- ASISTENCIA -->
             <section id="asistencia" class="section">
 
@@ -908,12 +942,12 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
                         <div class="form-group">
                             <label>Fecha</label>
-                            <input id="asisFecha" type="date">
+                            <input id="asisFecha" type="date" onchange="cargarDocenteAsistencia()">
                         </div>
 
                         <div class="form-group">
                             <label>Nivel</label>
-                            <select id="asisNivel" onchange="actualizarGradosAsistencia()">
+                            <select id="asisNivel" onchange="actualizarGradosAsistencia();cargarDocenteAsistencia()">
                                 <option value="">Seleccione</option>
                                 <option value="Inicial">Educación Inicial</option>
                                 <option value="Primaria">Primaria</option>
@@ -923,14 +957,14 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
                         <div class="form-group">
                             <label>Grado / Nivel</label>
-                            <select id="asisGrado">
+                            <select id="asisGrado" onchange="cargarDocenteAsistencia()">
                                 <option value="">Seleccione</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Sección</label>
-                            <select id="asisSeccion">
+                            <select id="asisSeccion" onchange="cargarDocenteAsistencia()">
                                 <option value="">Seleccione</option>
                                 <option>A</option>
                                 <option>B</option>
@@ -944,6 +978,11 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                             <select id="asisEstudiante" onchange="mostrarEstadoAsistenciaExistente()">
                                 <option value="">Seleccione</option>
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Docente responsable</label>
+                            <select id="asisDocente"><option value="">Sin asignación</option></select>
                         </div>
 
                         <div class="form-group">
@@ -982,6 +1021,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                                     <th>Nivel</th>
                                     <th>Grado</th>
                                     <th>Sección</th>
+                                    <th>Docente</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -1046,7 +1086,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                         <div class="form-group">
                             <label>Grado / Nivel</label>
 
-                            <select id="calGrado" onchange="actualizarCalificaciones()">
+                            <select id="calGrado" onchange="actualizarCalificaciones();cargarDocenteCalificacion()">
 
                                 <option value="">
                                     Seleccione nivel primero
@@ -1059,7 +1099,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
                             <label>Sección</label>
 
-                            <select id="calSeccion" onchange="actualizarCalificaciones()">
+                            <select id="calSeccion" onchange="actualizarCalificaciones();cargarDocenteCalificacion()">
 
                                 <option value="">Seleccione</option>
                                 <option>A</option>
@@ -1086,11 +1126,16 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                         </div>
 
                         <div class="form-group">
+                            <label>Docente responsable</label>
+                            <select id="calDocente"><option value="">Sin asignación</option></select>
+                        </div>
+
+                        <div class="form-group">
 
                             <label>Asignatura</label>
 
                             <select id="calAsignatura"
-                                    onchange="configurarTipoCalificacion()">
+                                    onchange="configurarTipoCalificacion();cargarDocenteCalificacion()">
 
                                 <option value="">
                                     Seleccione estudiante primero
@@ -1211,6 +1256,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                                     <th>Grado</th>
                                     <th>Sección</th>
                                     <th>Asignatura</th>
+                                    <th>Docente</th>
                                     <th>Corte</th>
                                     <th>Resultado</th>
                                     <th>Observación</th>
@@ -2116,6 +2162,7 @@ const KEY_EXPEDIENTES = "expedientesNuevaAlianza";
 const KEY_PROMOCIONES = "promocionesNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
 const KEY_CIERRES = "cierresAnualesNuevaAlianza";
+const KEY_ASIGNACIONES = "asignacionesAcademicasNuevaAlianza";
 
 
 /* =========================================================
@@ -2569,6 +2616,13 @@ function mostrarSeccion(id, boton){
         boton.classList.add("active");
     }
 
+    if(id === "asignaciones"){
+        cargarAsignaciones();
+        cargarDocentesAsignacion();
+        actualizarGradosAsignacion();
+        actualizarAsignaturasAsignacion();
+    }
+
     if(id === "cierreAnual"){
         cargarCierreAnual();
     }
@@ -2749,6 +2803,124 @@ function eliminarDocente(id){
     cargarDocentes(); actualizarEstadisticas();
 }
 /* =========================================================
+   CARGA ACADÉMICA 8.7
+========================================================= */
+
+function cargarDocentesAsignacion(){
+    const select=document.getElementById("asigDocente");
+    if(!select) return;
+    const anterior=select.value;
+    const docentes=obtenerDatos(KEY_DOCENTES).filter(d=>(d.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    select.innerHTML='<option value="">Seleccione docente</option>';
+    docentes.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.nombre;select.appendChild(o);});
+    if([...select.options].some(o=>String(o.value)===String(anterior))) select.value=anterior;
+}
+
+function actualizarGradosAsignacion(){
+    const nivel=document.getElementById("asigNivel")?.value, select=document.getElementById("asigGrado");
+    if(!select)return;
+    const anterior=select.value;
+    let lista=[];
+    if(nivel==="Inicial") lista=GRADOS_INICIAL;
+    else if(nivel==="Primaria") lista=GRADOS_PRIMARIA;
+    else if(nivel==="Secundaria") lista=GRADOS_SECUNDARIA;
+    select.innerHTML='<option value="">Seleccione</option>';
+    lista.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=nivel==="Inicial"?g:g+"º grado";select.appendChild(o);});
+    if([...select.options].some(o=>o.value===anterior)) select.value=anterior;
+    actualizarAsignaturasAsignacion();
+}
+
+function obtenerAsignaturasDisponibles(nivel,grado){
+    const g=normalizarGrado(grado);
+    if(nivel==="Inicial") return ["Sin disciplina"];
+    if(nivel==="Primaria" && (g==="1"||g==="2")) return [...DISCIPLINAS_CUALITATIVAS];
+    if(nivel==="Primaria" || nivel==="Secundaria") return [...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
+    return [];
+}
+
+function actualizarAsignaturasAsignacion(){
+    const select=document.getElementById("asigAsignaturas");
+    if(!select)return;
+    const anterior=[...select.selectedOptions].map(o=>o.value);
+    const lista=obtenerAsignaturasDisponibles(document.getElementById("asigNivel")?.value,document.getElementById("asigGrado")?.value);
+    select.innerHTML="";
+    lista.forEach(a=>{const o=document.createElement("option");o.value=a;o.textContent=a;o.selected=anterior.includes(a);select.appendChild(o);});
+}
+
+function limpiarAsignacion(){
+    ["asigId","asigHoras","asigObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const d=document.getElementById("asigDocente");if(d)d.value="";
+    const n=document.getElementById("asigNivel");if(n)n.value="";
+    actualizarGradosAsignacion();
+    const s=document.getElementById("asigSeccion");if(s)s.value="";
+    const t=document.getElementById("asigTurno");if(t)t.value="Matutino";
+    const es=document.getElementById("asigEstado");if(es)es.value="Activo";
+    const as=document.getElementById("asigAsignaturas");if(as)[...as.options].forEach(o=>o.selected=false);
+    const btn=document.getElementById("btnGuardarAsignacion");if(btn)btn.textContent="💾 Guardar asignación";
+}
+
+function guardarAsignacion(){
+    const id=document.getElementById("asigId").value, anio=document.getElementById("asigAnio").value, docenteId=document.getElementById("asigDocente").value, nivel=document.getElementById("asigNivel").value, grado=document.getElementById("asigGrado").value, seccion=document.getElementById("asigSeccion").value;
+    const asignaturas=[...document.getElementById("asigAsignaturas").selectedOptions].map(o=>o.value);
+    const docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteId));
+    if(!docenteId||!docente||!nivel||!grado||!seccion||!asignaturas.length){alert("Complete año, docente, nivel, grado, sección y al menos una asignatura.");return;}
+    const horas=Number(document.getElementById("asigHoras").value||0);
+    if(horas<0||horas>60){alert("Las horas semanales deben estar entre 0 y 60.");return;}
+    const datos=obtenerDatos(KEY_ASIGNACIONES);
+    const duplicada=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    if(duplicada){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return;}
+    const registro={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
+    const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
+    guardarDatos(KEY_ASIGNACIONES,datos);limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
+    alert(id?"Asignación actualizada correctamente.":"Carga académica guardada correctamente.");
+}
+
+function cargarAsignaciones(){
+    const tabla=document.getElementById("tablaAsignaciones");if(!tabla)return;
+    const buscar=limpiarTexto(document.getElementById("buscarAsignacion")?.value||""), filtro=document.getElementById("filtroAsigAnio")?.value||"", datos=obtenerDatos(KEY_ASIGNACIONES);
+    const lista=datos.filter(a=>{const texto=limpiarTexto([a.anio,a.docenteNombre,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
+    tabla.innerHTML="";
+    lista.forEach((a,i)=>{tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button class="btn-warning" onclick="editarAsignacion('+a.id+')">✏️</button> <button class="btn-danger" onclick="eliminarAsignacion('+a.id+')">Eliminar</button></td></tr>';});
+    if(!lista.length)tabla.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
+    const horas=lista.reduce((s,a)=>s+Number(a.horasSemanales||0),0), docentes=new Set(lista.map(a=>String(a.docenteId))).size;
+    document.getElementById("resumenAsignaciones").innerHTML="<strong>Asignaciones:</strong> "+lista.length+" &nbsp; | &nbsp; <strong>Docentes:</strong> "+docentes+" &nbsp; | &nbsp; <strong>Horas semanales:</strong> "+horas;
+}
+
+function editarAsignacion(id){
+    const a=obtenerDatos(KEY_ASIGNACIONES).find(x=>String(x.id)===String(id));if(!a){alert("No se encontró la asignación.");return;}
+    document.getElementById("asigId").value=a.id;document.getElementById("asigAnio").value=a.anio||"2026";cargarDocentesAsignacion();document.getElementById("asigDocente").value=a.docenteId||"";document.getElementById("asigNivel").value=a.nivel||"";actualizarGradosAsignacion();document.getElementById("asigGrado").value=a.grado||"";actualizarAsignaturasAsignacion();document.getElementById("asigSeccion").value=a.seccion||"";document.getElementById("asigHoras").value=a.horasSemanales||"";document.getElementById("asigTurno").value=a.turno||"Matutino";document.getElementById("asigEstado").value=a.estado||"Activo";document.getElementById("asigObservacion").value=a.observacion||"";
+    const sel=document.getElementById("asigAsignaturas");[...sel.options].forEach(o=>o.selected=(a.asignaturas||[]).includes(o.value));document.getElementById("btnGuardarAsignacion").textContent="✏️ Actualizar asignación";
+}
+
+function eliminarAsignacion(id){
+    if(!confirm("¿Desea eliminar esta asignación académica?"))return;
+    guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.id)!==String(id)));
+    cargarAsignaciones();cargarDocenteCalificacion();cargarDocenteAsistencia();
+}
+
+function buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura){
+    return obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).includes(asignatura))||null;
+}
+
+function cargarDocenteCalificacion(){
+    const select=document.getElementById("calDocente");if(!select)return;
+    const anio=document.getElementById("calAnio")?.value||"2026",nivel=document.getElementById("calNivel")?.value,grado=document.getElementById("calGrado")?.value,seccion=document.getElementById("calSeccion")?.value,asignatura=document.getElementById("calAsignatura")?.value;
+    const lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(!asignatura||(a.asignaturas||[]).includes(asignatura)));
+    select.innerHTML='<option value="">Sin asignación</option>';
+    [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
+    const encontrado=buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura);if(encontrado)select.value=encontrado.docenteId;
+}
+
+function cargarDocenteAsistencia(){
+    const select=document.getElementById("asisDocente");if(!select)return;
+    const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):"2026",nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
+    const lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    select.innerHTML='<option value="">Sin asignación</option>';
+    [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
+    if(lista.length===1)select.value=String(lista[0].docenteId);
+}
+
+/* =========================================================
    ASISTENCIA
 ========================================================= */
 
@@ -2872,10 +3044,12 @@ function guardarAsistencia(){
     if(!estudiante){alert("No se encontró el estudiante.");return;}
     const fecha=document.getElementById("asisFecha").value;
     const estado=document.getElementById("asisEstado").value;
+    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
+    const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
     if(!fecha){alert("Seleccione la fecha.");return;}
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
-    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,estado};
+    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
     alert(existe?"Asistencia actualizada.":"Asistencia guardada correctamente.");
@@ -2892,11 +3066,13 @@ function registrarAsistenciaGrupo(){
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel)&&normalizarGrado(e.grado)===normalizarGrado(grado)&&normalizarSeccion(e.seccion)===normalizarSeccion(seccion)&&String(e.estado||"Activo")==="Activo");
     if(!estudiantes.length){alert("No hay estudiantes activos en este grupo.");return;}
     const estado=document.getElementById("asisEstado").value;
+    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
+    const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     let nuevos=0,actualizados=0;
     estudiantes.forEach(e=>{
         const existe=datos.find(a=>String(a.estudianteId)===String(e.id)&&a.fecha===fecha);
-        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,estado};
+        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
         if(existe){datos[datos.indexOf(existe)]=registro;actualizados++;}else{datos.push(registro);nuevos++;}
     });
     guardarDatos(KEY_ASISTENCIAS,datos);
@@ -2915,8 +3091,8 @@ function cargarAsistencias(){
     const buscar=(document.getElementById("buscarAsistencia")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
     const lista=datos.filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
-    lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
-    if(!lista.length) tabla.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
+    lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
 /* =========================================================
    CALIFICACIONES 7.3
@@ -3190,6 +3366,10 @@ function guardarCalificacion(){
         return;
     }
 
+    const asignacionDocente=buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura);
+    const docenteId=asignacionDocente ? asignacionDocente.docenteId : "";
+    const docenteNombre=asignacionDocente ? asignacionDocente.docenteNombre : "";
+
     const registro={
         id:calId ? Number(calId) : Date.now(),
         anio:anio,
@@ -3199,6 +3379,8 @@ function guardarCalificacion(){
         grado:grado,
         seccion:seccion,
         asignatura:asignatura,
+        docenteId:docenteId,
+        docenteNombre:docenteNombre,
         corte:corte,
         tipo:numerica ? "Numerica" : "Cualitativa",
         resultado:resultado,
@@ -3253,7 +3435,7 @@ function cargarCalificaciones(){
     tabla.innerHTML="";
 
     if(!lista.length){
-        tabla.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
+        tabla.innerHTML='<tr><td colspan="12" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
     }
 
     lista.forEach((c,index)=>{
@@ -3278,6 +3460,7 @@ function cargarCalificaciones(){
             '<td>'+escaparHTML(c.grado)+'</td>' +
             '<td>'+escaparHTML(c.seccion)+'</td>' +
             '<td>'+escaparHTML(c.asignatura)+'</td>' +
+            '<td>'+escaparHTML(c.docenteNombre || "")+'</td>' +
             '<td>'+escaparHTML(c.corte)+'</td>' +
             '<td>'+resultadoHTML+'</td>' +
             '<td>'+escaparHTML(c.observacion || "")+'</td>' +
@@ -3721,7 +3904,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "8.6",
+        version: "8.7",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -3731,6 +3914,7 @@ function construirRespaldo(){
         expedientes: obtenerDatos(KEY_EXPEDIENTES),
         promociones: obtenerDatos(KEY_PROMOCIONES),
         cierresAnuales: obtenerDatos(KEY_CIERRES),
+        asignacionesAcademicas: obtenerDatos(KEY_ASIGNACIONES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -3846,6 +4030,11 @@ function importarRespaldo(event){
                 Array.isArray(respaldo.cierresAnuales) ? respaldo.cierresAnuales : []
             );
 
+            guardarDatos(
+                KEY_ASIGNACIONES,
+                Array.isArray(respaldo.asignacionesAcademicas) ? respaldo.asignacionesAcademicas : []
+            );
+
             if(respaldo.configuracion){
                 localStorage.setItem(
                     KEY_CONFIG,
@@ -3914,6 +4103,9 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_CALIFICACIONES);
     localStorage.removeItem(KEY_MATRICULAS);
     localStorage.removeItem(KEY_EXPEDIENTES);
+    localStorage.removeItem(KEY_PROMOCIONES);
+    localStorage.removeItem(KEY_CIERRES);
+    localStorage.removeItem(KEY_ASIGNACIONES);
 
     cargarTodo();
 
@@ -3935,6 +4127,8 @@ function cargarTodo(){
     cargarEstudiantes();
 
     cargarDocentes();
+    cargarAsignaciones();
+    cargarDocentesAsignacion();
 
     cargarAsistencias();
 
