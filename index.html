@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.1</title>
+<title>Sistema Escolar Nueva Alianza - v8.2</title>
 
 <style>
 *{
@@ -442,6 +442,8 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento *{visib
 body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15px;}
 body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-print{display:none !important;}
 }
+
+@media print{body[data-imprimiendo="promocion"] *{visibility:hidden !important;}body[data-imprimiendo="promocion"] #promocionDocumento,body[data-imprimiendo="promocion"] #promocionDocumento *{visibility:visible !important;}body[data-imprimiendo="promocion"] #promocionDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15px;}body[data-imprimiendo="promocion"] #promocionDocumento .no-print{display:none !important;}}
 </style>
 </head>
 
@@ -521,6 +523,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('historialAcademico',this)">
                 📚 Historial académico
+            </button>
+            <button onclick="mostrarSeccion('promocion',this)">
+                🎓 Promoción y traslado
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1704,6 +1709,50 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 </div>
             </section>
 
+            <!-- PROMOCIÓN Y TRASLADO 8.2 -->
+            <section id="promocion" class="section">
+                <div class="card no-print">
+                    <h2>🎓 Control de promoción y traslado</h2>
+                    <div class="notice"><strong>Uso administrativo:</strong> registre el resultado escolar de cada estudiante por año. La decisión oficial debe aplicarse conforme a la normativa vigente del MINED.</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar</label><select id="proAnio" onchange="cargarControlPromocion()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Estudiante</label><select id="proEstudiante" onchange="cargarDatosPromocion()"><option value="">Seleccione un estudiante</option></select></div>
+                        <div class="form-group"><label>Resultado escolar</label><select id="proResultado"><option value="Promovido">Promovido</option><option value="Reprobado">Reprobado</option><option value="Pendiente">Pendiente</option><option value="Trasladado">Trasladado</option><option value="Retirado">Retirado</option></select></div>
+                        <div class="form-group"><label>Grado cursado</label><input id="proGrado" type="text" readonly></div>
+                        <div class="form-group"><label>Grado siguiente</label><input id="proGradoSiguiente" type="text" placeholder="Ej.: 5"></div>
+                        <div class="form-group"><label>Fecha de resolución</label><input id="proFecha" type="date"></div>
+                    </div>
+                    <div class="form-group"><label>Observación / motivo</label><textarea id="proObservacion" rows="3" placeholder="Observación administrativa, motivo de traslado o retiro, etc."></textarea></div>
+                    <div class="actions">
+                        <button class="btn-success" onclick="guardarPromocion()">💾 Guardar resultado</button>
+                        <button class="btn-secondary" onclick="limpiarPromocion()">Limpiar</button>
+                        <button class="btn-primary" onclick="imprimirControlPromocion()">🖨️ Imprimir control</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="promocionDocumento">
+                        <div style="text-align:center;border-bottom:3px solid #123b6d;padding-bottom:12px;margin-bottom:15px;">
+                            <div style="font-size:18px;font-weight:bold;color:#123b6d;">CENTRO ESCOLAR NUEVA ALIANZA</div>
+                            <div style="font-size:16px;font-weight:bold;">CONTROL DE PROMOCIÓN, TRASLADO Y RETIRO</div>
+                            <div id="proEncabezado" style="font-size:13px;margin-top:6px;"></div>
+                        </div>
+                        <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:15px;">
+                            <div class="stat"><h3>Promovidos</h3><strong id="proPromovidos">0</strong></div>
+                            <div class="stat"><h3>Reprobados</h3><strong id="proReprobados">0</strong></div>
+                            <div class="stat"><h3>Pendientes</h3><strong id="proPendientes">0</strong></div>
+                            <div class="stat"><h3>Trasladados</h3><strong id="proTrasladados">0</strong></div>
+                            <div class="stat"><h3>Retirados</h3><strong id="proRetirados">0</strong></div>
+                        </div>
+                        <div class="table-container"><table>
+                            <thead><tr><th>#</th><th>Estudiante</th><th>Código</th><th>Grado</th><th>Resultado</th><th>Grado siguiente</th><th>Fecha</th><th>Observación</th><th class="no-print">Acciones</th></tr></thead>
+                            <tbody id="tablaPromocion"></tbody>
+                        </table></div>
+                        <div id="proPie" style="margin-top:18px;font-size:12px;color:#555;"></div>
+                        <div style="margin-top:70px;text-align:center;font-size:12px;"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:80px;"><div>____________________________<br>Docente responsable</div><div>____________________________<br>Evert Josue Maltez Sanchez<br>Director</div></div></div>
+                    </div>
+                </div>
+            </section>
+
                         <section id="configuracion" class="section">
 
                 <div class="card">
@@ -1837,6 +1886,7 @@ const KEY_CALIFICACIONES = "calificacionesNuevaAlianza";
 const KEY_CONFIG = "configNuevaAlianza";
 const KEY_MATRICULAS = "matriculasNuevaAlianza";
 const KEY_EXPEDIENTES = "expedientesNuevaAlianza";
+const KEY_PROMOCIONES = "promocionesNuevaAlianza";
 const KEY_USUARIOS = "usuariosNuevaAlianza";
 
 
@@ -3374,6 +3424,7 @@ function construirRespaldo(){
         calificaciones: obtenerDatos(KEY_CALIFICACIONES),
         matriculas: obtenerDatos(KEY_MATRICULAS),
         expedientes: obtenerDatos(KEY_EXPEDIENTES),
+        promociones: obtenerDatos(KEY_PROMOCIONES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -3475,6 +3526,11 @@ function importarRespaldo(event){
             guardarDatos(
                 KEY_EXPEDIENTES,
                 Array.isArray(respaldo.expedientes) ? respaldo.expedientes : []
+            );
+
+            guardarDatos(
+                KEY_PROMOCIONES,
+                Array.isArray(respaldo.promociones) ? respaldo.promociones : []
             );
 
             if(respaldo.configuracion){
@@ -3582,6 +3638,9 @@ function cargarTodo(){
     cargarEstudiantesExpediente();
     cargarEstudiantesHistorialAcademico();
     generarHistorialAcademico();
+    cargarEstudiantesPromocion();
+    limpiarPromocion();
+    cargarControlPromocion();
     cargarUsuarios();
     aplicarPermisos();
 
@@ -3759,6 +3818,49 @@ function cargarRendimiento(){
 function imprimirRendimiento(){
     cargarRendimiento();document.body.setAttribute("data-imprimiendo","rendimiento");window.print();document.body.removeAttribute("data-imprimiendo");
 }
+
+/* =========================================================
+   CONTROL DE PROMOCIÓN Y TRASLADO 8.2
+========================================================= */
+function cargarEstudiantesPromocion(){
+    const s=document.getElementById("proEstudiante");if(!s)return;const anterior=s.value;
+    obtenerDatos(KEY_ESTUDIANTES).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es")).forEach(()=>{});
+    const es=obtenerDatos(KEY_ESTUDIANTES).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    s.innerHTML='<option value="">Seleccione un estudiante</option>';
+    es.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");s.appendChild(o);});
+    if([...s.options].some(o=>String(o.value)===String(anterior)))s.value=anterior;
+}
+function cargarDatosPromocion(){
+    const id=document.getElementById("proEstudiante")?.value,anio=document.getElementById("proAnio")?.value||"2026";if(!id)return;
+    const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id)),grado=m?.grado||e?.grado||"";
+    document.getElementById("proGrado").value=grado;
+    const n=parseInt(normalizarGrado(grado),10);document.getElementById("proGradoSiguiente").value=Number.isFinite(n)?String(n+1):"";
+    const p=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
+    if(p){document.getElementById("proResultado").value=p.resultado||"Promovido";document.getElementById("proGradoSiguiente").value=p.gradoSiguiente||"";document.getElementById("proFecha").value=p.fecha||"";document.getElementById("proObservacion").value=p.observacion||"";document.getElementById("proGrado").value=p.grado||grado;}
+}
+function limpiarPromocion(){
+    if(document.getElementById("proResultado"))document.getElementById("proResultado").value="Promovido";
+    ["proGrado","proGradoSiguiente","proObservacion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
+    if(document.getElementById("proFecha"))document.getElementById("proFecha").value=new Date().toISOString().slice(0,10);cargarDatosPromocion();
+}
+function guardarPromocion(){
+    const estudianteId=document.getElementById("proEstudiante")?.value,anio=document.getElementById("proAnio")?.value||"2026";if(!estudianteId){alert("Seleccione un estudiante.");return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId)),datos=obtenerDatos(KEY_PROMOCIONES),idx=datos.findIndex(x=>String(x.estudianteId)===String(estudianteId)&&String(x.anio)===String(anio));
+    const r={id:idx>=0?datos[idx].id:Date.now().toString(),estudianteId,estudiante:e?.nombre||"",codigo:e?.codigo||"",anio,grado:document.getElementById("proGrado").value,resultado:document.getElementById("proResultado").value,gradoSiguiente:document.getElementById("proGradoSiguiente").value,fecha:document.getElementById("proFecha").value||new Date().toISOString().slice(0,10),observacion:document.getElementById("proObservacion").value.trim()};
+    if(idx>=0)datos[idx]=r;else datos.push(r);guardarDatos(KEY_PROMOCIONES,datos);cargarControlPromocion();alert("Resultado escolar guardado correctamente.");
+}
+function cargarControlPromocion(){
+    const tbody=document.getElementById("tablaPromocion");if(!tbody)return;const anio=document.getElementById("proAnio")?.value||"2026",datos=obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.anio)===String(anio)),res={Promovido:0,Reprobado:0,Pendiente:0,Trasladado:0,Retirado:0};
+    datos.forEach(x=>{if(res[x.resultado]!==undefined)res[x.resultado]++;});
+    ["Promovido","Reprobado","Pendiente","Trasladado","Retirado"].forEach(k=>{const id=k==="Promovido"?"proPromovidos":k==="Reprobado"?"proReprobados":k==="Pendiente"?"proPendientes":k==="Trasladado"?"proTrasladados":"proRetirados";document.getElementById(id).textContent=res[k];});
+    tbody.innerHTML=datos.length?datos.sort((a,b)=>String(a.estudiante).localeCompare(String(b.estudiante),"es")).map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+escaparHTML(x.estudiante||"—")+'</td><td>'+escaparHTML(x.codigo||"—")+'</td><td>'+escaparHTML(x.grado||"—")+'</td><td>'+escaparHTML(x.resultado||"—")+'</td><td>'+escaparHTML(x.gradoSiguiente||"—")+'</td><td>'+escaparHTML(x.fecha||"—")+'</td><td>'+escaparHTML(x.observacion||"—")+'</td><td class="no-print"><button class="btn-warning" onclick="editarPromocion(\''+escaparHTML(x.id)+'\')">✏️</button> <button class="btn-danger" onclick="eliminarPromocion(\''+escaparHTML(x.id)+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="9" style="text-align:center;color:#777;">No hay resultados registrados para este año.</td></tr>';
+    document.getElementById("proEncabezado").textContent="Año escolar: "+anio+" · Total de resultados: "+datos.length;
+    document.getElementById("proPie").textContent="Generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Registro administrativo referencial.";
+}
+function editarPromocion(id){const p=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(!p)return;document.getElementById("proAnio").value=p.anio||"2026";cargarEstudiantesPromocion();document.getElementById("proEstudiante").value=p.estudianteId||"";document.getElementById("proResultado").value=p.resultado||"Promovido";document.getElementById("proGrado").value=p.grado||"";document.getElementById("proGradoSiguiente").value=p.gradoSiguiente||"";document.getElementById("proFecha").value=p.fecha||"";document.getElementById("proObservacion").value=p.observacion||"";}
+function eliminarPromocion(id){if(!confirm("¿Eliminar este resultado escolar?"))return;guardarDatos(KEY_PROMOCIONES,obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.id)!==String(id)));cargarControlPromocion();}
+function imprimirControlPromocion(){cargarControlPromocion();document.body.setAttribute("data-imprimiendo","promocion");window.print();document.body.removeAttribute("data-imprimiendo");}
 
 /* =========================================================
    HISTORIAL ACADÉMICO ANUAL 8.1
