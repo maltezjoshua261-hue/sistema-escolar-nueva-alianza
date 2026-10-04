@@ -3672,28 +3672,42 @@ function cargarAsignaturas(){
    TIPO DE CALIFICACIÓN
 ========================================================= */
 
-function esCalificacionNumerica(){
+function esAsignaturaNumericaPorGrado(nivel,grado,asignatura){
+    const n=normalizarNivel(nivel);
+    const g=normalizarGrado(grado);
+    const a=String(asignatura||"").trim();
 
-    const nivel=document.getElementById("calNivel").value;
-    const grado=normalizarGrado(document.getElementById("calGrado").value);
-    const asignatura=document.getElementById("calAsignatura").value;
+    // Inicial: AA / AP.
+    if(n==="Inicial") return false;
 
-    if(nivel==="Inicial") return false;
+    // 1.º y 2.º de Primaria: todas las disciplinas son cualitativas.
+    if(n==="Primaria" && ["1","2"].includes(g)) return false;
 
-    if(nivel==="Primaria" && (grado==="1" || grado==="2")){
-        return false;
+    // 3.º a 6.º: las cuatro disciplinas básicas son numéricas.
+    if(n==="Primaria" && ["3","4","5","6"].includes(g)){
+        return BASICAS_NUMERICAS.includes(a);
     }
 
-    if(nivel==="Primaria" && ["3","4","5","6"].includes(grado)){
-        return BASICAS_NUMERICAS.includes(asignatura);
-    }
-
-    if(nivel==="Secundaria"){
-        return BASICAS_NUMERICAS.includes(asignatura);
-    }
+    // Regla vigente del sistema para Secundaria.
+    if(n==="Secundaria") return BASICAS_NUMERICAS.includes(a);
 
     return false;
+}
 
+function categoriasPorNivelGrado(nivel,grado){
+    const n=normalizarNivel(nivel);
+    const g=normalizarGrado(grado);
+
+    if(n==="Inicial") return ["AA","AP"];
+    if(n==="Primaria" && ["1","2","3","4","5","6"].includes(g)) return ["AA","AS","AF"];
+    return ["AA","AS","AF"];
+}
+
+function esCalificacionNumerica(){
+    const nivel=document.getElementById("calNivel")?.value||"";
+    const grado=document.getElementById("calGrado")?.value||"";
+    const asignatura=document.getElementById("calAsignatura")?.value||"";
+    return esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
 }
 
 
@@ -3720,26 +3734,20 @@ function configurarTipoCalificacion(){
 ========================================================= */
 
 function cargarCategorias(){
-
-    const nivel=document.getElementById("calNivel").value;
+    const nivel=document.getElementById("calNivel")?.value||"";
+    const grado=document.getElementById("calGrado")?.value||"";
     const select=document.getElementById("calCategoria");
+    if(!select) return;
     const anterior=select.value;
-
+    const categorias=categoriasPorNivelGrado(nivel,grado);
     select.innerHTML="";
-
-    const categorias=nivel==="Inicial"
-        ? ["AA","AP"]
-        : ["AA","AS","AF"];
-
     categorias.forEach(c=>{
         const option=document.createElement("option");
         option.value=c;
         option.textContent=c;
         select.appendChild(option);
     });
-
     if(categorias.includes(anterior)) select.value=anterior;
-
 }
 
 
@@ -3774,20 +3782,21 @@ function guardarCalificacion(){
         return;
     }
 
-    const numerica=esCalificacionNumerica();
+    const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
+    const categoriasValidas=categoriasPorNivelGrado(nivel,grado);
     let resultado="";
 
     if(numerica){
         const nota=Number(document.getElementById("calNota").value);
         if(!Number.isFinite(nota) || nota<0 || nota>100){
-            alert("La nota debe estar entre 0 y 100.");
+            alert("Esta disciplina es cuantitativa. La nota debe estar entre 0 y 100.");
             return;
         }
         resultado=nota;
     }else{
         resultado=document.getElementById("calCategoria").value;
-        if(!resultado){
-            alert("Seleccione una categoría.");
+        if(!categoriasValidas.includes(resultado)){
+            alert("Seleccione una categoría válida para este nivel y grado: "+categoriasValidas.join(", ")+".");
             return;
         }
     }
