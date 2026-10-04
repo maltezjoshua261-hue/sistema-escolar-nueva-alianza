@@ -3209,6 +3209,11 @@ function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
     );
 }
 
+function estudianteVisibleParaRol(e,anio){
+    const ses=obtenerSesionActual();
+    if(!ses || ses.rol==="Director") return true;
+    return docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio||new Date().getFullYear());
+}
 function cargarEstudiantes(){
     const datos=obtenerDatos(KEY_ESTUDIANTES), tabla=document.getElementById("tablaEstudiantes");
     const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
@@ -4834,7 +4839,7 @@ function eliminarUsuario(id){
 function cargarEstudiantesMatricula(){
     const select=document.getElementById("matEstudiante"); if(!select)return;
     const anterior=select.value;
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo"&&estudianteVisibleParaRol(e,document.getElementById("boletaAnio")?.value||new Date().getFullYear())).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     select.innerHTML='<option value="">Seleccione un estudiante</option>';
     estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
     if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
@@ -4849,7 +4854,7 @@ function cargarDatosMatricula(){
     document.getElementById("matTelefono").value=e.telefono||"";
     document.getElementById("matDireccion").value=e.direccion||"";
 }
-function guardarMatricula(){
+function guardarMatricula(){if(!exigirDirector())return;
     const anioCierre=document.getElementById("matAnio")?.value.trim()||"2026";
     if(estaCerradoAnio(anioCierre)) return;
     const id=document.getElementById("matId").value, estudianteId=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
@@ -4867,20 +4872,20 @@ function limpiarMatricula(){
     ["matId","matGrado","matResponsable","matTelefono","matDireccion","matObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     document.getElementById("matEstudiante").value="";document.getElementById("matNivel").value="";document.getElementById("matSeccion").value="";document.getElementById("matEstado").value="Matriculado";document.getElementById("matAnio").value="2026";document.getElementById("matFecha").value=new Date().toISOString().slice(0,10);document.getElementById("btnGuardarMatricula").textContent="💾 Guardar matrícula";
 }
-function editarMatricula(id){
+function editarMatricula(id){if(!exigirDirector())return;
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("matId").value=m.id;document.getElementById("matEstudiante").value=m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
 }
-function eliminarMatricula(id){const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
+function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
 function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
-    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));}).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
+    const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||docenteTieneGrupo(m.nivel,m.grado,m.seccion,m.anio))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
     tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.estado)+"</td><td><button class='btn-warning' onclick='editarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>🗑️</button></td></tr>").join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
 }
 function cargarSelectorConstancia(){
     const s=document.getElementById("constanciaMatricula");if(!s)return;const anterior=s.value;s.innerHTML='<option value="">Seleccione</option>';
-    obtenerDatos(KEY_MATRICULAS).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es")).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.estudiante+" · "+m.anio+" · "+(m.grado||m.nivel);s.appendChild(o);});
+    obtenerDatos(KEY_MATRICULAS).filter(m=>{const ses=obtenerSesionActual();return !ses||ses.rol==="Director"||docenteTieneGrupo(m.nivel,m.grado,m.seccion,m.anio);}).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es")).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.estudiante+" · "+m.anio+" · "+(m.grado||m.nivel);s.appendChild(o);});
     if([...s.options].some(o=>o.value===anterior))s.value=anterior;
 }
 function imprimirConstanciaMatricula(){
@@ -4935,7 +4940,7 @@ function calcularRendimientoEstudiante(e,anio){
 function cargarRendimiento(){
     const tbody=document.getElementById("tablaRendimiento"),resumen=document.getElementById("tablaResumenRendimiento");if(!tbody||!resumen)return;
     const anio=document.getElementById("rendAnio")?.value||"2026",nivel=document.getElementById("rendNivel")?.value||"",grado=document.getElementById("rendGrado")?.value||"",sec=document.getElementById("rendSeccion")?.value||"",filtro=document.getElementById("rendResultado")?.value||"",buscar=limpiarTexto(document.getElementById("rendBuscar")?.value||"");
-    const est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo"&&(!nivel||limpiarTexto(e.nivel)===limpiarTexto(nivel))&&(!grado||normalizarGrado(e.grado)===normalizarGrado(grado)||limpiarTexto(e.grado).includes(limpiarTexto(grado)))&&(!sec||limpiarTexto(e.seccion)===limpiarTexto(sec))&&(!buscar||limpiarTexto([e.nombre,e.codigo].join(" ")).includes(buscar)));
+    const ses=obtenerSesionActual(); const est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(!ses||ses.rol==="Director"||estudianteVisibleParaRol(e,anio))&&(e.estado||"Activo")==="Activo"&&(!nivel||limpiarTexto(e.nivel)===limpiarTexto(nivel))&&(!grado||normalizarGrado(e.grado)===normalizarGrado(grado)||limpiarTexto(e.grado).includes(limpiarTexto(grado)))&&(!sec||limpiarTexto(e.seccion)===limpiarTexto(sec))&&(!buscar||limpiarTexto([e.nombre,e.codigo].join(" ")).includes(buscar)));
     const rows=est.map(e=>({e,...calcularRendimientoEstudiante(e,anio)})).filter(r=>!filtro||r.resultado===filtro).sort((a,b)=>String(a.e.nombre||"").localeCompare(String(b.e.nombre||""),"es"));
     const all=est.map(e=>({e,...calcularRendimientoEstudiante(e,anio)}));
     const count=(v)=>all.filter(r=>r.resultado===v).length;
@@ -5005,7 +5010,7 @@ function imprimirControlPromocion(){cargarControlPromocion();document.body.setAt
 function cargarEstudiantesHistorialAcademico(){
     const s=document.getElementById("histEstudiante");if(!s)return;
     const anterior=s.value;
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>estudianteVisibleParaRol(e,document.getElementById("expAnio")?.value||new Date().getFullYear())).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     s.innerHTML='<option value="">Seleccione un estudiante</option>';
     estudiantes.forEach(e=>{
         const o=document.createElement("option");
@@ -5227,6 +5232,8 @@ function generarExpediente(){
 }
 function guardarObservacionExpediente(){
     const estudianteId=document.getElementById("expEstudiante")?.value;if(!estudianteId){alert("Seleccione un estudiante.");return;}
+    const eObs=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(estudianteId));
+    if(!eObs||!estudianteVisibleParaRol(eObs,document.getElementById("expAnio")?.value||new Date().getFullYear())){alert("Este estudiante no pertenece a sus grupos asignados.");return;}
     const texto=document.getElementById("expObsTexto").value.trim();if(!texto){alert("Escriba la observación.");return;}
     const datos=obtenerDatos(KEY_EXPEDIENTES),id=document.getElementById("expObsId").value;
     const r={id:id||Date.now().toString(),estudianteId,fecha:document.getElementById("expObsFecha").value||new Date().toISOString().slice(0,10),tipo:document.getElementById("expObsTipo").value,observacion:texto};
@@ -5291,6 +5298,7 @@ function generarBoleta(){
     }
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
     if(!e) return;
+    if(!estudianteVisibleParaRol(e,anio)){alert("Este estudiante no pertenece a sus grupos asignados.");return;}
     datos.innerHTML=
         "<div><strong>Estudiante:</strong> "+escaparHTML(e.nombre||"")+"</div>"+
         "<div><strong>Código / Cédula:</strong> "+escaparHTML(e.codigo||e.cedula||"—")+"</div>"+
@@ -5853,9 +5861,9 @@ function cargarGradosAlertas(){
     s.innerHTML='<option value="">Todos</option>'+vals.map(v=>'<option value="'+escaparHTML(v)+'">'+escaparHTML(v)+'</option>').join("");if(vals.includes(actual))s.value=actual;
 }
 function cargarAlertasPreventivas(){
-    let lista=obtenerAlertasPreventivas(),anio=document.getElementById("altAnio")?.value||"",nivel=document.getElementById("altNivel")?.value||"",grado=document.getElementById("altGrado")?.value||"",sec=document.getElementById("altSeccion")?.value||"",riesgo=document.getElementById("altRiesgo")?.value||"",estado=document.getElementById("altEstado")?.value||"";
+    const ses=obtenerSesionActual(); let lista=obtenerAlertasPreventivas().filter(x=>!ses||ses.rol==="Director"||docenteTieneGrupo(x.nivel,x.grado,x.seccion,x.anio)),anio=document.getElementById("altAnio")?.value||"",nivel=document.getElementById("altNivel")?.value||"",grado=document.getElementById("altGrado")?.value||"",sec=document.getElementById("altSeccion")?.value||"",riesgo=document.getElementById("altRiesgo")?.value||"",estado=document.getElementById("altEstado")?.value||"";
     if(anio)lista=lista.filter(x=>String(x.anio)===String(anio));if(nivel)lista=lista.filter(x=>normalizarNivel(x.nivel)===normalizarNivel(nivel));if(grado)lista=lista.filter(x=>normalizarGrado(x.grado)===normalizarGrado(grado));if(sec)lista=lista.filter(x=>normalizarSeccion(x.seccion)===normalizarSeccion(sec));if(riesgo)lista=lista.filter(x=>x.riesgo===riesgo);if(estado)lista=lista.filter(x=>x.estado===estado);
-    const all=obtenerAlertasPreventivas();document.getElementById("altKpiAlto").textContent=all.filter(x=>x.riesgo==="Alto"&&x.estado!=="Descartada").length;document.getElementById("altKpiMedio").textContent=all.filter(x=>x.riesgo==="Medio"&&x.estado!=="Descartada").length;document.getElementById("altKpiBajo").textContent=all.filter(x=>x.riesgo==="Bajo"&&x.estado!=="Descartada").length;document.getElementById("altKpiPendientes").textContent=all.filter(x=>["Pendiente","En atención"].includes(x.estado)).length;
+    const all=obtenerAlertasPreventivas().filter(x=>!ses||ses.rol==="Director"||docenteTieneGrupo(x.nivel,x.grado,x.seccion,x.anio));document.getElementById("altKpiAlto").textContent=all.filter(x=>x.riesgo==="Alto"&&x.estado!=="Descartada").length;document.getElementById("altKpiMedio").textContent=all.filter(x=>x.riesgo==="Medio"&&x.estado!=="Descartada").length;document.getElementById("altKpiBajo").textContent=all.filter(x=>x.riesgo==="Bajo"&&x.estado!=="Descartada").length;document.getElementById("altKpiPendientes").textContent=all.filter(x=>["Pendiente","En atención"].includes(x.estado)).length;
     const tbody=document.getElementById("tablaAlertasPreventivas");if(!tbody)return;
     lista.sort((a,b)=>({Alto:0,Medio:1,Bajo:2}[a.riesgo]-({Alto:0,Medio:1,Bajo:2}[b.riesgo])));tbody.innerHTML=lista.length?lista.map(x=>{const cls=x.riesgo==="Alto"?"riesgo-alto":x.riesgo==="Medio"?"riesgo-medio":"riesgo-bajo";return "<tr><td><strong>"+escaparHTML(x.estudianteNombre)+"</strong></td><td>"+escaparHTML((x.grado||"")+" "+(x.seccion||""))+"</td><td><span class='riesgo-badge "+cls+"'>"+escaparHTML(x.riesgo)+"</span></td><td>"+escaparHTML(x.motivo)+"</td><td><select onchange='cambiarEstadoAlerta(&quot;"+escaparHTML(x.id)+"&quot;,this.value)'><option "+(x.estado==="Pendiente"?"selected":"")+">Pendiente</option><option "+(x.estado==="En atención"?"selected":"")+">En atención</option><option "+(x.estado==="Atendida"?"selected":"")+">Atendida</option><option "+(x.estado==="Descartada"?"selected":"")+">Descartada</option></select></td><td>"+escaparHTML(x.ultimaIntervencion||"—")+"</td><td>"+escaparHTML(x.proximaAccion||"—")+"</td><td><div class='alerta-acciones'><button onclick='verPerfilAlerta(&quot;"+escaparHTML(x.id)+"&quot;)'>👁️</button><button onclick='accionAlertaSeguimiento(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>🧠</button><button onclick='accionAlertaExpediente(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>📁</button><button onclick='imprimirAlertaEstudiante(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>🖨️</button></div></td></tr>"}).join(""):"<tr><td colspan='8'>No hay alertas con los filtros seleccionados.</td></tr>";
 }
