@@ -5845,7 +5845,7 @@ function cargarTodo(){
     cargarSeguimientos();
     generarAlertasPreventivas(false);
     cargarBitacora();
-    if(document.getElementById("consolidacionV11")) cargarConsolidacionV11();
+    if(document.getElementById("consolidacionV11") && esDirectorActual()) cargarConsolidacionV11();
     cargarConsolidacionEvaluacion();
     cargarEstudiantesMejora();
     cargarPlanesMejora();
