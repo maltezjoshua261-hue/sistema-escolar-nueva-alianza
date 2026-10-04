@@ -3408,7 +3408,9 @@ function guardarAsignacion(){
     }
     const registro={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
     const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
-    guardarDatos(KEY_ASIGNACIONES,datos);limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
+    guardarDatos(KEY_ASIGNACIONES,datos);
+    registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
+    limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
     alert(id?"Asignación actualizada correctamente.":"Carga académica guardada correctamente.");
 }
 
@@ -3431,7 +3433,9 @@ function editarAsignacion(id){
 
 function eliminarAsignacion(id){
     if(!confirm("¿Desea eliminar esta asignación académica?"))return;
+    const registro=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id));
     guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.id)!==String(id)));
+    registrarAuditoria("Eliminar","Carga académica","Eliminación de carga académica",registro?.id||id,{anio:registro?.anio||"2026"});
     cargarAsignaciones();cargarDocenteCalificacion();cargarDocenteAsistencia();
 }
 
@@ -3610,6 +3614,7 @@ function guardarAsistencia(){
     const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
+    registrarAuditoria(existe?"Editar":"Crear","Asistencia",existe?"Actualización de asistencia":"Registro de asistencia",registro.id,{anio:anioAs});
     alert(existe?"Asistencia actualizada.":"Asistencia guardada correctamente.");
     cargarAsistencias(); actualizarEstadisticas();
 }
@@ -3647,6 +3652,7 @@ function registrarAsistenciaGrupo(){
         if(existe){datos[datos.indexOf(existe)]=registro;actualizados++;}else{datos.push(registro);nuevos++;}
     });
     guardarDatos(KEY_ASISTENCIAS,datos);
+    registrarAuditoria("Crear","Asistencia","Registro grupal: "+nuevos+" nuevos y "+actualizados+" actualizados",fecha+" "+nivel+" "+grado+" "+seccion,{anio:fecha.slice(0,4)});
     cargarAsistencias(); actualizarEstadisticas();
     alert("Grupo procesado. Nuevos: "+nuevos+" | Actualizados: "+actualizados);
 }
@@ -4007,6 +4013,7 @@ function guardarCalificacion(){
     }
 
     guardarDatos(KEY_CALIFICACIONES,datos);
+    registrarAuditoria(calId?"Editar":"Crear","Calificaciones",calId?"Actualización de calificación":"Nueva calificación",registro.id,{anio:anio});
     cargarCalificaciones();
     actualizarEstadisticas();
 
@@ -4175,6 +4182,7 @@ function eliminarCalificacion(id){
         KEY_CALIFICACIONES,
         datos.filter(c=>String(c.id)!==String(id))
     );
+    registrarAuditoria("Eliminar","Calificaciones","Eliminación de calificación",registro?.id||id,{anio:registro?.anio||"2026"});
 
     cargarCalificaciones();
     actualizarEstadisticas();
@@ -4914,7 +4922,9 @@ function guardarMatricula(){if(!exigirDirector())return;
     const registro={id:id||Date.now().toString(),estudianteId,estudiante:e.nombre||"",codigo:e.codigo||e.cedula||"",anio,nivel:document.getElementById("matNivel").value,grado:document.getElementById("matGrado").value.trim(),seccion:document.getElementById("matSeccion").value,fecha:document.getElementById("matFecha").value,responsable:document.getElementById("matResponsable").value.trim(),telefono:document.getElementById("matTelefono").value.trim(),direccion:document.getElementById("matDireccion").value.trim(),estado:document.getElementById("matEstado").value,observacion:document.getElementById("matObservacion").value.trim()};
     if(!registro.fecha){alert("Indique la fecha de matrícula.");return;}
     const pos=mats.findIndex(m=>String(m.id)===String(id));if(pos>=0)mats[pos]=registro;else mats.push(registro);
-    guardarDatos(KEY_MATRICULAS,mats);limpiarMatricula();cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();
+    guardarDatos(KEY_MATRICULAS,mats);
+    registrarAuditoria(pos>=0?"Editar":"Crear","Matrícula",pos>=0?"Actualización de matrícula":"Nueva matrícula",registro.id,{anio:anio});
+    limpiarMatricula();cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();
     alert(pos>=0?"Matrícula actualizada correctamente.":"Matrícula registrada correctamente.");
 }
 function limpiarMatricula(){
@@ -4925,7 +4935,7 @@ function editarMatricula(id){if(!exigirDirector())return;
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("matId").value=m.id;document.getElementById("matEstudiante").value=m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
 }
-function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
+function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));registrarAuditoria("Eliminar","Matrícula","Eliminación de matrícula",registro?.id||id,{anio:registro?.anio||"2026"});cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
 function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
@@ -5039,7 +5049,7 @@ function guardarPromocion(){
     const estudianteId=document.getElementById("proEstudiante")?.value,anio=document.getElementById("proAnio")?.value||"2026";if(!estudianteId){alert("Seleccione un estudiante.");return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId)),datos=obtenerDatos(KEY_PROMOCIONES),idx=datos.findIndex(x=>String(x.estudianteId)===String(estudianteId)&&String(x.anio)===String(anio));
     const r={id:idx>=0?datos[idx].id:Date.now().toString(),estudianteId,estudiante:e?.nombre||"",codigo:e?.codigo||"",anio,grado:document.getElementById("proGrado").value,resultado:document.getElementById("proResultado").value,gradoSiguiente:document.getElementById("proGradoSiguiente").value,fecha:document.getElementById("proFecha").value||new Date().toISOString().slice(0,10),observacion:document.getElementById("proObservacion").value.trim()};
-    if(idx>=0)datos[idx]=r;else datos.push(r);guardarDatos(KEY_PROMOCIONES,datos);cargarControlPromocion();alert("Resultado escolar guardado correctamente.");
+    if(idx>=0)datos[idx]=r;else datos.push(r);guardarDatos(KEY_PROMOCIONES,datos);registrarAuditoria(idx>=0?"Editar":"Crear","Promoción",idx>=0?"Actualización de resultado escolar":"Nuevo resultado escolar",r.id,{anio:anio});cargarControlPromocion();alert("Resultado escolar guardado correctamente.");
 }
 function cargarControlPromocion(){
     const tbody=document.getElementById("tablaPromocion");if(!tbody)return;const anio=document.getElementById("proAnio")?.value||"2026",datos=obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.anio)===String(anio)),res={Promovido:0,Reprobado:0,Pendiente:0,Trasladado:0,Retirado:0};
@@ -5050,7 +5060,7 @@ function cargarControlPromocion(){
     document.getElementById("proPie").textContent="Generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Registro administrativo referencial.";
 }
 function editarPromocion(id){const p=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(!p)return;document.getElementById("proAnio").value=p.anio||"2026";cargarEstudiantesPromocion();document.getElementById("proEstudiante").value=p.estudianteId||"";document.getElementById("proResultado").value=p.resultado||"Promovido";document.getElementById("proGrado").value=p.grado||"";document.getElementById("proGradoSiguiente").value=p.gradoSiguiente||"";document.getElementById("proFecha").value=p.fecha||"";document.getElementById("proObservacion").value=p.observacion||"";}
-function eliminarPromocion(id){const registro=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar este resultado escolar?"))return;guardarDatos(KEY_PROMOCIONES,obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.id)!==String(id)));cargarControlPromocion();}
+function eliminarPromocion(id){const registro=obtenerDatos(KEY_PROMOCIONES).find(x=>String(x.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar este resultado escolar?"))return;guardarDatos(KEY_PROMOCIONES,obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.id)!==String(id)));registrarAuditoria("Eliminar","Promoción","Eliminación de resultado escolar",registro?.id||id,{anio:registro?.anio||"2026"});cargarControlPromocion();}
 function imprimirControlPromocion(){cargarControlPromocion();document.body.setAttribute("data-imprimiendo","promocion");window.print();document.body.removeAttribute("data-imprimiendo");}
 
 /* =========================================================
@@ -5287,7 +5297,9 @@ function guardarObservacionExpediente(){
     const datos=obtenerDatos(KEY_EXPEDIENTES),id=document.getElementById("expObsId").value;
     const r={id:id||Date.now().toString(),estudianteId,fecha:document.getElementById("expObsFecha").value||new Date().toISOString().slice(0,10),tipo:document.getElementById("expObsTipo").value,observacion:texto};
     const p=datos.findIndex(x=>String(x.id)===String(id));if(p>=0)datos[p]=r;else datos.push(r);
-    guardarDatos(KEY_EXPEDIENTES,datos);limpiarObservacionExpediente();generarExpediente();
+    guardarDatos(KEY_EXPEDIENTES,datos);
+    registrarAuditoria(p>=0?"Editar":"Crear","Expediente",p>=0?"Actualización de observación":"Nueva observación de expediente",r.id,{anio:String(r.fecha||"").slice(0,4)||new Date().getFullYear()});
+    limpiarObservacionExpediente();generarExpediente();
 }
 function cargarObservacionesExpediente(){
     const tbody=document.getElementById("tablaExpObservaciones");if(!tbody)return;
@@ -5301,7 +5313,9 @@ function editarObservacionExpediente(id){
 }
 function eliminarObservacionExpediente(id){
     if(!confirm("¿Eliminar esta observación?"))return;
-    guardarDatos(KEY_EXPEDIENTES,obtenerDatos(KEY_EXPEDIENTES).filter(x=>String(x.id)!==String(id)));cargarObservacionesExpediente();
+    guardarDatos(KEY_EXPEDIENTES,obtenerDatos(KEY_EXPEDIENTES).filter(x=>String(x.id)!==String(id)));
+    registrarAuditoria("Eliminar","Expediente","Eliminación de observación de expediente",id);
+    cargarObservacionesExpediente();
 }
 function limpiarObservacionExpediente(){
     document.getElementById("expObsId").value="";document.getElementById("expObsFecha").value=new Date().toISOString().slice(0,10);document.getElementById("expObsTipo").value="Académica";document.getElementById("expObsTexto").value="";
