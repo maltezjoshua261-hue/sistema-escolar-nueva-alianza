@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.3</title>
+<title>Sistema Escolar Nueva Alianza - v8.4</title>
 
 <style>
 *{
@@ -455,6 +455,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
  body[data-imprimiendo="estadisticas"] #estadisticasDocumento,body[data-imprimiendo="estadisticas"] #estadisticasDocumento *{visibility:visible !important}
  body[data-imprimiendo="estadisticas"] #estadisticasDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none}
 }
+.control-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:24px;border-radius:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;gap:15px}.control-header h1{font-size:28px;margin-bottom:6px}.control-header p{opacity:.9}.control-fecha{font-size:13px;text-align:right}.control-stats{grid-template-columns:repeat(6,1fr);margin-bottom:20px}.control-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}.alertas-control{display:flex;flex-direction:column;gap:10px}.alerta-control{padding:12px;border-radius:9px;border-left:5px solid #ffc107;background:#fff8df}.alerta-control.danger{border-left-color:#dc3545;background:#fff0f1}.alerta-control.success{border-left-color:#198754;background:#eefaf3}.alerta-control.info{border-left-color:#0d6efd;background:#eef5ff}.alerta-control strong{display:block;margin-bottom:4px}.acciones-control{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.acciones-control button{width:100%}.resumen-control{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.resumen-control div{border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;background:#f9fbfd}.resumen-control strong{display:block;font-size:24px;color:#0d6efd;margin-top:4px}.control-pie{text-align:center;color:#666;font-size:12px;margin:10px 0 20px}@media(max-width:1100px){.control-stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:750px){.control-grid{grid-template-columns:1fr}.control-stats{grid-template-columns:repeat(2,1fr)}.control-header{flex-direction:column;align-items:flex-start}.control-fecha{text-align:left}.acciones-control{grid-template-columns:1fr}.resumen-control{grid-template-columns:1fr}}@media print{body[data-imprimiendo="centroControl"] *{visibility:hidden!important}body[data-imprimiendo="centroControl"] #centroControl,body[data-imprimiendo="centroControl"] #centroControl *{visibility:visible!important}body[data-imprimiendo="centroControl"] #centroControl{position:absolute;left:0;top:0;width:100%;box-shadow:none}.control-header{color:#000;background:#fff;border:2px solid #123b6d}}
 </style>
 </head>
 
@@ -495,6 +496,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             <button class="active" onclick="mostrarSeccion('inicio',this)">
                 🏠 Inicio
+            </button>
+            <button onclick="mostrarSeccion('centroControl',this)">
+                🎯 Centro de Control
             </button>
 
             <button onclick="mostrarSeccion('estudiantes',this)">
@@ -599,6 +603,72 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
                 </div>
 
+            </section>
+
+            <!-- CENTRO DE CONTROL DEL DIRECTOR 8.4 -->
+            <section id="centroControl" class="section">
+                <div class="control-header">
+                    <div>
+                        <h1>🎯 Centro de Control del Director</h1>
+                        <p>Resumen operativo del Centro Escolar Nueva Alianza</p>
+                    </div>
+                    <div class="control-fecha" id="controlFecha"></div>
+                </div>
+
+                <div class="stats control-stats">
+                    <div class="stat"><h3>👨‍🎓 Estudiantes activos</h3><strong id="ctrlActivos">0</strong></div>
+                    <div class="stat"><h3>👨‍🏫 Docentes</h3><strong id="ctrlDocentes">0</strong></div>
+                    <div class="stat"><h3>📋 Asistencia hoy</h3><strong id="ctrlAsistenciaHoy">0%</strong></div>
+                    <div class="stat"><h3>📝 Calificaciones pendientes</h3><strong id="ctrlPendientes">0</strong></div>
+                    <div class="stat"><h3>🎓 Promociones pendientes</h3><strong id="ctrlPromociones">0</strong></div>
+                    <div class="stat"><h3>⚠️ Alertas</h3><strong id="ctrlAlertas">0</strong></div>
+                </div>
+
+                <div class="control-grid">
+                    <div class="card">
+                        <h2>🚨 Alertas que requieren atención</h2>
+                        <div id="listaAlertas" class="alertas-control"></div>
+                    </div>
+                    <div class="card">
+                        <h2>⚡ Accesos rápidos</h2>
+                        <div class="acciones-control">
+                            <button class="btn-primary" onclick="abrirModuloControl('estudiantes')">👨‍🎓 Estudiantes</button>
+                            <button class="btn-success" onclick="abrirModuloControl('matricula')">🧾 Matrícula</button>
+                            <button class="btn-info" onclick="abrirModuloControl('asistencia')">📋 Asistencia</button>
+                            <button class="btn-warning" onclick="abrirModuloControl('calificaciones')">📝 Calificaciones</button>
+                            <button class="btn-primary" onclick="abrirModuloControl('reportes')">📊 Reportes</button>
+                            <button class="btn-secondary" onclick="abrirModuloControl('estadisticas')">📈 Estadísticas</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-grid">
+                    <div class="card">
+                        <h2>📌 Situación académica</h2>
+                        <div id="resumenAcademicoControl" class="resumen-control"></div>
+                    </div>
+                    <div class="card">
+                        <h2>📅 Asistencia del día</h2>
+                        <div id="resumenAsistenciaControl" class="resumen-control"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Resumen por nivel</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Nivel</th><th>Estudiantes</th><th>Hombres</th><th>Mujeres</th><th>Activos</th><th>Retirados</th><th>Trasladados</th></tr></thead>
+                            <tbody id="tablaControlNiveles"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="actions no-print">
+                    <button class="btn-primary" onclick="cargarCentroControl()">🔄 Actualizar panel</button>
+                    <button class="btn-secondary" onclick="imprimirCentroControl()">🖨️ Imprimir panel</button>
+                </div>
+
+                <div class="control-pie" id="controlPie">Panel administrativo de referencia.</div>
             </section>
 
             <!-- ESTUDIANTES -->
@@ -4322,6 +4392,74 @@ function cargarEstadisticas(){
     if(el("estadisticasPie"))el("estadisticasPie").textContent="Informe generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Herramienta estadística administrativa de referencia.";
 }
 function imprimirEstadisticas(){cargarEstadisticas();document.body.setAttribute("data-imprimiendo","estadisticas");window.print();document.body.removeAttribute("data-imprimiendo");}
+/* =========================================================
+   CENTRO DE CONTROL DEL DIRECTOR 8.4
+========================================================= */
+function abrirModuloControl(id){
+    const boton=[...document.querySelectorAll(".menu button")].find(b=>String(b.getAttribute("onclick")||"").includes("mostrarSeccion('"+id+"'"));
+    mostrarSeccion(id,boton||null);
+}
+function cargarCentroControl(){
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const docentes=obtenerDatos(KEY_DOCENTES);
+    const asistencias=obtenerDatos(KEY_ASISTENCIAS);
+    const calificaciones=obtenerDatos(KEY_CALIFICACIONES);
+    const promociones=obtenerDatos(KEY_PROMOCIONES);
+    const hoy=new Date().toISOString().slice(0,10);
+    const activos=estudiantes.filter(e=>limpiarTexto(e.estado||"activo")==="activo");
+    const retirados=estudiantes.filter(e=>limpiarTexto(e.estado||"")==="retirado");
+    const trasladados=estudiantes.filter(e=>limpiarTexto(e.estado||"")==="trasladado");
+
+    const asHoy=asistencias.filter(a=>String(a.fecha||"")===hoy);
+    const presentesHoy=asHoy.filter(a=>limpiarTexto(a.estado||"").includes("presente")).length;
+    const tardanzasHoy=asHoy.filter(a=>limpiarTexto(a.estado||"").includes("tardanza")).length;
+    const tasaHoy=asHoy.length?((presentesHoy+tardanzasHoy)/asHoy.length*100).toFixed(1):"0.0";
+
+    const pendientesProm=promociones.filter(p=>limpiarTexto(p.resultado||"")==="pendiente").length;
+    const alertas=[];
+    const hoyConRegistro=new Set(asHoy.map(a=>String(a.estudianteId)));
+    const sinAsistencia=activos.filter(e=>!hoyConRegistro.has(String(e.id))).length;
+    if(!asHoy.length)alertas.push({tipo:"info",titulo:"Sin asistencia registrada hoy",texto:"Todavía no existen registros de asistencia para la fecha "+hoy+"."});
+    else if(sinAsistencia>0)alertas.push({tipo:"danger",titulo:"Estudiantes sin registro de asistencia",texto:sinAsistencia+" estudiante(s) activo(s) no tienen registro de asistencia hoy."});
+    if(pendientesProm>0)alertas.push({tipo:"warning",titulo:"Promociones pendientes",texto:pendientesProm+" estudiante(s) tienen resultado de promoción pendiente."});
+
+    const corteActual=["I Corte","II Corte","III Corte","IV Corte"][Math.min(3,Math.floor(new Date().getMonth()/3))];
+    const estudiantesConNotas=new Set(calificaciones.filter(x=>String(x.anio||"2026")==="2026"&&String(x.corte||"")===corteActual).map(x=>String(x.estudianteId)));
+    const sinNotas=activos.filter(e=>!estudiantesConNotas.has(String(e.id))).length;
+    if(sinNotas>0)alertas.push({tipo:"warning",titulo:"Calificaciones pendientes",texto:sinNotas+" estudiante(s) activo(s) no tienen calificaciones registradas en "+corteActual+"."});
+    const bajaAsistencia=activos.filter(e=>{
+        const ra=asistencias.filter(a=>String(a.estudianteId)===String(e.id));
+        if(ra.length<5)return false;
+        const p=ra.filter(a=>{const z=limpiarTexto(a.estado||"");return z.includes("presente")||z.includes("tardanza")}).length;
+        return p/ra.length<0.8;
+    });
+    if(bajaAsistencia.length)alertas.push({tipo:"danger",titulo:"Baja asistencia detectada",texto:bajaAsistencia.length+" estudiante(s) presentan menos del 80% de asistencia registrada."});
+    if(!alertas.length)alertas.push({tipo:"success",titulo:"Sin alertas críticas",texto:"No se detectaron situaciones que requieran atención inmediata con los datos disponibles."});
+
+    const el=id=>document.getElementById(id);
+    [["ctrlActivos",activos.length],["ctrlDocentes",docentes.length],["ctrlAsistenciaHoy",tasaHoy+"%"],["ctrlPendientes",sinNotas],["ctrlPromociones",pendientesProm],["ctrlAlertas",alertas.filter(a=>a.tipo!=="success").length]].forEach(([id,v])=>{if(el(id))el(id).textContent=v;});
+    if(el("controlFecha"))el("controlFecha").textContent=new Date().toLocaleDateString("es-NI",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    if(el("listaAlertas"))el("listaAlertas").innerHTML=alertas.map(a=>'<div class="alerta-control '+(a.tipo==="danger"?"danger":a.tipo==="success"?"success":"")+'"><strong>'+escaparHTML(a.titulo)+'</strong><span>'+escaparHTML(a.texto)+'</span></div>').join("");
+
+    const resAcad=el("resumenAcademicoControl");
+    if(resAcad)resAcad.innerHTML='<div>Con calificaciones<strong>'+estudiantesConNotas.size+'</strong></div><div>Sin calificaciones<strong>'+sinNotas+'</strong></div><div>Promociones pendientes<strong>'+pendientesProm+'</strong></div><div>Retirados/trasladados<strong>'+(retirados.length+trasladados.length)+'</strong></div>';
+    const resAs=el("resumenAsistenciaControl");
+    const ausHoy=asHoy.filter(a=>limpiarTexto(a.estado||"").includes("ausente")).length,justHoy=asHoy.filter(a=>limpiarTexto(a.estado||"").includes("justificada")).length;
+    if(resAs)resAs.innerHTML='<div>Presentes<strong>'+presentesHoy+'</strong></div><div>Tardanzas<strong>'+tardanzasHoy+'</strong></div><div>Ausentes<strong>'+ausHoy+'</strong></div><div>Justificadas<strong>'+justHoy+'</strong></div>';
+
+    const grupos={};
+    estudiantes.forEach(e=>{const n=e.nivel||"Sin nivel";if(!grupos[n])grupos[n]={total:0,h:0,f:0,a:0,r:0,t:0};const g=grupos[n];g.total++;if(limpiarTexto(e.sexo||"")==="masculino")g.h++;if(limpiarTexto(e.sexo||"")==="femenino")g.f++;const s=limpiarTexto(e.estado||"activo");if(s==="activo")g.a++;if(s==="retirado")g.r++;if(s==="trasladado")g.t++;});
+    const tbody=el("tablaControlNiveles"),orden=["Inicial","Primaria","Secundaria"];
+    const filas=Object.entries(grupos).sort((a,b)=>(orden.indexOf(a[0])<0?99:orden.indexOf(a[0]))-(orden.indexOf(b[0])<0?99:orden.indexOf(b[0])));
+    if(tbody)tbody.innerHTML=filas.length?filas.map(([n,g])=>'<tr><td>'+escaparHTML(n)+'</td><td>'+g.total+'</td><td>'+g.h+'</td><td>'+g.f+'</td><td>'+g.a+'</td><td>'+g.r+'</td><td>'+g.t+'</td></tr>').join(""):'<tr><td colspan="7" style="text-align:center;color:#777;">No hay estudiantes registrados.</td></tr>';
+    if(el("controlPie"))el("controlPie").textContent="Panel actualizado el "+new Date().toLocaleString("es-NI")+". Los indicadores son de uso administrativo y dependen de los registros ingresados.";
+}
+function imprimirCentroControl(){
+    cargarCentroControl();
+    document.body.setAttribute("data-imprimiendo","centroControl");
+    window.print();
+    document.body.removeAttribute("data-imprimiendo");
+}
 </script>
 
 </body>
