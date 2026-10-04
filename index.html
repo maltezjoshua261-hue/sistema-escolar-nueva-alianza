@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.2</title>
+<title>Sistema Escolar Nueva Alianza - v10.3</title>
 
 <style>
 *{
@@ -524,6 +524,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
 /* v10.0 Evaluación académica avanzada */
 .eval10-header{background:linear-gradient(135deg,#123b6d,#6f42c1);color:#fff;padding:22px;border-radius:16px;margin-bottom:18px}.eval10-header h2{color:#fff;margin-bottom:6px}.eval10-header p{opacity:.92}.eval10-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.eval10-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:15px;text-align:center}.eval10-kpi strong{display:block;font-size:26px;color:#123b6d}.eval10-kpi span{font-size:12px;color:#6b7280}.eval10-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.eval10-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.eval10-form .full{grid-column:1/-1}.eval10-result{padding:12px;border-radius:10px;border-left:5px solid #6f42c1;background:#f7f3ff}.eval10-ok{border-left-color:#198754;background:#f1fbf5}.eval10-warn{border-left-color:#ffc107;background:#fffaf0}.eval10-danger{border-left-color:#dc3545;background:#fff5f5}.eval10-table{font-size:12px}.eval10-table th{background:#123b6d;color:#fff}.eval10-filtros{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end}.eval10-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-weight:bold;font-size:11px}.eval10-badge.verde{background:#d1e7dd;color:#0f5132}.eval10-badge.amarillo{background:#fff3cd;color:#664d03}.eval10-badge.rojo{background:#f8d7da;color:#842029}.eval10-badge.azul{background:#cff4fc;color:#055160}.eval10-print-head{display:none}@media(max-width:1000px){.eval10-kpis{grid-template-columns:repeat(3,1fr)}.eval10-grid{grid-template-columns:1fr}.eval10-filtros{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.eval10-kpis,.eval10-form,.eval10-filtros{grid-template-columns:1fr}.eval10-form .full{grid-column:auto}}@media print{body[data-imprimiendo="evaluacionAcademica"] *{visibility:hidden!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica,body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica *{visibility:visible!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="evaluacionAcademica"] .no-print{display:none!important}.eval10-print-head{display:block;text-align:center;margin-bottom:15px}}
+body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!important}body[data-imprimiendo="planesMejora"] #planesMejora{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="planesMejora"] .no-print{display:none!important}
 </style>
 </head>
 
@@ -636,6 +637,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('perfilAcademico',this)">
                 🧑‍🎓 Perfil académico
+            </button>
+
+            <button onclick="mostrarSeccion('planesMejora',this)">
+                🛠️ Plan de mejora académica
             </button>
 
             <button onclick="mostrarSeccion('consolidacionEvaluacion',this)">
@@ -2118,6 +2123,63 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 <div id="perfilAcademicoContenido"><div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div></div>
             </section>
 
+            <!-- V10.3 PLAN DE MEJORA ACADÉMICA -->
+            <section id="planesMejora" class="section">
+                <div class="card">
+                    <h2>🛠️ Plan de mejora académica</h2>
+                    <p>Organiza acciones de apoyo, recuperación y seguimiento para estudiantes que requieren acompañamiento. Herramienta administrativa/referencial.</p>
+                </div>
+                <div class="stats no-print">
+                    <div class="stat"><h3>Planes filtrados</h3><strong id="mejoraTotal">0</strong></div>
+                    <div class="stat"><h3>Abiertos</h3><strong id="mejoraAbiertos">0</strong></div>
+                    <div class="stat"><h3>En seguimiento</h3><strong id="mejoraSeguimiento">0</strong></div>
+                    <div class="stat"><h3>Atendidos</h3><strong id="mejoraAtendidos">0</strong></div>
+                    <div class="stat"><h3>Prioridad alta/urgente</h3><strong id="mejoraPrioridad">0</strong></div>
+                </div>
+                <div class="card no-print">
+                    <h3>📝 Registrar acción de mejora</h3>
+                    <input type="hidden" id="mejoraId">
+                    <div class="form-grid">
+                        <div><label>Año</label><select id="mejoraAnio" onchange="cargarEstudiantesMejora()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div><label>Estudiante</label><select id="mejoraEstudiante" onchange="cargarDatosMejoraEstudiante()"></select></div>
+                        <div><label>Nivel</label><input id="mejoraNivel" readonly></div>
+                        <div><label>Grado</label><input id="mejoraGrado" readonly></div>
+                        <div><label>Sección</label><input id="mejoraSeccion" readonly></div>
+                        <div><label>Asignatura / área</label><input id="mejoraAsignatura" placeholder="Ej. Matemática"></div>
+                        <div><label>Origen</label><select id="mejoraOrigen"><option>Evaluación académica</option><option>Alerta preventiva</option><option>Seguimiento pedagógico</option><option>Rendimiento académico</option><option>Solicitud familiar</option><option>Otra</option></select></div>
+                        <div><label>Prioridad</label><select id="mejoraPrioridadSel"><option>Normal</option><option>Preventiva</option><option>Atención</option><option>Urgente</option></select></div>
+                        <div><label>Fecha de inicio</label><input type="date" id="mejoraInicio"></div>
+                        <div><label>Fecha de revisión</label><input type="date" id="mejoraRevision"></div>
+                        <div><label>Responsable</label><input id="mejoraResponsable" placeholder="Docente, director u otro responsable"></div>
+                        <div><label>Estado</label><select id="mejoraEstado"><option>Abierto</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+                    </div>
+                    <div class="form-grid">
+                        <div><label>Necesidad identificada</label><textarea id="mejoraNecesidad" rows="3" placeholder="¿Qué dificultad o necesidad se atenderá?"></textarea></div>
+                        <div><label>Objetivo de mejora</label><textarea id="mejoraObjetivo" rows="3" placeholder="¿Qué se espera lograr?"></textarea></div>
+                        <div><label>Acciones / estrategias</label><textarea id="mejoraAcciones" rows="4" placeholder="Describa las actividades de apoyo, recuperación o reforzamiento."></textarea></div>
+                        <div><label>Evidencia esperada</label><textarea id="mejoraEvidencia" rows="3" placeholder="Producto, desempeño, actividad o evidencia."></textarea></div>
+                        <div><label>Resultado / progreso</label><textarea id="mejoraProgreso" rows="3" placeholder="Describa avances y resultados observados."></textarea></div>
+                        <div><label>Observación</label><textarea id="mejoraObservacion" rows="3"></textarea></div>
+                    </div>
+                    <button class="btn-primary" onclick="guardarPlanMejora()">💾 Guardar plan</button>
+                    <button class="btn-secondary" onclick="limpiarPlanMejora()">🧹 Limpiar</button>
+                </div>
+                <div class="card no-print">
+                    <h3>🔎 Filtros</h3>
+                    <div class="form-grid">
+                        <div><label>Año</label><select id="filtroMejoraAnio" onchange="cargarPlanesMejora()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div><label>Estado</label><select id="filtroMejoraEstado" onchange="cargarPlanesMejora()"><option value="">Todos</option><option>Abierto</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+                        <div><label>Prioridad</label><select id="filtroMejoraPrioridad" onchange="cargarPlanesMejora()"><option value="">Todas</option><option>Normal</option><option>Preventiva</option><option>Atención</option><option>Urgente</option></select></div>
+                        <div><label>Buscar</label><input id="filtroMejoraBuscar" oninput="cargarPlanesMejora()" placeholder="Estudiante, asignatura o necesidad"></div>
+                        <div><button onclick="imprimirPlanesMejora()">🖨️ Imprimir</button></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="eval10-print-head"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br>Plan de mejora académica</div>
+                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Estudiante</th><th>Grado</th><th>Asignatura</th><th>Prioridad</th><th>Inicio</th><th>Revisión</th><th>Estado</th><th>Progreso</th><th class="no-print">Acciones</th></tr></thead><tbody id="tablaPlanesMejora"></tbody></table></div>
+                </div>
+            </section>
+
             <section id="historialAcademico" class="section">
                 <div class="card no-print">
                     <h2>📚 Historial académico anual del estudiante</h2>
@@ -2818,6 +2880,7 @@ const KEY_AUDITORIA = "auditoriaNuevaAlianza";
 const KEY_PADRES_TUTORES = "padresTutoresNuevaAlianza";
 const KEY_EVALUACIONES = "evaluacionesAcademicasNuevaAlianza";
 const KEY_COMUNICACIONES = "comunicacionesFamiliaNuevaAlianza";
+const KEY_PLANES_MEJORA = "planesMejoraAcademicaNuevaAlianza";
 
 
 /* =========================================================
@@ -3523,6 +3586,56 @@ function imprimirComunicacionesFamilia(){
 function cargarComunicacionesFamiliaInicio(){cargarEstudiantesComunicacion();limpiarComunicacionFamilia();cargarComunicacionesFamilia();}
 
 
+
+/* =========================================================
+   V10.3 PLAN DE MEJORA ACADÉMICA
+========================================================= */
+function cargarEstudiantesMejora(){
+    const sel=document.getElementById("mejoraEstudiante");if(!sel)return;
+    const anio=document.getElementById("mejoraAnio")?.value||new Date().getFullYear(),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo"&&estudianteVisibleParaRol(e,anio));
+    sel.innerHTML='<option value="">Seleccione un estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre)+' — '+escaparHTML(e.grado||"")+' '+escaparHTML(e.seccion||"")+'</option>').join("");
+    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    sel.innerHTML='<option value="">Seleccione un estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre)+' — '+escaparHTML(e.grado||"")+' '+escaparHTML(e.seccion||"")+'</option>').join("");
+}
+function cargarDatosMejoraEstudiante(){
+    const id=document.getElementById("mejoraEstudiante")?.value,e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    document.getElementById("mejoraNivel").value=e.nivel||"";document.getElementById("mejoraGrado").value=e.grado||"";document.getElementById("mejoraSeccion").value=e.seccion||"";
+}
+function limpiarPlanMejora(){
+    ["mejoraId","mejoraAsignatura","mejoraResponsable","mejoraNecesidad","mejoraObjetivo","mejoraAcciones","mejoraEvidencia","mejoraProgreso","mejoraObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const hoy=new Date().toISOString().slice(0,10);document.getElementById("mejoraInicio").value=hoy;document.getElementById("mejoraRevision").value=hoy;document.getElementById("mejoraEstado").value="Abierto";document.getElementById("mejoraPrioridadSel").value="Normal";document.getElementById("mejoraOrigen").value="Evaluación académica";document.getElementById("mejoraEstudiante").value="";document.getElementById("mejoraNivel").value="";document.getElementById("mejoraGrado").value="";document.getElementById("mejoraSeccion").value="";
+}
+function guardarPlanMejora(){
+    const ses=obtenerSesionActual();if(!ses){alert("Debe iniciar sesión.");return;}
+    const anio=document.getElementById("mejoraAnio").value;if(cierreAnualEstaCerrado(anio)){alert("El año escolar está cerrado.");return;}
+    const estudianteId=document.getElementById("mejoraEstudiante").value,e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("Seleccione un estudiante.");return;}
+    if(!estudianteVisibleParaRol(e,anio)){alert("Este estudiante no pertenece a un grupo asignado a su usuario.");return;}
+    if(ses.rol==="Docente"&&!docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio)){alert("No tiene asignado este grupo.");return;}
+    const id=document.getElementById("mejoraId").value,datos=obtenerDatos(KEY_PLANES_MEJORA),idx=datos.findIndex(x=>String(x.id)===String(id));
+    if(idx>=0&&ses.rol==="Docente"&&String(datos[idx].docenteId||"")!==String(ses.docenteId||"")){alert("No puede modificar un plan creado por otro docente.");return;}
+    const obj={id:id||"MEJ-"+Date.now(),anio:String(anio),estudianteId:String(e.id),estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,asignatura:document.getElementById("mejoraAsignatura").value.trim(),origen:document.getElementById("mejoraOrigen").value,prioridad:document.getElementById("mejoraPrioridadSel").value,fechaInicio:document.getElementById("mejoraInicio").value,fechaRevision:document.getElementById("mejoraRevision").value,responsable:document.getElementById("mejoraResponsable").value.trim(),estado:document.getElementById("mejoraEstado").value,necesidad:document.getElementById("mejoraNecesidad").value.trim(),objetivo:document.getElementById("mejoraObjetivo").value.trim(),acciones:document.getElementById("mejoraAcciones").value.trim(),evidencia:document.getElementById("mejoraEvidencia").value.trim(),progreso:document.getElementById("mejoraProgreso").value.trim(),observacion:document.getElementById("mejoraObservacion").value.trim(),docenteId:ses.rol==="Docente"?String(ses.docenteId||""):(idx>=0?String(datos[idx].docenteId||""):""),usuario:ses.usuario||"Sistema",fechaRegistro:new Date().toISOString()};
+    if(!obj.asignatura){alert("Ingrese la asignatura o área.");return;}if(!obj.necesidad){alert("Describa la necesidad identificada.");return;}if(!obj.objetivo){alert("Ingrese el objetivo de mejora.");return;}if(!obj.acciones){alert("Ingrese las acciones o estrategias.");return;}
+    if(idx>=0)datos[idx]=obj;else datos.unshift(obj);guardarDatos(KEY_PLANES_MEJORA,datos);registrarAuditoria(idx>=0?"Editar":"Crear","Plan de mejora académica",(idx>=0?"Actualización":"Nuevo")+" plan para "+e.nombre,obj.id,{anio});alert(idx>=0?"Plan actualizado correctamente.":"Plan de mejora registrado correctamente.");limpiarPlanMejora();cargarPlanesMejora();
+}
+function cargarPlanesMejora(){
+    const tbody=document.getElementById("tablaPlanesMejora");if(!tbody)return;const anio=document.getElementById("filtroMejoraAnio")?.value||"",estado=document.getElementById("filtroMejoraEstado")?.value||"",prioridad=document.getElementById("filtroMejoraPrioridad")?.value||"",q=limpiarTexto(document.getElementById("filtroMejoraBuscar")?.value||""),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_PLANES_MEJORA).filter(x=>(!anio||String(x.anio)===String(anio))&&(!estado||x.estado===estado)&&(!prioridad||x.prioridad===prioridad)&&(!q||limpiarTexto([x.estudiante,x.asignatura,x.necesidad,x.objetivo].join(" ")).includes(q)));
+    if(ses?.rol==="Docente")lista=lista.filter(x=>String(x.docenteId||"")===String(ses.docenteId||"")&&docenteTieneGrupo(x.nivel,x.grado,x.seccion,x.anio));
+    tbody.innerHTML=lista.length?lista.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+escaparHTML(x.anio)+'</td><td>'+escaparHTML(x.estudiante)+'</td><td>'+escaparHTML((x.grado||"")+" "+(x.seccion||""))+'</td><td>'+escaparHTML(x.asignatura)+'</td><td>'+escaparHTML(x.prioridad)+'</td><td>'+escaparHTML(x.fechaInicio||"")+'</td><td>'+escaparHTML(x.fechaRevision||"")+'</td><td>'+escaparHTML(x.estado)+'</td><td>'+escaparHTML(x.progreso||"Sin actualización")+'</td><td class="no-print"><button onclick="editarPlanMejora(\''+String(x.id).replace(/'/g,"\\'")+'\')">✏️</button> <button class="btn-danger" onclick="eliminarPlanMejora(\''+String(x.id).replace(/'/g,"\\'")+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="11" style="text-align:center;padding:20px">No hay planes de mejora registrados.</td></tr>';
+    const total=lista.length,ab=lista.filter(x=>x.estado==="Abierto").length,seg=lista.filter(x=>x.estado==="En seguimiento").length,ate=lista.filter(x=>x.estado==="Atendido"||x.estado==="Cerrado").length,pri=lista.filter(x=>x.prioridad==="Atención"||x.prioridad==="Urgente").length;
+    [["mejoraTotal",total],["mejoraAbiertos",ab],["mejoraSeguimiento",seg],["mejoraAtendidos",ate],["mejoraPrioridad",pri]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+}
+function editarPlanMejora(id){
+    const x=obtenerDatos(KEY_PLANES_MEJORA).find(a=>String(a.id)===String(id));if(!x)return;const ses=obtenerSesionActual();if(ses?.rol==="Docente"&&String(x.docenteId||"")!==String(ses.docenteId||"")){alert("No puede editar este plan.");return;}if(cierreAnualEstaCerrado(x.anio)){alert("El año escolar está cerrado.");return;}
+    document.getElementById("mejoraId").value=x.id;document.getElementById("mejoraAnio").value=x.anio;cargarEstudiantesMejora();document.getElementById("mejoraEstudiante").value=x.estudianteId;cargarDatosMejoraEstudiante();["Asignatura","Origen","PrioridadSel","Inicio","Revision","Responsable","Estado","Necesidad","Objetivo","Acciones","Evidencia","Progreso","Observacion"].forEach(k=>{const e=document.getElementById("mejora"+k);if(e)e.value=x[k.charAt(0).toLowerCase()+k.slice(1)]??"";});window.scrollTo({top:0,behavior:"smooth"});
+}
+function eliminarPlanMejora(id){
+    const ses=obtenerSesionActual(),datos=obtenerDatos(KEY_PLANES_MEJORA),idx=datos.findIndex(x=>String(x.id)===String(id));if(idx<0)return;const x=datos[idx];if(cierreAnualEstaCerrado(x.anio)){alert("El año escolar está cerrado.");return;}if(ses?.rol!=="Director"&&String(x.docenteId||"")!==String(ses?.docenteId||"")){alert("No puede eliminar este plan.");return;}if(!confirm("¿Eliminar este plan de mejora?"))return;datos.splice(idx,1);guardarDatos(KEY_PLANES_MEJORA,datos);registrarAuditoria("Eliminar","Plan de mejora académica","Eliminación de plan de "+x.estudiante,x.id,{anio:x.anio});cargarPlanesMejora();
+}
+function imprimirPlanesMejora(){document.body.setAttribute("data-imprimiendo","planesMejora");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
+
+
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
@@ -3546,6 +3659,11 @@ function mostrarSeccion(id, boton){
 
     if(boton){
         boton.classList.add("active");
+    }
+
+    if(id === "planesMejora"){
+        cargarEstudiantesMejora();
+        cargarPlanesMejora();
     }
 
     if(id === "perfilAcademico"){
@@ -5052,6 +5170,7 @@ function construirRespaldo(){
         auditoria: obtenerDatos(KEY_AUDITORIA),
         padresTutores: obtenerDatos(KEY_PADRES_TUTORES),
         evaluacionesAcademicas: obtenerDatos(KEY_EVALUACIONES),
+        planesMejoraAcademica: obtenerDatos(KEY_PLANES_MEJORA),
         comunicacionesFamilia: obtenerDatos(KEY_COMUNICACIONES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
@@ -5154,6 +5273,7 @@ function importarRespaldo(event){
                 KEY_EVALUACIONES,
                 Array.isArray(respaldo.evaluacionesAcademicas) ? respaldo.evaluacionesAcademicas : []
             );
+            guardarDatos(KEY_PLANES_MEJORA,Array.isArray(respaldo.planesMejoraAcademica)?respaldo.planesMejoraAcademica:[]);
 
             guardarDatos(
                 KEY_MATRICULAS,
@@ -5287,6 +5407,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_AUDITORIA);
     localStorage.removeItem(KEY_PADRES_TUTORES);
     localStorage.removeItem(KEY_EVALUACIONES);
+    localStorage.removeItem(KEY_PLANES_MEJORA);
     localStorage.removeItem(KEY_COMUNICACIONES);
     registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
@@ -5322,6 +5443,8 @@ function cargarTodo(){
     generarAlertasPreventivas(false);
     cargarBitacora();
     cargarConsolidacionEvaluacion();
+    cargarEstudiantesMejora();
+    cargarPlanesMejora();
 
     cargarAsistencias();
 
