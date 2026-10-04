@@ -5812,7 +5812,11 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_PLANES_MEJORA);
     localStorage.removeItem(KEY_COMUNICACIONES);
     localStorage.removeItem(KEY_CONVIVENCIA);
-    registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
+
+    // El borrado general deja el sistema realmente limpio:
+    // no conserva registros académicos, pedagógicos ni eventos de prueba.
+    // Se mantienen únicamente la configuración institucional y las cuentas de acceso.
+    localStorage.removeItem(KEY_AUDITORIA);
 
     cargarTodo();
 
