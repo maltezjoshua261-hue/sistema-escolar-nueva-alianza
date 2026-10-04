@@ -631,6 +631,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             <button onclick="mostrarSeccion('evaluacionAcademica',this)">
                 🎯 Evaluación académica
             </button>
+            <button onclick="mostrarSeccion('perfilAcademico',this)">
+                🧑‍🎓 Perfil académico
+            </button>
+
             <button onclick="mostrarSeccion('consolidacionEvaluacion',this)">
                 📋 Consolidación de evaluación
             </button>
@@ -2100,6 +2104,17 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </section>
 
 <!-- HISTORIAL ACADÉMICO 8.1 -->
+            <section id="perfilAcademico" class="section">
+                <div class="eval10-header"><h2>🧑‍🎓 Perfil académico individual</h2><p>Vista integrada de desempeño, evolución por cortes, fortalezas, dificultades y acciones de apoyo.</p></div>
+                <div class="card no-print"><div class="form-grid">
+                    <div><label>Año</label><select id="perfilAcadAnio" onchange="cargarPerfilAcademico()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                    <div><label>Estudiante</label><select id="perfilAcadEstudiante" onchange="cargarPerfilAcademico()"></select></div>
+                    <div><label>Asignatura</label><select id="perfilAcadAsignatura" onchange="cargarPerfilAcademico()"><option value="">Todas</option></select></div>
+                    <div><button onclick="imprimirPerfilAcademico()">🖨️ Imprimir perfil</button></div>
+                </div></div>
+                <div id="perfilAcademicoContenido"><div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div></div>
+            </section>
+
             <section id="historialAcademico" class="section">
                 <div class="card no-print">
                     <h2>📚 Historial académico anual del estudiante</h2>
@@ -3337,6 +3352,65 @@ function eliminarEvaluacion10(id){
     if(!esDirectorActual()){alert("La eliminación de evaluaciones es exclusiva del Director.");return;}const anio=document.getElementById("eval10Anio")?.value||new Date().getFullYear();if(estaCerradoAnio(anio))return;if(!confirm("¿Eliminar esta evaluación?"))return;const datos=obtenerDatos(KEY_EVALUACIONES),x=datos.find(a=>String(a.id)===String(id));guardarDatos(KEY_EVALUACIONES,datos.filter(a=>String(a.id)!==String(id)));registrarAuditoria("Eliminar","Evaluación académica","Eliminación de evaluación de "+(x?.estudiante||"estudiante"),id,{anio:x?.anio||anio});cargarEvaluacion10();}
 function imprimirEvaluacion10(){document.body.setAttribute("data-imprimiendo","evaluacionAcademica");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
 
+
+/* =========================================================
+   V10.1 PERFIL ACADÉMICO INDIVIDUAL
+========================================================= */
+function cargarEstudiantesPerfilAcademico(){
+    const sel=document.getElementById("perfilAcadEstudiante"); if(!sel)return;
+    const anio=document.getElementById("perfilAcadAnio")?.value||new Date().getFullYear(), actual=sel.value;
+    const lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo"&&estudianteVisibleParaRol(e,anio));
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+e.id+'">'+escaparHTML(e.nombre)+' — '+escaparHTML(e.grado||"")+' '+escaparHTML(e.seccion||"")+'</option>').join("");
+    if(lista.some(e=>String(e.id)===String(actual)))sel.value=actual;
+    cargarAsignaturasPerfilAcademico();
+}
+function cargarAsignaturasPerfilAcademico(){
+    const sel=document.getElementById("perfilAcadAsignatura");if(!sel)return;
+    const id=document.getElementById("perfilAcadEstudiante")?.value||"", anio=document.getElementById("perfilAcadAnio")?.value||new Date().getFullYear(), actual=sel.value;
+    const lista=[...new Set(obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.anio)===String(anio)&&String(x.estudianteId)===String(id)).map(x=>x.asignatura).filter(Boolean))].sort();
+    sel.innerHTML='<option value="">Todas</option>'+lista.map(a=>'<option>'+escaparHTML(a)+'</option>').join("");
+    if(lista.includes(actual))sel.value=actual;
+}
+function situacionPerfil10(resultado){
+    const r=String(resultado||"").trim(),n=Number(r);
+    if(r==="AA"||r==="Recuperado"||(!Number.isNaN(n)&&n>=70))return "Satisfactorio";
+    if(r==="AS"||r==="AP"||(!Number.isNaN(n)&&n>=60))return "En proceso";
+    if(r==="AF"||(!Number.isNaN(n)&&n<60))return "Requiere apoyo";
+    if(["Satisfactorio","En proceso","Requiere apoyo"].includes(r))return r;
+    return "Sin dato";
+}
+function badgePerfil10(s){
+    const cls=s==="Satisfactorio"?"badge-success":s==="En proceso"?"badge-warning":"badge-danger";
+    return '<span class="'+cls+'">'+escaparHTML(s)+'</span>';
+}
+function cargarPerfilAcademico(){
+    const cont=document.getElementById("perfilAcademicoContenido");if(!cont)return;
+    const anio=document.getElementById("perfilAcadAnio")?.value||new Date().getFullYear(),id=document.getElementById("perfilAcadEstudiante")?.value||"",asign=document.getElementById("perfilAcadAsignatura")?.value||"";
+    if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div>';return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
+    if(!e||!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    const ev=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.anio)===String(anio)&&String(x.estudianteId)===String(id)&&(!asign||x.asignatura===asign));
+    const subjects=[...new Set(ev.map(x=>x.asignatura).filter(Boolean))].sort();
+    const situ=x=>situacionPerfil10(x.resultado), counts={s:0,p:0,a:0};
+    ev.forEach(x=>{const z=situ(x);if(z==="Satisfactorio")counts.s++;else if(z==="En proceso")counts.p++;else if(z==="Requiere apoyo")counts.a++;});
+    const fortalezas=[...new Set(ev.flatMap(x=>String(x.fortalezas||"").split(/[.;\n]/).map(v=>v.trim()).filter(Boolean)))];
+    const dificultades=[...new Set(ev.flatMap(x=>String(x.dificultades||"").split(/[.;\n]/).map(v=>v.trim()).filter(Boolean)))];
+    const apoyos=[...new Set(ev.flatMap(x=>String(x.reforzamiento||x.apoyo||"").split(/[.;\n]/).map(v=>v.trim()).filter(Boolean)))];
+    const rows=subjects.map(a=>{
+        const cells=["I Corte","II Corte","III Corte","IV Corte"].map(c=>{const rr=ev.filter(x=>x.asignatura===a&&x.corte===c);return '<td>'+ (rr.length?rr.map(x=>escaparHTML(String(x.resultado))).join("<br>"):"—") +'</td>';}).join("");
+        return '<tr><td>'+escaparHTML(a)+'</td>'+cells+'</tr>';
+    }).join("");
+    const detail=ev.map(x=>'<tr><td>'+escaparHTML(x.fecha||"")+'</td><td>'+escaparHTML(x.asignatura||"")+'</td><td>'+escaparHTML(x.corte||"")+'</td><td>'+badgePerfil10(situ(x))+'<br>'+escaparHTML(x.resultado||"")+'</td><td>'+escaparHTML(x.competencia||x.indicador||"")+'</td><td>'+escaparHTML(x.dificultades||"")+'</td></tr>').join("");
+    cont.innerHTML='<div class="card"><div class="print-header"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br>Perfil académico individual — '+escaparHTML(anio)+'</div>'+
+      '<div class="stats"><div class="stat"><h3>Estudiante</h3><strong style="font-size:18px">'+escaparHTML(e.nombre)+'</strong></div><div class="stat"><h3>Grupo</h3><strong style="font-size:18px">'+escaparHTML(e.grado||"")+' '+escaparHTML(e.seccion||"")+'</strong></div><div class="stat"><h3>Evaluaciones</h3><strong>'+ev.length+'</strong></div><div class="stat"><h3>Asignaturas</h3><strong>'+subjects.length+'</strong></div></div>'+
+      '<h3>📊 Situación académica</h3><div class="stats"><div class="stat"><h3>Satisfactorio</h3><strong>'+counts.s+'</strong></div><div class="stat"><h3>En proceso</h3><strong>'+counts.p+'</strong></div><div class="stat"><h3>Requiere apoyo</h3><strong>'+counts.a+'</strong></div></div>'+
+      '<h3>📈 Evolución por corte</h3><div style="overflow:auto"><table><thead><tr><th>Asignatura</th><th>I Corte</th><th>II Corte</th><th>III Corte</th><th>IV Corte</th></tr></thead><tbody>'+ (rows||'<tr><td colspan="5">No hay evaluaciones registradas.</td></tr>')+'</tbody></table></div>'+
+      '<div class="eval10-profile-grid"><div><h3>💪 Fortalezas</h3><ul>'+ (fortalezas.map(x=>'<li>'+escaparHTML(x)+'</li>').join("")||"<li>No registradas.</li>")+'</ul></div><div><h3>⚠️ Dificultades</h3><ul>'+ (dificultades.map(x=>'<li>'+escaparHTML(x)+'</li>').join("")||"<li>No registradas.</li>")+'</ul></div><div><h3>🛠️ Acciones de apoyo</h3><ul>'+ (apoyos.map(x=>'<li>'+escaparHTML(x)+'</li>').join("")||"<li>No registradas.</li>")+'</ul></div></div>'+
+      '<h3>📝 Detalle</h3><div style="overflow:auto"><table><thead><tr><th>Fecha</th><th>Asignatura</th><th>Corte</th><th>Resultado</th><th>Competencia / indicador</th><th>Dificultades</th></tr></thead><tbody>'+ (detail||'<tr><td colspan="6">No hay registros de evaluación académica.</td></tr>')+'</tbody></table></div>'+
+      '<p class="small-note">Herramienta administrativa/referencial. Las decisiones oficiales de evaluación, promoción y recuperación deben ajustarse a la normativa MINED vigente.</p></div>';
+}
+function imprimirPerfilAcademico(){document.body.setAttribute("data-imprimiendo","perfilAcademico");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
+
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
@@ -3360,6 +3434,11 @@ function mostrarSeccion(id, boton){
 
     if(boton){
         boton.classList.add("active");
+    }
+
+    if(id === "perfilAcademico"){
+        cargarEstudiantesPerfilAcademico();
+        cargarPerfilAcademico();
     }
 
     if(id === "consolidacionEvaluacion"){
