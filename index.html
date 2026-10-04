@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.3</title>
+<title>Sistema Escolar Nueva Alianza - v10.4</title>
 
 <style>
 *{
@@ -589,6 +589,9 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
             </button>
             <button onclick="mostrarSeccion('comunicacionesFamilia',this)">
                 📣 Comunicación familia-escuela
+            </button>
+            <button onclick="mostrarSeccion('convivencia',this)">
+                🤝 Convivencia y conducta
             </button>
 
             <button onclick="mostrarSeccion('docentes',this)">
@@ -2716,6 +2719,62 @@ body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!i
 </div>
 </section>
 
+<!-- V10.4 CONVIVENCIA Y CONDUCTA -->
+<section id="convivencia" class="section">
+<div class="card">
+<h2>🤝 Convivencia y conducta escolar</h2>
+<p>Registro integral de incidencias, reconocimientos, acuerdos, mediaciones y orientaciones. Herramienta administrativa/referencial.</p>
+</div>
+<div class="stats no-print">
+<div class="stat"><h3>Registros filtrados</h3><strong id="convTotal">0</strong></div>
+<div class="stat"><h3>Abiertos</h3><strong id="convAbiertos">0</strong></div>
+<div class="stat"><h3>Atención</h3><strong id="convAtencion">0</strong></div>
+<div class="stat"><h3>Positivos</h3><strong id="convPositivos">0</strong></div>
+<div class="stat"><h3>Familia notificada</h3><strong id="convFamilia">0</strong></div>
+</div>
+<div class="card no-print">
+<h3>📝 Registrar convivencia / conducta</h3>
+<input type="hidden" id="convId">
+<div class="form-grid">
+<div><label>Año</label><select id="convAnio" onchange="cargarEstudiantesConvivencia()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div><label>Fecha</label><input type="date" id="convFecha"></div>
+<div><label>Estudiante</label><select id="convEstudiante" onchange="cargarDatosConvivenciaEstudiante()"></select></div>
+<div><label>Nivel</label><input id="convNivel" readonly></div>
+<div><label>Grado</label><input id="convGrado" readonly></div>
+<div><label>Sección</label><input id="convSeccion" readonly></div>
+<div><label>Tipo</label><select id="convTipo"><option>Incidencia</option><option>Reconocimiento</option><option>Acuerdo</option><option>Mediación</option><option>Orientación</option></select></div>
+<div><label>Valoración</label><select id="convValoracion"><option>Leve</option><option>Moderada</option><option>Grave</option><option>Positiva</option></select></div>
+<div><label>Estado</label><select id="convEstado"><option>Abierto</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+<div><label>Fecha de seguimiento</label><input type="date" id="convSeguimiento"></div>
+<div><label>Familia notificada</label><select id="convFamiliaNotificada"><option>No</option><option>Sí</option></select></div>
+<div><label>Responsable</label><input id="convResponsable" placeholder="Docente, director u orientador"></div>
+</div>
+<div class="form-grid">
+<div><label>Descripción de la situación / reconocimiento</label><textarea id="convDescripcion" rows="4"></textarea></div>
+<div><label>Acción realizada</label><textarea id="convAccion" rows="4"></textarea></div>
+<div><label>Acuerdo / compromiso</label><textarea id="convAcuerdo" rows="4"></textarea></div>
+<div><label>Resultado / seguimiento</label><textarea id="convResultado" rows="4"></textarea></div>
+</div>
+<button class="btn-primary" onclick="guardarConvivencia()">💾 Guardar</button>
+<button class="btn-secondary" onclick="limpiarConvivencia()">🧹 Limpiar</button>
+</div>
+<div class="card no-print">
+<h3>🔎 Filtros</h3>
+<div class="form-grid">
+<div><label>Año</label><select id="convFiltroAnio" onchange="cargarConvivencia()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div><label>Estado</label><select id="convFiltroEstado" onchange="cargarConvivencia()"><option value="">Todos</option><option>Abierto</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+<div><label>Valoración</label><select id="convFiltroValoracion" onchange="cargarConvivencia()"><option value="">Todas</option><option>Leve</option><option>Moderada</option><option>Grave</option><option>Positiva</option></select></div>
+<div><label>Buscar</label><input id="convBuscar" oninput="cargarConvivencia()" placeholder="Estudiante, descripción, responsable..."></div>
+</div>
+</div>
+<div class="card">
+<div class="no-print" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+<h3>📋 Historial de convivencia</h3><button class="btn-secondary" onclick="imprimirConvivencia()">🖨️ Imprimir</button>
+</div>
+<div class="table-container"><table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Valoración</th><th>Estado</th><th>Familia</th><th>Responsable</th><th class="no-print">Acciones</th></tr></thead><tbody id="tablaConvivencia"></tbody></table></div>
+</div>
+</section>
+
 <section id="bitacora" class="section solo-director">
                 <div class="card">
                     <div class="audit-header"><h2>📜 Bitácora administrativa</h2><p>Registro de acciones realizadas en el sistema por usuario y rol.</p></div>
@@ -2881,6 +2940,7 @@ const KEY_PADRES_TUTORES = "padresTutoresNuevaAlianza";
 const KEY_EVALUACIONES = "evaluacionesAcademicasNuevaAlianza";
 const KEY_COMUNICACIONES = "comunicacionesFamiliaNuevaAlianza";
 const KEY_PLANES_MEJORA = "planesMejoraAcademicaNuevaAlianza";
+const KEY_CONVIVENCIA = "convivenciaEscolarNuevaAlianza";
 
 
 /* =========================================================
@@ -3617,6 +3677,8 @@ function guardarPlanMejora(){
     const obj={id:id||"MEJ-"+Date.now(),anio:String(anio),estudianteId:String(e.id),estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,asignatura:document.getElementById("mejoraAsignatura").value.trim(),origen:document.getElementById("mejoraOrigen").value,prioridad:document.getElementById("mejoraPrioridadSel").value,fechaInicio:document.getElementById("mejoraInicio").value,fechaRevision:document.getElementById("mejoraRevision").value,responsable:document.getElementById("mejoraResponsable").value.trim(),estado:document.getElementById("mejoraEstado").value,necesidad:document.getElementById("mejoraNecesidad").value.trim(),objetivo:document.getElementById("mejoraObjetivo").value.trim(),acciones:document.getElementById("mejoraAcciones").value.trim(),evidencia:document.getElementById("mejoraEvidencia").value.trim(),progreso:document.getElementById("mejoraProgreso").value.trim(),observacion:document.getElementById("mejoraObservacion").value.trim(),docenteId:ses.rol==="Docente"?String(ses.docenteId||""):(idx>=0?String(datos[idx].docenteId||""):""),usuario:ses.usuario||"Sistema",fechaRegistro:new Date().toISOString()};
     if(!obj.asignatura){alert("Ingrese la asignatura o área.");return;}if(!obj.necesidad){alert("Describa la necesidad identificada.");return;}if(!obj.objetivo){alert("Ingrese el objetivo de mejora.");return;}if(!obj.acciones){alert("Ingrese las acciones o estrategias.");return;}
     if(idx>=0)datos[idx]=obj;else datos.unshift(obj);guardarDatos(KEY_PLANES_MEJORA,datos);registrarAuditoria(idx>=0?"Editar":"Crear","Plan de mejora académica",(idx>=0?"Actualización":"Nuevo")+" plan para "+e.nombre,obj.id,{anio});alert(idx>=0?"Plan actualizado correctamente.":"Plan de mejora registrado correctamente.");limpiarPlanMejora();cargarPlanesMejora();
+    cargarEstudiantesConvivencia();
+    cargarConvivencia();
 }
 function cargarPlanesMejora(){
     const tbody=document.getElementById("tablaPlanesMejora");if(!tbody)return;const anio=document.getElementById("filtroMejoraAnio")?.value||"",estado=document.getElementById("filtroMejoraEstado")?.value||"",prioridad=document.getElementById("filtroMejoraPrioridad")?.value||"",q=limpiarTexto(document.getElementById("filtroMejoraBuscar")?.value||""),ses=obtenerSesionActual();
@@ -3635,6 +3697,76 @@ function eliminarPlanMejora(id){
 }
 function imprimirPlanesMejora(){document.body.setAttribute("data-imprimiendo","planesMejora");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
 
+
+/* =========================================================
+   V10.4 CONVIVENCIA Y CONDUCTA
+========================================================= */
+function cargarEstudiantesConvivencia(){
+    const sel=document.getElementById("convEstudiante"); if(!sel)return;
+    const anio=document.getElementById("convAnio")?.value||new Date().getFullYear();
+    const ses=obtenerSesionActual();
+    let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")!=="Retirado"&&String(e.estado||"Activo")!=="Trasladado");
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.anio)===String(anio));
+    if(mats.length) est=est.filter(e=>mats.some(m=>String(m.estudianteId)===String(e.id)));
+    if(ses?.rol==="Docente") est=est.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+est.map(e=>'<option value="'+escaparHTML(e.id)+'">'+escaparHTML(e.nombre)+'</option>').join("");
+    cargarDatosConvivenciaEstudiante();
+}
+function cargarDatosConvivenciaEstudiante(){
+    const id=document.getElementById("convEstudiante")?.value, e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
+    if(!e)return;
+    document.getElementById("convNivel").value=e.nivel||"";
+    document.getElementById("convGrado").value=e.grado||"";
+    document.getElementById("convSeccion").value=e.seccion||"";
+}
+function limpiarConvivencia(){
+    ["convId","convDescripcion","convAccion","convAcuerdo","convResultado","convResponsable"].forEach(id=>{const x=document.getElementById(id);if(x)x.value=""});
+    const f=document.getElementById("convFecha");if(f)f.value=new Date().toISOString().slice(0,10);
+    const s=document.getElementById("convFamiliaNotificada");if(s)s.value="No";
+    const e=document.getElementById("convEstado");if(e)e.value="Abierto";
+    cargarEstudiantesConvivencia();
+}
+function guardarConvivencia(){
+    const ses=obtenerSesionActual();if(!ses){alert("Debe iniciar sesión.");return;}
+    const id=document.getElementById("convId").value, anio=document.getElementById("convAnio").value;
+    if(!exigirAnioAbierto(anio))return;
+    const estudianteId=document.getElementById("convEstudiante").value;
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));
+    if(!e){alert("Seleccione un estudiante.");return;}
+    if(ses.rol==="Docente"&&!docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio)){alert("Este estudiante no pertenece a un grupo asignado a su usuario docente.");return;}
+    const datos=obtenerDatos(KEY_CONVIVENCIA),idx=datos.findIndex(x=>String(x.id)===String(id));
+    if(idx>=0&&ses.rol==="Docente"&&String(datos[idx].docenteId||"")!==String(ses.docenteId||"")){alert("No puede editar un registro de otro docente.");return;}
+    const obj={id:id||("CONV-"+Date.now()),anio,fecha:document.getElementById("convFecha").value,estudianteId:String(e.id),estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,tipo:document.getElementById("convTipo").value,valoracion:document.getElementById("convValoracion").value,estado:document.getElementById("convEstado").value,seguimiento:document.getElementById("convSeguimiento").value,familiaNotificada:document.getElementById("convFamiliaNotificada").value,responsable:document.getElementById("convResponsable").value,descripcion:document.getElementById("convDescripcion").value,accion:document.getElementById("convAccion").value,acuerdo:document.getElementById("convAcuerdo").value,resultado:document.getElementById("convResultado").value,docenteId:ses.rol==="Docente"?String(ses.docenteId||""):(idx>=0?datos[idx].docenteId||"":"")};
+    if(idx>=0)datos[idx]=obj;else datos.unshift(obj);guardarDatos(KEY_CONVIVENCIA,datos);
+    registrarAuditoria(idx>=0?"Editar":"Crear","Convivencia",idx>=0?"Actualización de registro de convivencia":"Nuevo registro de convivencia",obj.id,{anio});
+    limpiarConvivencia();cargarConvivencia();
+}
+function cargarConvivencia(){
+    const tbody=document.getElementById("tablaConvivencia");if(!tbody)return;
+    const anio=document.getElementById("convFiltroAnio")?.value||"",estado=document.getElementById("convFiltroEstado")?.value||"",val=document.getElementById("convFiltroValoracion")?.value||"",q=limpiarTexto(document.getElementById("convBuscar")?.value||""),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_CONVIVENCIA).filter(x=>(!anio||String(x.anio)===String(anio))&&(!estado||x.estado===estado)&&(!val||x.valoracion===val)&&(!q||limpiarTexto([x.estudiante,x.descripcion,x.responsable,x.acuerdo].join(" ")).includes(q)));
+    if(ses?.rol==="Docente")lista=lista.filter(x=>String(x.docenteId||"")===String(ses.docenteId||"")&&docenteTieneGrupo(x.nivel,x.grado,x.seccion,x.anio));
+    tbody.innerHTML=lista.length?lista.map(x=>'<tr><td>'+escaparHTML(x.fecha||"")+'</td><td>'+escaparHTML(x.estudiante)+'</td><td>'+escaparHTML(x.tipo)+'</td><td>'+escaparHTML(x.valoracion)+'</td><td>'+escaparHTML(x.estado)+'</td><td>'+escaparHTML(x.familiaNotificada||"No")+'</td><td>'+escaparHTML(x.responsable||"")+'</td><td class="no-print"><button onclick="editarConvivencia(\''+String(x.id).replace(/'/g,"\\'")+'\')">✏️</button> <button class="btn-danger" onclick="eliminarConvivencia(\''+String(x.id).replace(/'/g,"\\'")+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="8" style="text-align:center;padding:20px">No hay registros.</td></tr>';
+    document.getElementById("convTotal").textContent=lista.length;
+    document.getElementById("convAbiertos").textContent=lista.filter(x=>x.estado==="Abierto").length;
+    document.getElementById("convAtencion").textContent=lista.filter(x=>["Moderada","Grave"].includes(x.valoracion)).length;
+    document.getElementById("convPositivos").textContent=lista.filter(x=>x.valoracion==="Positiva").length;
+    document.getElementById("convFamilia").textContent=lista.filter(x=>x.familiaNotificada==="Sí").length;
+}
+function editarConvivencia(id){
+    const x=obtenerDatos(KEY_CONVIVENCIA).find(a=>String(a.id)===String(id));if(!x)return;
+    const ses=obtenerSesionActual();if(ses?.rol==="Docente"&&String(x.docenteId||"")!==String(ses.docenteId||"")){alert("No puede editar este registro.");return;}
+    document.getElementById("convId").value=x.id;document.getElementById("convAnio").value=x.anio;document.getElementById("convFecha").value=x.fecha||"";cargarEstudiantesConvivencia();document.getElementById("convEstudiante").value=x.estudianteId;cargarDatosConvivenciaEstudiante();
+    ["convTipo","convValoracion","convEstado","convSeguimiento","convFamiliaNotificada","convResponsable","convDescripcion","convAccion","convAcuerdo","convResultado"].forEach(k=>{const el=document.getElementById(k);if(el)el.value=x[k]||""});
+}
+function eliminarConvivencia(id){
+    const x=obtenerDatos(KEY_CONVIVENCIA).find(a=>String(a.id)===String(id));if(!x)return;
+    const ses=obtenerSesionActual();if(ses?.rol==="Docente"&&String(x.docenteId||"")!==String(ses.docenteId||"")){alert("No puede eliminar este registro.");return;}
+    if(!exigirAnioAbierto(x.anio))return;if(!confirm("¿Eliminar este registro de convivencia?"))return;
+    guardarDatos(KEY_CONVIVENCIA,obtenerDatos(KEY_CONVIVENCIA).filter(a=>String(a.id)!==String(id)));
+    registrarAuditoria("Eliminar","Convivencia","Eliminación de registro de convivencia",id,{anio:x.anio});cargarConvivencia();
+}
+function imprimirConvivencia(){document.body.setAttribute("data-imprimiendo","convivencia");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
 
 /* =========================================================
    NAVEGACIÓN
@@ -3675,6 +3807,8 @@ function mostrarSeccion(id, boton){
         actualizarGradosConsolidacion();
         cargarConsolidacionEvaluacion();
     }
+
+    if(id === "convivencia"){ cargarEstudiantesConvivencia(); cargarConvivencia(); }
 
     if(id === "asignaciones"){
         cargarAsignaciones();
@@ -5172,6 +5306,7 @@ function construirRespaldo(){
         evaluacionesAcademicas: obtenerDatos(KEY_EVALUACIONES),
         planesMejoraAcademica: obtenerDatos(KEY_PLANES_MEJORA),
         comunicacionesFamilia: obtenerDatos(KEY_COMUNICACIONES),
+        convivenciaEscolar: obtenerDatos(KEY_CONVIVENCIA),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -5252,6 +5387,7 @@ function importarRespaldo(event){
                 Array.isArray(respaldo.estudiantes) ? respaldo.estudiantes : []
             );
             guardarDatos(KEY_COMUNICACIONES,Array.isArray(respaldo.comunicacionesFamilia)?respaldo.comunicacionesFamilia:[]);
+            guardarDatos(KEY_CONVIVENCIA,Array.isArray(respaldo.convivenciaEscolar)?respaldo.convivenciaEscolar:[]);
 
 
             guardarDatos(
@@ -5409,6 +5545,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_EVALUACIONES);
     localStorage.removeItem(KEY_PLANES_MEJORA);
     localStorage.removeItem(KEY_COMUNICACIONES);
+    localStorage.removeItem(KEY_CONVIVENCIA);
     registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
     cargarTodo();
