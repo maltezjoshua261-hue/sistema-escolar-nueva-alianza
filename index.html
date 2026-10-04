@@ -3998,7 +3998,7 @@ function cargarSeguridadMantenimiento109(){
 
 function mostrarSeccion(id, boton){
 
-    validarSesion109();
+    if(!validarSesion109()) return;
     if(id==="configuracion" && !esDirectorActual()){
         alert("Acceso restringido. La Configuración es exclusiva del Director.");
         return;
