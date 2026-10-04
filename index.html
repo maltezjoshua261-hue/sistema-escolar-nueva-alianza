@@ -3311,8 +3311,14 @@ function guardarAsignacion(){
     const horas=Number(document.getElementById("asigHoras").value||0);
     if(horas<0||horas>60){alert("Las horas semanales deben estar entre 0 y 60.");return;}
     const datos=obtenerDatos(KEY_ASIGNACIONES);
-    const duplicada=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
-    if(duplicada){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return;}
+    const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    if(asignacionMismoDocente){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return;}
+    const asignacionConflicto=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
+    if(asignacionConflicto){
+        const repetidas=(a=>a.filter(x=>asignaturas.includes(x)))(asignacionConflicto.asignaturas||[]);
+        alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
+        return;
+    }
     const registro={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
     const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
     guardarDatos(KEY_ASIGNACIONES,datos);limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
@@ -3349,7 +3355,9 @@ function buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura){
 function cargarDocenteCalificacion(){
     const select=document.getElementById("calDocente");if(!select)return;
     const anio=document.getElementById("calAnio")?.value||"2026",nivel=document.getElementById("calNivel")?.value,grado=document.getElementById("calGrado")?.value,seccion=document.getElementById("calSeccion")?.value,asignatura=document.getElementById("calAsignatura")?.value;
-    const lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(!asignatura||(a.asignaturas||[]).includes(asignatura)));
+    const sesion=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(!asignatura||(a.asignaturas||[]).includes(asignatura)));
+    if(sesion?.rol==="Docente") lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId||""));
     select.innerHTML='<option value="">Sin asignación</option>';
     [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
     const encontrado=buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura);if(encontrado)select.value=encontrado.docenteId;
@@ -3358,7 +3366,9 @@ function cargarDocenteCalificacion(){
 function cargarDocenteAsistencia(){
     const select=document.getElementById("asisDocente");if(!select)return;
     const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):"2026",nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
-    const lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    const sesion=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    if(sesion?.rol==="Docente") lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId||""));
     select.innerHTML='<option value="">Sin asignación</option>';
     [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
     if(lista.length===1)select.value=String(lista[0].docenteId);
@@ -5564,7 +5574,7 @@ function cargarOpcionesHorario(){
     const asel=document.getElementById("horarioAsignatura"),dsel=document.getElementById("horarioDocente");if(!asel||!dsel)return;
     const asign=obtenerAsignacionesGrupoHorario(),subjects=[...new Set(asign.flatMap(a=>a.asignaturas||[]))],prevA=asel.value,prevD=dsel.value;
     asel.innerHTML='<option value="">Seleccione asignatura</option>';subjects.forEach(a=>{const o=document.createElement("option");o.value=a;o.textContent=a;asel.appendChild(o);});
-    dsel.innerHTML='<option value="">Seleccione docente</option>';const docentes=[...new Map(asign.map(a=>[String(a.docenteId),a])).values()];docentes.forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;asel.value===a.asignatura;dsel.appendChild(o);});
+    dsel.innerHTML='<option value="">Seleccione docente</option>';const docentes=[...new Map(asign.map(a=>[String(a.docenteId),a])).values()];docentes.forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;dsel.appendChild(o);});
     if([...asel.options].some(o=>o.value===prevA))asel.value=prevA;if([...dsel.options].some(o=>o.value===prevD))dsel.value=prevD;
 }
 function docentesParaAsignaturaHorario(){
