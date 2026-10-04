@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.4.2</title>
+<title>Sistema Escolar Nueva Alianza - v8.5</title>
 
 <style>
 *{
@@ -456,6 +456,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
  body[data-imprimiendo="estadisticas"] #estadisticasDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none}
 }
 .control-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:24px;border-radius:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;gap:15px}.control-header h1{font-size:28px;margin-bottom:6px}.control-header p{opacity:.9}.control-fecha{font-size:13px;text-align:right}.control-stats{grid-template-columns:repeat(6,1fr);margin-bottom:20px}.control-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}.alertas-control{display:flex;flex-direction:column;gap:10px}.alerta-control{padding:12px;border-radius:9px;border-left:5px solid #ffc107;background:#fff8df}.alerta-control.danger{border-left-color:#dc3545;background:#fff0f1}.alerta-control.success{border-left-color:#198754;background:#eefaf3}.alerta-control.info{border-left-color:#0d6efd;background:#eef5ff}.alerta-control strong{display:block;margin-bottom:4px}.acciones-control{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.acciones-control button{width:100%}.resumen-control{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.resumen-control div{border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;background:#f9fbfd}.resumen-control strong{display:block;font-size:24px;color:#0d6efd;margin-top:4px}.control-pie{text-align:center;color:#666;font-size:12px;margin:10px 0 20px}@media(max-width:1100px){.control-stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:750px){.control-grid{grid-template-columns:1fr}.control-stats{grid-template-columns:repeat(2,1fr)}.control-header{flex-direction:column;align-items:flex-start}.control-fecha{text-align:left}.acciones-control{grid-template-columns:1fr}.resumen-control{grid-template-columns:1fr}}@media print{body[data-imprimiendo="centroControl"] *{visibility:hidden!important}body[data-imprimiendo="centroControl"] #centroControl,body[data-imprimiendo="centroControl"] #centroControl *{visibility:visible!important}body[data-imprimiendo="centroControl"] #centroControl{position:absolute;left:0;top:0;width:100%;box-shadow:none}.control-header{color:#000;background:#fff;border:2px solid #123b6d}}
+
+/* DOCUMENTOS OFICIALES 8.5 */
+.documento-oficial{background:#fff;border:1px solid #d9dee7;border-radius:12px;padding:38px;box-shadow:0 3px 12px rgba(0,0,0,.06);max-width:1000px;margin:0 auto;min-height:500px}.doc-encabezado{text-align:center;border-bottom:2px solid #123b6d;padding-bottom:15px;margin-bottom:20px}.doc-encabezado h1{font-size:17px;color:#123b6d}.doc-encabezado h2{font-size:20px;margin:5px 0}.doc-encabezado p{font-size:13px;margin:3px 0}.doc-titulo{text-align:center;font-size:18px;font-weight:bold;text-transform:uppercase;margin:20px 0;color:#123b6d}.doc-cuerpo{font-size:14px;line-height:1.7;text-align:justify}.doc-datos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;background:#f7f9fc;border:1px solid #e1e5eb;padding:15px;margin:15px 0}.doc-datos div{font-size:13px}.doc-tabla{margin-top:15px}.doc-firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;text-align:center;margin-top:70px;font-size:12px}.doc-firma{border-top:1px solid #333;padding-top:7px}.doc-pie{text-align:center;font-size:10px;color:#666;margin-top:30px}.doc-sello{margin-top:18px;text-align:center;font-size:11px;color:#666}.doc-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}.doc-resumen div{border:1px solid #ddd;padding:12px;text-align:center}.doc-resumen strong{display:block;font-size:20px;color:#123b6d;margin-top:5px}@media(max-width:700px){.documento-oficial{padding:20px}.doc-datos{grid-template-columns:1fr}.doc-firmas{grid-template-columns:1fr}.doc-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="documentoOficial"] *{visibility:hidden!important}body[data-imprimiendo="documentoOficial"] #documentoOficial,body[data-imprimiendo="documentoOficial"] #documentoOficial *{visibility:visible!important}body[data-imprimiendo="documentoOficial"] #documentoOficial{position:absolute;left:0;top:0;width:100%;max-width:none;border:none;box-shadow:none;padding:20px}.no-print{display:none!important}}
 </style>
 </head>
 
@@ -544,6 +547,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('estadisticas',this)">
                 📊 Estadísticas y gráficos
+            </button>
+
+            <button onclick="mostrarSeccion('documentosOficiales',this)">
+                📑 Documentos oficiales
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1892,6 +1899,36 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 </div>
             </section>
 
+            <!-- DOCUMENTOS OFICIALES 8.5 -->
+            <section id="documentosOficiales" class="section">
+                <div class="card">
+                    <h2>📑 Documentos oficiales automáticos</h2>
+                    <div class="notice">Genere documentos administrativos a partir de la información registrada. Revise los datos antes de imprimir. La validez oficial depende de la firma, sello y procedimientos vigentes del MINED.</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Estudiante</label><select id="docOficialEstudiante" onchange="generarDocumentoOficial()"><option value="">Seleccione un estudiante</option></select></div>
+                        <div class="form-group"><label>Tipo de documento</label><select id="docOficialTipo" onchange="generarDocumentoOficial()">
+                            <option value="matricula">Constancia de matrícula</option>
+                            <option value="activo">Constancia de estudiante activo</option>
+                            <option value="traslado">Constancia de traslado</option>
+                            <option value="retiro">Constancia de retiro</option>
+                            <option value="notas">Certificación de notas</option>
+                            <option value="historial">Historial académico</option>
+                            <option value="boleta">Boleta del estudiante</option>
+                            <option value="asistencia">Reporte de asistencia</option>
+                            <option value="promocion">Reporte de promoción</option>
+                        </select></div>
+                        <div class="form-group"><label>Año escolar</label><select id="docOficialAnio" onchange="generarDocumentoOficial()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Fecha del documento</label><input id="docOficialFecha" type="date" onchange="generarDocumentoOficial()"></div>
+                    </div>
+                    <div class="actions no-print">
+                        <button class="btn-primary" onclick="generarDocumentoOficial()">🔄 Generar documento</button>
+                        <button class="btn-success" onclick="imprimirDocumentoOficial()">🖨️ Imprimir / Guardar PDF</button>
+                        <button class="btn-secondary" onclick="limpiarDocumentoOficial()">Limpiar</button>
+                    </div>
+                </div>
+                <div id="documentoOficial" class="documento-oficial"><div style="text-align:center;padding:40px;color:#777;">Seleccione un estudiante y genere un documento.</div></div>
+            </section>
+
                         <section id="configuracion" class="section">
 
                 <div class="card">
@@ -1917,6 +1954,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                             <input id="configAnio"
                                    value="2026">
                         </div>
+
+                        <div class="form-group"><label>NER</label><input id="configNER" value="Nueva Alianza"></div>
+                        <div class="form-group"><label>Municipio</label><input id="configMunicipio" value="El Cuá"></div>
+                        <div class="form-group"><label>Departamento</label><input id="configDepartamento" value="Jinotega"></div>
 
                     </div>
 
@@ -2478,6 +2519,11 @@ function mostrarSeccion(id, boton){
 
     if(boton){
         boton.classList.add("active");
+    }
+
+    if(id === "documentosOficiales"){
+        cargarEstudiantesDocumentosOficiales();
+        generarDocumentoOficial();
     }
 
     if(id === "reportes"){
@@ -3551,7 +3597,16 @@ function guardarConfiguracion(){
             document.getElementById("configDirector").value,
 
         anio:
-            document.getElementById("configAnio").value
+            document.getElementById("configAnio").value,
+
+        ner:
+            document.getElementById("configNER")?.value || "Nueva Alianza",
+
+        municipio:
+            document.getElementById("configMunicipio")?.value || "El Cuá",
+
+        departamento:
+            document.getElementById("configDepartamento")?.value || "Jinotega"
 
     };
 
@@ -4522,6 +4577,79 @@ function imprimirCentroControl(){
     window.print();
     document.body.removeAttribute("data-imprimiendo");
 }
+
+/* =========================================================
+   DOCUMENTOS OFICIALES AUTOMÁTICOS 8.5
+========================================================= */
+function cargarEstudiantesDocumentosOficiales(){
+    const select=document.getElementById("docOficialEstudiante");if(!select)return;
+    const anterior=select.value;
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    select.innerHTML='<option value="">Seleccione un estudiante</option>';
+    estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
+    if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
+    const fecha=document.getElementById("docOficialFecha");if(fecha&&!fecha.value)fecha.value=new Date().toISOString().slice(0,10);
+}
+function obtenerConfigDocumentos(){
+    let c={};try{c=JSON.parse(localStorage.getItem(KEY_CONFIG)||"{}")||{};}catch(e){}
+    return {centro:c.centro||"Centro Escolar Nueva Alianza",director:c.director||"Evert Josue Maltez Sanchez",anio:c.anio||"2026",ner:c.ner||"Nueva Alianza",municipio:c.municipio||"El Cuá",departamento:c.departamento||"Jinotega"};
+}
+function encabezadoDocumentoOficial(titulo){
+    const c=obtenerConfigDocumentos();
+    return '<div class="doc-encabezado"><h1>MINISTERIO DE EDUCACIÓN</h1><h2>'+escaparHTML(c.centro)+'</h2><p>NER '+escaparHTML(c.ner)+'</p><p>Municipio: '+escaparHTML(c.municipio)+' · Departamento: '+escaparHTML(c.departamento)+'</p><div class="doc-titulo">'+escaparHTML(titulo)+'</div></div>';
+}
+function datosBasicosDocumento(e,anio){
+    return '<div class="doc-datos"><div><strong>Estudiante:</strong> '+escaparHTML(e.nombre||"—")+'</div><div><strong>Código / Cédula:</strong> '+escaparHTML(e.codigo||e.cedula||"—")+'</div><div><strong>Sexo:</strong> '+escaparHTML(e.sexo||"—")+'</div><div><strong>Fecha de nacimiento:</strong> '+escaparHTML(e.nacimiento||"—")+'</div><div><strong>Nivel:</strong> '+escaparHTML(e.nivel||"—")+'</div><div><strong>Grado:</strong> '+escaparHTML(e.grado||"—")+'</div><div><strong>Sección:</strong> '+escaparHTML(e.seccion||"—")+'</div><div><strong>Año escolar:</strong> '+escaparHTML(anio)+'</div></div>';
+}
+function firmasDocumentoOficial(){
+    const c=obtenerConfigDocumentos();
+    return '<div class="doc-firmas"><div class="doc-firma">Docente responsable</div><div class="doc-firma">'+escaparHTML(c.director)+'<br>Director(a)</div><div class="doc-firma">Madre, padre o tutor</div></div><div class="doc-sello">Sello del centro escolar</div>';
+}
+function generarDocumentoOficial(){
+    const box=document.getElementById("documentoOficial");if(!box)return;
+    const id=document.getElementById("docOficialEstudiante")?.value,tipo=document.getElementById("docOficialTipo")?.value||"matricula",anio=document.getElementById("docOficialAnio")?.value||"2026",fecha=document.getElementById("docOficialFecha")?.value||new Date().toISOString().slice(0,10);
+    if(!id){box.innerHTML='<div style="text-align:center;padding:50px;color:#777;">Seleccione un estudiante para generar el documento.</div>';return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    const mats=obtenerDatos(KEY_MATRICULAS),cal=obtenerDatos(KEY_CALIFICACIONES),as=obtenerDatos(KEY_ASISTENCIAS),prom=obtenerDatos(KEY_PROMOCIONES);
+    let titulo="",cuerpo="",mat=mats.find(m=>String(m.estudianteId)===String(id)&&String(m.anio)===String(anio));
+    if(tipo==="matricula"){
+        titulo="Constancia de matrícula";
+        cuerpo='<p>Por medio de la presente se hace constar que el/la estudiante <strong>'+escaparHTML(e.nombre)+'</strong> se encuentra registrado(a) en el sistema de matrícula del Centro Escolar para el año escolar <strong>'+anio+'</strong>.</p>'+datosBasicosDocumento(e,anio)+'<p><strong>Responsable:</strong> '+escaparHTML(e.responsable||mat?.responsable||"—")+' &nbsp; <strong>Teléfono:</strong> '+escaparHTML(e.telefonoResponsable||mat?.telefono||"—")+'</p>';
+    }else if(tipo==="activo"){
+        titulo="Constancia de estudiante activo";cuerpo='<p>Por medio de la presente se hace constar que <strong>'+escaparHTML(e.nombre)+'</strong> figura como estudiante <strong>'+escaparHTML(e.estado||"Activo")+'</strong> del Centro Escolar durante el año escolar <strong>'+anio+'</strong>.</p>'+datosBasicosDocumento(e,anio);
+    }else if(tipo==="traslado"||tipo==="retiro"){
+        const estado=tipo==="traslado"?"Trasladado":"Retirado";titulo=tipo==="traslado"?"Constancia de traslado":"Constancia de retiro";
+        const mov=mats.find(m=>String(m.estudianteId)===String(id)&&String(m.anio)===String(anio)&&limpiarTexto(m.estado||"")===limpiarTexto(estado));
+        cuerpo='<p>Por medio de la presente se hace constar que el/la estudiante <strong>'+escaparHTML(e.nombre)+'</strong> registra condición de <strong>'+estado+'</strong> en el año escolar <strong>'+anio+'</strong>.</p>'+datosBasicosDocumento(e,anio)+'<p><strong>Fecha de movimiento:</strong> '+escaparHTML(mov?.fecha||"—")+'</p><p><strong>Observación / motivo:</strong> '+escaparHTML(mov?.observacion||"—")+'</p>';
+    }else if(tipo==="notas"||tipo==="boleta"){
+        titulo=tipo==="notas"?"Certificación de notas":"Boleta del estudiante";
+        const rows=cal.filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||"2026")===String(anio)),asigs=[...new Set(rows.map(x=>x.asignatura).filter(Boolean))];
+        let html=datosBasicosDocumento(e,anio)+'<table class="doc-tabla"><thead><tr><th>Asignatura</th><th>I</th><th>II</th><th>III</th><th>IV</th><th>Final</th></tr></thead><tbody>';
+        asigs.forEach(a=>{const rr=rows.filter(x=>x.asignatura===a),pc={};rr.forEach(x=>pc[x.corte]=x);const nums=rr.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado));const fin=nums.length?(nums.reduce((x,y)=>x+y,0)/nums.length).toFixed(1):(rr.length?rr[rr.length-1].resultado:"—");html+='<tr><td>'+escaparHTML(a)+'</td><td>'+escaparHTML(pc["I Corte"]?.resultado||"—")+'</td><td>'+escaparHTML(pc["II Corte"]?.resultado||"—")+'</td><td>'+escaparHTML(pc["III Corte"]?.resultado||"—")+'</td><td>'+escaparHTML(pc["IV Corte"]?.resultado||"—")+'</td><td><strong>'+escaparHTML(fin)+'</strong></td></tr>';});
+        html+='</tbody></table>';cuerpo=html+(rows.length?"":"<p>No hay calificaciones registradas para el año seleccionado.</p>");
+    }else if(tipo==="historial"){
+        titulo="Historial académico";const years=[...new Set([...cal.filter(x=>String(x.estudianteId)===String(id)).map(x=>String(x.anio||"2026")),...mats.filter(m=>String(m.estudianteId)===String(id)).map(m=>String(m.anio))])].sort();let html=datosBasicosDocumento(e,anio)+'<table class="doc-tabla"><thead><tr><th>Año</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Promedio</th></tr></thead><tbody>';
+        years.forEach(y=>{const mm=mats.find(m=>String(m.estudianteId)===String(id)&&String(m.anio)===y),rr=cal.filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||"2026")===y&&x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado)),pr=rr.length?(rr.reduce((a,b)=>a+b,0)/rr.length).toFixed(1):"—";html+='<tr><td>'+y+'</td><td>'+escaparHTML(mm?.nivel||e.nivel||"—")+'</td><td>'+escaparHTML(mm?.grado||e.grado||"—")+'</td><td>'+escaparHTML(mm?.seccion||e.seccion||"—")+'</td><td>'+pr+'</td></tr>';});
+        html+='</tbody></table>';cuerpo=html;
+    }else if(tipo==="asistencia"){
+        titulo="Reporte de asistencia";const rr=as.filter(x=>String(x.estudianteId)===String(id)&&String(x.fecha||"").slice(0,4)===String(anio)),p=rr.filter(x=>limpiarTexto(x.estado||"").includes("presente")).length,a=rr.filter(x=>limpiarTexto(x.estado||"").includes("ausente")).length,t=rr.filter(x=>limpiarTexto(x.estado||"").includes("tardanza")).length,j=rr.filter(x=>limpiarTexto(x.estado||"").includes("justificada")).length;
+        cuerpo=datosBasicosDocumento(e,anio)+'<div class="doc-resumen"><div>Presentes<strong>'+p+'</strong></div><div>Ausencias<strong>'+a+'</strong></div><div>Tardanzas<strong>'+t+'</strong></div><div>Justificadas<strong>'+j+'</strong></div></div><p>Total de registros: <strong>'+rr.length+'</strong>.</p>';
+    }else if(tipo==="promocion"){
+        titulo="Reporte de promoción";const rr=prom.filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio)),m=rr[rr.length-1];
+        cuerpo=datosBasicosDocumento(e,anio)+(m?'<div class="doc-datos"><div><strong>Resultado:</strong> '+escaparHTML(m.resultado)+'</div><div><strong>Grado actual:</strong> '+escaparHTML(m.gradoActual||"—")+'</div><div><strong>Grado siguiente:</strong> '+escaparHTML(m.gradoSiguiente||"—")+'</div><div><strong>Fecha de resolución:</strong> '+escaparHTML(m.fecha||"—")+'</div></div><p><strong>Observación:</strong> '+escaparHTML(m.observacion||"—")+'</p>':'<p>No existe un registro de promoción para el año seleccionado.</p>');
+    }
+    const f=new Date(fecha+"T12:00:00"),ft=f.toLocaleDateString("es-NI",{day:"numeric",month:"long",year:"numeric"}),cfg=obtenerConfigDocumentos();
+    box.innerHTML=encabezadoDocumentoOficial(titulo)+'<div class="doc-cuerpo">'+cuerpo+'<p style="margin-top:25px;">Extendida en el municipio de '+escaparHTML(cfg.municipio)+', a los '+ft+'.</p>'+firmasDocumentoOficial()+'<div class="doc-pie">Documento administrativo generado por el Sistema Escolar Nueva Alianza. Verificar información, firma y sello antes de su uso oficial.</div></div>';
+}
+function imprimirDocumentoOficial(){
+    if(!document.getElementById("docOficialEstudiante")?.value){alert("Seleccione un estudiante antes de imprimir.");return;}
+    generarDocumentoOficial();document.body.setAttribute("data-imprimiendo","documentoOficial");window.print();document.body.removeAttribute("data-imprimiendo");
+}
+function limpiarDocumentoOficial(){
+    const s=document.getElementById("docOficialEstudiante");if(s)s.value="";
+    const b=document.getElementById("documentoOficial");if(b)b.innerHTML='<div style="text-align:center;padding:50px;color:#777;">Seleccione un estudiante y genere un documento.</div>';
+}
+
 </script>
 
 </body>
