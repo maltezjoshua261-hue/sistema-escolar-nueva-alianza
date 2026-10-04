@@ -702,7 +702,7 @@ th{
 
                         <div class="form-group">
                             <label>Estudiante</label>
-                            <select id="asisEstudiante">
+                            <select id="asisEstudiante" onchange="mostrarEstadoAsistenciaExistente()">
                                 <option value="">Seleccione</option>
                             </select>
                         </div>
@@ -711,7 +711,7 @@ th{
                             <label>Estado</label>
                             <select id="asisEstado">
                                 <option>Presente</option>
-                                <option>Ausente</option>
+                                <option>Ausente</option><option>Justificada</option>
                                 <option>Tardanza</option>
                             </select>
                         </div>
@@ -719,7 +719,7 @@ th{
                     </div>
 
                     <div class="actions">
-
+                        <button class="btn-primary" onclick="registrarAsistenciaGrupo()">📋 Registrar grupo completo</button>
                         <button class="btn-success" onclick="guardarAsistencia()">
                             💾 Guardar asistencia
                         </button>
@@ -731,6 +731,7 @@ th{
                 <div class="card">
 
                     <h2>Asistencias registradas</h2>
+                    <div class="form-group"><label>Buscar asistencia</label><input id="buscarAsistencia" type="search" placeholder="Nombre, fecha, grado o estado" oninput="cargarAsistencias()"></div>
 
                     <div class="table-container">
                         <table>
@@ -1766,126 +1767,57 @@ function cargarEstudiantesAsistencia(){
 
 
 function guardarAsistencia(){
-
-    const estudianteId =
-        document.getElementById("asisEstudiante").value;
-
-    if(!estudianteId){
-
-        alert("Seleccione un estudiante.");
-        return;
-
-    }
-
+    const estudianteId=document.getElementById("asisEstudiante").value;
+    if(!estudianteId){alert("Seleccione un estudiante.");return;}
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
-
-    const estudiante=estudiantes.find(
-        e=>String(e.id) === String(estudianteId)
-    );
-
-    if(!estudiante){
-
-        alert("No se encontró el estudiante.");
-        return;
-
-    }
-
-    const registro={
-
-        id:Date.now(),
-
-        fecha:
-            document.getElementById("asisFecha").value,
-
-        estudianteId:estudiante.id,
-
-        estudiante:estudiante.nombre,
-
-        nivel:
-            document.getElementById("asisNivel").value,
-
-        grado:
-            document.getElementById("asisGrado").value,
-
-        seccion:
-            document.getElementById("asisSeccion").value,
-
-        estado:
-            document.getElementById("asisEstado").value
-
-    };
-
+    const estudiante=estudiantes.find(e=>String(e.id)===String(estudianteId));
+    if(!estudiante){alert("No se encontró el estudiante.");return;}
+    const fecha=document.getElementById("asisFecha").value;
+    const estado=document.getElementById("asisEstado").value;
+    if(!fecha){alert("Seleccione la fecha.");return;}
     const datos=obtenerDatos(KEY_ASISTENCIAS);
-
-    datos.push(registro);
-
+    const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
+    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,estado};
+    if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
-
-    alert("Asistencia guardada correctamente.");
-
-    cargarAsistencias();
-    actualizarEstadisticas();
-
+    alert(existe?"Asistencia actualizada.":"Asistencia guardada correctamente.");
+    cargarAsistencias(); actualizarEstadisticas();
 }
-
-
-function cargarAsistencias(){
-
+function registrarAsistenciaGrupo(){
+    const fecha=document.getElementById("asisFecha").value;
+    const nivel=document.getElementById("asisNivel").value;
+    const grado=document.getElementById("asisGrado").value;
+    const seccion=document.getElementById("asisSeccion").value;
+    if(!fecha||!nivel||!grado||!seccion){alert("Seleccione fecha, nivel, grado y sección.");return;}
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel)&&normalizarGrado(e.grado)===normalizarGrado(grado)&&normalizarSeccion(e.seccion)===normalizarSeccion(seccion)&&String(e.estado||"Activo")==="Activo");
+    if(!estudiantes.length){alert("No hay estudiantes activos en este grupo.");return;}
+    const estado=document.getElementById("asisEstado").value;
     const datos=obtenerDatos(KEY_ASISTENCIAS);
-
-    const tabla=document.getElementById("tablaAsistencia");
-
-    tabla.innerHTML="";
-
-    datos.forEach((a,index)=>{
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${escaparHTML(a.fecha)}</td>
-            <td>${escaparHTML(a.estudiante)}</td>
-            <td>${escaparHTML(a.nivel)}</td>
-            <td>${escaparHTML(a.grado)}</td>
-            <td>${escaparHTML(a.seccion)}</td>
-            <td>${escaparHTML(a.estado)}</td>
-
-            <td>
-                <button
-                    class="btn-danger"
-                    onclick="eliminarAsistencia(${a.id})">
-                    Eliminar
-                </button>
-            </td>
-
-        </tr>
-
-        `;
-
+    let nuevos=0,actualizados=0;
+    estudiantes.forEach(e=>{
+        const existe=datos.find(a=>String(a.estudianteId)===String(e.id)&&a.fecha===fecha);
+        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,estado};
+        if(existe){datos[datos.indexOf(existe)]=registro;actualizados++;}else{datos.push(registro);nuevos++;}
     });
-
+    guardarDatos(KEY_ASISTENCIAS,datos);
+    cargarAsistencias(); actualizarEstadisticas();
+    alert("Grupo procesado. Nuevos: "+nuevos+" | Actualizados: "+actualizados);
 }
-
-
-function eliminarAsistencia(id){
-
-    if(!confirm("¿Desea eliminar este registro?")){
-        return;
-    }
-
-    const datos=obtenerDatos(KEY_ASISTENCIAS);
-
-    guardarDatos(
-        KEY_ASISTENCIAS,
-        datos.filter(a=>a.id!==id)
-    );
-
-    cargarAsistencias();
-    actualizarEstadisticas();
-
+function mostrarEstadoAsistenciaExistente(){
+    const id=document.getElementById("asisEstudiante").value;
+    const fecha=document.getElementById("asisFecha").value;
+    if(!id||!fecha)return;
+    const r=obtenerDatos(KEY_ASISTENCIAS).find(a=>String(a.estudianteId)===String(id)&&a.fecha===fecha);
+    if(r) document.getElementById("asisEstado").value=r.estado;
 }
-
-
+function cargarAsistencias(){
+    const datos=obtenerDatos(KEY_ASISTENCIAS), tabla=document.getElementById("tablaAsistencia");
+    const buscar=(document.getElementById("buscarAsistencia")?.value||"").trim().toLowerCase();
+    tabla.innerHTML="";
+    const lista=datos.filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
+    lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
+}
 /* =========================================================
    CALIFICACIONES
 ========================================================= */
