@@ -3168,6 +3168,7 @@ function limpiarEstudiante(){
     document.getElementById("btnGuardarEstudiante").textContent="💾 Guardar estudiante";
 }
 function editarEstudiante(id){
+    if(!exigirDirector())return;
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>Number(x.id)===Number(id));
     if(!e){alert("No se encontró el estudiante.");return;}
     document.getElementById("estId").value=e.id; document.getElementById("estNombre").value=e.nombre||"";
@@ -3178,15 +3179,54 @@ function editarEstudiante(id){
     document.getElementById("estDireccion").value=e.direccion||""; document.getElementById("estEstado").value=e.estado||"Activo";
     document.getElementById("btnGuardarEstudiante").textContent="✏️ Actualizar estudiante"; document.getElementById("estNombre").focus();
 }
+function obtenerAsignacionesDocenteActual(anio){
+    const ses=obtenerSesionActual();
+    if(!ses || ses.rol!=="Docente") return [];
+    const an=String(anio||new Date().getFullYear());
+    return obtenerDatos(KEY_ASIGNACIONES).filter(a=>
+        String(a.anio)===an &&
+        String(a.docenteId||"")===String(ses.docenteId||"") &&
+        String(a.estado||"Activo")==="Activo"
+    );
+}
+function docenteTieneGrupo(nivel,grado,seccion,anio){
+    const ses=obtenerSesionActual();
+    if(!ses || ses.rol!=="Docente") return true;
+    return obtenerAsignacionesDocenteActual(anio).some(a=>
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
+    );
+}
+function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
+    const ses=obtenerSesionActual();
+    if(!ses || ses.rol!=="Docente") return true;
+    return obtenerAsignacionesDocenteActual(anio).some(a=>
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (a.asignaturas||[]).includes(asignatura)
+    );
+}
+
 function cargarEstudiantes(){
     const datos=obtenerDatos(KEY_ESTUDIANTES), tabla=document.getElementById("tablaEstudiantes");
     const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
-    const lista=datos.filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
-    lista.forEach((e,i)=>tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.codigo)}</td><td>${escaparHTML(e.nivel)}</td><td>${escaparHTML(e.grado)}</td><td>${escaparHTML(e.seccion)}</td><td>${escaparHTML(e.responsable||"")}</td><td>${escaparHTML(e.estado||"Activo")}</td><td><button class="btn-warning" onclick="editarEstudiante(${e.id})">✏️ Editar</button> <button class="btn-danger" onclick="eliminarEstudiante(${e.id})">Eliminar</button></td></tr>`);
-    if(!lista.length) tabla.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados.</td></tr>';
+    const ses=obtenerSesionActual();
+    const lista=datos
+        .filter(e=>!ses||ses.rol==="Director"||docenteTieneGrupo(e.nivel,e.grado,e.seccion,e.anio||new Date().getFullYear()))
+        .filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
+    lista.forEach((e,i)=>{
+        const acciones=(!ses||ses.rol==="Director")
+            ? '<button class="btn-warning" onclick="editarEstudiante('+e.id+')">✏️ Editar</button> <button class="btn-danger" onclick="eliminarEstudiante('+e.id+')">Eliminar</button>'
+            : '<span style="color:#6b7280;font-size:12px;">Solo consulta</span>';
+        tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.codigo)}</td><td>${escaparHTML(e.nivel)}</td><td>${escaparHTML(e.grado)}</td><td>${escaparHTML(e.seccion)}</td><td>${escaparHTML(e.responsable||"")}</td><td>${escaparHTML(e.estado||"Activo")}</td><td>${acciones}</td></tr>`;
+    });
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes asignados a su usuario docente.</td></tr>';
 }
 function eliminarEstudiante(id){
+    if(!exigirDirector())return;
     if(!confirm("¿Desea eliminar este estudiante?"))return;
     guardarDatos(KEY_ESTUDIANTES,obtenerDatos(KEY_ESTUDIANTES).filter(e=>Number(e.id)!==Number(id)));
     cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
@@ -3574,7 +3614,8 @@ function cargarAsistencias(){
     const datos=obtenerDatos(KEY_ASISTENCIAS), tabla=document.getElementById("tablaAsistencia");
     const buscar=(document.getElementById("buscarAsistencia")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
-    const lista=datos.filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
+    const ses=obtenerSesionActual();
+    const lista=datos.filter(a=>ses?.rol==="Docente" ? (String(a.docenteId||"")===String(ses.docenteId||"") && docenteTieneGrupo(a.nivel,a.grado,a.seccion,String(a.fecha||"").slice(0,4))) : true).filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
     if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
@@ -3940,8 +3981,10 @@ function cargarCalificaciones(){
     const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value || "");
     const filtroCorte=document.getElementById("filtroCalCorte")?.value || "";
 
+    const ses=obtenerSesionActual();
     const lista=datos.filter(c=>{
 
+        if(ses?.rol==="Docente" && (String(c.docenteId||"")!==String(ses.docenteId||"") || !docenteTieneAsignatura(c.nivel,c.grado,c.seccion,c.asignatura,c.anio))) return false;
         const texto=limpiarTexto([
             c.anio,c.estudiante,c.nivel,c.grado,c.seccion,
             c.asignatura,c.corte,c.resultado,c.observacion
@@ -4023,6 +4066,11 @@ function actualizarResumenCalificaciones(lista){
 ========================================================= */
 
 function editarCalificacion(id){
+    const ses=obtenerSesionActual();
+    if(ses?.rol==="Docente"){
+        const cx=obtenerDatos(KEY_CALIFICACIONES).find(x=>String(x.id)===String(id));
+        if(!cx || String(cx.docenteId||"")!==String(ses.docenteId||"")){alert("No tiene permiso para editar esta calificación.");return;}
+    }
 
     const c=obtenerDatos(KEY_CALIFICACIONES).find(
         registro=>String(registro.id)===String(id)
@@ -5617,8 +5665,9 @@ function guardarHorario(){
 function cargarHorarios(){
     const box=document.getElementById("contenedorHorario");if(!box)return;
     const anio=document.getElementById("filtroHorarioAnio")?.value||"2026",nivel=document.getElementById("filtroHorarioNivel")?.value||"",grado=document.getElementById("filtroHorarioGrado")?.value||"",seccion=document.getElementById("filtroHorarioSeccion")?.value||"",docente=document.getElementById("filtroHorarioDocente")?.value||"",vista=document.getElementById("vistaHorario")?.value||"grupo";
-    let lista=obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)&&(!nivel||normalizarNivel(h.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(h.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(h.seccion)===normalizarSeccion(seccion))&&(!docente||String(h.docenteId)===String(docente))&&String(h.estado||"Activo")==="Activo");
-    const filtroDoc=document.getElementById("filtroHorarioDocente");if(filtroDoc){const prev=filtroDoc.value,ds=[...new Map(obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)).map(h=>[String(h.docenteId),h])).values()];filtroDoc.innerHTML='<option value="">Todos</option>';ds.sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(h=>{const o=document.createElement("option");o.value=h.docenteId;o.textContent=h.docenteNombre;filtroDoc.appendChild(o);});if([...filtroDoc.options].some(o=>o.value===prev))filtroDoc.value=prev;}
+    const ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_HORARIOS).filter(h=>(ses?.rol==="Docente" ? String(h.docenteId||"")===String(ses.docenteId||"") : true)&&String(h.anio)===String(anio)&&(!nivel||normalizarNivel(h.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(h.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(h.seccion)===normalizarSeccion(seccion))&&(!docente||String(h.docenteId)===String(docente))&&String(h.estado||"Activo")==="Activo");
+    const filtroDoc=document.getElementById("filtroHorarioDocente");if(filtroDoc){const prev=filtroDoc.value,baseHor=obtenerDatos(KEY_HORARIOS).filter(h=>String(h.anio)===String(anio)&&(ses?.rol==="Docente"?String(h.docenteId||"")===String(ses.docenteId||""):true)),ds=[...new Map(baseHor.map(h=>[String(h.docenteId),h])).values()];filtroDoc.innerHTML='<option value="">Todos</option>';ds.sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(h=>{const o=document.createElement("option");o.value=h.docenteId;o.textContent=h.docenteNombre;filtroDoc.appendChild(o);});if([...filtroDoc.options].some(o=>o.value===prev))filtroDoc.value=prev;}
     lista.sort((a,b)=>a.dia.localeCompare(b.dia)||a.horaInicio.localeCompare(b.horaInicio));
     const horas=lista.reduce((s,h)=>{const a=h.horaInicio.split(":").map(Number),b=h.horaFin.split(":").map(Number);return s+(b[0]*60+b[1]-a[0]*60-a[1])/60;},0),grupos=new Set(lista.map(h=>[h.nivel,h.grado,h.seccion].join("|"))),docs=new Set(lista.map(h=>String(h.docenteId)));
     document.getElementById("resumenHorarios").innerHTML='<div class="horario-resumen"><div>Clases<strong>'+lista.length+'</strong></div><div>Grupos<strong>'+grupos.size+'</strong></div><div>Docentes<strong>'+docs.size+'</strong></div><div>Horas programadas<strong>'+horas.toFixed(1)+'</strong></div></div>';
@@ -6013,6 +6062,8 @@ function cargarSeguimientos(){
 function editarSeguimiento(id){
     const x=obtenerSeguimientos().find(s=>String(s.id)===String(id));
     if(!x) return;
+    const ses=obtenerSesionActual();
+    if(ses?.rol==="Docente" && String(x.docenteId||"")!==String(ses.docenteId||"")){alert("No tiene permiso para editar este seguimiento.");return;}
     const est=obtenerEstudianteSeguimiento(x.estudianteId);
     if(!est || !estudianteVisibleSeguimiento(est)){alert("No tiene permiso para editar este seguimiento.");return;}
     if(estaCerradoAnio(Number(x.anio))) return;
