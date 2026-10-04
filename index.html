@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza</title>
+<title>Sistema Escolar Nueva Alianza - v7.2</title>
 
 <style>
 *{
@@ -1011,6 +1011,28 @@ th{
                         💾 Guardar configuración
                     </button>
 
+                </div>
+
+                <div class="card">
+                    <h2>💾 Respaldo de información</h2>
+                    <p style="margin-bottom:15px;color:#555;">
+                        Los datos actuales se guardan en este navegador. Use estas opciones para
+                        conservar una copia o trasladar la información a otra computadora.
+                    </p>
+                    <div class="actions">
+                        <button class="btn-primary" onclick="exportarRespaldo()">
+                            📥 Descargar respaldo
+                        </button>
+                        <label class="btn-info" style="display:inline-block;padding:10px 15px;border-radius:8px;cursor:pointer;">
+                            📤 Restaurar respaldo
+                            <input id="archivoRespaldo" type="file" accept=".json,application/json"
+                                   onchange="importarRespaldo(event)" style="display:none;">
+                        </label>
+                        <button class="btn-danger" onclick="borrarDatosSistema()">
+                            🗑️ Borrar datos
+                        </button>
+                    </div>
+                    <p id="estadoRespaldo" style="margin-top:15px;font-size:13px;color:#666;"></p>
                 </div>
 
                 <div class="card">
@@ -2971,6 +2993,190 @@ function cargarConfiguracion(){
         }
 
     }catch(error){}
+
+}
+
+
+/* =========================================================
+   RESPALDO Y RESTAURACIÓN 7.2
+========================================================= */
+
+function construirRespaldo(){
+
+    return {
+        sistema: "Sistema Escolar Nueva Alianza",
+        version: "7.2",
+        fecha: new Date().toISOString(),
+        estudiantes: obtenerDatos(KEY_ESTUDIANTES),
+        docentes: obtenerDatos(KEY_DOCENTES),
+        asistencias: obtenerDatos(KEY_ASISTENCIAS),
+        calificaciones: obtenerDatos(KEY_CALIFICACIONES),
+        configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
+    };
+
+}
+
+
+function exportarRespaldo(){
+
+    const respaldo = construirRespaldo();
+
+    const contenido = JSON.stringify(respaldo,null,2);
+    const blob = new Blob([contenido],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+
+    const enlace = document.createElement("a");
+    const fecha = new Date().toISOString().slice(0,10);
+
+    enlace.href = url;
+    enlace.download = "respaldo-sistema-nueva-alianza-" + fecha + ".json";
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    URL.revokeObjectURL(url);
+
+    mostrarEstadoRespaldo(
+        "✅ Respaldo descargado correctamente."
+    );
+
+}
+
+
+function importarRespaldo(event){
+
+    const archivo = event.target.files && event.target.files[0];
+
+    if(!archivo){
+        return;
+    }
+
+    const lector = new FileReader();
+
+    lector.onload = function(){
+
+        try{
+
+            const respaldo = JSON.parse(lector.result);
+
+            if(
+                !respaldo ||
+                respaldo.sistema !== "Sistema Escolar Nueva Alianza"
+            ){
+                throw new Error("Archivo no válido");
+            }
+
+            const cantidad =
+                (respaldo.estudiantes || []).length +
+                (respaldo.docentes || []).length +
+                (respaldo.asistencias || []).length +
+                (respaldo.calificaciones || []).length;
+
+            const confirmar = confirm(
+                "Este respaldo contiene " + cantidad +
+                " registros.\n\n" +
+                "Al restaurarlo se reemplazarán los datos actuales del navegador.\n\n" +
+                "¿Desea continuar?"
+            );
+
+            if(!confirmar){
+                event.target.value = "";
+                return;
+            }
+
+            guardarDatos(
+                KEY_ESTUDIANTES,
+                Array.isArray(respaldo.estudiantes) ? respaldo.estudiantes : []
+            );
+
+            guardarDatos(
+                KEY_DOCENTES,
+                Array.isArray(respaldo.docentes) ? respaldo.docentes : []
+            );
+
+            guardarDatos(
+                KEY_ASISTENCIAS,
+                Array.isArray(respaldo.asistencias) ? respaldo.asistencias : []
+            );
+
+            guardarDatos(
+                KEY_CALIFICACIONES,
+                Array.isArray(respaldo.calificaciones) ? respaldo.calificaciones : []
+            );
+
+            if(respaldo.configuracion){
+                localStorage.setItem(
+                    KEY_CONFIG,
+                    JSON.stringify(respaldo.configuracion)
+                );
+            }
+
+            cargarTodo();
+
+            mostrarEstadoRespaldo(
+                "✅ Respaldo restaurado correctamente."
+            );
+
+            alert("La información fue restaurada correctamente.");
+
+        }catch(error){
+
+            alert(
+                "No se pudo restaurar el respaldo. " +
+                "Verifique que sea un archivo generado por este sistema."
+            );
+
+        }finally{
+
+            event.target.value = "";
+
+        }
+
+    };
+
+    lector.readAsText(archivo);
+
+}
+
+
+function mostrarEstadoRespaldo(mensaje){
+
+    const elemento =
+        document.getElementById("estadoRespaldo");
+
+    if(elemento){
+        elemento.textContent = mensaje;
+    }
+
+}
+
+
+function borrarDatosSistema(){
+
+    const confirmar = confirm(
+        "⚠️ ATENCIÓN\n\n" +
+        "Esta acción eliminará estudiantes, docentes, asistencias y calificaciones " +
+        "guardados en este navegador.\n\n" +
+        "Se recomienda descargar un respaldo antes de continuar.\n\n" +
+        "¿Desea eliminar los datos?"
+    );
+
+    if(!confirmar){
+        return;
+    }
+
+    localStorage.removeItem(KEY_ESTUDIANTES);
+    localStorage.removeItem(KEY_DOCENTES);
+    localStorage.removeItem(KEY_ASISTENCIAS);
+    localStorage.removeItem(KEY_CALIFICACIONES);
+
+    cargarTodo();
+
+    mostrarEstadoRespaldo(
+        "🗑️ Los datos académicos de este navegador fueron eliminados."
+    );
+
+    alert("Los datos fueron eliminados.");
 
 }
 
