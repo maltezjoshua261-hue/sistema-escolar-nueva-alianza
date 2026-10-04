@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.5</title>
+<title>Sistema Escolar Nueva Alianza - v7.6</title>
 
 <style>
 *{
@@ -470,7 +470,7 @@ th{
                 📄 Boleta del estudiante
             </button>
 
-            <button onclick="mostrarSeccion('configuracion',this)">
+            <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
             </button>
 
@@ -1344,6 +1344,41 @@ th{
                 </div>
 
                 <div class="card">
+                    <h2>🔐 Usuarios y roles</h2>
+                    <div class="notice">
+                        Control básico de acceso para este sistema. Los usuarios se guardan en el navegador.
+                        Para seguridad real entre computadoras será necesario conectar el sistema a una base de datos.
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Usuario</label>
+                            <input id="usrNombre" type="text" placeholder="Ej.: docente1">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input id="usrPassword" type="password" placeholder="Contraseña">
+                        </div>
+                        <div class="form-group">
+                            <label>Rol</label>
+                            <select id="usrRol">
+                                <option value="Docente">Docente</option>
+                                <option value="Director">Director</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-success" onclick="guardarUsuario()">💾 Guardar usuario</button>
+                        <button class="btn-secondary" onclick="limpiarUsuario()">Limpiar</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>#</th><th>Usuario</th><th>Rol</th><th>Acción</th></tr></thead>
+                            <tbody id="tablaUsuarios"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h2>💾 Respaldo de información</h2>
                     <p style="margin-bottom:15px;color:#555;">
                         Los datos actuales se guardan en este navegador. Use estas opciones para
@@ -1404,6 +1439,7 @@ const KEY_DOCENTES = "docentesNuevaAlianza";
 const KEY_ASISTENCIAS = "asistenciasNuevaAlianza";
 const KEY_CALIFICACIONES = "calificacionesNuevaAlianza";
 const KEY_CONFIG = "configNuevaAlianza";
+const KEY_USUARIOS = "usuariosNuevaAlianza";
 
 
 /* =========================================================
@@ -1733,25 +1769,50 @@ const DISCIPLINAS_CUALITATIVAS = [
    LOGIN
 ========================================================= */
 
-function iniciarSesion(){
-
-    const usuario = document.getElementById("loginUser").value.trim();
-    const password = document.getElementById("loginPass").value.trim();
-
-    if(usuario === "admin" && password === "1234"){
-
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-
-        cargarTodo();
-
-    }else{
-
-        document.getElementById("loginError").textContent =
-            "Usuario o contraseña incorrectos.";
-
+function obtenerUsuarios(){
+    let usuarios=obtenerDatos(KEY_USUARIOS);
+    if(!usuarios.length){
+        usuarios=[
+            {id:"admin",usuario:"admin",password:"1234",rol:"Director"},
+            {id:"docente",usuario:"docente",password:"2026",rol:"Docente"}
+        ];
+        guardarDatos(KEY_USUARIOS,usuarios);
     }
+    return usuarios;
+}
 
+function iniciarSesion(){
+    const usuario=document.getElementById("loginUser").value.trim();
+    const password=document.getElementById("loginPass").value.trim();
+    const encontrado=obtenerUsuarios().find(u=>u.usuario===usuario&&u.password===password);
+
+    if(encontrado){
+        sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({usuario:encontrado.usuario,rol:encontrado.rol}));
+        document.getElementById("loginError").textContent="";
+        document.getElementById("loginScreen").style.display="none";
+        document.getElementById("app").style.display="flex";
+        cargarTodo();
+        aplicarPermisos();
+    }else{
+        document.getElementById("loginError").textContent="Usuario o contraseña incorrectos.";
+    }
+}
+
+function aplicarPermisos(){
+    const sesion=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+    if(!sesion) return;
+    const esDirector=sesion.rol==="Director";
+    document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"block":"none");
+    const top=document.querySelector(".topbar div:last-child");
+    if(top) top.textContent=sesion.usuario+" · "+sesion.rol;
+}
+
+function cerrarSesion(){
+    sessionStorage.removeItem("sesionNuevaAlianza");
+    document.getElementById("app").style.display="none";
+    document.getElementById("loginScreen").style.display="flex";
+    document.getElementById("loginUser").value="";
+    document.getElementById("loginPass").value="";
 }
 
 
@@ -2907,7 +2968,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "7.5",
+        version: "7.6",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -3099,6 +3160,8 @@ function cargarTodo(){
 
     cargarEstudiantesBoleta();
     generarBoleta();
+    cargarUsuarios();
+    aplicarPermisos();
 
     actualizarEstadisticas();
 
@@ -3121,6 +3184,35 @@ window.addEventListener("load",function(){
     */
 
 });
+
+function cargarUsuarios(){
+    const tbody=document.getElementById("tablaUsuarios");
+    if(!tbody) return;
+    const usuarios=obtenerUsuarios();
+    tbody.innerHTML=usuarios.map((u,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(u.usuario)+"</td><td>"+escaparHTML(u.rol)+"</td><td>"+(u.usuario==="admin"?"Principal":"<button class='btn-danger' onclick='eliminarUsuario(""+escaparHTML(u.id)+"")'>🗑️</button>")+"</td></tr>").join("");
+}
+function guardarUsuario(){
+    const usuario=document.getElementById("usrNombre").value.trim();
+    const password=document.getElementById("usrPassword").value.trim();
+    const rol=document.getElementById("usrRol").value;
+    if(!usuario||!password){alert("Ingrese usuario y contraseña.");return;}
+    const usuarios=obtenerUsuarios();
+    if(usuarios.some(u=>u.usuario===usuario)){alert("Ese usuario ya existe.");return;}
+    usuarios.push({id:Date.now().toString(),usuario,password,rol});
+    guardarDatos(KEY_USUARIOS,usuarios);
+    limpiarUsuario(); cargarUsuarios();
+}
+function limpiarUsuario(){
+    document.getElementById("usrNombre").value="";
+    document.getElementById("usrPassword").value="";
+    document.getElementById("usrRol").value="Docente";
+}
+function eliminarUsuario(id){
+    if(id==="admin") return;
+    if(!confirm("¿Eliminar este usuario?")) return;
+    guardarDatos(KEY_USUARIOS,obtenerUsuarios().filter(u=>String(u.id)!==String(id)));
+    cargarUsuarios();
+}
 
 /* =========================================================
    BOLETA DEL ESTUDIANTE 7.5
