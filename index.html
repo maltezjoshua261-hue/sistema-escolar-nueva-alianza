@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.7</title>
+<title>Sistema Escolar Nueva Alianza - v9.8</title>
 
 <style>
 *{
@@ -578,6 +578,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             <button onclick="mostrarSeccion('estudiantes',this)">
                 👨‍🎓 Estudiantes
+            </button>
+
+            <button onclick="mostrarSeccion('padresTutores',this)">
+                👨‍👩‍👧 Padres y tutores
             </button>
 
             <button onclick="mostrarSeccion('docentes',this)">
@@ -2435,6 +2439,43 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             </section>
 
+
+            <section id="padresTutores" class="section">
+                <div class="card">
+                    <h2>👨‍👩‍👧 Padres y tutores</h2>
+                    <p class="notice">Registro de responsables familiares vinculado a cada estudiante. El Director puede administrar los datos; el Docente los consulta únicamente para sus grupos asignados.</p>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año</label><select id="padreAnio"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Estudiante</label><select id="padreEstudiante"></select></div>
+                        <div class="form-group"><label>Nombre del padre/tutor</label><input id="padreNombre" placeholder="Nombre completo"></div>
+                        <div class="form-group"><label>Parentesco</label><select id="padreParentesco"><option>Madre</option><option>Padre</option><option>Tutor(a)</option><option>Abuelo(a)</option><option>Hermano(a)</option><option>Otro</option></select></div>
+                        <div class="form-group"><label>Cédula</label><input id="padreCedula"></div>
+                        <div class="form-group"><label>Teléfono</label><input id="padreTelefono"></div>
+                        <div class="form-group"><label>Correo</label><input id="padreCorreo" type="email"></div>
+                        <div class="form-group"><label>Ocupación</label><input id="padreOcupacion"></div>
+                        <div class="form-group"><label>Dirección/comunidad</label><input id="padreDireccion"></div>
+                        <div class="form-group"><label>Contacto de emergencia</label><input id="padreEmergencia"></div>
+                        <div class="form-group"><label>Teléfono de emergencia</label><input id="padreTelefonoEmergencia"></div>
+                        <div class="form-group"><label>Es responsable principal</label><select id="padrePrincipal"><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                        <div class="form-group"><label>Estado</label><select id="padreEstado"><option>Activo</option><option>Inactivo</option></select></div>
+                        <div class="form-group" style="grid-column:1/-1"><label>Observación</label><textarea id="padreObservacion" rows="2"></textarea></div>
+                    </div>
+                    <div class="actions solo-director">
+                        <button class="btn-primary" onclick="guardarPadreTutor()">💾 Guardar</button>
+                        <button class="btn-secondary" onclick="limpiarPadreTutor()">Limpiar</button>
+                    </div>
+                    <input type="hidden" id="padreId">
+                </div>
+                <div class="card">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Filtrar año</label><select id="padreFiltroAnio"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Buscar</label><input id="padreBuscar" placeholder="Estudiante, tutor, teléfono..."></div>
+                    </div>
+                    <div class="actions"><button class="btn-primary" onclick="cargarPadresTutores()">🔎 Buscar</button><button class="btn-secondary" onclick="imprimirPadresTutores()">🖨️ Imprimir</button></div>
+                    <div class="table-container"><table><thead><tr><th>Año</th><th>Estudiante</th><th>Padre/Tutor</th><th>Parentesco</th><th>Teléfono</th><th>Principal</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaPadresTutores"></tbody></table></div>
+                </div>
+            </section>
+
             <section id="bitacora" class="section solo-director">
                 <div class="card">
                     <div class="audit-header"><h2>📜 Bitácora administrativa</h2><p>Registro de acciones realizadas en el sistema por usuario y rol.</p></div>
@@ -2596,6 +2637,7 @@ const KEY_PLANIFICACIONES = "planificacionesNuevaAlianza";
 const KEY_SEGUIMIENTOS = "seguimientosPedagogicosNuevaAlianza";
 const KEY_ALERTAS = "alertasPreventivasNuevaAlianza";
 const KEY_AUDITORIA = "auditoriaNuevaAlianza";
+const KEY_PADRES_TUTORES = "padresTutoresNuevaAlianza";
 
 
 /* =========================================================
@@ -4564,6 +4606,7 @@ function construirRespaldo(){
         seguimientosPedagogicos: obtenerDatos(KEY_SEGUIMIENTOS),
         alertasPreventivas: obtenerDatos(KEY_ALERTAS),
         auditoria: obtenerDatos(KEY_AUDITORIA),
+        padresTutores: obtenerDatos(KEY_PADRES_TUTORES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4707,6 +4750,10 @@ function importarRespaldo(event){
                 KEY_AUDITORIA,
                 Array.isArray(respaldo.auditoria) ? respaldo.auditoria : []
             );
+            guardarDatos(
+                KEY_PADRES_TUTORES,
+                Array.isArray(respaldo.padresTutores) ? respaldo.padresTutores : []
+            );
             registrarAuditoria("Restaurar","Respaldo","Restauración de respaldo del sistema","RESPALDO-"+Date.now(),{anio:new Date().getFullYear()});
 
             if(respaldo.configuracion){
@@ -4785,6 +4832,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_SEGUIMIENTOS);
     localStorage.removeItem(KEY_ALERTAS);
     localStorage.removeItem(KEY_AUDITORIA);
+    localStorage.removeItem(KEY_PADRES_TUTORES);
     registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
     cargarTodo();
@@ -4805,6 +4853,8 @@ function borrarDatosSistema(){
 function cargarTodo(){
 
     cargarEstudiantes();
+    cargarEstudiantesPadresTutores();
+    cargarPadresTutores();
 
     cargarDocentes();
     cargarAsignaciones();
@@ -6240,6 +6290,126 @@ function imprimirReporteSeguimiento(){
     document.body.dataset.imprimiendo="reporteSeguimiento";
     window.print();
     setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarSeguimientos();},500);
+}
+
+
+/* =========================================================
+   PADRES Y TUTORES V9.8
+========================================================= */
+function obtenerPadresTutoresVisibles(anio){
+    const datos=obtenerDatos(KEY_PADRES_TUTORES);
+    const ses=obtenerSesionActual();
+    if(!ses || ses.rol==="Director") return datos;
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    const ids=new Set(estudiantes.map(e=>String(e.id)));
+    return datos.filter(x=>ids.has(String(x.estudianteId)));
+}
+
+function cargarEstudiantesPadresTutores(){
+    const sel=document.getElementById("padreEstudiante"); if(!sel)return;
+    const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
+    const ses=obtenerSesionActual();
+    let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo");
+    if(ses?.rol==="Docente") est=est.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    const prev=sel.value;
+    sel.innerHTML='<option value="">Seleccione estudiante</option>';
+    est.forEach(e=>{
+        const o=document.createElement("option");
+        o.value=e.id;
+        o.textContent=e.nombre+" — "+normalizarNivel(e.nivel)+" "+normalizarGrado(e.grado)+" "+normalizarSeccion(e.seccion);
+        sel.appendChild(o);
+    });
+    if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+}
+
+function guardarPadreTutor(){
+    if(!exigirDirector())return;
+    const id=document.getElementById("padreId")?.value||"";
+    const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
+    const estudianteId=document.getElementById("padreEstudiante")?.value||"";
+    const estudiante=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(estudianteId));
+    const nombre=limpiarTexto(document.getElementById("padreNombre")?.value||"");
+    if(!estudianteId||!estudiante){alert("Seleccione un estudiante.");return}
+    if(!nombre){alert("Ingrese el nombre del padre o tutor.");return}
+    const datos=obtenerDatos(KEY_PADRES_TUTORES);
+    const obj={
+        id:id||"PT-"+Date.now(),
+        anio:String(anio),
+        estudianteId:String(estudianteId),
+        estudianteNombre:estudiante.nombre,
+        parentesco:document.getElementById("padreParentesco")?.value||"Madre",
+        nombre,
+        cedula:limpiarTexto(document.getElementById("padreCedula")?.value||""),
+        telefono:limpiarTexto(document.getElementById("padreTelefono")?.value||""),
+        correo:limpiarTexto(document.getElementById("padreCorreo")?.value||""),
+        ocupacion:limpiarTexto(document.getElementById("padreOcupacion")?.value||""),
+        direccion:limpiarTexto(document.getElementById("padreDireccion")?.value||""),
+        emergencia:limpiarTexto(document.getElementById("padreEmergencia")?.value||""),
+        telefonoEmergencia:limpiarTexto(document.getElementById("padreTelefonoEmergencia")?.value||""),
+        principal:document.getElementById("padrePrincipal")?.value||"No",
+        estado:document.getElementById("padreEstado")?.value||"Activo",
+        observacion:limpiarTexto(document.getElementById("padreObservacion")?.value||""),
+        actualizado:new Date().toISOString()
+    };
+    const idx=datos.findIndex(x=>String(x.id)===String(id));
+    if(obj.principal==="Sí"){
+        datos.forEach(x=>{if(String(x.estudianteId)===String(estudianteId)&&String(x.anio)===String(anio)&&String(x.id)!==String(obj.id))x.principal="No";});
+    }
+    if(idx>=0)datos[idx]=obj;else datos.unshift(obj);
+    guardarDatos(KEY_PADRES_TUTORES,datos);
+    registrarAuditoria(idx>=0?"Editar":"Crear","Padres/Tutores",idx>=0?"Actualización de padre/tutor":"Nuevo padre/tutor",obj.id,{anio});
+    limpiarPadreTutor(); cargarPadresTutores();
+    alert("Registro de padre/tutor guardado correctamente.");
+}
+
+function limpiarPadreTutor(){
+    ["padreId","padreNombre","padreCedula","padreTelefono","padreCorreo","padreOcupacion","padreDireccion","padreEmergencia","padreTelefonoEmergencia","padreObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});
+    const p=document.getElementById("padrePrincipal");if(p)p.value="Sí";
+    const es=document.getElementById("padreEstado");if(es)es.value="Activo";
+}
+
+function cargarPadresTutores(){
+    const tbody=document.getElementById("tablaPadresTutores");if(!tbody)return;
+    const anio=document.getElementById("padreFiltroAnio")?.value||"";
+    const buscar=limpiarTexto(document.getElementById("padreBuscar")?.value||"").toLowerCase();
+    let datos=obtenerPadresTutoresVisibles(anio||new Date().getFullYear());
+    if(anio)datos=datos.filter(x=>String(x.anio)===String(anio));
+    if(buscar)datos=datos.filter(x=>(x.estudianteNombre+" "+x.nombre+" "+x.telefono+" "+x.parentesco).toLowerCase().includes(buscar));
+    tbody.innerHTML=datos.length?datos.map(x=>{
+        const acciones=esDirectorActual()?'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button> <button class="btn-danger" onclick="eliminarPadreTutor(\''+x.id+'\')">Eliminar</button>':"<span>Solo consulta</span>";
+        return "<tr><td>"+escaparHTML(x.anio)+"</td><td>"+escaparHTML(x.estudianteNombre)+"</td><td>"+escaparHTML(x.nombre)+"</td><td>"+escaparHTML(x.parentesco)+"</td><td>"+escaparHTML(x.telefono)+"</td><td>"+escaparHTML(x.principal)+"</td><td>"+escaparHTML(x.estado)+"</td><td>"+acciones+"</td></tr>";
+    }).join(""):"<tr><td colspan='8'>Sin registros.</td></tr>";
+}
+
+function editarPadreTutor(id){
+    if(!exigirDirector())return;
+    const x=obtenerDatos(KEY_PADRES_TUTORES).find(a=>String(a.id)===String(id));if(!x)return;
+    document.getElementById("padreId").value=x.id;document.getElementById("padreAnio").value=x.anio;document.getElementById("padreEstudiante").value=x.estudianteId;
+    document.getElementById("padreNombre").value=x.nombre||"";document.getElementById("padreParentesco").value=x.parentesco||"Madre";document.getElementById("padreCedula").value=x.cedula||"";
+    document.getElementById("padreTelefono").value=x.telefono||"";document.getElementById("padreCorreo").value=x.correo||"";document.getElementById("padreOcupacion").value=x.ocupacion||"";
+    document.getElementById("padreDireccion").value=x.direccion||"";document.getElementById("padreEmergencia").value=x.emergencia||"";document.getElementById("padreTelefonoEmergencia").value=x.telefonoEmergencia||"";
+    document.getElementById("padrePrincipal").value=x.principal||"No";document.getElementById("padreEstado").value=x.estado||"Activo";document.getElementById("padreObservacion").value=x.observacion||"";
+    cargarEstudiantesPadresTutores();
+    document.getElementById("padreEstudiante").value=x.estudianteId;
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function eliminarPadreTutor(id){
+    if(!exigirDirector())return;
+    const datos=obtenerDatos(KEY_PADRES_TUTORES),x=datos.find(a=>String(a.id)===String(id));if(!x)return;
+    if(!confirm("¿Eliminar el registro de padre/tutor de "+x.estudianteNombre+"?"))return;
+    guardarDatos(KEY_PADRES_TUTORES,datos.filter(a=>String(a.id)!==String(id)));
+    registrarAuditoria("Eliminar","Padres/Tutores","Eliminación de padre/tutor",id,{anio:x.anio});
+    cargarPadresTutores();
+}
+
+function imprimirPadresTutores(){
+    const tbody=document.getElementById("tablaPadresTutores");if(!tbody)return;
+    const original=tbody.innerHTML;
+    const datos=obtenerPadresTutoresVisibles(document.getElementById("padreFiltroAnio")?.value||"");
+    tbody.innerHTML=datos.length?datos.map((x,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(x.estudianteNombre)+"</td><td>"+escaparHTML(x.nombre)+"</td><td>"+escaparHTML(x.parentesco)+"</td><td>"+escaparHTML(x.telefono)+"</td><td>"+escaparHTML(x.principal)+"</td><td>"+escaparHTML(x.estado)+"</td></tr>").join(""):"<tr><td colspan='7'>Sin registros.</td></tr>";
+    document.body.dataset.imprimiendo="padresTutores";window.print();
+    setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarPadresTutores()},500);
 }
 
 </script>
