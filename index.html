@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.4</title>
+<title>Sistema Escolar Nueva Alianza - v10.6</title>
 
 <style>
 *{
@@ -5363,7 +5363,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "9.7",
+        version: "10.6",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -5659,6 +5659,13 @@ function cargarTodo(){
     cargarConsolidacionEvaluacion();
     cargarEstudiantesMejora();
     cargarPlanesMejora();
+    cargarEstudiantesPerfilAcademico();
+    cargarPerfilAcademico();
+    cargarComunicacionesFamilia();
+    cargarEstudiantesConvivencia();
+    cargarConvivencia();
+    cargarEstudiantesExpedienteIntegral();
+    generarExpedienteIntegral();
 
     cargarAsistencias();
 
