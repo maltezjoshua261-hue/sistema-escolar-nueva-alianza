@@ -3199,6 +3199,7 @@ function guardarEstudiante(){
         if(i>=0) datos[i]={...datos[i],...estudiante}; else datos.push(estudiante);
     }else datos.push(estudiante);
     guardarDatos(KEY_ESTUDIANTES,datos);
+    registrarAuditoria(id?"Editar":"Crear","Estudiantes",id?"Actualización de datos del estudiante":"Nuevo estudiante",registro.id);
     alert(id?"Estudiante actualizado correctamente.":"Estudiante guardado correctamente.");
     limpiarEstudiante(); cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
 }
@@ -3274,8 +3275,10 @@ function cargarEstudiantes(){
 }
 function eliminarEstudiante(id){
     if(!exigirDirector())return;
+    const registro=obtenerDatos(KEY_ESTUDIANTES).find(e=>Number(e.id)===Number(id));
     if(!confirm("¿Desea eliminar este estudiante?"))return;
     guardarDatos(KEY_ESTUDIANTES,obtenerDatos(KEY_ESTUDIANTES).filter(e=>Number(e.id)!==Number(id)));
+    registrarAuditoria("Eliminar","Estudiantes","Eliminación de estudiante",registro?.id||id);
     cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
 }
 /* =========================================================
@@ -3302,6 +3305,7 @@ function guardarDocente(){
         if(i>=0) datos[i]={...datos[i],...docente}; else datos.push(docente);
     }else datos.push(docente);
     guardarDatos(KEY_DOCENTES,datos);
+    registrarAuditoria(id?"Editar":"Crear","Docentes",id?"Actualización de datos del docente":"Nuevo docente",registro.id);
     alert(id?"Docente actualizado correctamente.":"Docente guardado correctamente.");
     limpiarDocente(); cargarDocentes(); actualizarEstadisticas();
 }
@@ -3329,8 +3333,10 @@ function cargarDocentes(){
     if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay docentes registrados.</td></tr>';
 }
 function eliminarDocente(id){
+    const registro=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(id));
     if(!confirm("¿Desea eliminar este docente?"))return;
     guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).filter(x=>Number(x.id)!==Number(id)));
+    registrarAuditoria("Eliminar","Docentes","Eliminación de docente",registro?.id||id);
     cargarDocentes(); actualizarEstadisticas();
 }
 /* =========================================================
@@ -3672,6 +3678,20 @@ function cargarAsistencias(){
     lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
     if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
+function eliminarAsistencia(id){
+    const registro=obtenerDatos(KEY_ASISTENCIAS).find(a=>String(a.id)===String(id));
+    if(!registro)return;
+    const ses=obtenerSesionActual();
+    if(ses?.rol==="Docente" && String(registro.docenteId||"")!==String(ses.docenteId||"")){
+        alert("No tiene permiso para eliminar esta asistencia.");return;
+    }
+    if(estaCerradoAnio(String(registro.fecha||"").slice(0,4)))return;
+    if(!confirm("¿Desea eliminar esta asistencia?"))return;
+    guardarDatos(KEY_ASISTENCIAS,obtenerDatos(KEY_ASISTENCIAS).filter(a=>String(a.id)!==String(id)));
+    registrarAuditoria("Eliminar","Asistencia","Eliminación de asistencia",registro.id,{anio:String(registro.fecha||"").slice(0,4)||new Date().getFullYear()});
+    cargarAsistencias();actualizarEstadisticas();
+}
+
 /* =========================================================
    CALIFICACIONES 7.3
 ========================================================= */
@@ -4527,7 +4547,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "9.1",
+        version: "9.6",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -4871,8 +4891,10 @@ function guardarUsuario(){
     if(rol==="Docente"&&!docenteId){alert("Seleccione el docente que utilizará este usuario.");return;}
     const usuarios=obtenerUsuarios();
     if(usuarios.some(u=>u.usuario===usuario)){alert("Ese usuario ya existe.");return;}
-    usuarios.push({id:Date.now().toString(),usuario,password,rol,docenteId:rol==="Docente"?String(docenteId):""});
+    const nuevoUsuario={id:Date.now().toString(),usuario,password,rol,docenteId:rol==="Docente"?String(docenteId):""};
+    usuarios.push(nuevoUsuario);
     guardarDatos(KEY_USUARIOS,usuarios);
+    registrarAuditoria("Crear","Usuarios","Creación de usuario: "+usuario,nuevoUsuario.id);
     limpiarUsuario(); cargarUsuarios();
 }
 function limpiarUsuario(){
@@ -4885,8 +4907,10 @@ function limpiarUsuario(){
 function eliminarUsuario(id){
     if(!exigirDirector()) return;
     if(id==="admin") return;
+    const registro=obtenerUsuarios().find(u=>String(u.id)===String(id));
     if(!confirm("¿Eliminar este usuario?")) return;
     guardarDatos(KEY_USUARIOS,obtenerUsuarios().filter(u=>String(u.id)!==String(id)));
+    registrarAuditoria("Eliminar","Usuarios","Eliminación de usuario",registro?.id||id);
     cargarUsuarios();
 }
 
