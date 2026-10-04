@@ -631,6 +631,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             <button onclick="mostrarSeccion('evaluacionAcademica',this)">
                 🎯 Evaluación académica
             </button>
+            <button onclick="mostrarSeccion('consolidacionEvaluacion',this)">
+                📋 Consolidación de evaluación
+            </button>
             <button onclick="mostrarSeccion('historialAcademico',this)">
                 📚 Historial académico
             </button>
@@ -741,6 +744,43 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                     <div class="eval10-print-head"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br>Evaluación académica avanzada</div>
                     <h3>📋 Resumen del grupo</h3>
                     <div id="eval10GrupoResumen">Sin datos.</div>
+                </div>
+            </section>
+
+            <!-- V10.1 CONSOLIDACIÓN DE EVALUACIÓN POR CORTE -->
+            <section id="consolidacionEvaluacion" class="section">
+                <div class="card">
+                    <h2>📋 Consolidación de evaluación por corte</h2>
+                    <p>Resumen académico por estudiante, asignatura y corte. Herramienta administrativa/referencial.</p>
+                    <div class="form-grid no-print">
+                        <div><label>Año</label><select id="consolAnio" onchange="cargarConsolidacionEvaluacion()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div><label>Nivel</label><select id="consolNivel" onchange="actualizarGradosConsolidacion()"><option value="">Todos</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div><label>Grado</label><select id="consolGrado" onchange="cargarConsolidacionEvaluacion()"><option value="">Todos</option></select></div>
+                        <div><label>Sección</label><select id="consolSeccion" onchange="cargarConsolidacionEvaluacion()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div><label>Corte</label><select id="consolCorte" onchange="cargarConsolidacionEvaluacion()"><option>I Corte</option><option>II Corte</option><option>III Corte</option><option>IV Corte</option></select></div>
+                        <div><label>Buscar estudiante</label><input id="consolBuscar" oninput="cargarConsolidacionEvaluacion()" placeholder="Nombre o código"></div>
+                        <div><button onclick="imprimirConsolidacionEvaluacion()">🖨️ Imprimir</button></div>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat"><h3>Estudiantes</h3><strong id="consolTotal">0</strong></div>
+                    <div class="stat"><h3>Satisfactorios</h3><strong id="consolSatisfactorios">0</strong></div>
+                    <div class="stat"><h3>En proceso</h3><strong id="consolProceso">0</strong></div>
+                    <div class="stat"><h3>Requieren apoyo</h3><strong id="consolApoyo">0</strong></div>
+                </div>
+                <div class="card">
+                    <div class="print-header"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br>Consolidación de evaluación académica por corte</div>
+                    <div style="overflow:auto">
+                        <table>
+                            <thead><tr><th>#</th><th>Estudiante</th><th>Grado</th><th>Sección</th><th>Asignaturas evaluadas</th><th>Promedio numérico</th><th>Situación</th><th>Necesita apoyo</th></tr></thead>
+                            <tbody id="tablaConsolidacionEvaluacion"></tbody>
+                        </table>
+                    </div>
+                    <div id="consolDetalle" style="margin-top:18px"></div>
+                    <div class="firma-print" style="margin-top:40px;display:flex;justify-content:space-around;text-align:center">
+                        <div>____________________________<br>Docente</div>
+                        <div>____________________________<br>Director(a)</div>
+                    </div>
                 </div>
             </section>
 
@@ -3196,6 +3236,61 @@ function cargarDatosEval10Estudiante(){
     document.getElementById("eval10Nivel").value=e.nivel||"";actualizarGradosEval10();document.getElementById("eval10Grado").value=e.grado||"";document.getElementById("eval10Seccion").value=e.seccion||"";
     generarAnalisisEval10(id);
 }
+function actualizarGradosConsolidacion(){
+    const n=document.getElementById("consolNivel"),g=document.getElementById("consolGrado");if(!n||!g)return;
+    const prev=g.value;g.innerHTML='<option value="">Todos</option>';
+    const mapa={Inicial:["I Nivel","II Nivel","III Nivel"],Primaria:["1","2","3","4","5","6"],Secundaria:["7","8","9","10","11"]};
+    (mapa[n.value]||["1","2","3","4","5","6","7","8","9","10","11"]).forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;g.appendChild(o);});
+    if([...g.options].some(o=>o.value===prev))g.value=prev;
+    cargarConsolidacionEvaluacion();
+}
+function cargarConsolidacionEvaluacion(){
+    const tb=document.getElementById("tablaConsolidacionEvaluacion");if(!tb)return;
+    const anio=document.getElementById("consolAnio")?.value||String(new Date().getFullYear());
+    const nivel=document.getElementById("consolNivel")?.value||"";
+    const grado=document.getElementById("consolGrado")?.value||"";
+    const sec=document.getElementById("consolSeccion")?.value||"";
+    const corte=document.getElementById("consolCorte")?.value||"I Corte";
+    const q=limpiarTexto(document.getElementById("consolBuscar")?.value||"");
+    const ses=obtenerSesionActual();
+    let estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+        String(e.estado||"Activo")==="Activo" &&
+        (!nivel||normalizarNivel(e.nivel)===normalizarNivel(nivel)) &&
+        (!grado||normalizarGrado(e.grado)===normalizarGrado(grado)) &&
+        (!sec||normalizarSeccion(e.seccion)===normalizarSeccion(sec)) &&
+        (!q||limpiarTexto([e.nombre,e.codigo,e.cedula].join(" ")).includes(q))
+    );
+    if(ses?.rol==="Docente") estudiantes=estudiantes.filter(e=>estudianteVisibleParaRol(e,anio));
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.anio||anio)===String(anio)&&x.corte===corte);
+    const evals=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.anio)===String(anio)&&x.corte===corte);
+    const rows=estudiantes.map(e=>{
+        const cs=cal.filter(x=>String(x.estudianteId)===String(e.id));
+        const es=evals.filter(x=>String(x.estudianteId)===String(e.id));
+        const nums=cs.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado));
+        const prom=nums.length?(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1):"—";
+        const asign=[...new Set(cs.map(x=>x.asignatura).filter(Boolean).concat(es.map(x=>x.asignatura).filter(Boolean)))];
+        const apoyo=cs.some(x=>x.tipo==="Cualitativa"&&x.resultado==="AF")||cs.some(x=>x.tipo==="Numerica"&&Number(x.resultado)<60)||es.some(x=>x.resultado==="Requiere apoyo");
+        const proceso=!apoyo&&(cs.some(x=>x.tipo==="Cualitativa"&&x.resultado==="AS")||cs.some(x=>x.tipo==="Numerica"&&Number(x.resultado)>=60&&Number(x.resultado)<70)||es.some(x=>x.resultado==="En proceso"));
+        const situ=apoyo?"Requiere apoyo":proceso?"En proceso":(cs.length||es.length?"Satisfactorio":"Sin evaluación");
+        return {e,cs,es,prom,asign,apoyo,situ};
+    });
+    const valid=rows.filter(r=>r.cs.length||r.es.length);
+    const s=valid.filter(r=>r.situ==="Satisfactorio").length,p=valid.filter(r=>r.situ==="En proceso").length,a=valid.filter(r=>r.situ==="Requiere apoyo").length;
+    document.getElementById("consolTotal").textContent=valid.length;
+    document.getElementById("consolSatisfactorios").textContent=s;
+    document.getElementById("consolProceso").textContent=p;
+    document.getElementById("consolApoyo").textContent=a;
+    tb.innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+escaparHTML(r.e.nombre)+'</td><td>'+escaparHTML(r.e.grado||"")+'</td><td>'+escaparHTML(r.e.seccion||"")+'</td><td>'+escaparHTML(r.asign.join(", ")||"—")+'</td><td>'+r.prom+'</td><td>'+escaparHTML(r.situ)+'</td><td>'+(r.apoyo?"Sí":"No")+'</td></tr>').join(""):'<tr><td colspan="8">No hay estudiantes o evaluaciones para los filtros seleccionados.</td></tr>';
+    const detalle=document.getElementById("consolDetalle");
+    const apoyos=valid.filter(r=>r.apoyo);
+    detalle.innerHTML='<h3>🎯 Estudiantes que requieren seguimiento</h3>'+(apoyos.length?'<ul>'+apoyos.map(r=>'<li><strong>'+escaparHTML(r.e.nombre)+'</strong> — '+escaparHTML(r.asign.join(", ")||"Revisar calificaciones")+'</li>').join("")+'</ul>':'<p>No se identifican estudiantes con necesidad de apoyo según los registros disponibles.</p>');
+}
+function imprimirConsolidacionEvaluacion(){
+    document.body.setAttribute("data-imprimiendo","consolidacionEvaluacion");
+    window.print();
+    setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);
+}
+
 function guardarEvaluacion10(){
     const anio=document.getElementById("eval10Anio").value, id=document.getElementById("eval10Id").value, estudianteId=document.getElementById("eval10Estudiante").value;
     if(estaCerradoAnio(anio))return;
@@ -3265,6 +3360,11 @@ function mostrarSeccion(id, boton){
 
     if(boton){
         boton.classList.add("active");
+    }
+
+    if(id === "consolidacionEvaluacion"){
+        actualizarGradosConsolidacion();
+        cargarConsolidacionEvaluacion();
     }
 
     if(id === "asignaciones"){
@@ -5026,6 +5126,7 @@ function cargarTodo(){
     cargarSeguimientos();
     generarAlertasPreventivas(false);
     cargarBitacora();
+    cargarConsolidacionEvaluacion();
 
     cargarAsistencias();
 
