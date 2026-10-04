@@ -453,10 +453,11 @@ th{
 
                     <h2>👨‍🎓 Registro de estudiantes</h2>
 
+                    <input type="hidden" id="estId">
                     <div class="form-grid">
 
                         <div class="form-group">
-                            <label>Nombre completo</label>
+                            <label>Nombre completo *</label>
                             <input id="estNombre" type="text">
                         </div>
 
@@ -475,7 +476,12 @@ th{
                         </div>
 
                         <div class="form-group">
-                            <label>Nivel educativo</label>
+                            <label>Fecha de nacimiento</label>
+                            <input id="estNacimiento" type="date">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nivel educativo *</label>
                             <select id="estNivel" onchange="actualizarGradosEstudiante()">
                                 <option value="">Seleccione</option>
                                 <option value="Inicial">Educación Inicial</option>
@@ -504,8 +510,15 @@ th{
 
                     </div>
 
+                    <div class="form-grid">
+                        <div class="form-group"><label>Responsable / Tutor</label><input id="estResponsable" type="text"></div>
+                        <div class="form-group"><label>Teléfono del responsable</label><input id="estTelefono" type="tel"></div>
+                        <div class="form-group"><label>Dirección / Comunidad</label><input id="estDireccion" type="text"></div>
+                        <div class="form-group"><label>Estado</label><select id="estEstado"><option>Activo</option><option>Retirado</option><option>Trasladado</option></select></div>
+                    </div>
+
                     <div class="actions">
-                        <button class="btn-success" onclick="guardarEstudiante()">
+                        <button id="btnGuardarEstudiante" class="btn-success" onclick="guardarEstudiante()">
                             💾 Guardar estudiante
                         </button>
 
@@ -519,6 +532,7 @@ th{
                 <div class="card">
 
                     <h2>Estudiantes registrados</h2>
+                    <div class="form-group"><label>Buscar estudiante</label><input id="buscarEstudiante" type="search" placeholder="Nombre, código, grado o responsable" oninput="cargarEstudiantes()"></div>
 
                     <div class="table-container">
                         <table>
@@ -527,11 +541,11 @@ th{
                                     <th>#</th>
                                     <th>Nombre</th>
                                     <th>Código</th>
-                                    <th>Sexo</th>
+                                    
                                     <th>Nivel</th>
                                     <th>Grado/Nivel</th>
                                     <th>Sección</th>
-                                    <th>Acciones</th>
+                                    <th>Responsable</th><th>Estado</th><th>Acciones</th>
                                 </tr>
                             </thead>
 
@@ -1510,136 +1524,63 @@ function actualizarGradosEstudiante(){
 
 
 function guardarEstudiante(){
-
-    const nombre = document.getElementById("estNombre").value.trim();
-
-    if(!nombre){
-
-        alert("Ingrese el nombre del estudiante.");
-        return;
-
-    }
-
-    const estudiante = {
-
-        id: Date.now(),
-
-        nombre: nombre,
-
-        codigo:
-            document.getElementById("estCodigo").value.trim(),
-
-        sexo:
-            document.getElementById("estSexo").value,
-
-        nivel:
-            document.getElementById("estNivel").value,
-
-        grado:
-            document.getElementById("estGrado").value,
-
-        seccion:
-            document.getElementById("estSeccion").value
-
+    const nombre=document.getElementById("estNombre").value.trim();
+    const nivel=document.getElementById("estNivel").value;
+    const grado=document.getElementById("estGrado").value;
+    const seccion=document.getElementById("estSeccion").value;
+    const id=document.getElementById("estId").value;
+    if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel, grado y sección.");return;}
+    const datos=obtenerDatos(KEY_ESTUDIANTES);
+    const estudiante={
+        id:id?Number(id):Date.now(),nombre,
+        codigo:document.getElementById("estCodigo").value.trim(),
+        sexo:document.getElementById("estSexo").value,
+        nacimiento:document.getElementById("estNacimiento").value,
+        nivel,grado,seccion,
+        responsable:document.getElementById("estResponsable").value.trim(),
+        telefono:document.getElementById("estTelefono").value.trim(),
+        direccion:document.getElementById("estDireccion").value.trim(),
+        estado:document.getElementById("estEstado").value||"Activo"
     };
-
-    const datos = obtenerDatos(KEY_ESTUDIANTES);
-
-    datos.push(estudiante);
-
+    if(id){
+        const i=datos.findIndex(e=>Number(e.id)===Number(id));
+        if(i>=0) datos[i]={...datos[i],...estudiante}; else datos.push(estudiante);
+    }else datos.push(estudiante);
     guardarDatos(KEY_ESTUDIANTES,datos);
-
-    alert("Estudiante guardado correctamente.");
-
-    limpiarEstudiante();
-    cargarEstudiantes();
-    actualizarEstadisticas();
-
+    alert(id?"Estudiante actualizado correctamente.":"Estudiante guardado correctamente.");
+    limpiarEstudiante(); cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
 }
-
-
 function limpiarEstudiante(){
-
-    document.getElementById("estNombre").value = "";
-    document.getElementById("estCodigo").value = "";
-    document.getElementById("estSexo").value = "";
-    document.getElementById("estNivel").value = "";
-
-    document.getElementById("estGrado").innerHTML =
-        '<option value="">Seleccione nivel primero</option>';
-
-    document.getElementById("estSeccion").value = "";
-
+    ["estId","estNombre","estCodigo","estSexo","estNacimiento","estResponsable","estTelefono","estDireccion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
+    document.getElementById("estEstado").value="Activo"; document.getElementById("estNivel").value="";
+    document.getElementById("estGrado").innerHTML='<option value="">Seleccione nivel primero</option>';
+    document.getElementById("estSeccion").value="";
+    document.getElementById("btnGuardarEstudiante").textContent="💾 Guardar estudiante";
 }
-
-
+function editarEstudiante(id){
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>Number(x.id)===Number(id));
+    if(!e){alert("No se encontró el estudiante.");return;}
+    document.getElementById("estId").value=e.id; document.getElementById("estNombre").value=e.nombre||"";
+    document.getElementById("estCodigo").value=e.codigo||""; document.getElementById("estSexo").value=e.sexo||"";
+    document.getElementById("estNacimiento").value=e.nacimiento||""; document.getElementById("estNivel").value=e.nivel||"";
+    actualizarGradosEstudiante(); document.getElementById("estGrado").value=e.grado||""; document.getElementById("estSeccion").value=e.seccion||"";
+    document.getElementById("estResponsable").value=e.responsable||""; document.getElementById("estTelefono").value=e.telefono||"";
+    document.getElementById("estDireccion").value=e.direccion||""; document.getElementById("estEstado").value=e.estado||"Activo";
+    document.getElementById("btnGuardarEstudiante").textContent="✏️ Actualizar estudiante"; document.getElementById("estNombre").focus();
+}
 function cargarEstudiantes(){
-
-    const datos = obtenerDatos(KEY_ESTUDIANTES);
-
-    const tabla = document.getElementById("tablaEstudiantes");
-
-    tabla.innerHTML = "";
-
-    datos.forEach((e,index)=>{
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${index+1}</td>
-
-            <td>${escaparHTML(e.nombre)}</td>
-
-            <td>${escaparHTML(e.codigo)}</td>
-
-            <td>${escaparHTML(e.sexo)}</td>
-
-            <td>${escaparHTML(e.nivel)}</td>
-
-            <td>${escaparHTML(e.grado)}</td>
-
-            <td>${escaparHTML(e.seccion)}</td>
-
-            <td>
-
-                <button
-                    class="btn-danger"
-                    onclick="eliminarEstudiante(${e.id})">
-                    Eliminar
-                </button>
-
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
+    const datos=obtenerDatos(KEY_ESTUDIANTES), tabla=document.getElementById("tablaEstudiantes");
+    const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
+    tabla.innerHTML="";
+    const lista=datos.filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
+    lista.forEach((e,i)=>tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.codigo)}</td><td>${escaparHTML(e.nivel)}</td><td>${escaparHTML(e.grado)}</td><td>${escaparHTML(e.seccion)}</td><td>${escaparHTML(e.responsable||"")}</td><td>${escaparHTML(e.estado||"Activo")}</td><td><button class="btn-warning" onclick="editarEstudiante(${e.id})">✏️ Editar</button> <button class="btn-danger" onclick="eliminarEstudiante(${e.id})">Eliminar</button></td></tr>`);
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados.</td></tr>';
 }
-
-
 function eliminarEstudiante(id){
-
-    if(!confirm("¿Desea eliminar este estudiante?")){
-        return;
-    }
-
-    const datos = obtenerDatos(KEY_ESTUDIANTES);
-
-    const nuevos = datos.filter(e => e.id !== id);
-
-    guardarDatos(KEY_ESTUDIANTES,nuevos);
-
-    cargarEstudiantes();
-    actualizarEstadisticas();
-
-    actualizarCalificaciones();
-
+    if(!confirm("¿Desea eliminar este estudiante?"))return;
+    guardarDatos(KEY_ESTUDIANTES,obtenerDatos(KEY_ESTUDIANTES).filter(e=>Number(e.id)!==Number(id)));
+    cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
 }
-
-
 /* =========================================================
    DOCENTES
 ========================================================= */
