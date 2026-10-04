@@ -5073,7 +5073,7 @@ function actualizarGradosFiltroHorario(){
 }
 function obtenerAsignacionesGrupoHorario(){
     const anio=document.getElementById("horarioAnio")?.value||"2026",nivel=document.getElementById("horarioNivel")?.value,grado=document.getElementById("horarioGrado")?.value,seccion=document.getElementById("horarioSeccion")?.value;
-    return obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(a.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    return obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&(!grado||normalizarGrado(a.grado)===normalizarGrado(grado))&&(!seccion||normalizarSeccion(a.seccion)===normalizarSeccion(seccion)));
 }
 function cargarOpcionesHorario(){
     const asel=document.getElementById("horarioAsignatura"),dsel=document.getElementById("horarioDocente");if(!asel||!dsel)return;
