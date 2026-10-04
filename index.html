@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.8</title>
+<title>Sistema Escolar Nueva Alianza - v10.0</title>
 
 <style>
 *{
@@ -521,6 +521,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 .alertas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.alerta-kpi{padding:16px;border-radius:14px;background:#fff;border:1px solid #e5e7eb;text-align:center}.alerta-kpi strong{display:block;font-size:28px}.alerta-kpi span{font-size:13px;color:#666}.alerta-alta{border-left:5px solid #dc3545!important}.alerta-media{border-left:5px solid #fd7e14!important}.alerta-baja{border-left:5px solid #ffc107!important}.riesgo-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}.riesgo-alto{background:#f8d7da;color:#842029}.riesgo-medio{background:#ffe5d0;color:#8a3d00}.riesgo-bajo{background:#fff3cd;color:#664d03}.alerta-acciones{display:flex;gap:5px;flex-wrap:wrap}.alerta-acciones button{padding:5px 8px;font-size:12px}.alertas-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:18px}.alerta-detalle{background:#f8fafc;border-radius:12px;padding:16px}.alerta-detalle h3{margin-top:0}.alerta-filtros{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end}.alerta-filtros label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}.alerta-filtros input,.alerta-filtros select{width:100%;padding:9px;border:1px solid #d1d5db;border-radius:8px}@media(max-width:900px){.alertas-kpis{grid-template-columns:repeat(2,1fr)}.alertas-grid{grid-template-columns:1fr}.alerta-filtros{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="alertasPreventivas"] .no-print{display:none!important}body[data-imprimiendo="alertasPreventivas"] .section:not(#alertasPreventivas){display:none!important}body[data-imprimiendo="alertaEstudiante"] .section:not(#alertasPreventivas){display:none!important}}
 /* BITÁCORA V9.7 */
 .audit-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:20px;border-radius:14px;margin-bottom:18px}.audit-header h2{color:#fff;margin-bottom:5px}.audit-header p{opacity:.9}.audit-stats{grid-template-columns:repeat(5,1fr)}@media(max-width:900px){.audit-stats{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="bitacora"] *{visibility:hidden!important}body[data-imprimiendo="bitacora"] #bitacora,body[data-imprimiendo="bitacora"] #bitacora *{visibility:visible!important}body[data-imprimiendo="bitacora"] #bitacora{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="bitacora"] #bitacora .actions,body[data-imprimiendo="bitacora"] #bitacora .notice{display:none!important}}
+
+/* v10.0 Evaluación académica avanzada */
+.eval10-header{background:linear-gradient(135deg,#123b6d,#6f42c1);color:#fff;padding:22px;border-radius:16px;margin-bottom:18px}.eval10-header h2{color:#fff;margin-bottom:6px}.eval10-header p{opacity:.92}.eval10-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.eval10-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:15px;text-align:center}.eval10-kpi strong{display:block;font-size:26px;color:#123b6d}.eval10-kpi span{font-size:12px;color:#6b7280}.eval10-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.eval10-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.eval10-form .full{grid-column:1/-1}.eval10-result{padding:12px;border-radius:10px;border-left:5px solid #6f42c1;background:#f7f3ff}.eval10-ok{border-left-color:#198754;background:#f1fbf5}.eval10-warn{border-left-color:#ffc107;background:#fffaf0}.eval10-danger{border-left-color:#dc3545;background:#fff5f5}.eval10-table{font-size:12px}.eval10-table th{background:#123b6d;color:#fff}.eval10-filtros{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end}.eval10-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-weight:bold;font-size:11px}.eval10-badge.verde{background:#d1e7dd;color:#0f5132}.eval10-badge.amarillo{background:#fff3cd;color:#664d03}.eval10-badge.rojo{background:#f8d7da;color:#842029}.eval10-badge.azul{background:#cff4fc;color:#055160}.eval10-print-head{display:none}@media(max-width:1000px){.eval10-kpis{grid-template-columns:repeat(3,1fr)}.eval10-grid{grid-template-columns:1fr}.eval10-filtros{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.eval10-kpis,.eval10-form,.eval10-filtros{grid-template-columns:1fr}.eval10-form .full{grid-column:auto}}@media print{body[data-imprimiendo="evaluacionAcademica"] *{visibility:hidden!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica,body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica *{visibility:visible!important}body[data-imprimiendo="evaluacionAcademica"] #evaluacionAcademica{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="evaluacionAcademica"] .no-print{display:none!important}.eval10-print-head{display:block;text-align:center;margin-bottom:15px}}
 </style>
 </head>
 
@@ -625,6 +628,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             <button onclick="mostrarSeccion('rendimiento',this)">
                 📈 Rendimiento y promoción
             </button>
+            <button onclick="mostrarSeccion('evaluacionAcademica',this)">
+                🎯 Evaluación académica
+            </button>
             <button onclick="mostrarSeccion('historialAcademico',this)">
                 📚 Historial académico
             </button>
@@ -668,6 +674,75 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
         </div>
 
         <div class="content">
+
+
+            <!-- v10.0 EVALUACIÓN ACADÉMICA AVANZADA -->
+            <section id="evaluacionAcademica" class="section">
+                <div class="eval10-header">
+                    <h2>🎯 Evaluación académica avanzada</h2>
+                    <p>Seguimiento por corte, competencias, criterios, evidencias y reforzamiento académico.</p>
+                </div>
+                <div class="eval10-kpis">
+                    <div class="eval10-kpi"><strong id="eval10Total">0</strong><span>Registros de evaluación</span></div>
+                    <div class="eval10-kpi"><strong id="eval10Satisfactorio">0</strong><span>Satisfactorios</span></div>
+                    <div class="eval10-kpi"><strong id="eval10Proceso">0</strong><span>En proceso</span></div>
+                    <div class="eval10-kpi"><strong id="eval10Apoyo">0</strong><span>Requieren apoyo</span></div>
+                    <div class="eval10-kpi"><strong id="eval10Refuerzo">0</strong><span>Refuerzos activos</span></div>
+                </div>
+                <div class="card no-print">
+                    <h3>📝 Registrar evaluación / reforzamiento</h3>
+                    <input type="hidden" id="eval10Id">
+                    <div class="eval10-form">
+                        <div><label>Año</label><select id="eval10Anio"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div><label>Estudiante</label><select id="eval10Estudiante" onchange="cargarDatosEval10Estudiante()"></select></div>
+                        <div><label>Nivel</label><select id="eval10Nivel" onchange="actualizarGradosEval10()"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                        <div><label>Grado</label><select id="eval10Grado"><option value="">Seleccione</option></select></div>
+                        <div><label>Sección</label><select id="eval10Seccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div><label>Asignatura</label><input id="eval10Asignatura" placeholder="Ej. Matemática"></div>
+                        <div><label>Corte</label><select id="eval10Corte"><option>I Corte</option><option>II Corte</option><option>III Corte</option><option>IV Corte</option></select></div>
+                        <div><label>Tipo</label><select id="eval10Tipo"><option>Evaluación de competencia</option><option>Evidencia de aprendizaje</option><option>Reforzamiento</option><option>Recuperación</option></select></div>
+                        <div class="full"><label>Competencia / aprendizaje esperado</label><textarea id="eval10Competencia" rows="2"></textarea></div>
+                        <div><label>Indicador de logro</label><textarea id="eval10Indicador" rows="2"></textarea></div>
+                        <div><label>Criterio de evaluación</label><textarea id="eval10Criterio" rows="2"></textarea></div>
+                        <div><label>Evidencia / actividad realizada</label><textarea id="eval10Evidencia" rows="2"></textarea></div>
+                        <div><label>Resultado</label><select id="eval10Resultado"><option>Satisfactorio</option><option>En proceso</option><option>Requiere apoyo</option><option>Recuperado</option></select></div>
+                        <div><label>Fecha de evaluación</label><input type="date" id="eval10Fecha"></div>
+                        <div class="full"><label>Fortalezas</label><textarea id="eval10Fortalezas" rows="2"></textarea></div>
+                        <div class="full"><label>Dificultades / necesidad de apoyo</label><textarea id="eval10Dificultades" rows="2"></textarea></div>
+                        <div class="full"><label>Actividad de reforzamiento / compromiso</label><textarea id="eval10RefuerzoTexto" rows="2"></textarea></div>
+                        <div><label>Fecha de seguimiento</label><input type="date" id="eval10Seguimiento"></div>
+                        <div><label>Estado</label><select id="eval10Estado"><option>Abierto</option><option>En seguimiento</option><option>Atendido</option><option>Cerrado</option></select></div>
+                    </div>
+                    <div class="form-actions" style="margin-top:12px">
+                        <button class="btn-primary" onclick="guardarEvaluacion10()">💾 Guardar evaluación</button>
+                        <button onclick="limpiarEvaluacion10()">🧹 Limpiar</button>
+                    </div>
+                </div>
+                <div class="eval10-grid">
+                    <div class="card">
+                        <div class="eval10-filtros no-print">
+                            <div><label>Año</label><select id="filtroEval10Anio" onchange="cargarEvaluacion10()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                            <div><label>Corte</label><select id="filtroEval10Corte" onchange="cargarEvaluacion10()"><option value="">Todos</option><option>I Corte</option><option>II Corte</option><option>III Corte</option><option>IV Corte</option></select></div>
+                            <div><label>Resultado</label><select id="filtroEval10Resultado" onchange="cargarEvaluacion10()"><option value="">Todos</option><option>Satisfactorio</option><option>En proceso</option><option>Requiere apoyo</option><option>Recuperado</option></select></div>
+                            <div><label>Estudiante</label><input id="filtroEval10Buscar" oninput="cargarEvaluacion10()" placeholder="Buscar..."></div>
+                            <div><button onclick="imprimirEvaluacion10()">🖨️ Imprimir</button></div>
+                        </div>
+                        <div style="overflow:auto;margin-top:15px"><table class="eval10-table"><thead><tr><th>#</th><th>Año</th><th>Estudiante</th><th>Grado</th><th>Asignatura</th><th>Corte</th><th>Tipo</th><th>Resultado</th><th>Estado</th><th class="no-print">Acciones</th></tr></thead><tbody id="tablaEvaluacion10"></tbody></table></div>
+                    </div>
+                    <div class="card">
+                        <h3>📊 Análisis académico</h3>
+                        <div id="eval10Analisis" class="eval10-result">Seleccione un estudiante o registre una evaluación para ver el análisis.</div>
+                        <hr style="margin:15px 0">
+                        <h3>🎯 Situación de aprendizaje</h3>
+                        <div id="eval10Situacion">Sin datos.</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:18px">
+                    <div class="eval10-print-head"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br>Evaluación académica avanzada</div>
+                    <h3>📋 Resumen del grupo</h3>
+                    <div id="eval10GrupoResumen">Sin datos.</div>
+                </div>
+            </section>
 
             <!-- INICIO -->
             <section id="inicio" class="section active">
@@ -2641,6 +2716,7 @@ const KEY_SEGUIMIENTOS = "seguimientosPedagogicosNuevaAlianza";
 const KEY_ALERTAS = "alertasPreventivasNuevaAlianza";
 const KEY_AUDITORIA = "auditoriaNuevaAlianza";
 const KEY_PADRES_TUTORES = "padresTutoresNuevaAlianza";
+const KEY_EVALUACIONES = "evaluacionesAcademicasNuevaAlianza";
 
 
 /* =========================================================
@@ -3096,6 +3172,76 @@ function cerrarSesion(){
 
 
 
+
+/* =========================================================
+   V10.0 EVALUACIÓN ACADÉMICA AVANZADA
+========================================================= */
+function actualizarGradosEval10(){
+    const nivel=document.getElementById("eval10Nivel")?.value, s=document.getElementById("eval10Grado"); if(!s)return;
+    const lista=nivel==="Inicial"?GRADOS_INICIAL:nivel==="Primaria"?GRADOS_PRIMARIA:nivel==="Secundaria"?GRADOS_SECUNDARIA:[];
+    s.innerHTML='<option value="">Seleccione</option>';
+    lista.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(nivel==="Primaria"||nivel==="Secundaria")?g+"º grado":g;s.appendChild(o);});
+}
+function cargarEstudiantesEvaluacion10(){
+    const s=document.getElementById("eval10Estudiante");if(!s)return;
+    const anio=document.getElementById("eval10Anio")?.value||new Date().getFullYear(), ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo" && estudianteVisibleParaRol(e,anio));
+    lista.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const prev=s.value;s.innerHTML='<option value="">Seleccione estudiante</option>';
+    lista.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=e.nombre+" · "+e.nivel+" · "+e.grado+" · "+e.seccion;s.appendChild(o);});
+    if([...s.options].some(o=>String(o.value)===String(prev)))s.value=prev;
+}
+function cargarDatosEval10Estudiante(){
+    const id=document.getElementById("eval10Estudiante")?.value, e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    document.getElementById("eval10Nivel").value=e.nivel||"";actualizarGradosEval10();document.getElementById("eval10Grado").value=e.grado||"";document.getElementById("eval10Seccion").value=e.seccion||"";
+    generarAnalisisEval10(id);
+}
+function guardarEvaluacion10(){
+    const anio=document.getElementById("eval10Anio").value, id=document.getElementById("eval10Id").value, estudianteId=document.getElementById("eval10Estudiante").value;
+    if(estaCerradoAnio(anio))return;
+    if(!estudianteId){alert("Seleccione el estudiante.");return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("No se encontró el estudiante.");return;}
+    if(!estudianteVisibleParaRol(e,anio)){alert("Este estudiante no pertenece a un grupo asignado a su usuario.");return;}
+    const ses=obtenerSesionActual();
+    const obj={id:id||"EV-"+Date.now(),anio,estudianteId:String(estudianteId),estudiante:e.nombre,nivel:document.getElementById("eval10Nivel").value||e.nivel,grado:document.getElementById("eval10Grado").value||e.grado,seccion:document.getElementById("eval10Seccion").value||e.seccion,asignatura:document.getElementById("eval10Asignatura").value.trim(),corte:document.getElementById("eval10Corte").value,tipo:document.getElementById("eval10Tipo").value,competencia:document.getElementById("eval10Competencia").value.trim(),indicador:document.getElementById("eval10Indicador").value.trim(),criterio:document.getElementById("eval10Criterio").value.trim(),evidencia:document.getElementById("eval10Evidencia").value.trim(),resultado:document.getElementById("eval10Resultado").value,fecha:document.getElementById("eval10Fecha").value||new Date().toISOString().slice(0,10),fortalezas:document.getElementById("eval10Fortalezas").value.trim(),dificultades:document.getElementById("eval10Dificultades").value.trim(),refuerzo:document.getElementById("eval10RefuerzoTexto").value.trim(),fechaSeguimiento:document.getElementById("eval10Seguimiento").value,estado:document.getElementById("eval10Estado").value,docenteId:ses?.rol==="Docente"?String(ses.docenteId||""):(ses?.rol==="Director"?String(document.getElementById("eval10Docente")?.value||""):""),usuario:ses?.usuario||"Sistema"};
+    if(!obj.asignatura){alert("Ingrese la asignatura.");return;}
+    if(ses?.rol==="Docente"&&!docenteTieneAsignatura(obj.nivel,obj.grado,obj.seccion,obj.asignatura,anio)){alert("La asignatura no está asignada a su usuario docente para este grupo.");return;}
+    const datos=obtenerDatos(KEY_EVALUACIONES),idx=datos.findIndex(x=>String(x.id)===String(id));
+    if(idx>=0)datos[idx]=obj;else datos.unshift(obj);guardarDatos(KEY_EVALUACIONES,datos);
+    registrarAuditoria(idx>=0?"Editar":"Crear","Evaluación académica",(idx>=0?"Actualización":"Nueva")+" evaluación de "+e.nombre,obj.id,{anio});
+    alert(idx>=0?"Evaluación actualizada correctamente.":"Evaluación registrada correctamente.");
+    limpiarEvaluacion10();cargarEvaluacion10();
+}
+function limpiarEvaluacion10(){
+    ["eval10Id","eval10Asignatura","eval10Competencia","eval10Indicador","eval10Criterio","eval10Evidencia","eval10Fortalezas","eval10Dificultades","eval10RefuerzoTexto","eval10Seguimiento"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const fecha=document.getElementById("eval10Fecha");if(fecha)fecha.value=new Date().toISOString().slice(0,10);const est=document.getElementById("eval10Estudiante");if(est)est.value="";document.getElementById("eval10Estado").value="Abierto";document.getElementById("eval10Resultado").value="Satisfactorio";document.getElementById("eval10Corte").value="I Corte";
+}
+function cargarEvaluacion10(){
+    const tbody=document.getElementById("tablaEvaluacion10");if(!tbody)return;const anio=document.getElementById("filtroEval10Anio")?.value||"",corte=document.getElementById("filtroEval10Corte")?.value||"",res=document.getElementById("filtroEval10Resultado")?.value||"",q=limpiarTexto(document.getElementById("filtroEval10Buscar")?.value||""),ses=obtenerSesionActual();
+    let lista=obtenerDatos(KEY_EVALUACIONES).filter(x=>(!anio||String(x.anio)===String(anio))&&(!corte||x.corte===corte)&&(!res||x.resultado===res)&&(!q||limpiarTexto([x.estudiante,x.asignatura,x.competencia,x.dificultades].join(" ")).includes(q)));
+    if(ses?.rol==="Docente")lista=lista.filter(x=>String(x.docenteId||"")===String(ses.docenteId||"")&&docenteTieneAsignatura(x.nivel,x.grado,x.seccion,x.asignatura,x.anio));
+    tbody.innerHTML=lista.length?lista.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+escaparHTML(x.anio)+'</td><td>'+escaparHTML(x.estudiante)+'</td><td>'+escaparHTML(x.grado+' '+x.seccion)+'</td><td>'+escaparHTML(x.asignatura)+'</td><td>'+escaparHTML(x.corte)+'</td><td>'+escaparHTML(x.tipo)+'</td><td>'+eval10Badge(x.resultado)+'</td><td>'+escaparHTML(x.estado)+'</td><td class="no-print"><button onclick="editarEvaluacion10(\''+String(x.id).replace(/'/g,"\\'")+'\')">✏️</button> <button class="btn-danger" onclick="eliminarEvaluacion10(\''+String(x.id).replace(/'/g,"\\'")+'\')">🗑️</button></td></tr>').join(""):'<tr><td colspan="10" style="text-align:center;padding:20px">No hay registros.</td></tr>';
+    const total=lista.length,sat=lista.filter(x=>x.resultado==="Satisfactorio"||x.resultado==="Recuperado").length,proc=lista.filter(x=>x.resultado==="En proceso").length,apo=lista.filter(x=>x.resultado==="Requiere apoyo").length,ref=lista.filter(x=>x.tipo==="Reforzamiento"||x.tipo==="Recuperación").filter(x=>!["Atendido","Cerrado"].includes(x.estado)).length;
+    ["eval10Total","eval10Satisfactorio","eval10Proceso","eval10Apoyo","eval10Refuerzo"].forEach((id,i)=>{const e=document.getElementById(id);if(e)e.textContent=[total,sat,proc,apo,ref][i];});
+    generarResumenGrupoEval10(lista);const sid=document.getElementById("eval10Estudiante")?.value;if(sid)generarAnalisisEval10(sid); 
+}
+function eval10Badge(r){const cls=r==="Satisfactorio"||r==="Recuperado"?"verde":r==="En proceso"?"amarillo":"rojo";return '<span class="eval10-badge '+cls+'">'+escaparHTML(r)+'</span>';}
+function generarAnalisisEval10(estudianteId){
+    const box=document.getElementById("eval10Analisis"),sit=document.getElementById("eval10Situacion");if(!box)return;const datos=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.estudianteId)===String(estudianteId)),cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(estudianteId));
+    const nums=cal.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado)),prom=nums.length?(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1):"—",apoyo=datos.filter(x=>x.resultado==="Requiere apoyo").length,rec=datos.filter(x=>x.resultado==="Recuperado").length;
+    box.className="eval10-result "+(apoyo?"eval10-danger":prom!=="—"&&Number(prom)>=70?"eval10-ok":"eval10-warn");box.innerHTML='<strong>Resumen del estudiante</strong><br>Evaluaciones registradas: '+datos.length+'<br>Promedio numérico disponible: '+prom+(prom!=="—"?" puntos":"")+'<br>Registros que requieren apoyo: '+apoyo+'<br>Recuperaciones satisfactorias: '+rec;
+    const dificultades=datos.filter(x=>x.dificultades).map(x=>x.dificultades).slice(0,3);sit.innerHTML=dificultades.length?'<ul>'+dificultades.map(x=>'<li>'+escaparHTML(x)+'</li>').join("")+'</ul>':'<span style="color:#6b7280">No se han registrado dificultades específicas.</span>';
+}
+function generarResumenGrupoEval10(lista){
+    const e=document.getElementById("eval10GrupoResumen");if(!e)return;if(!lista.length){e.textContent="Sin datos.";return;}const por={};lista.forEach(x=>{const k=(x.grado||"")+" "+(x.seccion||"");por[k]??={t:0,s:0,p:0,a:0};por[k].t++;if(x.resultado==="Satisfactorio"||x.resultado==="Recuperado")por[k].s++;else if(x.resultado==="En proceso")por[k].p++;else por[k].a++;});e.innerHTML='<div style="overflow:auto"><table><thead><tr><th>Grupo</th><th>Total</th><th>Satisfactorio</th><th>En proceso</th><th>Apoyo</th></tr></thead><tbody>'+Object.entries(por).map(([k,v])=>'<tr><td>'+escaparHTML(k)+'</td><td>'+v.t+'</td><td>'+v.s+'</td><td>'+v.p+'</td><td>'+v.a+'</td></tr>').join("")+'</tbody></table></div>';
+}
+function editarEvaluacion10(id){
+    const x=obtenerDatos(KEY_EVALUACIONES).find(a=>String(a.id)===String(id));if(!x)return;const e=obtenerDatos(KEY_ESTUDIANTES).find(a=>String(a.id)===String(x.estudianteId));if(!e||!estudianteVisibleParaRol(e,x.anio)){alert("No tiene permiso para editar esta evaluación.");return;}document.getElementById("eval10Id").value=x.id;document.getElementById("eval10Anio").value=x.anio;cargarEstudiantesEvaluacion10();document.getElementById("eval10Estudiante").value=x.estudianteId;document.getElementById("eval10Nivel").value=x.nivel;actualizarGradosEval10();document.getElementById("eval10Grado").value=x.grado;document.getElementById("eval10Seccion").value=x.seccion;["Asignatura","Competencia","Indicador","Criterio","Evidencia","Fortalezas","Dificultades","RefuerzoTexto","Seguimiento","Fecha"].forEach(k=>{const idf="eval10"+k,el=document.getElementById(idf);if(el)el.value=x[k.charAt(0).toLowerCase()+k.slice(1)]||"";});document.getElementById("eval10Corte").value=x.corte;document.getElementById("eval10Tipo").value=x.tipo;document.getElementById("eval10Resultado").value=x.resultado;document.getElementById("eval10Estado").value=x.estado;document.getElementById("evaluacionAcademica").scrollIntoView({behavior:"smooth"});
+}
+function eliminarEvaluacion10(id){
+    if(!esDirectorActual()){alert("La eliminación de evaluaciones es exclusiva del Director.");return;}const anio=document.getElementById("eval10Anio")?.value||new Date().getFullYear();if(estaCerradoAnio(anio))return;if(!confirm("¿Eliminar esta evaluación?"))return;const datos=obtenerDatos(KEY_EVALUACIONES),x=datos.find(a=>String(a.id)===String(id));guardarDatos(KEY_EVALUACIONES,datos.filter(a=>String(a.id)!==String(id)));registrarAuditoria("Eliminar","Evaluación académica","Eliminación de evaluación de "+(x?.estudiante||"estudiante"),id,{anio:x?.anio||anio});cargarEvaluacion10();}
+function imprimirEvaluacion10(){document.body.setAttribute("data-imprimiendo","evaluacionAcademica");window.print();setTimeout(()=>document.body.removeAttribute("data-imprimiendo"),500);}
+
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
@@ -3168,6 +3314,10 @@ function mostrarSeccion(id, boton){
         cargarEstudiantesSeguimiento();
         cargarSeguimientos();
         generarResumenSeguimiento();
+    }
+    if(id === "evaluacionAcademica"){
+        cargarEstudiantesEvaluacion10();
+        cargarEvaluacion10();
     }
     if(id === "alertasPreventivas"){
         cargarGradosAlertas();
@@ -4610,6 +4760,7 @@ function construirRespaldo(){
         alertasPreventivas: obtenerDatos(KEY_ALERTAS),
         auditoria: obtenerDatos(KEY_AUDITORIA),
         padresTutores: obtenerDatos(KEY_PADRES_TUTORES),
+        evaluacionesAcademicas: obtenerDatos(KEY_EVALUACIONES),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4703,6 +4854,11 @@ function importarRespaldo(event){
             guardarDatos(
                 KEY_CALIFICACIONES,
                 Array.isArray(respaldo.calificaciones) ? respaldo.calificaciones : []
+            );
+
+            guardarDatos(
+                KEY_EVALUACIONES,
+                Array.isArray(respaldo.evaluacionesAcademicas) ? respaldo.evaluacionesAcademicas : []
             );
 
             guardarDatos(
@@ -4836,6 +4992,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_ALERTAS);
     localStorage.removeItem(KEY_AUDITORIA);
     localStorage.removeItem(KEY_PADRES_TUTORES);
+    localStorage.removeItem(KEY_EVALUACIONES);
     registrarAuditoria("Eliminar","Sistema","Eliminación general de datos del navegador","BORRADO-"+Date.now(),{anio:new Date().getFullYear()});
 
     cargarTodo();
