@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v7.9</title>
+<title>Sistema Escolar Nueva Alianza - v8.0</title>
 
 <style>
 *{
@@ -427,6 +427,13 @@ position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15
 }
 body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento .no-print{display:none !important;}
 }
+@media print{
+body[data-imprimiendo="rendimiento"] *{visibility:hidden !important;}
+body[data-imprimiendo="rendimiento"] #rendimientoDocumento,
+body[data-imprimiendo="rendimiento"] #rendimientoDocumento *{visibility:visible !important;}
+body[data-imprimiendo="rendimiento"] #rendimientoDocumento{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:15px;}
+body[data-imprimiendo="rendimiento"] #rendimientoDocumento .no-print{display:none !important;}
+}
 </style>
 </head>
 
@@ -500,6 +507,9 @@ body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento .no-print{d
             </button>
             <button onclick="mostrarSeccion('reporteMatricula',this)">
                 📋 Reporte de matrícula
+            </button>
+            <button onclick="mostrarSeccion('rendimiento',this)">
+                📈 Rendimiento y promoción
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
@@ -1547,6 +1557,53 @@ body[data-imprimiendo="reporteMatricula"] #reporteMatriculaDocumento .no-print{d
                             <div>_______________________________<br><strong>Docente / Responsable de matrícula</strong></div>
                             <div>_______________________________<br><strong>Evert Josue Maltez Sanchez<br>Director</strong></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RENDIMIENTO Y PROMOCIÓN 8.0 -->
+            <section id="rendimiento" class="section">
+                <div class="card no-print">
+                    <h2>📈 Rendimiento académico y promoción</h2>
+                    <div class="notice"><strong>Nota:</strong> este reporte es una herramienta administrativa preliminar del centro escolar. La condición oficial de promoción debe aplicarse conforme a la normativa vigente del MINED.</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Año escolar</label><select id="rendAnio" onchange="cargarRendimiento()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Nivel educativo</label><select id="rendNivel" onchange="actualizarGradosRendimiento();cargarRendimiento()"><option value="">Todos</option><option value="Inicial">Educación Inicial</option><option value="Primaria">Primaria</option><option value="Secundaria">Secundaria</option></select></div>
+                        <div class="form-group"><label>Grado</label><select id="rendGrado" onchange="cargarRendimiento()"><option value="">Todos</option></select></div>
+                        <div class="form-group"><label>Sección</label><select id="rendSeccion" onchange="cargarRendimiento()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                        <div class="form-group"><label>Resultado</label><select id="rendResultado" onchange="cargarRendimiento()"><option value="">Todos</option><option value="Satisfactorio">Satisfactorio</option><option value="En proceso">En proceso</option><option value="Requiere apoyo">Requiere apoyo</option><option value="Sin calificaciones">Sin calificaciones</option></select></div>
+                        <div class="form-group"><label>Buscar estudiante</label><input id="rendBuscar" type="search" placeholder="Nombre o código" oninput="cargarRendimiento()"></div>
+                    </div>
+                    <div class="stats" style="grid-template-columns:repeat(4,1fr);">
+                        <div class="stat"><h3>Satisfactorio</h3><strong id="rendSatisfactorio">0</strong></div>
+                        <div class="stat"><h3>En proceso</h3><strong id="rendProceso">0</strong></div>
+                        <div class="stat"><h3>Requiere apoyo</h3><strong id="rendApoyo">0</strong></div>
+                        <div class="stat"><h3>Sin calificaciones</h3><strong id="rendSinCalif">0</strong></div>
+                    </div>
+                    <div class="actions"><button class="btn-primary" onclick="imprimirRendimiento()">🖨️ Imprimir reporte</button></div>
+                </div>
+                <div class="card">
+                    <div id="rendimientoDocumento">
+                        <div style="text-align:center;border-bottom:3px solid #123b6d;padding-bottom:12px;margin-bottom:15px;">
+                            <div style="font-size:18px;font-weight:bold;color:#123b6d;">CENTRO ESCOLAR NUEVA ALIANZA</div>
+                            <div style="font-size:16px;font-weight:bold;">REPORTE DE RENDIMIENTO ACADÉMICO</div>
+                            <div id="rendEncabezado" style="font-size:13px;margin-top:6px;"></div>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>#</th><th>Estudiante</th><th>Código</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Promedio</th><th>Asignaturas</th><th>Resultado</th></tr></thead>
+                                <tbody id="tablaRendimiento"></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:20px;">
+                            <h3 style="color:#123b6d;margin-bottom:8px;">Resumen por grupo</h3>
+                            <div class="table-container"><table>
+                                <thead><tr><th>Nivel</th><th>Grado</th><th>Sección</th><th>Total</th><th>Satisfactorio</th><th>En proceso</th><th>Requiere apoyo</th><th>Sin calificaciones</th></tr></thead>
+                                <tbody id="tablaResumenRendimiento"></tbody>
+                            </table></div>
+                        </div>
+                        <div id="rendPie" style="margin-top:18px;font-size:12px;color:#555;"></div>
+                        <div style="margin-top:70px;text-align:center;font-size:12px;">_______________________________<br><strong>Evert Josue Maltez Sanchez<br>Director</strong></div>
                     </div>
                 </div>
             </section>
@@ -3423,6 +3480,8 @@ function cargarTodo(){
     cargarMatriculas();
     cargarSelectorConstancia();
     actualizarGradosReporteMatricula();
+    actualizarGradosRendimiento();
+    cargarRendimiento();
     cargarReporteMatricula();
     cargarEstudiantesExpediente();
     cargarUsuarios();
@@ -3537,6 +3596,70 @@ function imprimirConstanciaMatricula(){
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
     document.getElementById("constanciaMatriculaContenido").innerHTML='<div style="padding:20px;line-height:2;font-size:15px;text-align:justify;">Por medio de la presente se hace constar que <strong>'+escaparHTML(m.estudiante)+'</strong>, código/cédula <strong>'+escaparHTML(m.codigo||"—")+'</strong>, se encuentra registrado(a) en el <strong>Centro Escolar Nueva Alianza</strong>, correspondiente al año escolar <strong>'+escaparHTML(m.anio)+'</strong>, en <strong>'+escaparHTML(m.nivel||"—")+'</strong>, grado/nivel <strong>'+escaparHTML(m.grado||"—")+'</strong>, sección <strong>'+escaparHTML(m.seccion||"—")+'</strong>. Responsable/tutor: <strong>'+escaparHTML(m.responsable||"—")+'</strong>. Fecha de matrícula: <strong>'+escaparHTML(m.fecha||"—")+'</strong>.<br><br>Se extiende la presente constancia para los fines que estime convenientes.</div>';
     const doc=document.getElementById("constanciaMatriculaDocumento");doc.style.display="block";document.body.setAttribute("data-imprimiendo","matricula");window.print();doc.style.display="none";document.body.removeAttribute("data-imprimiendo");
+}
+
+/* =========================================================
+   RENDIMIENTO Y PROMOCIÓN 8.0
+========================================================= */
+function actualizarGradosRendimiento(){
+    const s=document.getElementById("rendGrado");if(!s)return;
+    const anterior=s.value,n=document.getElementById("rendNivel")?.value||"";
+    let gs=[];
+    if(n==="Inicial")gs=["I Nivel","II Nivel","III Nivel"];
+    else if(n==="Primaria")gs=["1","2","3","4","5","6"];
+    else if(n==="Secundaria")gs=["7","8","9","10","11"];
+    else gs=["I Nivel","II Nivel","III Nivel","1","2","3","4","5","6","7","8","9","10","11"];
+    s.innerHTML='<option value="">Todos</option>'+gs.map(g=>'<option value="'+escaparHTML(g)+'">'+escaparHTML(g)+'</option>').join("");
+    if([...s.options].some(o=>o.value===anterior))s.value=anterior;
+}
+function calcularRendimientoEstudiante(e,anio){
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(e.id)&&String(x.anio||"2026")===String(anio));
+    if(!cal.length)return {promedio:null,asignaturas:0,resultado:"Sin calificaciones"};
+    const por={};
+    cal.forEach(x=>{const a=x.asignatura||"Sin asignatura";if(!por[a])por[a]=[];por[a].push(x);});
+    const finales=[];
+    Object.values(por).forEach(rs=>{
+        const nums=rs.filter(x=>x.tipo==="Numerica"&&Number.isFinite(Number(x.resultado))).map(x=>Number(x.resultado));
+        if(nums.length)finales.push({valor:nums.reduce((a,b)=>a+b,0)/nums.length,tipo:"num"});
+        else {
+            const q=rs.map(x=>String(x.resultado||"")).filter(Boolean);
+            if(q.length)finales.push({valor:q[q.length-1],tipo:"qual"});
+        }
+    });
+    const nums=finales.filter(x=>x.tipo==="num").map(x=>x.valor);
+    const promedio=nums.length?nums.reduce((a,b)=>a+b,0)/nums.length:null;
+    const tieneAF=finales.some(x=>x.tipo==="qual"&&limpiarTexto(x.valor).includes("af"));
+    let resultado="En proceso";
+    if(promedio!==null){
+        if(promedio<60||tieneAF)resultado="Requiere apoyo";
+        else if(promedio>=70&&!tieneAF)resultado="Satisfactorio";
+    }else if(tieneAF)resultado="Requiere apoyo";
+    else {
+        const cual=finales.filter(x=>x.tipo==="qual");
+        if(cual.length)resultado=cual.every(x=>limpiarTexto(x.valor).includes("aa"))?"Satisfactorio":"En proceso";
+    }
+    return {promedio,asignaturas:finales.length,resultado};
+}
+function cargarRendimiento(){
+    const tbody=document.getElementById("tablaRendimiento"),resumen=document.getElementById("tablaResumenRendimiento");if(!tbody||!resumen)return;
+    const anio=document.getElementById("rendAnio")?.value||"2026",nivel=document.getElementById("rendNivel")?.value||"",grado=document.getElementById("rendGrado")?.value||"",sec=document.getElementById("rendSeccion")?.value||"",filtro=document.getElementById("rendResultado")?.value||"",buscar=limpiarTexto(document.getElementById("rendBuscar")?.value||"");
+    const est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo"&&(!nivel||limpiarTexto(e.nivel)===limpiarTexto(nivel))&&(!grado||normalizarGrado(e.grado)===normalizarGrado(grado)||limpiarTexto(e.grado).includes(limpiarTexto(grado)))&&(!sec||limpiarTexto(e.seccion)===limpiarTexto(sec))&&(!buscar||limpiarTexto([e.nombre,e.codigo].join(" ")).includes(buscar)));
+    const rows=est.map(e=>({e,...calcularRendimientoEstudiante(e,anio)})).filter(r=>!filtro||r.resultado===filtro).sort((a,b)=>String(a.e.nombre||"").localeCompare(String(b.e.nombre||""),"es"));
+    const all=est.map(e=>({e,...calcularRendimientoEstudiante(e,anio)}));
+    const count=(v)=>all.filter(r=>r.resultado===v).length;
+    document.getElementById("rendSatisfactorio").textContent=count("Satisfactorio");
+    document.getElementById("rendProceso").textContent=count("En proceso");
+    document.getElementById("rendApoyo").textContent=count("Requiere apoyo");
+    document.getElementById("rendSinCalif").textContent=count("Sin calificaciones");
+    tbody.innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+escaparHTML(r.e.nombre||"—")+'</td><td>'+escaparHTML(r.e.codigo||"—")+'</td><td>'+escaparHTML(r.e.nivel||"—")+'</td><td>'+escaparHTML(r.e.grado||"—")+'</td><td>'+escaparHTML(r.e.seccion||"—")+'</td><td>'+ (r.promedio===null?"—":r.promedio.toFixed(1)) +'</td><td>'+r.asignaturas+'</td><td>'+escaparHTML(r.resultado)+'</td></tr>').join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes para mostrar.</td></tr>';
+    const groups={};rows.forEach(r=>{const k=[r.e.nivel||"—",r.e.grado||"—",r.e.seccion||"—"].join("|");if(!groups[k])groups[k]={nivel:r.e.nivel||"—",grado:r.e.grado||"—",seccion:r.e.seccion||"—",total:0,s:0,p:0,a:0,n:0};const g=groups[k];g.total++;if(r.resultado==="Satisfactorio")g.s++;else if(r.resultado==="En proceso")g.p++;else if(r.resultado==="Requiere apoyo")g.a++;else g.n++;});
+    resumen.innerHTML=Object.values(groups).sort((a,b)=>(a.nivel+" "+a.grado+" "+a.seccion).localeCompare(b.nivel+" "+b.grado+" "+b.seccion,"es")).map(g=>'<tr><td>'+escaparHTML(g.nivel)+'</td><td>'+escaparHTML(g.grado)+'</td><td>'+escaparHTML(g.seccion)+'</td><td>'+g.total+'</td><td>'+g.s+'</td><td>'+g.p+'</td><td>'+g.a+'</td><td>'+g.n+'</td></tr>').join("")||'<tr><td colspan="8" style="text-align:center;color:#777;">No hay grupos para mostrar.</td></tr>';
+    const encabezado="Año escolar: "+anio+" · "+(nivel||"Todos los niveles")+" · "+(grado||"Todos los grados")+" · "+(sec||"Todas las secciones");
+    document.getElementById("rendEncabezado").textContent=encabezado;
+    document.getElementById("rendPie").textContent="Reporte generado el "+new Date().toLocaleDateString("es-NI",{year:"numeric",month:"long",day:"numeric"})+". Los resultados son referenciales y deben contrastarse con la normativa vigente.";
+}
+function imprimirRendimiento(){
+    cargarRendimiento();document.body.setAttribute("data-imprimiendo","rendimiento");window.print();document.body.removeAttribute("data-imprimiendo");
 }
 
 /* =========================================================
