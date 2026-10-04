@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v8.4</title>
+<title>Sistema Escolar Nueva Alianza - v8.4.2</title>
 
 <style>
 *{
@@ -2410,10 +2410,34 @@ function iniciarSesion(){
     }
 }
 
+
+function obtenerSesionActual(){
+    try{
+        return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+    }catch(e){
+        return null;
+    }
+}
+
+function esDirectorActual(){
+    const sesion=obtenerSesionActual();
+    return !!sesion && sesion.rol==="Director";
+}
+
+function exigirDirector(){
+    if(!esDirectorActual()){
+        alert("Acción no permitida. Esta función es exclusiva del Director.");
+        return false;
+    }
+    return true;
+}
+
 function aplicarPermisos(){
     const sesion=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
     if(!sesion) return;
     const esDirector=sesion.rol==="Director";
+    const titulo=document.querySelector(".topbar strong");
+    if(titulo) titulo.textContent=esDirector?"Panel del Director":"Panel del Docente";
     document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"block":"none");
     const top=document.querySelector(".topbar div:last-child");
     if(top) top.textContent=sesion.usuario+" · "+sesion.rol;
@@ -2436,6 +2460,11 @@ function cerrarSesion(){
 ========================================================= */
 
 function mostrarSeccion(id, boton){
+
+    if(id==="configuracion" && !esDirectorActual()){
+        alert("Acceso restringido. La Configuración es exclusiva del Director.");
+        return;
+    }
 
     document.querySelectorAll(".section").forEach(section=>{
         section.classList.remove("active");
@@ -3511,6 +3540,7 @@ function actualizarEstadisticas(){
 ========================================================= */
 
 function guardarConfiguracion(){
+    if(!exigirDirector()) return;
 
     const config={
 
@@ -3592,6 +3622,7 @@ function construirRespaldo(){
 
 
 function exportarRespaldo(){
+    if(!exigirDirector()) return;
 
     const respaldo = construirRespaldo();
 
@@ -3618,6 +3649,7 @@ function exportarRespaldo(){
 
 
 function importarRespaldo(event){
+    if(!exigirDirector()) return;
 
     const archivo = event.target.files && event.target.files[0];
 
@@ -3741,6 +3773,7 @@ function mostrarEstadoRespaldo(mensaje){
 
 
 function borrarDatosSistema(){
+    if(!exigirDirector()) return;
 
     const confirmar = confirm(
         "⚠️ ATENCIÓN\n\n" +
@@ -3839,6 +3872,7 @@ function cargarUsuarios(){
     tbody.innerHTML=usuarios.map((u,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(u.usuario)+"</td><td>"+escaparHTML(u.rol)+"</td><td>"+(u.usuario==="admin"?"Principal":"<button class='btn-danger' onclick='eliminarUsuario(&quot;"+escaparHTML(u.id)+"&quot;)'>🗑️</button>")+"</td></tr>").join("");
 }
 function guardarUsuario(){
+    if(!exigirDirector()) return;
     const usuario=document.getElementById("usrNombre").value.trim();
     const password=document.getElementById("usrPassword").value.trim();
     const rol=document.getElementById("usrRol").value;
@@ -3855,6 +3889,7 @@ function limpiarUsuario(){
     document.getElementById("usrRol").value="Docente";
 }
 function eliminarUsuario(id){
+    if(!exigirDirector()) return;
     if(id==="admin") return;
     if(!confirm("¿Eliminar este usuario?")) return;
     guardarDatos(KEY_USUARIOS,obtenerUsuarios().filter(u=>String(u.id)!==String(id)));
