@@ -564,6 +564,7 @@ th{
 
                     <h2>👨‍🏫 Registro de docentes</h2>
 
+                    <input type="hidden" id="docId">
                     <div class="form-grid">
 
                         <div class="form-group">
@@ -574,6 +575,14 @@ th{
                         <div class="form-group">
                             <label>Código / Cédula</label>
                             <input id="docCodigo" type="text">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Teléfono</label><input id="docTelefono" type="tel">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Correo</label><input id="docCorreo" type="email">
                         </div>
 
                         <div class="form-group">
@@ -601,9 +610,14 @@ th{
 
                     </div>
 
+                    <div class="form-group">
+                        <label>Grados / Secciones que atiende</label>
+                        <input id="docAsignacion" type="text" placeholder="Ej.: 5.º A, 6.º A">
+                    </div>
+
                     <div class="actions">
 
-                        <button class="btn-success" onclick="guardarDocente()">
+                        <button id="btnGuardarDocente" class="btn-success" onclick="guardarDocente()">
                             💾 Guardar docente
                         </button>
 
@@ -618,6 +632,7 @@ th{
                 <div class="card">
 
                     <h2>Docentes registrados</h2>
+                    <div class="form-group"><label>Buscar docente</label><input id="buscarDocente" type="search" placeholder="Nombre, código, especialidad o grado" oninput="cargarDocentes()"></div>
 
                     <div class="table-container">
                         <table>
@@ -1586,126 +1601,56 @@ function eliminarEstudiante(id){
 ========================================================= */
 
 function guardarDocente(){
-
-    const nombre = document.getElementById("docNombre").value.trim();
-
-    if(!nombre){
-
-        alert("Ingrese el nombre del docente.");
-        return;
-
-    }
-
-    const docente = {
-
-        id:Date.now(),
-
-        nombre,
-
-        codigo:
-            document.getElementById("docCodigo").value.trim(),
-
-        especialidad:
-            document.getElementById("docEspecialidad").value.trim(),
-
-        nivel:
-            document.getElementById("docNivel").value,
-
-        estado:
-            document.getElementById("docEstado").value
-
+    const nombre=document.getElementById("docNombre").value.trim();
+    const id=document.getElementById("docId").value;
+    if(!nombre){alert("Ingrese el nombre del docente.");return;}
+    const datos=obtenerDatos(KEY_DOCENTES);
+    const docente={
+        id:id?Number(id):Date.now(),nombre,
+        codigo:document.getElementById("docCodigo").value.trim(),
+        especialidad:document.getElementById("docEspecialidad").value.trim(),
+        telefono:document.getElementById("docTelefono").value.trim(),
+        correo:document.getElementById("docCorreo").value.trim(),
+        nivel:document.getElementById("docNivel").value,
+        asignacion:document.getElementById("docAsignacion").value.trim(),
+        estado:document.getElementById("docEstado").value
     };
-
-    const datos = obtenerDatos(KEY_DOCENTES);
-
-    datos.push(docente);
-
+    if(id){
+        const i=datos.findIndex(x=>Number(x.id)===Number(id));
+        if(i>=0) datos[i]={...datos[i],...docente}; else datos.push(docente);
+    }else datos.push(docente);
     guardarDatos(KEY_DOCENTES,datos);
-
-    alert("Docente guardado correctamente.");
-
-    limpiarDocente();
-    cargarDocentes();
-    actualizarEstadisticas();
-
+    alert(id?"Docente actualizado correctamente.":"Docente guardado correctamente.");
+    limpiarDocente(); cargarDocentes(); actualizarEstadisticas();
 }
-
-
 function limpiarDocente(){
-
-    document.getElementById("docNombre").value = "";
-    document.getElementById("docCodigo").value = "";
-    document.getElementById("docEspecialidad").value = "";
-    document.getElementById("docNivel").value = "";
-    document.getElementById("docEstado").value = "Activo";
-
+    ["docId","docNombre","docCodigo","docEspecialidad","docTelefono","docCorreo","docAsignacion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
+    document.getElementById("docNivel").value=""; document.getElementById("docEstado").value="Activo";
+    document.getElementById("btnGuardarDocente").textContent="💾 Guardar docente";
 }
-
-
+function editarDocente(id){
+    const d=obtenerDatos(KEY_DOCENTES).find(x=>Number(x.id)===Number(id));
+    if(!d){alert("No se encontró el docente.");return;}
+    document.getElementById("docId").value=d.id; document.getElementById("docNombre").value=d.nombre||"";
+    document.getElementById("docCodigo").value=d.codigo||""; document.getElementById("docEspecialidad").value=d.especialidad||"";
+    document.getElementById("docTelefono").value=d.telefono||""; document.getElementById("docCorreo").value=d.correo||"";
+    document.getElementById("docNivel").value=d.nivel||""; document.getElementById("docAsignacion").value=d.asignacion||"";
+    document.getElementById("docEstado").value=d.estado||"Activo";
+    document.getElementById("btnGuardarDocente").textContent="✏️ Actualizar docente"; document.getElementById("docNombre").focus();
+}
 function cargarDocentes(){
-
-    const datos = obtenerDatos(KEY_DOCENTES);
-
-    const tabla = document.getElementById("tablaDocentes");
-
-    tabla.innerHTML = "";
-
-    datos.forEach((d,index)=>{
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${index+1}</td>
-
-            <td>${escaparHTML(d.nombre)}</td>
-
-            <td>${escaparHTML(d.codigo)}</td>
-
-            <td>${escaparHTML(d.especialidad)}</td>
-
-            <td>${escaparHTML(d.nivel)}</td>
-
-            <td>${escaparHTML(d.estado)}</td>
-
-            <td>
-
-                <button
-                    class="btn-danger"
-                    onclick="eliminarDocente(${d.id})">
-                    Eliminar
-                </button>
-
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
+    const datos=obtenerDatos(KEY_DOCENTES), tabla=document.getElementById("tablaDocentes");
+    const buscar=(document.getElementById("buscarDocente")?.value||"").trim().toLowerCase();
+    tabla.innerHTML="";
+    const lista=datos.filter(d=>!buscar||[d.nombre,d.codigo,d.especialidad,d.nivel,d.asignacion,d.estado].join(" ").toLowerCase().includes(buscar));
+    lista.forEach((d,i)=>tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(d.nombre)}</td><td>${escaparHTML(d.codigo)}</td><td>${escaparHTML(d.especialidad)}</td><td>${escaparHTML(d.nivel)}</td><td>${escaparHTML(d.asignacion||"")}</td><td>${escaparHTML(d.estado||"Activo")}</td><td><button class="btn-warning" onclick="editarDocente(${d.id})">✏️ Editar</button> <button class="btn-danger" onclick="eliminarDocente(${d.id})">Eliminar</button></td></tr>`);
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay docentes registrados.</td></tr>';
 }
-
-
 function eliminarDocente(id){
-
-    if(!confirm("¿Desea eliminar este docente?")){
-        return;
-    }
-
-    const datos = obtenerDatos(KEY_DOCENTES);
-
-    guardarDatos(
-        KEY_DOCENTES,
-        datos.filter(d=>d.id !== id)
-    );
-
-    cargarDocentes();
-    actualizarEstadisticas();
-
+    if(!confirm("¿Desea eliminar este docente?"))return;
+    guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).filter(x=>Number(x.id)!==Number(id)));
+    cargarDocentes(); actualizarEstadisticas();
 }
-
-
 /* =========================================================
    ASISTENCIA
 ========================================================= */
