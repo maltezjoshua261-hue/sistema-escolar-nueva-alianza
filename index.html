@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.0</title>
+<title>Sistema Escolar Nueva Alianza - v9.1</title>
 
 <style>
 *{
@@ -492,6 +492,31 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 /* HORARIO ESCOLAR 8.8 */
 .horario-contenedor{overflow-x:auto}.horario-grid{min-width:850px}.horario-grid th{text-align:center}.horario-grid td{vertical-align:top;min-width:145px;height:85px}.horario-celda{background:#eef5ff;border-left:4px solid #0d6efd;border-radius:7px;padding:7px;margin:2px 0;font-size:12px}.horario-celda strong{display:block;color:#123b6d}.horario-celda small{display:block;color:#555;margin-top:3px}.horario-lista{overflow-x:auto}.horario-lista table{min-width:1000px}.horario-alertas{margin:12px 0}.horario-alerta{padding:11px;border-radius:8px;margin:6px 0;border-left:5px solid #dc3545;background:#fff0f1}.horario-alerta.warning{border-left-color:#ffc107;background:#fff8df}.horario-ok{padding:11px;border-radius:8px;border-left:5px solid #198754;background:#eefaf3}.horario-badge{display:inline-block;padding:4px 8px;border-radius:12px;background:#e7f1ff;color:#123b6d;font-weight:bold;font-size:11px}.horario-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.horario-resumen div{border:1px solid #e5e7eb;border-radius:10px;padding:12px;text-align:center;background:#f9fbfd}.horario-resumen strong{display:block;font-size:22px;color:#0d6efd;margin-top:4px}@media(max-width:800px){.horario-resumen{grid-template-columns:repeat(2,1fr)}}
 @media print{body[data-imprimiendo="horarios"] *{visibility:hidden!important}body[data-imprimiendo="horarios"] #horarios,body[data-imprimiendo="horarios"] #horarios *{visibility:visible!important}body[data-imprimiendo="horarios"] #horarios{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="horarios"] #horarios .card:first-child{display:none!important}body[data-imprimiendo="horarios"] #horarios .no-print{display:none!important}}
+/* v9.1 Seguimiento pedagógico */
+.seguimiento-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);gap:20px;margin-bottom:20px}
+.seguimiento-toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.resumen-seguimiento{display:grid;gap:10px}
+.resumen-seguimiento .mini-situacion{padding:12px;border-radius:10px;background:#f7f8fa;border:1px solid #e5e7eb}
+.resumen-seguimiento .mini-situacion strong{display:block;font-size:18px;margin-top:3px}
+.seguimiento-alerta{padding:12px;border-left:5px solid #dc3545;background:#fff5f5;border-radius:8px}
+.seguimiento-ok{padding:12px;border-left:5px solid #198754;background:#f2fff7;border-radius:8px}
+@media(max-width:900px){.seguimiento-grid,.seguimiento-toolbar{grid-template-columns:1fr}}
+@media print{
+ body[data-imprimiendo="seguimiento"] *{visibility:hidden}
+ body[data-imprimiendo="seguimiento"] #seguimiento,
+ body[data-imprimiendo="seguimiento"] #seguimiento *{visibility:visible}
+ body[data-imprimiendo="seguimiento"] #seguimiento{position:absolute;left:0;top:0;width:100%}
+ body[data-imprimiendo="seguimiento"] .seguimiento-toolbar,
+ body[data-imprimiendo="seguimiento"] .form-actions{display:none!important}
+}
+@media print{
+ body[data-imprimiendo="reporteSeguimiento"] *{visibility:hidden}
+ body[data-imprimiendo="reporteSeguimiento"] #seguimiento,
+ body[data-imprimiendo="reporteSeguimiento"] #seguimiento *{visibility:visible}
+ body[data-imprimiendo="reporteSeguimiento"] #seguimiento{position:absolute;left:0;top:0;width:100%}
+ body[data-imprimiendo="reporteSeguimiento"] .seguimiento-toolbar,
+ body[data-imprimiendo="reporteSeguimiento"] .form-actions{display:none!important}
+}
 </style>
 </head>
 
@@ -538,6 +563,10 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
             </button>
             <button onclick="mostrarSeccion('dashboardAcademico',this)">
                 🚀 Dashboard académico
+            </button>
+
+            <button onclick="mostrarSeccion('seguimiento',this)">
+                🧠 Seguimiento pedagógico
             </button>
 
             <button onclick="mostrarSeccion('estudiantes',this)">
@@ -2194,7 +2223,197 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 <div id="documentoOficial" class="documento-oficial"><div style="text-align:center;padding:40px;color:#777;">Seleccione un estudiante y genere un documento.</div></div>
             </section>
 
-                        <section id="configuracion" class="section">
+                        <section id="seguimiento" class="section">
+
+                <div class="page-header">
+                    <div>
+                        <h1>🧠 Seguimiento pedagógico individual</h1>
+                        <p>Registro y seguimiento de avances, dificultades, apoyos, compromisos y alertas de cada estudiante.</p>
+                    </div>
+                </div>
+
+                <div class="seguimiento-grid">
+                    <div class="card">
+                        <h2>Nuevo seguimiento</h2>
+
+                        <div class="form-grid">
+                            <div>
+                                <label>Año</label>
+                                <select id="segAnio" onchange="cargarEstudiantesSeguimiento()">
+                                    <option value="2026">2026</option>
+                                    <option value="2027">2027</option>
+                                    <option value="2028">2028</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Estudiante</label>
+                                <select id="segEstudiante" onchange="generarResumenSeguimiento()">
+                                    <option value="">Seleccione estudiante</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Fecha</label>
+                                <input type="date" id="segFecha">
+                            </div>
+
+                            <div>
+                                <label>Tipo de seguimiento</label>
+                                <select id="segTipo">
+                                    <option>Académico</option>
+                                    <option>Asistencia</option>
+                                    <option>Conducta</option>
+                                    <option>Orientación</option>
+                                    <option>Inclusión y apoyo</option>
+                                    <option>Familiar</option>
+                                    <option>Administrativo</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Nivel de atención</label>
+                                <select id="segPrioridad">
+                                    <option>Normal</option>
+                                    <option>Preventiva</option>
+                                    <option>Atención</option>
+                                    <option>Urgente</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Estado</label>
+                                <select id="segEstado">
+                                    <option>Abierto</option>
+                                    <option>En seguimiento</option>
+                                    <option>Atendido</option>
+                                    <option>Cerrado</option>
+                                </select>
+                            </div>
+
+                            <div class="full">
+                                <label>Dificultades o necesidades identificadas</label>
+                                <textarea id="segDificultades" rows="3" placeholder="Describa las dificultades observadas, sin utilizar diagnósticos médicos."></textarea>
+                            </div>
+
+                            <div class="full">
+                                <label>Fortalezas y avances</label>
+                                <textarea id="segFortalezas" rows="3" placeholder="Avances, habilidades, participación, logros y aspectos positivos."></textarea>
+                            </div>
+
+                            <div class="full">
+                                <label>Apoyo o estrategia acordada</label>
+                                <textarea id="segApoyo" rows="3" placeholder="Acciones pedagógicas, acompañamiento o estrategias de apoyo."></textarea>
+                            </div>
+
+                            <div class="full">
+                                <label>Compromisos</label>
+                                <textarea id="segCompromisos" rows="3" placeholder="Compromisos del estudiante, docente y familia cuando corresponda."></textarea>
+                            </div>
+
+                            <div class="full">
+                                <label>Progreso / resultado del seguimiento</label>
+                                <textarea id="segProgreso" rows="3" placeholder="Resultado observado respecto al seguimiento anterior."></textarea>
+                            </div>
+
+                            <div class="full">
+                                <label>Observación</label>
+                                <textarea id="segObservacion" rows="3"></textarea>
+                            </div>
+
+                            <div>
+                                <label>Próxima revisión</label>
+                                <input type="date" id="segProximaRevision">
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="segId">
+
+                        <div class="form-actions">
+                            <button class="btn-primary" onclick="guardarSeguimiento()">💾 Guardar seguimiento</button>
+                            <button class="btn-secondary" onclick="limpiarSeguimiento()">🧹 Limpiar</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Situación actual del estudiante</h2>
+                        <div id="resumenSeguimiento" class="resumen-seguimiento">
+                            <p>Seleccione un estudiante para consultar su situación académica y de asistencia.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="seguimiento-toolbar">
+                        <div>
+                            <label>Buscar</label>
+                            <input id="segBuscar" type="text" placeholder="Nombre o código..." oninput="cargarSeguimientos()">
+                        </div>
+                        <div>
+                            <label>Estado</label>
+                            <select id="segFiltroEstado" onchange="cargarSeguimientos()">
+                                <option value="">Todos</option>
+                                <option>Abierto</option>
+                                <option>En seguimiento</option>
+                                <option>Atendido</option>
+                                <option>Cerrado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Nivel de atención</label>
+                            <select id="segFiltroPrioridad" onchange="cargarSeguimientos()">
+                                <option value="">Todos</option>
+                                <option>Normal</option>
+                                <option>Preventiva</option>
+                                <option>Atención</option>
+                                <option>Urgente</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Año</label>
+                            <select id="segFiltroAnio" onchange="cargarSeguimientos()">
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-stats">
+                        <div class="stat-card"><span>Total</span><strong id="segTotal">0</strong></div>
+                        <div class="stat-card"><span>Abiertos</span><strong id="segAbiertos">0</strong></div>
+                        <div class="stat-card"><span>Atención/Urgente</span><strong id="segAlertas">0</strong></div>
+                        <div class="stat-card"><span>Revisión pendiente</span><strong id="segPendientes">0</strong></div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estudiante</th>
+                                    <th>Tipo</th>
+                                    <th>Prioridad</th>
+                                    <th>Estado</th>
+                                    <th>Próxima revisión</th>
+                                    <th>Responsable</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaSeguimientos"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="imprimirSeguimiento()">🖨️ Imprimir seguimiento</button>
+                        <button class="btn-secondary" onclick="imprimirReporteSeguimiento()">📄 Reporte general</button>
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="configuracion" class="section">
 
                 <div class="card">
 
@@ -2341,6 +2560,7 @@ const KEY_CIERRES = "cierresAnualesNuevaAlianza";
 const KEY_ASIGNACIONES = "asignacionesAcademicasNuevaAlianza";
 const KEY_HORARIOS = "horariosNuevaAlianza";
 const KEY_PLANIFICACIONES = "planificacionesNuevaAlianza";
+const KEY_SEGUIMIENTOS = "seguimientosPedagogicosNuevaAlianza";
 
 
 /* =========================================================
@@ -2835,6 +3055,12 @@ function mostrarSeccion(id, boton){
 
     if(id === "dashboardAcademico"){
         cargarDashboardAcademicoInicial();
+    }
+
+    if(id === "seguimiento"){
+        cargarEstudiantesSeguimiento();
+        cargarSeguimientos();
+        generarResumenSeguimiento();
     }
 
 }
@@ -4097,7 +4323,7 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "8.9",
+        version: "9.1",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
@@ -4110,6 +4336,7 @@ function construirRespaldo(){
         asignacionesAcademicas: obtenerDatos(KEY_ASIGNACIONES),
         horarios: obtenerDatos(KEY_HORARIOS),
         planificaciones: obtenerDatos(KEY_PLANIFICACIONES),
+        seguimientosPedagogicos: obtenerDatos(KEY_SEGUIMIENTOS),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4239,6 +4466,11 @@ function importarRespaldo(event){
                 KEY_PLANIFICACIONES,
                 Array.isArray(respaldo.planificaciones) ? respaldo.planificaciones : []
             );
+            
+            guardarDatos(
+                KEY_SEGUIMIENTOS,
+                Array.isArray(respaldo.seguimientosPedagogicos) ? respaldo.seguimientosPedagogicos : []
+            );
 
             if(respaldo.configuracion){
                 localStorage.setItem(
@@ -4313,6 +4545,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_ASIGNACIONES);
     localStorage.removeItem(KEY_HORARIOS);
     localStorage.removeItem(KEY_PLANIFICACIONES);
+    localStorage.removeItem(KEY_SEGUIMIENTOS);
 
     cargarTodo();
 
@@ -4339,6 +4572,8 @@ function cargarTodo(){
     cargarOpcionesHorario();
     cargarHorarios();
     cargarPlanificaciones();
+    cargarEstudiantesSeguimiento();
+    cargarSeguimientos();
 
     cargarAsistencias();
 
@@ -5399,6 +5634,270 @@ function cargarDashboardAcademico(){
 }
 function imprimirDashboardAcademico(){cargarDashboardAcademico();document.body.setAttribute("data-imprimiendo","dashboardAcademico");window.print();document.body.removeAttribute("data-imprimiendo")}
 function cargarDashboardAcademicoInicial(){const y=document.getElementById("dash9Anio");if(y)y.value=new Date().getFullYear()>=2026&&new Date().getFullYear()<=2028?String(new Date().getFullYear()):"2026";actualizarGradosDashboard9();cargarDashboardAcademico()}
+
+
+
+
+/* =========================================================
+   v9.1 — SEGUIMIENTO PEDAGÓGICO INDIVIDUAL
+========================================================= */
+
+function obtenerSeguimientos(){
+    return obtenerDatos(KEY_SEGUIMIENTOS);
+}
+
+function sesionDocenteSeguimiento(){
+    const ses=obtenerSesionActual();
+    return ses && ses.rol==="Docente" ? String(ses.docenteId||"") : "";
+}
+
+function estudianteVisibleSeguimiento(est){
+    const ses=obtenerSesionActual();
+    if(!ses) return false;
+    if(ses.rol==="Director") return true;
+    const did=String(ses.docenteId||"");
+    if(!did) return false;
+    const asig=obtenerDatos(KEY_ASIGNACIONES);
+    return asig.some(a=>
+        String(a.docenteId||"")===did &&
+        (a.estado||"Activo")==="Activo" &&
+        normalizarNivel(a.nivel)===normalizarNivel(est.nivel) &&
+        normalizarGrado(a.grado)===normalizarGrado(est.grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(est.seccion)
+    );
+}
+
+function cargarEstudiantesSeguimiento(){
+    const select=document.getElementById("segEstudiante");
+    if(!select) return;
+    const actual=select.value;
+    const lista=obtenerDatos(KEY_ESTUDIANTES)
+        .filter(e=>(e.estado||"Activo")==="Activo")
+        .filter(estudianteVisibleSeguimiento)
+        .sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    select.innerHTML='<option value="">Seleccione estudiante</option>';
+    lista.forEach(e=>{
+        const o=document.createElement("option");
+        o.value=e.id;
+        o.textContent=e.nombre+(e.codigo?" · "+e.codigo:"")+" · "+(e.grado||"")+" "+(e.seccion||"");
+        select.appendChild(o);
+    });
+    if([...select.options].some(o=>String(o.value)===String(actual))) select.value=actual;
+    generarResumenSeguimiento();
+}
+
+function obtenerEstudianteSeguimiento(id){
+    return obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(id));
+}
+
+function datosAcademicosSeguimiento(est){
+    const anio=Number(document.getElementById("segAnio")?.value||new Date().getFullYear());
+    const grades=obtenerDatos(KEY_CALIFICACIONES).filter(x=>
+        String(x.estudianteId)===String(est.id) &&
+        Number(x.anio||anio)===anio
+    );
+    const asis=obtenerDatos(KEY_ASISTENCIAS).filter(x=>
+        String(x.estudianteId)===String(est.id) &&
+        String(x.fecha||"").startsWith(String(anio))
+    );
+    let suma=0,n=0;
+    grades.forEach(g=>{
+        const v=Number(g.notaFinal ?? g.nota ?? g.valor);
+        if(Number.isFinite(v)){suma+=v;n++;}
+    });
+    const promedio=n?Math.round((suma/n)*100)/100:null;
+    const total=asis.length;
+    const presentes=asis.filter(a=>["Presente","Tardanza"].includes(a.estado)).length;
+    const asistencia=total?Math.round((presentes/total)*1000)/10:null;
+    const observaciones=obtenerDatos(KEY_SEGUIMIENTOS).filter(x=>
+        String(x.estudianteId)===String(est.id) && Number(x.anio)===anio
+    );
+    return {grades,asis,promedio,asistencia,observaciones};
+}
+
+function generarResumenSeguimiento(){
+    const box=document.getElementById("resumenSeguimiento");
+    const id=document.getElementById("segEstudiante")?.value;
+    if(!box) return;
+    const est=obtenerEstudianteSeguimiento(id);
+    if(!est){
+        box.innerHTML="<p>Seleccione un estudiante para consultar su situación académica y de asistencia.</p>";
+        return;
+    }
+    const d=datosAcademicosSeguimiento(est);
+    const alertas=[];
+    if(d.asistencia!==null && d.asistencia<80) alertas.push("Asistencia inferior al 80%.");
+    if(d.promedio!==null && d.promedio<60) alertas.push("Promedio numérico inferior a 60.");
+    if(d.grades.length===0) alertas.push("No se encontraron calificaciones para el año seleccionado.");
+    const pendientes=d.observaciones.filter(x=>["Abierto","En seguimiento"].includes(x.estado)).length;
+    if(pendientes) alertas.push("Tiene "+pendientes+" seguimiento(s) abierto(s) o en proceso.");
+    box.innerHTML=
+        '<div class="mini-situacion"><span>Estudiante</span><strong>'+escaparHTML(est.nombre)+'</strong><small>'+escaparHTML((est.nivel||"")+" · "+(est.grado||"")+" · "+(est.seccion||""))+'</small></div>'+
+        '<div class="mini-situacion"><span>Promedio numérico</span><strong>'+(d.promedio===null?"Sin datos":d.promedio)+'</strong></div>'+
+        '<div class="mini-situacion"><span>Asistencia</span><strong>'+(d.asistencia===null?"Sin datos":d.asistencia+"%")+'</strong></div>'+
+        '<div class="mini-situacion"><span>Seguimientos del año</span><strong>'+d.observaciones.length+'</strong></div>'+
+        (alertas.length?'<div class="seguimiento-alerta"><strong>⚠️ Atención</strong><br>'+alertas.map(escaparHTML).join("<br>")+'</div>':'<div class="seguimiento-ok">✅ No se detectan alertas automáticas con los datos disponibles.</div>');
+}
+
+function limpiarSeguimiento(){
+    ["segId","segDificultades","segFortalezas","segApoyo","segCompromisos","segProgreso","segObservacion","segProximaRevision"].forEach(id=>{
+        const e=document.getElementById(id);if(e)e.value="";
+    });
+    const fecha=document.getElementById("segFecha");if(fecha)fecha.value=new Date().toISOString().slice(0,10);
+    const tipo=document.getElementById("segTipo");if(tipo)tipo.value="Académico";
+    const pri=document.getElementById("segPrioridad");if(pri)pri.value="Normal";
+    const estado=document.getElementById("segEstado");if(estado)estado.value="Abierto";
+}
+
+function guardarSeguimiento(){
+    const est=obtenerEstudianteSeguimiento(document.getElementById("segEstudiante")?.value);
+    if(!est){alert("Seleccione un estudiante.");return;}
+    if(!estudianteVisibleSeguimiento(est)){alert("No tiene permiso para dar seguimiento a este estudiante.");return;}
+    const anio=Number(document.getElementById("segAnio").value);
+    if(estaCerradoAnio(anio)) return;
+    const id=document.getElementById("segId").value;
+    const ses=obtenerSesionActual();
+    const lista=obtenerSeguimientos();
+    const existente=id?lista.find(x=>String(x.id)===String(id)):null;
+    const obj={
+        id:id||("SEG-"+Date.now()),
+        anio,
+        estudianteId:est.id,
+        estudianteNombre:est.nombre,
+        nivel:est.nivel||"",
+        grado:est.grado||"",
+        seccion:est.seccion||"",
+        fecha:document.getElementById("segFecha").value||new Date().toISOString().slice(0,10),
+        tipo:document.getElementById("segTipo").value,
+        prioridad:document.getElementById("segPrioridad").value,
+        estado:document.getElementById("segEstado").value,
+        dificultades:document.getElementById("segDificultades").value.trim(),
+        fortalezas:document.getElementById("segFortalezas").value.trim(),
+        apoyo:document.getElementById("segApoyo").value.trim(),
+        compromisos:document.getElementById("segCompromisos").value.trim(),
+        progreso:document.getElementById("segProgreso").value.trim(),
+        observacion:document.getElementById("segObservacion").value.trim(),
+        proximaRevision:document.getElementById("segProximaRevision").value||"",
+        docenteId:ses?.rol==="Docente"?String(ses.docenteId||""):(existente?.docenteId||""),
+        responsable:ses?.usuario||""
+    };
+    if(!obj.dificultades && !obj.fortalezas && !obj.apoyo && !obj.compromisos && !obj.progreso && !obj.observacion){
+        alert("Registre al menos un aspecto del seguimiento.");return;
+    }
+    const idx=lista.findIndex(x=>String(x.id)===String(obj.id));
+    if(idx>=0) lista[idx]=obj; else lista.push(obj);
+    guardarDatos(KEY_SEGUIMIENTOS,lista);
+    alert(idx>=0?"Seguimiento actualizado correctamente.":"Seguimiento guardado correctamente.");
+    limpiarSeguimiento();
+    document.getElementById("segId").value="";
+    cargarSeguimientos();
+    generarResumenSeguimiento();
+}
+
+function cargarSeguimientos(){
+    const tbody=document.getElementById("tablaSeguimientos");
+    if(!tbody) return;
+    const anio=document.getElementById("segFiltroAnio")?.value||"";
+    const estado=document.getElementById("segFiltroEstado")?.value||"";
+    const prioridad=document.getElementById("segFiltroPrioridad")?.value||"";
+    const buscar=limpiarTexto(document.getElementById("segBuscar")?.value||"");
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const visibleIds=new Set(estudiantes.filter(estudianteVisibleSeguimiento).map(e=>String(e.id)));
+    let lista=obtenerSeguimientos().filter(x=>visibleIds.has(String(x.estudianteId)));
+    if(anio) lista=lista.filter(x=>String(x.anio)===String(anio));
+    if(estado) lista=lista.filter(x=>x.estado===estado);
+    if(prioridad) lista=lista.filter(x=>x.prioridad===prioridad);
+    if(buscar) lista=lista.filter(x=>limpiarTexto(x.estudianteNombre+" "+x.estudianteCodigo).includes(buscar));
+    lista.sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")));
+    const hoy=new Date().toISOString().slice(0,10);
+    const abiertos=lista.filter(x=>["Abierto","En seguimiento"].includes(x.estado)).length;
+    const alertas=lista.filter(x=>["Atención","Urgente"].includes(x.prioridad)).length;
+    const pendientes=lista.filter(x=>x.proximaRevision && x.proximaRevision<=hoy && x.estado!=="Cerrado").length;
+    document.getElementById("segTotal").textContent=lista.length;
+    document.getElementById("segAbiertos").textContent=abiertos;
+    document.getElementById("segAlertas").textContent=alertas;
+    document.getElementById("segPendientes").textContent=pendientes;
+    tbody.innerHTML=lista.length?lista.map(x=>"<tr>"+
+        "<td>"+escaparHTML(x.fecha||"")+"</td>"+
+        "<td>"+escaparHTML(x.estudianteNombre||"")+"</td>"+
+        "<td>"+escaparHTML(x.tipo||"")+"</td>"+
+        "<td>"+escaparHTML(x.prioridad||"")+"</td>"+
+        "<td>"+escaparHTML(x.estado||"")+"</td>"+
+        "<td>"+escaparHTML(x.proximaRevision||"")+"</td>"+
+        "<td>"+escaparHTML(x.responsable||"")+"</td>"+
+        "<td><button class='btn-secondary' onclick='editarSeguimiento(&quot;"+escaparHTML(x.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarSeguimiento(&quot;"+escaparHTML(x.id)+"&quot;)'>🗑️</button></td>"+
+        "</tr>").join(""):"<tr><td colspan='8'>No hay seguimientos registrados con los filtros seleccionados.</td></tr>";
+}
+
+function editarSeguimiento(id){
+    const x=obtenerSeguimientos().find(s=>String(s.id)===String(id));
+    if(!x) return;
+    const est=obtenerEstudianteSeguimiento(x.estudianteId);
+    if(!est || !estudianteVisibleSeguimiento(est)){alert("No tiene permiso para editar este seguimiento.");return;}
+    if(estaCerradoAnio(Number(x.anio))) return;
+    document.getElementById("segId").value=x.id;
+    document.getElementById("segAnio").value=x.anio;
+    cargarEstudiantesSeguimiento();
+    document.getElementById("segEstudiante").value=x.estudianteId;
+    ["fecha","tipo","prioridad","estado","dificultades","fortalezas","apoyo","compromisos","progreso","observacion","proximaRevision"].forEach(k=>{
+        const e=document.getElementById("seg"+k.charAt(0).toUpperCase()+k.slice(1));if(e)e.value=x[k]||"";
+    });
+    generarResumenSeguimiento();
+    window.scrollTo({top:document.getElementById("seguimiento").offsetTop,behavior:"smooth"});
+}
+
+function eliminarSeguimiento(id){
+    const x=obtenerSeguimientos().find(s=>String(s.id)===String(id));
+    if(!x) return;
+    if(!esDirectorActual() && String(x.docenteId||"")!==sesionDocenteSeguimiento()){alert("No tiene permiso para eliminar este seguimiento.");return;}
+    if(estaCerradoAnio(Number(x.anio))) return;
+    if(!confirm("¿Desea eliminar este seguimiento?")) return;
+    guardarDatos(KEY_SEGUIMIENTOS,obtenerSeguimientos().filter(s=>String(s.id)!==String(id)));
+    cargarSeguimientos();
+    generarResumenSeguimiento();
+}
+
+function imprimirSeguimiento(){
+    const est=obtenerEstudianteSeguimiento(document.getElementById("segEstudiante")?.value);
+    if(!est){alert("Seleccione un estudiante.");return;}
+    const d=datosAcademicosSeguimiento(est);
+    const lista=obtenerSeguimientos().filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio)===Number(document.getElementById("segAnio").value));
+    const area=document.getElementById("seguimiento");
+    const original=area.querySelector(".page-header")?.innerHTML||"";
+    let reporte='<div class="card"><h2>SEGUIMIENTO PEDAGÓGICO INDIVIDUAL</h2>'+
+        '<p><strong>Estudiante:</strong> '+escaparHTML(est.nombre)+'</p>'+
+        '<p><strong>Nivel:</strong> '+escaparHTML(est.nivel||"")+' &nbsp; <strong>Grado:</strong> '+escaparHTML(est.grado||"")+' &nbsp; <strong>Sección:</strong> '+escaparHTML(est.seccion||"")+'</p>'+
+        '<p><strong>Promedio:</strong> '+(d.promedio??"Sin datos")+' &nbsp; <strong>Asistencia:</strong> '+(d.asistencia===null?"Sin datos":d.asistencia+"%")+'</p></div>';
+    lista.forEach(x=>{reporte+='<div class="card"><h3>'+escaparHTML(x.fecha||"")+' — '+escaparHTML(x.tipo||"")+'</h3>'+
+        '<p><strong>Prioridad:</strong> '+escaparHTML(x.prioridad||"")+' &nbsp; <strong>Estado:</strong> '+escaparHTML(x.estado||"")+'</p>'+
+        '<p><strong>Dificultades:</strong> '+escaparHTML(x.dificultades||"—")+'</p>'+
+        '<p><strong>Fortalezas y avances:</strong> '+escaparHTML(x.fortalezas||"—")+'</p>'+
+        '<p><strong>Apoyo:</strong> '+escaparHTML(x.apoyo||"—")+'</p>'+
+        '<p><strong>Compromisos:</strong> '+escaparHTML(x.compromisos||"—")+'</p>'+
+        '<p><strong>Progreso:</strong> '+escaparHTML(x.progreso||"—")+'</p>'+
+        '<p><strong>Observación:</strong> '+escaparHTML(x.observacion||"—")+'</p>'+
+        '<p><strong>Próxima revisión:</strong> '+escaparHTML(x.proximaRevision||"—")+'</p></div>';});
+    area.innerHTML='<div class="page-header"><div><h1>MINISTERIO DE EDUCACIÓN</h1><p>Centro Escolar Nueva Alianza · Seguimiento pedagógico</p></div></div>'+reporte;
+    document.body.dataset.imprimiendo="seguimiento";
+    window.print();
+    setTimeout(()=>{area.innerHTML='<div class="page-header">'+original+'</div>';delete document.body.dataset.imprimiendo;cargarEstudiantesSeguimiento();cargarSeguimientos();},500);
+}
+
+function imprimirReporteSeguimiento(){
+    const lista=obtenerSeguimientos().filter(x=>{
+        const a=document.getElementById("segFiltroAnio")?.value||"";
+        return (!a||String(x.anio)===String(a));
+    }).filter(x=>{
+        const est=obtenerEstudianteSeguimiento(x.estudianteId);
+        return est&&estudianteVisibleSeguimiento(est);
+    });
+    const tbody=document.getElementById("tablaSeguimientos");
+    const original=tbody.innerHTML;
+    tbody.innerHTML=lista.length?lista.map(x=>"<tr><td>"+escaparHTML(x.fecha||"")+"</td><td>"+escaparHTML(x.estudianteNombre||"")+"</td><td>"+escaparHTML(x.tipo||"")+"</td><td>"+escaparHTML(x.prioridad||"")+"</td><td>"+escaparHTML(x.estado||"")+"</td><td>"+escaparHTML(x.proximaRevision||"")+"</td><td>"+escaparHTML(x.responsable||"")+"</td><td></td></tr>").join(""):"<tr><td colspan='8'>Sin registros.</td></tr>";
+    document.body.dataset.imprimiendo="reporteSeguimiento";
+    window.print();
+    setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarSeguimientos();},500);
+}
 
 </script>
 
