@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.6</title>
+<title>Sistema Escolar Nueva Alianza - v10.9</title>
 
 <style>
 *{
@@ -527,6 +527,17 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!important}body[data-imprimiendo="planesMejora"] #planesMejora{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="planesMejora"] .no-print{display:none!important}
 
 body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){display:none!important}body[data-imprimiendo="expedienteIntegral"] #expedienteIntegral{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="expedienteIntegral"] .no-print{display:none!important}
+/* V10.9 Seguridad y mantenimiento */
+.security-header{border-left:5px solid #0d6efd;padding-left:14px;margin-bottom:18px}
+.security-header h2{margin-bottom:6px}
+.security-header p{color:#667085}
+.security-stats .stat strong{font-size:22px}
+#tablaSeguridad109 td:nth-child(2){font-weight:bold}
+.security-ok{color:#198754}
+.security-warn{color:#b7791f}
+.security-error{color:#dc3545}
+.security-info{color:#0d6efd}
+
 </style>
 </head>
 
@@ -672,6 +683,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                 📑 Documentos oficiales
             </button>
 
+            <button class="solo-director" onclick="mostrarSeccion('seguridadMantenimiento',this)">🛡️ Seguridad y mantenimiento</button>
             <button class="solo-director" onclick="mostrarSeccion('bitacora',this)">📜 Bitácora administrativa</button>
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
@@ -3360,7 +3372,9 @@ function iniciarSesion(){
     if(encontrado){
         sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
             usuario:encontrado.usuario,
-            rol:encontrado.rol||"Docente"
+            rol:encontrado.rol||"Docente",
+            docenteId:encontrado.docenteId||"",
+            ultimaActividad:Date.now()
         }));
         document.getElementById("loginError").textContent="";
         document.getElementById("loginScreen").style.display="none";
@@ -3844,11 +3858,147 @@ function imprimirExpedienteIntegral(){document.body.setAttribute("data-imprimien
  
 
 /* =========================================================
+   V10.9 SEGURIDAD, INTEGRIDAD Y MANTENIMIENTO
+========================================================= */
+const TIEMPO_INACTIVIDAD_109 = 60*60*1000;
+const CLAVES_SISTEMA_109 = [
+    KEY_ESTUDIANTES,KEY_DOCENTES,KEY_ASISTENCIAS,KEY_CALIFICACIONES,
+    KEY_CONFIG,KEY_MATRICULAS,KEY_EXPEDIENTES,KEY_PROMOCIONES,KEY_USUARIOS,
+    KEY_CIERRES,KEY_ASIGNACIONES,KEY_HORARIOS,KEY_PLANIFICACIONES,
+    KEY_SEGUIMIENTOS,KEY_ALERTAS,KEY_AUDITORIA,KEY_PADRES_TUTORES,
+    KEY_EVALUACIONES,KEY_COMUNICACIONES,KEY_PLANES_MEJORA,KEY_CONVIVENCIA
+];
+
+function registrarActividadSesion109(){
+    const ses=obtenerSesionActual();
+    if(!ses)return;
+    ses.ultimaActividad=Date.now();
+    sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(ses));
+}
+
+function validarSesion109(){
+    const ses=obtenerSesionActual();
+    if(!ses)return false;
+    const ultima=Number(ses.ultimaActividad||0);
+    if(ultima && Date.now()-ultima>TIEMPO_INACTIVIDAD_109){
+        sessionStorage.removeItem("sesionNuevaAlianza");
+        const app=document.getElementById("app"),login=document.getElementById("loginScreen");
+        if(app)app.style.display="none";
+        if(login)login.style.display="flex";
+        alert("La sesión se cerró por inactividad. Inicie sesión nuevamente.");
+        return false;
+    }
+    registrarActividadSesion109();
+    return true;
+}
+
+function obtenerUsoLocalStorage109(){
+    let bytes=0;
+    for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        const v=localStorage.getItem(k)||"";
+        bytes+=(String(k).length+v.length)*2;
+    }
+    return bytes;
+}
+
+function revisarClaves109(){
+    return CLAVES_SISTEMA_109.map(clave=>{
+        const bruto=localStorage.getItem(clave);
+        if(bruto===null)return {clave,estado:"info",detalle:"Sin registros almacenados."};
+        try{
+            const datos=JSON.parse(bruto);
+            if(clave===KEY_CONFIG){
+                return {clave,estado:(datos&&typeof datos==="object")?"ok":"error",detalle:(datos&&typeof datos==="object")?"Configuración válida.":"Configuración inválida."};
+            }
+            return {clave,estado:Array.isArray(datos)?"ok":"error",detalle:Array.isArray(datos)?datos.length+" registros.":"El contenido no es una lista válida."};
+        }catch(e){
+            return {clave,estado:"error",detalle:"JSON inválido o corrupto."};
+        }
+    });
+}
+
+function idsDuplicados109(datos){
+    if(!Array.isArray(datos))return 0;
+    const vistos=new Set(),dup=new Set();
+    datos.forEach(x=>{const id=String(x?.id||"");if(!id)return;if(vistos.has(id))dup.add(id);vistos.add(id);});
+    return dup.size;
+}
+
+function ejecutarDiagnostico109(){
+    if(!exigirDirector())return;
+    const filas=revisarClaves109(), problemas=[], advertencias=[];
+    filas.forEach(x=>{
+        if(x.estado==="error")problemas.push(x.clave+": "+x.detalle);
+        if(x.estado==="info")advertencias.push(x.clave+": "+x.detalle);
+    });
+    const chequeos=[
+        [KEY_ESTUDIANTES,"estudiantes"],
+        [KEY_DOCENTES,"docentes"],
+        [KEY_CALIFICACIONES,"calificaciones"],
+        [KEY_ASISTENCIAS,"asistencias"],
+        [KEY_MATRICULAS,"matriculas"],
+        [KEY_ASIGNACIONES,"asignaciones"],
+        [KEY_EVALUACIONES,"evaluaciones"]
+    ];
+    chequeos.forEach(([clave,nombre])=>{
+        const d=obtenerDatos(clave),n=idsDuplicados109(d);
+        if(n)problemas.push(nombre+": "+n+" identificadores duplicados.");
+    });
+    const idsEst=new Set(obtenerDatos(KEY_ESTUDIANTES).map(x=>String(x.id)));
+    const idsDoc=new Set(obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)));
+    obtenerDatos(KEY_CALIFICACIONES).forEach(x=>{if(x.estudianteId&&!idsEst.has(String(x.estudianteId)))problemas.push("Calificación "+(x.id||"")+" apunta a estudiante inexistente.");});
+    obtenerDatos(KEY_ASISTENCIAS).forEach(x=>{if(x.estudianteId&&!idsEst.has(String(x.estudianteId)))problemas.push("Asistencia "+(x.id||"")+" apunta a estudiante inexistente.");});
+    obtenerDatos(KEY_MATRICULAS).forEach(x=>{if(x.estudianteId&&!idsEst.has(String(x.estudianteId)))problemas.push("Matrícula "+(x.id||"")+" apunta a estudiante inexistente.");});
+    obtenerDatos(KEY_ASIGNACIONES).forEach(x=>{if(x.docenteId&&!idsDoc.has(String(x.docenteId)))advertencias.push("Asignación "+(x.id||"")+" apunta a docente inexistente.");});
+    const bytes=obtenerUsoLocalStorage109(),kb=(bytes/1024).toFixed(1);
+    if(bytes>4*1024*1024)advertencias.push("El almacenamiento local supera 4 MB; se recomienda respaldo y mantenimiento.");
+    const totalProblemas=problemas.length,totalAdvertencias=advertencias.length;
+    document.getElementById("secEstado").textContent=totalProblemas?"Requiere atención":totalAdvertencias?"Con advertencias":"Correcto";
+    document.getElementById("secEstado").className=totalProblemas?"security-error":totalAdvertencias?"security-warn":"security-ok";
+    document.getElementById("secClaves").textContent=filas.length;
+    document.getElementById("secProblemas").textContent=totalProblemas;
+    document.getElementById("secAdvertencias").textContent=totalAdvertencias;
+    document.getElementById("secStorage").textContent=kb+" KB";
+    document.getElementById("secResumen").textContent=totalProblemas?"Se encontraron "+totalProblemas+" problema(s) que requieren revisión.":totalAdvertencias?"El sistema funciona, pero presenta "+totalAdvertencias+" advertencia(s).":"No se detectaron problemas de integridad en la revisión automática.";
+    const tbody=document.getElementById("tablaSeguridad109");
+    const rows=filas.map(x=>"<tr><td>"+escaparHTML(x.clave)+"</td><td class='"+(x.estado==="ok"?"security-ok":x.estado==="error"?"security-error":"security-info")+"'>"+(x.estado==="ok"?"Correcto":x.estado==="error"?"Error":"Información")+"</td><td>"+escaparHTML(x.detalle)+"</td></tr>");
+    problemas.forEach(x=>rows.push("<tr><td>Integridad referencial</td><td class='security-error'>Problema</td><td>"+escaparHTML(x)+"</td></tr>"));
+    advertencias.forEach(x=>rows.push("<tr><td>Mantenimiento</td><td class='security-warn'>Advertencia</td><td>"+escaparHTML(x)+"</td></tr>"));
+    tbody.innerHTML=rows.join("");
+    registrarAuditoria("Diagnóstico","Seguridad","Diagnóstico de integridad: "+totalProblemas+" problemas y "+totalAdvertencias+" advertencias","DIAG-"+Date.now());
+}
+
+function optimizarSistema109(){
+    if(!exigirDirector())return;
+    if(!confirm("Se optimizará únicamente la bitácora: se eliminarán eventos duplicados por ID y se conservarán como máximo 5000. ¿Continuar?"))return;
+    const datos=obtenerDatos(KEY_AUDITORIA),vistos=new Set(),limpios=[];
+    datos.forEach(x=>{const id=String(x?.id||"");if(id&&!vistos.has(id)){vistos.add(id);limpios.push(x);}});
+    limpios.sort((a,b)=>String(b.fechaHora||"").localeCompare(String(a.fechaHora||"")));
+    if(limpios.length>5000)limpios.length=5000;
+    guardarDatos(KEY_AUDITORIA,limpios);
+    registrarAuditoria("Mantenimiento","Seguridad","Optimización de bitácora administrativa");
+    ejecutarDiagnostico109();
+    alert("Mantenimiento completado sin modificar estudiantes, docentes, calificaciones ni asistencias.");
+}
+
+function cargarSeguridadMantenimiento109(){
+    if(!esDirectorActual())return;
+    const ses=obtenerSesionActual();
+    const u=document.getElementById("secSesion"),r=document.getElementById("secRol"),a=document.getElementById("secActividad");
+    if(u)u.value=ses?.usuario||"";
+    if(r)r.value=ses?.rol||"";
+    if(a)a.value=ses?.ultimaActividad?new Date(ses.ultimaActividad).toLocaleString("es-NI"):"Sesión iniciada";
+    ejecutarDiagnostico109();
+}
+
+/* =========================================================
    NAVEGACIÓN
 ========================================================= */
 
 function mostrarSeccion(id, boton){
 
+    validarSesion109();
     if(id==="configuracion" && !esDirectorActual()){
         alert("Acceso restringido. La Configuración es exclusiva del Director.");
         return;
@@ -3934,6 +4084,9 @@ function mostrarSeccion(id, boton){
         cargarEstudiantesSeguimiento();
         cargarSeguimientos();
         generarResumenSeguimiento();
+    }
+    if(id === "seguridadMantenimiento"){
+        cargarSeguridadMantenimiento109();
     }
     if(id === "evaluacionAcademica"){
         cargarEstudiantesEvaluacion10();
@@ -7211,6 +7364,13 @@ function imprimirPadresTutores(){
     document.body.dataset.imprimiendo="padresTutores";window.print();
     setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarPadresTutores()},500);
 }
+
+
+/* V10.9 control de actividad de sesión */
+["click","keydown","mousemove"].forEach(ev=>document.addEventListener(ev,()=>{
+    if(obtenerSesionActual()) registrarActividadSesion109();
+},{passive:true}));
+setInterval(()=>{ if(obtenerSesionActual()) validarSesion109(); },60000);
 
 </script>
 
