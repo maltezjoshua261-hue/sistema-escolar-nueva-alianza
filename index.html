@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v9.1</title>
+<title>Sistema Escolar Nueva Alianza - v9.2</title>
 
 <style>
 *{
@@ -517,7 +517,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
  body[data-imprimiendo="reporteSeguimiento"] .seguimiento-toolbar,
  body[data-imprimiendo="reporteSeguimiento"] .form-actions{display:none!important}
 }
-</style>
+<style>
+.alertas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.alerta-kpi{padding:16px;border-radius:14px;background:#fff;border:1px solid #e5e7eb;text-align:center}.alerta-kpi strong{display:block;font-size:28px}.alerta-kpi span{font-size:13px;color:#666}.alerta-alta{border-left:5px solid #dc3545!important}.alerta-media{border-left:5px solid #fd7e14!important}.alerta-baja{border-left:5px solid #ffc107!important}.riesgo-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}.riesgo-alto{background:#f8d7da;color:#842029}.riesgo-medio{background:#ffe5d0;color:#8a3d00}.riesgo-bajo{background:#fff3cd;color:#664d03}.alerta-acciones{display:flex;gap:5px;flex-wrap:wrap}.alerta-acciones button{padding:5px 8px;font-size:12px}.alertas-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:18px}.alerta-detalle{background:#f8fafc;border-radius:12px;padding:16px}.alerta-detalle h3{margin-top:0}.alerta-filtros{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end}.alerta-filtros label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}.alerta-filtros input,.alerta-filtros select{width:100%;padding:9px;border:1px solid #d1d5db;border-radius:8px}@media(max-width:900px){.alertas-kpis{grid-template-columns:repeat(2,1fr)}.alertas-grid{grid-template-columns:1fr}.alerta-filtros{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="alertasPreventivas"] .no-print{display:none!important}body[data-imprimiendo="alertasPreventivas"] .section:not(#alertasPreventivas){display:none!important}body[data-imprimiendo="alertaEstudiante"] .section:not(#alertasPreventivas){display:none!important}}
+</style></style>
 </head>
 
 <body>
@@ -567,6 +569,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 
             <button onclick="mostrarSeccion('seguimiento',this)">
                 🧠 Seguimiento pedagógico
+            </button>
+            <button onclick="mostrarSeccion('alertasPreventivas',this)">
+                🚨 Alertas preventivas
             </button>
 
             <button onclick="mostrarSeccion('estudiantes',this)">
@@ -2223,7 +2228,21 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
                 <div id="documentoOficial" class="documento-oficial"><div style="text-align:center;padding:40px;color:#777;">Seleccione un estudiante y genere un documento.</div></div>
             </section>
 
-                        <section id="seguimiento" class="section">
+<section id="alertasPreventivas" class="section">
+                <div class="page-header"><div><h1>🚨 Alertas y seguimiento preventivo</h1><p>Detección temprana de situaciones que requieren atención. Criterios administrativos preventivos y referenciales; no sustituyen las normas oficiales del MINED.</p></div></div>
+                <div class="card"><div class="alerta-filtros">
+                    <div><label>Año</label><select id="altAnio" onchange="generarAlertasPreventivas(false);cargarAlertasPreventivas()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
+                    <div><label>Nivel</label><select id="altNivel" onchange="cargarGradosAlertas();cargarAlertasPreventivas()"><option value="">Todos</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
+                    <div><label>Grado</label><select id="altGrado" onchange="cargarAlertasPreventivas()"><option value="">Todos</option></select></div>
+                    <div><label>Sección</label><select id="altSeccion" onchange="cargarAlertasPreventivas()"><option value="">Todas</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
+                    <div><label>Riesgo</label><select id="altRiesgo" onchange="cargarAlertasPreventivas()"><option value="">Todos</option><option>Alto</option><option>Medio</option><option>Bajo</option></select></div>
+                    <div><label>Estado</label><select id="altEstado" onchange="cargarAlertasPreventivas()"><option value="">Todos</option><option>Pendiente</option><option>En atención</option><option>Atendida</option><option>Descartada</option></select></div>
+                </div><div class="acciones-control" style="margin-top:14px"><button class="btn-primary" onclick="generarAlertasPreventivas(true);cargarAlertasPreventivas()">🔄 Actualizar alertas</button><button class="btn-success" onclick="imprimirAlertasPreventivas()">🖨️ Imprimir reporte</button></div></div>
+                <div class="alertas-kpis"><div class="alerta-kpi alerta-alta"><strong id="altKpiAlto">0</strong><span>🔴 Riesgo alto</span></div><div class="alerta-kpi alerta-media"><strong id="altKpiMedio">0</strong><span>🟠 Riesgo medio</span></div><div class="alerta-kpi alerta-baja"><strong id="altKpiBajo">0</strong><span>🟡 Preventivas</span></div><div class="alerta-kpi"><strong id="altKpiPendientes">0</strong><span>📌 Pendientes</span></div></div>
+                <div class="alertas-grid"><div class="alerta-detalle"><h3>Perfil de riesgo</h3><div id="detalleAlertaEstudiante">Seleccione un estudiante desde la tabla.</div></div><div class="card"><h2>🚨 Estudiantes que requieren atención</h2><div class="table-container"><table><thead><tr><th>Estudiante</th><th>Grupo</th><th>Riesgo</th><th>Motivo</th><th>Estado</th><th>Última intervención</th><th>Próxima acción</th><th>Acciones</th></tr></thead><tbody id="tablaAlertasPreventivas"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div></div></div>
+            </section>
+
+            <section id="seguimiento" class="section">
 
                 <div class="page-header">
                     <div>
@@ -2561,6 +2580,7 @@ const KEY_ASIGNACIONES = "asignacionesAcademicasNuevaAlianza";
 const KEY_HORARIOS = "horariosNuevaAlianza";
 const KEY_PLANIFICACIONES = "planificacionesNuevaAlianza";
 const KEY_SEGUIMIENTOS = "seguimientosPedagogicosNuevaAlianza";
+const KEY_ALERTAS = "alertasPreventivasNuevaAlianza";
 
 
 /* =========================================================
@@ -3061,6 +3081,11 @@ function mostrarSeccion(id, boton){
         cargarEstudiantesSeguimiento();
         cargarSeguimientos();
         generarResumenSeguimiento();
+    }
+    if(id === "alertasPreventivas"){
+        cargarGradosAlertas();
+        generarAlertasPreventivas(false);
+        cargarAlertasPreventivas();
     }
 
 }
@@ -4337,6 +4362,7 @@ function construirRespaldo(){
         horarios: obtenerDatos(KEY_HORARIOS),
         planificaciones: obtenerDatos(KEY_PLANIFICACIONES),
         seguimientosPedagogicos: obtenerDatos(KEY_SEGUIMIENTOS),
+        alertasPreventivas: obtenerDatos(KEY_ALERTAS),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -4471,6 +4497,11 @@ function importarRespaldo(event){
                 KEY_SEGUIMIENTOS,
                 Array.isArray(respaldo.seguimientosPedagogicos) ? respaldo.seguimientosPedagogicos : []
             );
+            
+            guardarDatos(
+                KEY_ALERTAS,
+                Array.isArray(respaldo.alertasPreventivas) ? respaldo.alertasPreventivas : []
+            );
 
             if(respaldo.configuracion){
                 localStorage.setItem(
@@ -4546,6 +4577,7 @@ function borrarDatosSistema(){
     localStorage.removeItem(KEY_HORARIOS);
     localStorage.removeItem(KEY_PLANIFICACIONES);
     localStorage.removeItem(KEY_SEGUIMIENTOS);
+    localStorage.removeItem(KEY_ALERTAS);
 
     cargarTodo();
 
@@ -4574,6 +4606,7 @@ function cargarTodo(){
     cargarPlanificaciones();
     cargarEstudiantesSeguimiento();
     cargarSeguimientos();
+    generarAlertasPreventivas(false);
 
     cargarAsistencias();
 
@@ -5645,6 +5678,65 @@ function cargarDashboardAcademicoInicial(){const y=document.getElementById("dash
 function obtenerSeguimientos(){
     return obtenerDatos(KEY_SEGUIMIENTOS);
 }
+function obtenerAlertasPreventivas(){return obtenerDatos(KEY_ALERTAS);}
+function estudianteVisibleAlerta(est){return estudianteVisibleSeguimiento(est);}
+function datosRiesgoAlerta(est,anio){
+    const grades=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio||anio)===Number(anio));
+    const asis=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(est.id)&&String(x.fecha||"").startsWith(String(anio)));
+    let suma=0,n=0;grades.forEach(g=>{const v=Number(g.notaFinal??g.nota??g.valor);if(Number.isFinite(v)){suma+=v;n++;}});
+    const promedio=n?Math.round(suma/n*100)/100:null;
+    const asistencia=asis.length?Math.round(asis.filter(a=>["Presente","Tardanza"].includes(a.estado)).length/asis.length*1000)/10:null;
+    const segs=obtenerDatos(KEY_SEGUIMIENTOS).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio)===Number(anio));
+    const abiertos=segs.filter(x=>["Abierto","En seguimiento"].includes(x.estado)),urgentes=abiertos.filter(x=>x.prioridad==="Urgente");
+    const hoy=new Date().toISOString().slice(0,10),vencidos=abiertos.filter(x=>x.proximaRevision&&x.proximaRevision<hoy);
+    const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio||0)===Number(anio));
+    const promos=obtenerDatos(KEY_PROMOCIONES).filter(x=>String(x.estudianteId)===String(est.id)&&Number(x.anio||0)===Number(anio));
+    const factores=[];
+    if(asistencia!==null&&asistencia<70)factores.push({tipo:"Asistencia",nivel:"Alto",motivo:"Asistencia inferior al 70%.",detalle:"Asistencia: "+asistencia+"%."});else if(asistencia!==null&&asistencia<80)factores.push({tipo:"Asistencia",nivel:"Medio",motivo:"Asistencia inferior al 80%.",detalle:"Asistencia: "+asistencia+"%."});
+    if(promedio!==null&&promedio<50)factores.push({tipo:"Rendimiento",nivel:"Alto",motivo:"Promedio inferior a 50.",detalle:"Promedio: "+promedio+"."});else if(promedio!==null&&promedio<60)factores.push({tipo:"Rendimiento",nivel:"Medio",motivo:"Promedio inferior a 60.",detalle:"Promedio: "+promedio+"."});
+    if(!grades.length)factores.push({tipo:"Calificaciones",nivel:"Medio",motivo:"No se encontraron calificaciones.",detalle:"No hay calificaciones registradas para el año."});
+    if(urgentes.length)factores.push({tipo:"Seguimiento",nivel:"Alto",motivo:"Seguimiento urgente abierto.",detalle:"Existe un seguimiento con prioridad urgente."});else if(abiertos.length)factores.push({tipo:"Seguimiento",nivel:"Medio",motivo:"Seguimiento abierto.",detalle:"Hay "+abiertos.length+" seguimiento(s) abierto(s)."});
+    if(vencidos.length)factores.push({tipo:"Revisión",nivel:"Medio",motivo:"Revisión de seguimiento vencida.",detalle:"Hay "+vencidos.length+" revisión(es) vencida(s)."});
+    if(promos.some(p=>p.resultado==="Pendiente"))factores.push({tipo:"Promoción",nivel:"Medio",motivo:"Proceso de promoción pendiente.",detalle:"Existe una promoción pendiente."});
+    if(!mats.length)factores.push({tipo:"Matrícula",nivel:"Bajo",motivo:"No se encontró matrícula del año.",detalle:"No hay matrícula registrada para "+anio+"."});
+    const altos=factores.filter(f=>f.nivel==="Alto").length,medios=factores.filter(f=>f.nivel==="Medio").length;
+    const riesgo=altos||factores.length>=3?"Alto":medios>=2?"Medio":factores.length?"Bajo":"Sin alerta";
+    return {factores,promedio,asistencia,riesgo};
+}
+function generarAlertasPreventivas(mostrar){
+    const sel=document.getElementById("altAnio")?.value||String(new Date().getFullYear()),anios=sel?[Number(sel)]:[2026,2027,2028];
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo"&&estudianteVisibleAlerta(e)),anteriores=obtenerAlertasPreventivas(),actuales=[];
+    anios.forEach(anio=>estudiantes.forEach(est=>{const d=datosRiesgoAlerta(est,anio);d.factores.forEach(f=>{const id="ALT-"+anio+"-"+est.id+"-"+f.tipo,previo=anteriores.find(x=>x.id===id);actuales.push({id,anio,estudianteId:est.id,estudianteNombre:est.nombre||"",nivel:est.nivel||"",grado:est.grado||"",seccion:est.seccion||"",riesgo:d.riesgo,tipo:f.tipo,motivo:f.motivo,detalle:f.detalle,fechaGenerada:previo?.fechaGenerada||new Date().toISOString().slice(0,10),ultimaIntervencion:previo?.ultimaIntervencion||"",proximaAccion:previo?.proximaAccion||"Revisar situación y registrar seguimiento.",responsable:previo?.responsable||"",estado:previo?.estado||"Pendiente",historial:previo?.historial||[]});});}));
+    guardarDatos(KEY_ALERTAS,actuales);if(mostrar)alert("Alertas preventivas actualizadas.");return actuales;
+}
+function cargarGradosAlertas(){
+    const s=document.getElementById("altGrado");if(!s)return;const nivel=document.getElementById("altNivel")?.value||"",actual=s.value;
+    const vals=[...new Set(obtenerDatos(KEY_ESTUDIANTES).filter(e=>!nivel||normalizarNivel(e.nivel)===normalizarNivel(nivel)).map(e=>e.grado).filter(Boolean))];vals.sort((a,b)=>normalizarGrado(a)-normalizarGrado(b));
+    s.innerHTML='<option value="">Todos</option>'+vals.map(v=>'<option value="'+escaparHTML(v)+'">'+escaparHTML(v)+'</option>').join("");if(vals.includes(actual))s.value=actual;
+}
+function cargarAlertasPreventivas(){
+    let lista=obtenerAlertasPreventivas(),anio=document.getElementById("altAnio")?.value||"",nivel=document.getElementById("altNivel")?.value||"",grado=document.getElementById("altGrado")?.value||"",sec=document.getElementById("altSeccion")?.value||"",riesgo=document.getElementById("altRiesgo")?.value||"",estado=document.getElementById("altEstado")?.value||"";
+    if(anio)lista=lista.filter(x=>String(x.anio)===String(anio));if(nivel)lista=lista.filter(x=>normalizarNivel(x.nivel)===normalizarNivel(nivel));if(grado)lista=lista.filter(x=>normalizarGrado(x.grado)===normalizarGrado(grado));if(sec)lista=lista.filter(x=>normalizarSeccion(x.seccion)===normalizarSeccion(sec));if(riesgo)lista=lista.filter(x=>x.riesgo===riesgo);if(estado)lista=lista.filter(x=>x.estado===estado);
+    const all=obtenerAlertasPreventivas();document.getElementById("altKpiAlto").textContent=all.filter(x=>x.riesgo==="Alto"&&x.estado!=="Descartada").length;document.getElementById("altKpiMedio").textContent=all.filter(x=>x.riesgo==="Medio"&&x.estado!=="Descartada").length;document.getElementById("altKpiBajo").textContent=all.filter(x=>x.riesgo==="Bajo"&&x.estado!=="Descartada").length;document.getElementById("altKpiPendientes").textContent=all.filter(x=>["Pendiente","En atención"].includes(x.estado)).length;
+    const tbody=document.getElementById("tablaAlertasPreventivas");if(!tbody)return;
+    lista.sort((a,b)=>({Alto:0,Medio:1,Bajo:2}[a.riesgo]-({Alto:0,Medio:1,Bajo:2}[b.riesgo])));tbody.innerHTML=lista.length?lista.map(x=>{const cls=x.riesgo==="Alto"?"riesgo-alto":x.riesgo==="Medio"?"riesgo-medio":"riesgo-bajo";return "<tr><td><strong>"+escaparHTML(x.estudianteNombre)+"</strong></td><td>"+escaparHTML((x.grado||"")+" "+(x.seccion||""))+"</td><td><span class='riesgo-badge "+cls+"'>"+escaparHTML(x.riesgo)+"</span></td><td>"+escaparHTML(x.motivo)+"</td><td><select onchange='cambiarEstadoAlerta(&quot;"+escaparHTML(x.id)+"&quot;,this.value)'><option "+(x.estado==="Pendiente"?"selected":"")+">Pendiente</option><option "+(x.estado==="En atención"?"selected":"")+">En atención</option><option "+(x.estado==="Atendida"?"selected":"")+">Atendida</option><option "+(x.estado==="Descartada"?"selected":"")+">Descartada</option></select></td><td>"+escaparHTML(x.ultimaIntervencion||"—")+"</td><td>"+escaparHTML(x.proximaAccion||"—")+"</td><td><div class='alerta-acciones'><button onclick='verPerfilAlerta(&quot;"+escaparHTML(x.id)+"&quot;)'>👁️</button><button onclick='accionAlertaSeguimiento(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>🧠</button><button onclick='accionAlertaExpediente(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>📁</button><button onclick='imprimirAlertaEstudiante(&quot;"+escaparHTML(x.estudianteId)+"&quot;)'>🖨️</button></div></td></tr>"}).join(""):"<tr><td colspan='8'>No hay alertas con los filtros seleccionados.</td></tr>";
+}
+function cambiarEstadoAlerta(id,estado){
+    if(!exigirDirector())return;const lista=obtenerAlertasPreventivas(),x=lista.find(a=>String(a.id)===String(id));if(!x)return;const hoy=new Date().toISOString().slice(0,10);x.estado=estado;x.ultimaIntervencion=hoy;x.responsable=obtenerSesionActual()?.usuario||"";x.historial=x.historial||[];x.historial.push({fecha:hoy,accion:"Cambio de estado a "+estado,responsable:x.responsable});guardarDatos(KEY_ALERTAS,lista);cargarAlertasPreventivas();verPerfilAlerta(id);
+}
+function verPerfilAlerta(id){
+    const x=obtenerAlertasPreventivas().find(a=>String(a.id)===String(id)),box=document.getElementById("detalleAlertaEstudiante");if(!x||!box)return;const est=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(x.estudianteId)),d=est?datosRiesgoAlerta(est,x.anio):null;
+    box.innerHTML="<h3>"+escaparHTML(x.estudianteNombre)+"</h3><p><strong>Riesgo:</strong> "+escaparHTML(x.riesgo)+"</p><p><strong>Grupo:</strong> "+escaparHTML((x.nivel||"")+" · "+(x.grado||"")+" · "+(x.seccion||""))+"</p><p><strong>Motivo:</strong> "+escaparHTML(x.motivo)+"</p><p><strong>Detalle:</strong> "+escaparHTML(x.detalle)+"</p><p><strong>Promedio:</strong> "+(d?.promedio??"Sin datos")+" · <strong>Asistencia:</strong> "+(d?.asistencia??"Sin datos")+"%</p><p><strong>Última intervención:</strong> "+escaparHTML(x.ultimaIntervencion||"No registrada")+"</p><p><strong>Próxima acción:</strong> "+escaparHTML(x.proximaAccion||"No definida")+"</p><p><strong>Responsable:</strong> "+escaparHTML(x.responsable||"No registrado")+"</p>";
+}
+function accionAlertaSeguimiento(id){mostrarSeccion("seguimiento");const s=document.getElementById("segEstudiante");if(s){s.value=String(id);generarResumenSeguimiento();}}
+function accionAlertaExpediente(id){mostrarSeccion("expediente");const s=document.getElementById("expEstudiante");if(s){s.value=String(id);generarExpediente();}}
+function imprimirAlertasPreventivas(){document.body.dataset.imprimiendo="alertasPreventivas";window.print();setTimeout(()=>delete document.body.dataset.imprimiendo,500);}
+function imprimirAlertaEstudiante(id){
+    const lista=obtenerAlertasPreventivas().filter(x=>String(x.estudianteId)===String(id)),tbody=document.getElementById("tablaAlertasPreventivas"),original=tbody.innerHTML;
+    tbody.innerHTML=lista.length?lista.map(x=>"<tr><td>"+escaparHTML(x.estudianteNombre)+"</td><td>"+escaparHTML((x.grado||"")+" "+(x.seccion||""))+"</td><td>"+escaparHTML(x.riesgo)+"</td><td>"+escaparHTML(x.motivo+" "+x.detalle)+"</td><td>"+escaparHTML(x.estado)+"</td><td>"+escaparHTML(x.ultimaIntervencion||"—")+"</td><td>"+escaparHTML(x.proximaAccion||"—")+"</td><td></td></tr>").join(""):"<tr><td colspan='8'>Sin alertas.</td></tr>";
+    document.body.dataset.imprimiendo="alertaEstudiante";window.print();setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarAlertasPreventivas();},500);
+}
+
 
 function sesionDocenteSeguimiento(){
     const ses=obtenerSesionActual();
