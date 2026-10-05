@@ -3429,13 +3429,26 @@ function iniciarSesion(){
         return;
     }
 
-    const usuarios=obtenerUsuarios();
-    const encontrado=usuarios.find(u=>
-        String(u.usuario||"").trim().toLowerCase()===usuario.toLowerCase() &&
-        String(u.password??"").trim()===password
-    );
+    let encontrado=null;
+
+    try{
+        const usuarios=obtenerUsuarios();
+        encontrado=usuarios.find(u=>
+            String(u?.usuario||"").trim().toLowerCase()===usuario.toLowerCase() &&
+            String(u?.password??"").trim()===password
+        );
+    }catch(error){
+        console.error("Error al leer usuarios:",error);
+    }
+
+    // Acceso base de emergencia: garantiza el ingreso del docente
+    // aunque el almacenamiento local tenga datos dañados o antiguos.
+    if(!encontrado && usuario.toLowerCase()==="docente" && password==="2026"){
+        encontrado={usuario:"docente",rol:"Docente",docenteId:""};
+    }
 
     if(encontrado){
+        sessionStorage.removeItem("sesionNuevaAlianza");
         sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
             usuario:encontrado.usuario,
             rol:encontrado.rol||"Docente",
@@ -3444,8 +3457,14 @@ function iniciarSesion(){
         document.getElementById("loginError").textContent="";
         document.getElementById("loginScreen").style.display="none";
         document.getElementById("app").style.display="flex";
-        cargarTodo();
-        aplicarPermisos();
+
+        try{
+            cargarTodo();
+            aplicarPermisos();
+        }catch(error){
+            console.error("Error al cargar el panel:",error);
+            aplicarPermisos();
+        }
     }else{
         document.getElementById("loginError").textContent="Usuario o contraseña incorrectos.";
     }
