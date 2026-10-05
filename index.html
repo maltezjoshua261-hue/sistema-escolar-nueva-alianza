@@ -4611,11 +4611,36 @@ function guardarAsistencia(){
             alert("No tiene asignación activa para este grupo.");return;
         }
     }
-    const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
     if(!fecha){alert("Seleccione la fecha.");return;}
+    const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
+
+    // V11.4 - La asistencia debe tomar nivel, grado y sección
+    // de la matrícula vigente del estudiante cuando exista.
+    const matriculasAs=obtenerDatos(KEY_MATRICULAS);
+    const matriculaAs=matriculasAs.find(m=>
+        String(m.estudianteId)===String(estudiante.id) &&
+        String(m.anio)===String(fecha.slice(0,4)) &&
+        String(m.estado||"Matriculado")==="Matriculado"
+    );
+
+    const nivelAs=matriculaAs?.nivel || estudiante.nivel || "";
+    const gradoAs=matriculaAs?.grado || estudiante.grado || "";
+    const seccionAs=matriculaAs?.seccion || estudiante.seccion || "";
+
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
-    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
+    const registro={
+        id:existe?existe.id:Date.now(),
+        fecha,
+        estudianteId:estudiante.id,
+        estudiante:estudiante.nombre||estudiante.codigo||"",
+        nivel:nivelAs,
+        grado:gradoAs,
+        seccion:seccionAs,
+        docenteId:docenteObj?.id||"",
+        docenteNombre:docenteObj?.nombre||"",
+        estado
+    };
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
     registrarAuditoria(existe?"Editar":"Crear","Asistencia",existe?"Actualización de asistencia":"Registro de asistencia",registro.id,{anio:anioAs});
