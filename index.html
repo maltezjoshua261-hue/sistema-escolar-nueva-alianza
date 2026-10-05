@@ -5026,9 +5026,13 @@ function guardarCalificacion(){
         normalizarSeccion(m.seccion)===normalizarSeccion(seccion)
     );
 
+    const opcionEstudiante=document.getElementById("calEstudiante")?.selectedOptions?.[0];
+    const textoOpcion=String(opcionEstudiante?.textContent||"").trim();
     const nombreCal=String(estudiante.nombre||"").trim() ||
         String(estudiante.codigo||"").trim() ||
+        String(matriculaCal?.estudiante||"").trim() ||
         String(matriculaCal?.codigo||"").trim() ||
+        textoOpcion.replace(/^Sin nombre\s*[·|-]\s*/i,"").trim() ||
         ("Estudiante "+estudiante.id);
 
     const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
