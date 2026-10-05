@@ -4014,7 +4014,13 @@ function mostrarSeccion(id, boton){
         generarDocumentoOficial();
     }
 
-    if(id === "configuracion"){\n        cargarDocentesSelectorUsuario();\n        cargarUsuarios();\n        actualizarSelectorUsuarioDocente();\n    }\n\n    if(id === "reportes"){
+    if(id === "configuracion"){
+        cargarDocentesSelectorUsuario();
+        cargarUsuarios();
+        actualizarSelectorUsuarioDocente();
+    }
+
+    if(id === "reportes"){
         actualizarReportes();
     }
 
