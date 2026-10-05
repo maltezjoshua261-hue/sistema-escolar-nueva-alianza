@@ -3385,7 +3385,7 @@ function obtenerUsuarios(){
     // información antigua o incompleta en localStorage.
     const cuentasBase=[
         {id:"admin",usuario:"admin",password:"1234",rol:"Director"},
-        {id:"docente",usuario:"docente",password:"2026",rol:"Docente"}
+        {id:"docente",usuario:"docente",password:"2026",rol:"Docente",docenteId:""}
     ];
 
     if(!Array.isArray(usuarios)) usuarios=[];
@@ -3420,7 +3420,8 @@ function iniciarSesion(){
     if(encontrado){
         sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
             usuario:encontrado.usuario,
-            rol:encontrado.rol||"Docente"
+            rol:encontrado.rol||"Docente",
+            docenteId:String(encontrado.docenteId||"")
         }));
         document.getElementById("loginError").textContent="";
         document.getElementById("loginScreen").style.display="none";
