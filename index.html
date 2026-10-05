@@ -4776,6 +4776,7 @@ function cargarEstudiantesCalificaciones(){
     const nivel=document.getElementById("calNivel").value;
     const grado=document.getElementById("calGrado").value;
     const seccion=document.getElementById("calSeccion").value;
+    const anio=document.getElementById("calAnio")?.value || String(new Date().getFullYear());
 
     if(!nivel || !grado || !seccion) return;
 
@@ -4783,20 +4784,61 @@ function cargarEstudiantesCalificaciones(){
     const gradoBuscado=normalizarGrado(grado);
     const seccionBuscada=normalizarSeccion(seccion);
 
-    const encontrados=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const matriculas=obtenerDatos(KEY_MATRICULAS);
+
+    const encontrados=estudiantes.filter(e=>{
+
+        const estadoEstudiante=String(e.estado||"Activo").toLowerCase();
+        if(estadoEstudiante==="retirado" || estadoEstudiante==="trasladado") return false;
+
+        const matricula=matriculas.find(m=>
+            String(m.estudianteId)===String(e.id) &&
+            String(m.anio)===String(anio) &&
+            String(m.estado||"Matriculado")==="Matriculado" &&
+            normalizarNivel(m.nivel)===nivelBuscado &&
+            normalizarGrado(m.grado)===gradoBuscado &&
+            normalizarSeccion(m.seccion)===seccionBuscada
+        );
+
+        if(matricula) return true;
+
+        // Compatibilidad con estudiantes antiguos que aún tienen
+        // nivel, grado y sección directamente en su ficha maestra.
+        return !matriculas.some(m=>
+            String(m.estudianteId)===String(e.id) &&
+            String(m.anio)===String(anio) &&
+            String(m.estado||"Matriculado")==="Matriculado"
+        ) &&
         normalizarNivel(e.nivel)===nivelBuscado &&
         normalizarGrado(e.grado)===gradoBuscado &&
-        normalizarSeccion(e.seccion)===seccionBuscada &&
-        String(e.estado||"Activo").toLowerCase()!=="retirado" &&
-        String(e.estado||"Activo").toLowerCase()!=="trasladado"
-    );
+        normalizarSeccion(e.seccion)===seccionBuscada;
+    });
 
-    encontrados.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    encontrados.sort((a,b)=>{
+        const na=String(a.nombre||a.codigo||"").trim();
+        const nb=String(b.nombre||b.codigo||"").trim();
+        return na.localeCompare(nb,"es");
+    });
 
     encontrados.forEach(e=>{
         const option=document.createElement("option");
         option.value=e.id;
-        option.textContent=e.nombre;
+
+        const matricula=matriculas.find(m=>
+            String(m.estudianteId)===String(e.id) &&
+            String(m.anio)===String(anio) &&
+            String(m.estado||"Matriculado")==="Matriculado" &&
+            normalizarNivel(m.nivel)===nivelBuscado &&
+            normalizarGrado(m.grado)===gradoBuscado &&
+            normalizarSeccion(m.seccion)===seccionBuscada
+        );
+
+        option.textContent=String(e.nombre||"").trim() ||
+            String(e.codigo||"").trim() ||
+            String(matricula?.codigo||"").trim() ||
+            ("Estudiante "+e.id);
+
         select.appendChild(option);
     });
 
