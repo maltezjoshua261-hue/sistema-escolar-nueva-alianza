@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.6</title>
+<title>Sistema Escolar Nueva Alianza - v10.7</title>
 
 <style>
 *{
@@ -527,6 +527,9 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 body[data-imprimiendo="planesMejora"] .section:not(#planesMejora){display:none!important}body[data-imprimiendo="planesMejora"] #planesMejora{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="planesMejora"] .no-print{display:none!important}
 
 body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){display:none!important}body[data-imprimiendo="expedienteIntegral"] #expedienteIntegral{display:block!important;position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="expedienteIntegral"] .no-print{display:none!important}
+
+/* V10.7 REUNIONES, ACUERDOS Y SEGUIMIENTO */
+.v107-header{background:linear-gradient(135deg,#123b6d,#198754);color:#fff;padding:24px;border-radius:16px;margin-bottom:20px}.v107-header h2{color:#fff;margin-bottom:6px}.v107-header p{opacity:.92}.v107-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.v107-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:15px;text-align:center}.v107-kpi strong{display:block;font-size:26px;color:#0d6efd;margin-top:5px}.v107-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.v107-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;box-shadow:0 3px 10px rgba(0,0,0,.05);margin-bottom:18px}.v107-card h3{color:#123b6d;margin-bottom:12px}.v107-form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.v107-form .full{grid-column:1/-1}.v107-table{overflow-x:auto}.v107-estado{font-weight:bold}.v107-vencido{color:#842029}.v107-cumplido{color:#0f5132}.v107-pendiente{color:#664d03}.v107-actions{display:flex;gap:8px;flex-wrap:wrap}.v107-nota{padding:11px;border-left:4px solid #0d6efd;background:#eef5ff;border-radius:8px;margin-bottom:15px}@media(max-width:1000px){.v107-kpis{grid-template-columns:repeat(3,1fr)}.v107-grid{grid-template-columns:1fr}.v107-form{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.v107-kpis,.v107-form{grid-template-columns:1fr}.v107-form .full{grid-column:auto}}@media print{body[data-imprimiendo="reunionesAcuerdos"] *{visibility:hidden!important}body[data-imprimiendo="reunionesAcuerdos"] #reunionesAcuerdos,body[data-imprimiendo="reunionesAcuerdos"] #reunionesAcuerdos *{visibility:visible!important}body[data-imprimiendo="reunionesAcuerdos"] #reunionesAcuerdos{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}.no-print{display:none!important}}
 </style>
 </head>
 
@@ -673,6 +676,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
             </button>
 
             <button class="solo-director" onclick="mostrarSeccion('bitacora',this)">📜 Bitácora administrativa</button>
+        <button onclick="mostrarSeccion('reunionesAcuerdos',this)">🤝 Reuniones, acuerdos y seguimiento</button>
             <button class="solo-director" onclick="mostrarSeccion('configuracion',this)">
                 ⚙️ Configuración
             </button>
@@ -2787,7 +2791,8 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 </div>
 <div class="card no-print">
 <div class="form-grid">
-<div><label>Año</label><select id="expIntAnio" onchange="cargarEstudiantesExpedienteIntegral();generarExpedienteIntegral()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div><label>Año</label><select id="expIntAnio" onchange="cargarEstudiantesExpedienteIntegral();
+    prepararReunionesV107();generarExpedienteIntegral()"><option>2026</option><option>2027</option><option>2028</option></select></div>
 <div><label>Estudiante</label><select id="expIntEstudiante" onchange="generarExpedienteIntegral()"></select></div>
 <div><label>Buscar</label><input id="expIntBuscar" oninput="cargarEstudiantesExpedienteIntegral()" placeholder="Nombre del estudiante"></div>
 </div>
@@ -2806,6 +2811,54 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <div class="notice">La bitácora se conserva en este navegador y registra hasta los últimos 5,000 eventos.</div>
                 </div>
             </section>
+<section id="reunionesAcuerdos" class="section">
+  <div class="v107-header">
+    <div><h2>🤝 Reuniones, acuerdos y seguimiento</h2><p>Gestión institucional de reuniones, compromisos, responsables, fechas y seguimiento.</p></div>
+  </div>
+  <div class="v107-nota"><strong>V10.7:</strong> registre las reuniones del centro, documente acuerdos y controle el cumplimiento de cada compromiso. El Director administra los registros; el personal docente puede consultarlos según sus permisos.</div>
+  <div class="v107-kpis">
+    <div class="v107-kpi">Reuniones<strong id="v107TotalReuniones">0</strong></div>
+    <div class="v107-kpi">Acuerdos<strong id="v107TotalAcuerdos">0</strong></div>
+    <div class="v107-kpi">Pendientes<strong id="v107Pendientes">0</strong></div>
+    <div class="v107-kpi">Vencidos<strong id="v107Vencidos">0</strong></div>
+    <div class="v107-kpi">Cumplidos<strong id="v107Cumplidos">0</strong></div>
+  </div>
+  <div class="v107-grid">
+    <div class="v107-card">
+      <h3>📅 Registrar reunión</h3>
+      <div class="v107-form">
+        <input type="hidden" id="v107ReunionId">
+        <div><label>Fecha</label><input type="date" id="v107Fecha"></div>
+        <div><label>Hora</label><input type="time" id="v107Hora"></div>
+        <div><label>Tipo</label><select id="v107Tipo"><option>Consejo de docentes</option><option>Reunión con familias</option><option>Reunión pedagógica</option><option>Reunión administrativa</option><option>Comité / comisión</option><option>Otra</option></select></div>
+        <div><label>Tema / asunto</label><input id="v107Tema" placeholder="Tema principal"></div>
+        <div><label>Lugar</label><input id="v107Lugar" placeholder="Lugar"></div>
+        <div><label>Responsable</label><input id="v107Responsable" placeholder="Responsable de la reunión"></div>
+        <div class="full"><label>Participantes</label><textarea id="v107Participantes" rows="2" placeholder="Docentes, familias, comisiones u otros participantes"></textarea></div>
+        <div class="full"><label>Desarrollo / observaciones</label><textarea id="v107Desarrollo" rows="3" placeholder="Resumen de lo abordado"></textarea></div>
+      </div>
+      <div class="v107-actions"><button class="btn-success" onclick="guardarReunionV107()">💾 Guardar reunión</button><button class="btn-secondary" onclick="limpiarReunionV107()">🧹 Limpiar</button></div>
+    </div>
+    <div class="v107-card">
+      <h3>🎯 Registrar acuerdo / compromiso</h3>
+      <div class="v107-form">
+        <input type="hidden" id="v107AcuerdoId">
+        <div><label>Reunión</label><select id="v107AcuerdoReunion"></select></div>
+        <div><label>Responsable</label><input id="v107AcuerdoResponsable" placeholder="Persona responsable"></div>
+        <div><label>Fecha límite</label><input type="date" id="v107FechaLimite"></div>
+        <div class="full"><label>Acuerdo / compromiso</label><textarea id="v107Acuerdo" rows="3" placeholder="Escriba el acuerdo concreto y verificable"></textarea></div>
+        <div><label>Estado</label><select id="v107Estado"><option>Pendiente</option><option>En proceso</option><option>Cumplido</option><option>Cancelado</option></select></div>
+        <div class="full"><label>Seguimiento / evidencia</label><textarea id="v107Seguimiento" rows="3" placeholder="Avances, evidencias o dificultades"></textarea></div>
+      </div>
+      <div class="v107-actions"><button class="btn-primary" onclick="guardarAcuerdoV107()">💾 Guardar acuerdo</button><button class="btn-secondary" onclick="limpiarAcuerdoV107()">🧹 Limpiar</button></div>
+    </div>
+  </div>
+  <div class="v107-card">
+    <div class="actions no-print"><select id="v107FiltroEstado" onchange="cargarReunionesV107()"><option value="">Todos los estados</option><option>Pendiente</option><option>En proceso</option><option>Cumplido</option><option>Cancelado</option></select><input id="v107Buscar" placeholder="Buscar tema, responsable o acuerdo" oninput="cargarReunionesV107()"><button class="btn-info" onclick="imprimirReunionesV107()">🖨️ Imprimir seguimiento</button></div>
+    <div class="v107-table"><table><thead><tr><th>Fecha</th><th>Reunión / tema</th><th>Acuerdo</th><th>Responsable</th><th>Fecha límite</th><th>Estado</th><th>Seguimiento</th><th class="no-print">Acciones</th></tr></thead><tbody id="tablaReunionesV107"></tbody></table></div>
+  </div>
+</section>
+
 
             <section id="configuracion" class="section">
 
@@ -3869,6 +3922,7 @@ function mostrarSeccion(id, boton){
     }
 
     if(id === "expedienteIntegral"){cargarEstudiantesExpedienteIntegral();generarExpedienteIntegral();}
+    if(id === "reunionesAcuerdos"){prepararReunionesV107();}
 
     if(id === "planesMejora"){
         cargarEstudiantesMejora();
@@ -7212,6 +7266,62 @@ function imprimirPadresTutores(){
     setTimeout(()=>{tbody.innerHTML=original;delete document.body.dataset.imprimiendo;cargarPadresTutores()},500);
 }
 
+
+/* =========================================================
+   V10.7 — REUNIONES, ACUERDOS Y SEGUIMIENTO
+========================================================= */
+const KEY_REUNIONES_ACUERDOS="reunionesAcuerdosNuevaAlianza";
+function obtenerReunionesV107(){return obtenerDatos(KEY_REUNIONES_ACUERDOS);}
+function prepararReunionesV107(){
+  const f=document.getElementById("v107Fecha"); if(f&&!f.value)f.value=new Date().toISOString().slice(0,10);
+  const fl=document.getElementById("v107FechaLimite"); if(fl&&!fl.value)fl.value=new Date().toISOString().slice(0,10);
+  cargarReunionesV107(); cargarAcuerdosSelectV107();
+}
+function cargarAcuerdosSelectV107(){
+  const s=document.getElementById("v107AcuerdoReunion");if(!s)return;
+  const prev=s.value; const rs=obtenerReunionesV107().sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  s.innerHTML='<option value="">Seleccione reunión</option>'+rs.map(r=>'<option value="'+escaparHTML(r.id)+'">'+escaparHTML(r.fecha+' — '+r.tema)+'</option>').join('');
+  if(rs.some(r=>String(r.id)===String(prev)))s.value=prev;
+}
+function limpiarReunionV107(){
+  ["v107ReunionId","v107Tema","v107Lugar","v107Responsable","v107Participantes","v107Desarrollo"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});
+  const f=document.getElementById("v107Fecha");if(f)f.value=new Date().toISOString().slice(0,10);
+  const h=document.getElementById("v107Hora");if(h)h.value="";
+}
+function guardarReunionV107(){
+  if(!esDirectorActual()){alert("Solo el Director puede registrar o modificar reuniones.");return;}
+  const tema=document.getElementById("v107Tema")?.value.trim();if(!tema){alert("Ingrese el tema de la reunión.");return;}
+  const id=document.getElementById("v107ReunionId")?.value||"";const datos=obtenerReunionesV107();
+  const obj={id:id||"REU-"+Date.now(),tipo:document.getElementById("v107Tipo")?.value||"Otra",fecha:document.getElementById("v107Fecha")?.value||"",hora:document.getElementById("v107Hora")?.value||"",tema,lugar:document.getElementById("v107Lugar")?.value.trim()||"",responsable:document.getElementById("v107Responsable")?.value.trim()||"",participantes:document.getElementById("v107Participantes")?.value.trim()||"",desarrollo:document.getElementById("v107Desarrollo")?.value.trim()||"",creado:new Date().toISOString(),usuario:obtenerSesionActual()?.usuario||""};
+  const i=datos.findIndex(x=>String(x.id)===String(obj.id));if(i>=0)datos[i]=obj;else datos.unshift(obj);guardarDatos(KEY_REUNIONES_ACUERDOS,datos);
+  registrarAuditoria(i>=0?"Editar":"Crear","Reuniones V10.7",i>=0?"Actualización de reunión":"Nueva reunión",obj.id,{});limpiarReunionV107();cargarReunionesV107();cargarAcuerdosSelectV107();alert(i>=0?"Reunión actualizada correctamente.":"Reunión registrada correctamente.");
+}
+function limpiarAcuerdoV107(){
+  ["v107AcuerdoId","v107AcuerdoResponsable","v107Acuerdo","v107Seguimiento"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});
+  const f=document.getElementById("v107FechaLimite");if(f)f.value=new Date().toISOString().slice(0,10);
+  const es=document.getElementById("v107Estado");if(es)es.value="Pendiente";
+}
+function guardarAcuerdoV107(){
+  if(!esDirectorActual()){alert("Solo el Director puede registrar o modificar acuerdos.");return;}
+  const rid=document.getElementById("v107AcuerdoReunion")?.value||"", acuerdo=document.getElementById("v107Acuerdo")?.value.trim();if(!rid){alert("Seleccione la reunión relacionada.");return}if(!acuerdo){alert("Escriba el acuerdo o compromiso.");return}
+  const datos=obtenerReunionesV107(),r=datos.find(x=>String(x.id)===String(rid));if(!r){alert("La reunión seleccionada ya no existe.");return}
+  const id=document.getElementById("v107AcuerdoId")?.value||"", now=new Date().toISOString();
+  const obj={id:id||"ACU-"+Date.now(),reunionId:rid,reunionTema:r.tema,reunionFecha:r.fecha,acuerdo,responsable:document.getElementById("v107AcuerdoResponsable")?.value.trim()||"",fechaLimite:document.getElementById("v107FechaLimite")?.value||"",estado:document.getElementById("v107Estado")?.value||"Pendiente",seguimiento:document.getElementById("v107Seguimiento")?.value.trim()||"",actualizado:now};
+  const acuerdos=obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos");const i=acuerdos.findIndex(x=>String(x.id)===String(obj.id));if(i>=0)acuerdos[i]=obj;else acuerdos.unshift(obj);guardarDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos",acuerdos);
+  registrarAuditoria(i>=0?"Editar":"Crear","Acuerdos V10.7",i>=0?"Actualización de acuerdo":"Nuevo acuerdo",obj.id,{reunionId:rid});limpiarAcuerdoV107();cargarReunionesV107();alert(i>=0?"Acuerdo actualizado correctamente.":"Acuerdo registrado correctamente.");
+}
+function editarReunionV107(id){if(!esDirectorActual()){alert("Solo el Director puede editar reuniones.");return}const r=obtenerReunionesV107().find(x=>String(x.id)===String(id));if(!r)return;document.getElementById("v107ReunionId").value=r.id;document.getElementById("v107Tipo").value=r.tipo||"Otra";document.getElementById("v107Fecha").value=r.fecha||"";document.getElementById("v107Hora").value=r.hora||"";document.getElementById("v107Tema").value=r.tema||"";document.getElementById("v107Lugar").value=r.lugar||"";document.getElementById("v107Responsable").value=r.responsable||"";document.getElementById("v107Participantes").value=r.participantes||"";document.getElementById("v107Desarrollo").value=r.desarrollo||"";window.scrollTo({top:0,behavior:"smooth"});}
+function editarAcuerdoV107(id){if(!esDirectorActual()){alert("Solo el Director puede editar acuerdos.");return}const a=obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos").find(x=>String(x.id)===String(id));if(!a)return;document.getElementById("v107AcuerdoId").value=a.id;cargarAcuerdosSelectV107();document.getElementById("v107AcuerdoReunion").value=a.reunionId;document.getElementById("v107AcuerdoResponsable").value=a.responsable||"";document.getElementById("v107FechaLimite").value=a.fechaLimite||"";document.getElementById("v107Acuerdo").value=a.acuerdo||"";document.getElementById("v107Estado").value=a.estado||"Pendiente";document.getElementById("v107Seguimiento").value=a.seguimiento||"";window.scrollTo({top:document.getElementById("reunionesAcuerdos").offsetTop,behavior:"smooth"});}
+function eliminarAcuerdoV107(id){if(!esDirectorActual()){alert("Solo el Director puede eliminar acuerdos.");return}if(!confirm("¿Desea eliminar este acuerdo?"))return;const k=KEY_REUNIONES_ACUERDOS+"_acuerdos",a=obtenerDatos(k),x=a.find(y=>String(y.id)===String(id));guardarDatos(k,a.filter(y=>String(y.id)!==String(id)));if(x)registrarAuditoria("Eliminar","Acuerdos V10.7","Eliminación de acuerdo",id,{});cargarReunionesV107();}
+function eliminarReunionV107(id){if(!esDirectorActual()){alert("Solo el Director puede eliminar reuniones.");return}const acuerdos=obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos").filter(x=>String(x.reunionId)===String(id));if(acuerdos.length&&!confirm("Esta reunión tiene "+acuerdos.length+" acuerdo(s). ¿Desea eliminar la reunión y sus acuerdos?"))return;if(!acuerdos.length&&!confirm("¿Desea eliminar esta reunión?"))return;guardarDatos(KEY_REUNIONES_ACUERDOS,obtenerReunionesV107().filter(x=>String(x.id)!==String(id)));guardarDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos",obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos").filter(x=>String(x.reunionId)!==String(id)));registrarAuditoria("Eliminar","Reuniones V10.7","Eliminación de reunión y acuerdos relacionados",id,{});cargarReunionesV107();cargarAcuerdosSelectV107();}
+function cargarReunionesV107(){
+  const tb=document.getElementById("tablaReunionesV107");if(!tb)return;const estado=document.getElementById("v107FiltroEstado")?.value||"",q=(document.getElementById("v107Buscar")?.value||"").toLowerCase();const rs=obtenerReunionesV107();const as=obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos");
+  let filas=[];rs.sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||""))).forEach(r=>{as.filter(a=>String(a.reunionId)===String(r.id)).forEach(a=>{const txt=(r.tema+" "+a.acuerdo+" "+(a.responsable||"")).toLowerCase();if(estado&&a.estado!==estado)return;if(q&&!txt.includes(q))return;let cls=a.estado==="Cumplido"?"v107-cumplido":a.estado==="Pendiente"?"v107-pendiente":"";if(a.fechaLimite&&a.fechaLimite<new Date().toISOString().slice(0,10)&&!["Cumplido","Cancelado"].includes(a.estado))cls="v107-vencido";filas.push("<tr><td>"+escaparHTML(r.fecha)+"<br>"+escaparHTML(r.hora||"")+"</td><td><strong>"+escaparHTML(r.tema)+"</strong><br><small>"+escaparHTML(r.tipo)+" · "+escaparHTML(r.lugar||"")+"</small></td><td>"+escaparHTML(a.acuerdo)+"</td><td>"+escaparHTML(a.responsable||"—")+"</td><td>"+escaparHTML(a.fechaLimite||"—")+"</td><td class='v107-estado "+cls+"'>"+escaparHTML(a.estado)+"</td><td>"+escaparHTML(a.seguimiento||"—")+"</td><td class='no-print'><button class='btn-secondary' onclick='editarReunionV107(\""+escaparHTML(r.id)+"\")'>Reunión</button> <button class='btn-info' onclick='editarAcuerdoV107(\""+escaparHTML(a.id)+"\")'>Acuerdo</button> <button class='btn-danger' onclick='eliminarAcuerdoV107(\""+escaparHTML(a.id)+"\")'>🗑️</button></td></tr>");});});
+  tb.innerHTML=filas.length?filas.join(""):"<tr><td colspan='8'>No hay acuerdos registrados con los filtros seleccionados.</td></tr>";
+  const hoy=new Date().toISOString().slice(0,10),pend=as.filter(a=>a.estado==="Pendiente"||a.estado==="En proceso"),ven=pend.filter(a=>a.fechaLimite&&a.fechaLimite<hoy).length,cum=as.filter(a=>a.estado==="Cumplido").length;
+  document.getElementById("v107TotalReuniones").textContent=rs.length;document.getElementById("v107TotalAcuerdos").textContent=as.length;document.getElementById("v107Pendientes").textContent=pend.length;document.getElementById("v107Vencidos").textContent=ven;document.getElementById("v107Cumplidos").textContent=cum;
+}
+function imprimirReunionesV107(){document.body.dataset.imprimiendo="reunionesAcuerdos";window.print();setTimeout(()=>delete document.body.dataset.imprimiendo,500);}
 </script>
 
 </body>
