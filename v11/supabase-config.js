@@ -143,7 +143,7 @@ window.addEventListener("load", function(){
   };
 
   // Si ya existe una sesión central, la recuperamos al recargar.
-  (async functionrestaurarSesionCentral(){
+  (async function restaurarSesionCentral(){
     try{
       const cliente=await esperarCliente();
       if(!cliente) return;
