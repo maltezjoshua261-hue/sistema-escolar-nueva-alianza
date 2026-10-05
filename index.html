@@ -5016,6 +5016,21 @@ function guardarCalificacion(){
         return;
     }
 
+    const matriculasCal=obtenerDatos(KEY_MATRICULAS);
+    const matriculaCal=matriculasCal.find(m=>
+        String(m.estudianteId)===String(estudiante.id) &&
+        String(m.anio)===String(anio) &&
+        String(m.estado||"Matriculado")==="Matriculado" &&
+        normalizarNivel(m.nivel)===normalizarNivel(nivel) &&
+        normalizarGrado(m.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(m.seccion)===normalizarSeccion(seccion)
+    );
+
+    const nombreCal=String(estudiante.nombre||"").trim() ||
+        String(estudiante.codigo||"").trim() ||
+        String(matriculaCal?.codigo||"").trim() ||
+        ("Estudiante "+estudiante.id);
+
     const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
     const categoriasValidas=categoriasPorNivelGrado(nivel,grado);
     let resultado="";
@@ -5084,7 +5099,7 @@ function guardarCalificacion(){
         id:calId ? Number(calId) : Date.now(),
         anio:anio,
         estudianteId:estudiante.id,
-        estudiante:estudiante.nombre,
+        estudiante:nombreCal,
         nivel:nivel,
         grado:grado,
         seccion:seccion,
