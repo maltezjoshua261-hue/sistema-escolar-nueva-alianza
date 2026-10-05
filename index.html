@@ -4183,7 +4183,7 @@ function guardarDocente(){
         if(i>=0) datos[i]={...datos[i],...docente}; else datos.push(docente);
     }else datos.push(docente);
     guardarDatos(KEY_DOCENTES,datos);
-    registrarAuditoria(id?"Editar":"Crear","Docentes",id?"Actualización de datos del docente":"Nuevo docente",registro.id);
+    registrarAuditoria(id?"Editar":"Crear","Docentes",id?"Actualización de datos del docente":"Nuevo docente",docente.id);
     alert(id?"Docente actualizado correctamente.":"Docente guardado correctamente.");
     limpiarDocente(); cargarDocentes(); actualizarEstadisticas();
 }
