@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.8</title>
+<title>Sistema Escolar Nueva Alianza - v10.9</title>
 
 <style>
 *{
@@ -460,6 +460,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
 /* DOCUMENTOS OFICIALES 8.5 */
 .documento-oficial{background:#fff;border:1px solid #d9dee7;border-radius:12px;padding:38px;box-shadow:0 3px 12px rgba(0,0,0,.06);max-width:1000px;margin:0 auto;min-height:500px}.doc-encabezado{text-align:center;border-bottom:2px solid #123b6d;padding-bottom:15px;margin-bottom:20px}.doc-encabezado h1{font-size:17px;color:#123b6d}.doc-encabezado h2{font-size:20px;margin:5px 0}.doc-encabezado p{font-size:13px;margin:3px 0}.doc-titulo{text-align:center;font-size:18px;font-weight:bold;text-transform:uppercase;margin:20px 0;color:#123b6d}.doc-cuerpo{font-size:14px;line-height:1.7;text-align:justify}.doc-datos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;background:#f7f9fc;border:1px solid #e1e5eb;padding:15px;margin:15px 0}.doc-datos div{font-size:13px}.doc-tabla{margin-top:15px}.doc-firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;text-align:center;margin-top:70px;font-size:12px}.doc-firma{border-top:1px solid #333;padding-top:7px}.doc-pie{text-align:center;font-size:10px;color:#666;margin-top:30px}.doc-sello{margin-top:18px;text-align:center;font-size:11px;color:#666}.doc-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}.doc-resumen div{border:1px solid #ddd;padding:12px;text-align:center}.doc-resumen strong{display:block;font-size:20px;color:#123b6d;margin-top:5px}@media(max-width:700px){.documento-oficial{padding:20px}.doc-datos{grid-template-columns:1fr}.doc-firmas{grid-template-columns:1fr}.doc-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="documentoOficial"] *{visibility:hidden!important}body[data-imprimiendo="documentoOficial"] #documentoOficial,body[data-imprimiendo="documentoOficial"] #documentoOficial *{visibility:visible!important}body[data-imprimiendo="documentoOficial"] #documentoOficial{position:absolute;left:0;top:0;width:100%;max-width:none;border:none;box-shadow:none;padding:20px}.no-print{display:none!important}}
 
+/* OPERACIÓN REAL Y RESPALDO INTEGRAL 10.9 */
 /* CIERRE ANUAL 8.6 */
 .cierre-estado{display:inline-block;padding:7px 14px;border-radius:20px;font-weight:bold}.cierre-abierto{background:#d1e7dd;color:#0f5132}.cierre-cerrado{background:#f8d7da;color:#842029}.cierre-resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:15px 0}.cierre-resumen .stat-cierre{border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;background:#f9fbfd}.stat-cierre strong{display:block;font-size:25px;color:#0d6efd;margin-top:5px}.cierre-nota{margin-top:15px;padding:12px;border-left:4px solid #198754;background:#eefaf3}.cierre-tabla{margin-top:15px}@media(max-width:800px){.cierre-resumen{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="cierreAnual"] *{visibility:hidden!important}body[data-imprimiendo="cierreAnual"] #cierreAnual,body[data-imprimiendo="cierreAnual"] #cierreAnual *{visibility:visible!important}body[data-imprimiendo="cierreAnual"] #cierreAnual{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}.no-print{display:none!important}}
 
@@ -5505,10 +5506,11 @@ function construirRespaldo(){
 
     return {
         sistema: "Sistema Escolar Nueva Alianza",
-        version: "10.8",
+        version: "10.9",
         fecha: new Date().toISOString(),
         estudiantes: obtenerDatos(KEY_ESTUDIANTES),
         docentes: obtenerDatos(KEY_DOCENTES),
+        usuarios: obtenerDatos(KEY_USUARIOS),
         asistencias: obtenerDatos(KEY_ASISTENCIAS),
         calificaciones: obtenerDatos(KEY_CALIFICACIONES),
         matriculas: obtenerDatos(KEY_MATRICULAS),
@@ -5526,6 +5528,8 @@ function construirRespaldo(){
         planesMejoraAcademica: obtenerDatos(KEY_PLANES_MEJORA),
         comunicacionesFamilia: obtenerDatos(KEY_COMUNICACIONES),
         convivenciaEscolar: obtenerDatos(KEY_CONVIVENCIA),
+        reunionesAcuerdos: obtenerDatos(KEY_REUNIONES_ACUERDOS),
+        acuerdosReuniones: obtenerDatos(KEY_REUNIONES_ACUERDOS+"_acuerdos"),
         configuracion: JSON.parse(localStorage.getItem(KEY_CONFIG) || "null")
     };
 
@@ -5612,6 +5616,21 @@ function importarRespaldo(event){
             guardarDatos(
                 KEY_DOCENTES,
                 Array.isArray(respaldo.docentes) ? respaldo.docentes : []
+            );
+
+            guardarDatos(
+                KEY_USUARIOS,
+                Array.isArray(respaldo.usuarios) ? respaldo.usuarios : []
+            );
+            obtenerUsuarios();
+
+            guardarDatos(
+                KEY_REUNIONES_ACUERDOS,
+                Array.isArray(respaldo.reunionesAcuerdos) ? respaldo.reunionesAcuerdos : []
+            );
+            guardarDatos(
+                KEY_REUNIONES_ACUERDOS+"_acuerdos",
+                Array.isArray(respaldo.acuerdosReuniones) ? respaldo.acuerdosReuniones : []
             );
 
             guardarDatos(
@@ -5748,6 +5767,9 @@ function borrarDatosSistema(){
 
     localStorage.removeItem(KEY_ESTUDIANTES);
     localStorage.removeItem(KEY_DOCENTES);
+    localStorage.removeItem(KEY_USUARIOS);
+    localStorage.removeItem(KEY_REUNIONES_ACUERDOS);
+    localStorage.removeItem(KEY_REUNIONES_ACUERDOS+"_acuerdos");
     localStorage.removeItem(KEY_ASISTENCIAS);
     localStorage.removeItem(KEY_CALIFICACIONES);
     localStorage.removeItem(KEY_MATRICULAS);
