@@ -4623,9 +4623,10 @@ function guardarAsistencia(){
         String(m.estado||"Matriculado")==="Matriculado"
     );
 
-    const nivelAs=matriculaAs?.nivel || estudiante.nivel || "";
-    const gradoAs=matriculaAs?.grado || estudiante.grado || "";
-    const seccionAs=matriculaAs?.seccion || estudiante.seccion || "";
+    const nivelAs=matriculaAs?.nivel || document.getElementById("asisNivel")?.value || estudiante.nivel || "";
+    const gradoAs=matriculaAs?.grado || document.getElementById("asisGrado")?.value || estudiante.grado || "";
+    const seccionAs=matriculaAs?.seccion || document.getElementById("asisSeccion")?.value || estudiante.seccion || "";
+    const nombreAs=String(estudiante.nombre||"").trim() || String(estudiante.codigo||"").trim() || String(matriculaAs?.codigo||"").trim() || ("Estudiante "+estudiante.id);
 
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
@@ -4633,7 +4634,7 @@ function guardarAsistencia(){
         id:existe?existe.id:Date.now(),
         fecha,
         estudianteId:estudiante.id,
-        estudiante:estudiante.nombre||estudiante.codigo||"",
+        estudiante:nombreAs,
         nivel:nivelAs,
         grado:gradoAs,
         seccion:seccionAs,
