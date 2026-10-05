@@ -4534,6 +4534,8 @@ function cargarEstudiantesAsistencia(){
     const nivel=document.getElementById("asisNivel").value;
     const grado=document.getElementById("asisGrado").value;
     const seccion=document.getElementById("asisSeccion").value;
+    const fecha=document.getElementById("asisFecha")?.value||"";
+    const anio=fecha?fecha.slice(0,4):String(new Date().getFullYear());
 
     const select=document.getElementById("asisEstudiante");
 
@@ -4545,34 +4547,37 @@ function cargarEstudiantesAsistencia(){
     }
 
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const matriculas=obtenerDatos(KEY_MATRICULAS);
 
     estudiantes
-        .filter(e =>
+        .filter(e=>{
+            if(String(e.estado||"Activo")!=="Activo") return false;
 
-            normalizarNivel(e.nivel) ===
-            normalizarNivel(nivel)
+            const matricula=matriculas.find(m=>
+                String(m.estudianteId)===String(e.id) &&
+                String(m.anio)===String(anio) &&
+                String(m.estado||"Matriculado")==="Matriculado" &&
+                normalizarNivel(m.nivel)===normalizarNivel(nivel) &&
+                normalizarGrado(m.grado)===normalizarGrado(grado) &&
+                normalizarSeccion(m.seccion)===normalizarSeccion(seccion)
+            );
 
-            &&
+            if(matricula) return true;
 
-            normalizarGrado(e.grado) ===
-            normalizarGrado(grado)
-
-            &&
-
-            normalizarSeccion(e.seccion) ===
-            normalizarSeccion(seccion)
-
-        )
+            return !matriculas.some(m=>
+                String(m.estudianteId)===String(e.id) &&
+                String(m.anio)===String(anio) &&
+                String(m.estado||"Matriculado")==="Matriculado"
+            ) &&
+            normalizarNivel(e.nivel)===normalizarNivel(nivel) &&
+            normalizarGrado(e.grado)===normalizarGrado(grado) &&
+            normalizarSeccion(e.seccion)===normalizarSeccion(seccion);
+        })
         .forEach(e=>{
-
             const option=document.createElement("option");
-
             option.value=e.id;
-
-            option.textContent=e.nombre;
-
+            option.textContent=e.nombre||e.codigo||("Estudiante "+e.id);
             select.appendChild(option);
-
         });
 
 }
