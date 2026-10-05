@@ -4096,6 +4096,35 @@ function actualizarGradosEstudiante(){
 }
 
 
+function claveUnicaEstudiante(e){
+    const codigo=String(e?.codigo||"").trim().toLowerCase();
+    if(codigo) return "codigo:"+codigo;
+    return "datos:"+[
+        String(e?.nombre||"").trim().toLowerCase(),
+        String(e?.nacimiento||"").trim(),
+        String(e?.responsable||"").trim().toLowerCase(),
+        normalizarNivel(e?.nivel||""),
+        normalizarGrado(e?.grado||""),
+        normalizarSeccion(e?.seccion||"")
+    ].join("|");
+}
+function depurarDuplicadosEstudiantes(){
+    const datos=obtenerDatos(KEY_ESTUDIANTES);
+    if(!Array.isArray(datos)||!datos.length) return datos||[];
+    const vistos=new Set(),limpios=[];
+    datos.forEach(e=>{
+        const clave=claveUnicaEstudiante(e);
+        if(!vistos.has(clave)){
+            vistos.add(clave);
+            limpios.push(e);
+        }
+    });
+    if(limpios.length!==datos.length){
+        guardarDatos(KEY_ESTUDIANTES,limpios);
+        registrarAuditoria("Depurar","Estudiantes","Eliminación automática de registros duplicados",datos.length-limpios.length);
+    }
+    return limpios;
+}
 function guardarEstudiante(){
     const nombre=document.getElementById("estNombre").value.trim();
     const nivel=document.getElementById("estNivel").value;
@@ -4103,7 +4132,7 @@ function guardarEstudiante(){
     const seccion=document.getElementById("estSeccion").value;
     const id=document.getElementById("estId").value;
     if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel, grado y sección.");return;}
-    const datos=obtenerDatos(KEY_ESTUDIANTES);
+    const datos=depurarDuplicadosEstudiantes();
     const estudiante={
         id:id?Number(id):Date.now(),nombre,
         codigo:document.getElementById("estCodigo").value.trim(),
@@ -4118,9 +4147,16 @@ function guardarEstudiante(){
     if(id){
         const i=datos.findIndex(e=>Number(e.id)===Number(id));
         if(i>=0) datos[i]={...datos[i],...estudiante}; else datos.push(estudiante);
-    }else datos.push(estudiante);
+    }else{
+        const clave=claveUnicaEstudiante(estudiante);
+        if(datos.some(e=>claveUnicaEstudiante(e)===clave)){
+            alert("Este estudiante ya está registrado.");
+            return;
+        }
+        datos.push(estudiante);
+    }
     guardarDatos(KEY_ESTUDIANTES,datos);
-    registrarAuditoria(id?"Editar":"Crear","Estudiantes",id?"Actualización de datos del estudiante":"Nuevo estudiante",registro.id);
+    registrarAuditoria(id?"Editar":"Crear","Estudiantes",id?"Actualización de datos del estudiante":"Nuevo estudiante",estudiante.id);
     alert(id?"Estudiante actualizado correctamente.":"Estudiante guardado correctamente.");
     limpiarEstudiante(); cargarEstudiantes(); actualizarEstadisticas(); actualizarCalificaciones();
 }
@@ -4179,7 +4215,7 @@ function estudianteVisibleParaRol(e,anio){
     return docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio||new Date().getFullYear());
 }
 function cargarEstudiantes(){
-    const datos=obtenerDatos(KEY_ESTUDIANTES), tabla=document.getElementById("tablaEstudiantes");
+    const datos=depurarDuplicadosEstudiantes(), tabla=document.getElementById("tablaEstudiantes");
     const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
