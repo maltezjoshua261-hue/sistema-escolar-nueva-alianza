@@ -1,4 +1,4 @@
-// V11.2 - Configuración de conexión Supabase
+// V11.3 - Configuración de conexión y autenticación Supabase
 // Publishable Key: apta para uso en el navegador.
 // NO colocar aquí una secret key ni una service_role key.
 
@@ -6,3 +6,179 @@ window.NUEVA_ALIANZA_SUPABASE = {
   url: "https://qgorjwwhludvzwvrgecz.supabase.co",
   publishableKey: "sb_publishable_pcK1oUF6hSjngE2zHePKuQ_H81RtQHL"
 };
+
+// V11.3 - Login central con Supabase Auth.
+// Este bloque se ejecuta después de que el index.html haya cargado sus funciones.
+window.addEventListener("load", function(){
+  const userInput = document.getElementById("loginUser");
+  const passInput = document.getElementById("loginPass");
+  const errorBox = document.getElementById("loginError");
+
+  if(userInput){
+    userInput.type = "email";
+    userInput.placeholder = "Correo electrónico";
+  }
+
+  if(typeof window.supabase === "undefined"){
+    if(errorBox) errorBox.textContent = "No se pudo cargar el servicio de autenticación.";
+    return;
+  }
+
+  function obtenerCliente(){
+    return window.NUEVA_ALIANZA_SUPABASE_CLIENT || null;
+  }
+
+  async function esperarCliente(intentos=50){
+    for(let i=0;i<intentos;i++){
+      const cliente=obtenerCliente();
+      if(cliente) return cliente;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    return null;
+  }
+
+  window.iniciarSesion = async function(){
+    const email=String(userInput?.value||"").trim();
+    const password=String(passInput?.value||"").trim();
+
+    if(!email || !password){
+      if(errorBox) errorBox.textContent="Ingrese el correo y la contraseña.";
+      return;
+    }
+
+    if(!email.includes("@")){
+      if(errorBox) errorBox.textContent="Para V11.3 debe ingresar el correo usado en Supabase.";
+      return;
+    }
+
+    if(errorBox) errorBox.textContent="Verificando acceso...";
+
+    try{
+      const cliente=await esperarCliente();
+
+      if(!cliente){
+        if(errorBox) errorBox.textContent="No se pudo conectar con Supabase. Recargue la página e intente nuevamente.";
+        return;
+      }
+
+      const {data,error}=await cliente.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if(error){
+        console.error("V11.3 - Error de autenticación:",error);
+        if(errorBox) errorBox.textContent="Correo o contraseña incorrectos.";
+        return;
+      }
+
+      const user=data?.user;
+
+      if(!user){
+        if(errorBox) errorBox.textContent="No se recibió la cuenta autenticada.";
+        return;
+      }
+
+      const {data:perfil,error:errorPerfil}=await cliente
+        .from("perfiles")
+        .select("id,nombre_completo,usuario,rol,activo")
+        .eq("id",user.id)
+        .single();
+
+      if(errorPerfil || !perfil || !perfil.activo){
+        await cliente.auth.signOut();
+        console.error("V11.3 - Perfil no encontrado o inactivo:",errorPerfil);
+        if(errorBox) errorBox.textContent="La cuenta no tiene un perfil escolar activo.";
+        return;
+      }
+
+      if(!["Director","Docente"].includes(String(perfil.rol))){
+        await cliente.auth.signOut();
+        if(errorBox) errorBox.textContent="El rol de esta cuenta no está autorizado.";
+        return;
+      }
+
+      sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
+        usuario:perfil.usuario || user.email,
+        rol:perfil.rol,
+        docenteId:"",
+        authUserId:user.id,
+        nombreCompleto:perfil.nombre_completo || ""
+      }));
+
+      if(errorBox) errorBox.textContent="";
+      document.getElementById("loginScreen").style.display="none";
+      document.getElementById("app").style.display="flex";
+
+      try{
+        cargarTodo();
+        aplicarPermisos();
+      }catch(errorCarga){
+        console.error("V11.3 - Error al cargar el panel:",errorCarga);
+        aplicarPermisos();
+      }
+
+    }catch(error){
+      console.error("V11.3 - Error inesperado en login:",error);
+      if(errorBox) errorBox.textContent="No fue posible iniciar sesión. Intente nuevamente.";
+    }
+  };
+
+  window.cerrarSesion = async function(){
+    try{
+      const cliente=obtenerCliente();
+      if(cliente) await cliente.auth.signOut();
+    }catch(error){
+      console.error("V11.3 - Error al cerrar sesión:",error);
+    }
+
+    sessionStorage.removeItem("sesionNuevaAlianza");
+    const app=document.getElementById("app");
+    const login=document.getElementById("loginScreen");
+    if(app) app.style.display="none";
+    if(login) login.style.display="flex";
+    if(userInput) userInput.value="";
+    if(passInput) passInput.value="";
+    if(errorBox) errorBox.textContent="";
+  };
+
+  // Si ya existe una sesión central, la recuperamos al recargar.
+  (async functionrestaurarSesionCentral(){
+    try{
+      const cliente=await esperarCliente();
+      if(!cliente) return;
+
+      const {data,error}=await cliente.auth.getSession();
+      if(error || !data?.session) return;
+
+      const user=data.session.user;
+      const {data:perfil,error:errorPerfil}=await cliente
+        .from("perfiles")
+        .select("id,nombre_completo,usuario,rol,activo")
+        .eq("id",user.id)
+        .single();
+
+      if(errorPerfil || !perfil || !perfil.activo) return;
+
+      sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
+        usuario:perfil.usuario || user.email,
+        rol:perfil.rol,
+        docenteId:"",
+        authUserId:user.id,
+        nombreCompleto:perfil.nombre_completo || ""
+      }));
+
+      document.getElementById("loginScreen").style.display="none";
+      document.getElementById("app").style.display="flex";
+      try{
+        cargarTodo();
+        aplicarPermisos();
+      }catch(errorCarga){
+        console.error("V11.3 - Error al restaurar sesión:",errorCarga);
+        aplicarPermisos();
+      }
+    }catch(error){
+      console.error("V11.3 - Error al restaurar sesión central:",error);
+    }
+  })();
+});
