@@ -3380,23 +3380,41 @@ const DISCIPLINAS_CUALITATIVAS = [
 
 function obtenerUsuarios(){
     let usuarios=obtenerDatos(KEY_USUARIOS);
+    if(!Array.isArray(usuarios)) usuarios=[];
 
-    // Mantener disponibles las cuentas iniciales aunque exista
-    // información antigua o incompleta en localStorage.
+    // Cuentas base del sistema. Se garantiza siempre el acceso inicial.
     const cuentasBase=[
         {id:"admin",usuario:"admin",password:"1234",rol:"Director"},
         {id:"docente",usuario:"docente",password:"2026",rol:"Docente",docenteId:""}
     ];
 
-    if(!Array.isArray(usuarios)) usuarios=[];
-
     cuentasBase.forEach(base=>{
-        const existe=usuarios.some(u=>String(u?.usuario||"").trim().toLowerCase()===base.usuario);
-        if(!existe) usuarios.push(base);
+        const indice=usuarios.findIndex(u=>
+            String(u?.usuario||"").trim().toLowerCase()===base.usuario
+        );
+
+        if(indice<0){
+            usuarios.push({...base});
+        }else{
+            // Recuperar credenciales base si fueron alteradas accidentalmente,
+            // pero conservar el docenteId ya vinculado.
+            usuarios[indice]={
+                ...usuarios[indice],
+                id:usuarios[indice].id||base.id,
+                usuario:base.usuario,
+                password:base.password,
+                rol:base.rol,
+                docenteId:String(usuarios[indice].docenteId||"")
+            };
+        }
     });
 
-    // Limpiar registros de usuario incompletos sin eliminar cuentas válidas.
-    usuarios=usuarios.filter(u=>u && String(u.usuario||"").trim() && String(u.password??"").trim());
+    // Limpiar registros de usuario incompletos.
+    usuarios=usuarios.filter(u=>
+        u &&
+        String(u.usuario||"").trim() &&
+        String(u.password??"").trim()
+    );
 
     guardarDatos(KEY_USUARIOS,usuarios);
     return usuarios;
