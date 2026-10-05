@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - v10.9</title>
+<title>Sistema Escolar Nueva Alianza - V11.2</title>
 
 <style>
 *{
@@ -2995,6 +2995,41 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
     </main>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="v11/supabase-config.js"></script>
+<script>
+/* V11.2 - Conexión segura al proyecto Supabase */
+window.NUEVA_ALIANZA_SUPABASE_CLIENT = null;
+
+async function inicializarSupabaseNuevaAlianza(){
+    try{
+        const cfg = window.NUEVA_ALIANZA_SUPABASE;
+        if(!cfg || !cfg.url || !cfg.publishableKey){
+            console.error("V11.2: Falta la configuración de Supabase.");
+            return false;
+        }
+        if(!window.supabase || typeof window.supabase.createClient !== "function"){
+            console.error("V11.2: No se pudo cargar la librería de Supabase.");
+            return false;
+        }
+        window.NUEVA_ALIANZA_SUPABASE_CLIENT =
+            window.supabase.createClient(cfg.url, cfg.publishableKey);
+        const { error } = await window.NUEVA_ALIANZA_SUPABASE_CLIENT.auth.getSession();
+        if(error){
+            console.error("V11.2: Error de conexión con Supabase:", error);
+            return false;
+        }
+        console.info("V11.2: Supabase conectado correctamente.");
+        return true;
+    }catch(error){
+        console.error("V11.2: Error al inicializar Supabase:", error);
+        return false;
+    }
+}
+
+inicializarSupabaseNuevaAlianza();
+</script>
 
 <script>
 
