@@ -5842,19 +5842,54 @@ function actualizarSelectorUsuarioDocente(){
 }
 function guardarUsuario(){
     if(!exigirDirector()) return;
+
     const usuario=document.getElementById("usrNombre").value.trim();
     const password=document.getElementById("usrPassword").value.trim();
     const rol=document.getElementById("usrRol").value;
     const docenteId=document.getElementById("usrDocente")?.value||"";
-    if(!usuario||!password){alert("Ingrese usuario y contraseña.");return;}
-    if(rol==="Docente"&&!docenteId){alert("Seleccione el docente que utilizará este usuario.");return;}
+
+    if(!usuario||!password){
+        alert("Ingrese usuario y contraseña.");
+        return;
+    }
+
+    if(rol==="Docente"&&!docenteId){
+        alert("Seleccione el docente que utilizará este usuario.");
+        return;
+    }
+
     const usuarios=obtenerUsuarios();
-    if(usuarios.some(u=>u.usuario===usuario)){alert("Ese usuario ya existe.");return;}
-    const nuevoUsuario={id:Date.now().toString(),usuario,password,rol,docenteId:rol==="Docente"?String(docenteId):""};
-    usuarios.push(nuevoUsuario);
-    guardarDatos(KEY_USUARIOS,usuarios);
-    registrarAuditoria("Crear","Usuarios","Creación de usuario: "+usuario,nuevoUsuario.id);
-    limpiarUsuario(); cargarUsuarios();
+    const indice=usuarios.findIndex(u=>
+        String(u.usuario||"").trim().toLowerCase()===usuario.toLowerCase()
+    );
+
+    if(usuario.toLowerCase()==="admin"){
+        alert("La cuenta admin está protegida y no puede modificarse desde este formulario.");
+        return;
+    }
+
+    const datosUsuario={
+        id:indice>=0?(usuarios[indice].id||Date.now().toString()):Date.now().toString(),
+        usuario,
+        password,
+        rol,
+        docenteId:rol==="Docente"?String(docenteId):""
+    };
+
+    if(indice>=0){
+        usuarios[indice]={...usuarios[indice],...datosUsuario};
+        guardarDatos(KEY_USUARIOS,usuarios);
+        registrarAuditoria("Editar","Usuarios","Actualización de usuario: "+usuario,datosUsuario.id);
+        alert("Usuario actualizado y vinculado correctamente.");
+    }else{
+        usuarios.push(datosUsuario);
+        guardarDatos(KEY_USUARIOS,usuarios);
+        registrarAuditoria("Crear","Usuarios","Creación de usuario: "+usuario,datosUsuario.id);
+        alert("Usuario creado correctamente.");
+    }
+
+    limpiarUsuario();
+    cargarUsuarios();
 }
 function limpiarUsuario(){
     document.getElementById("usrNombre").value="";
