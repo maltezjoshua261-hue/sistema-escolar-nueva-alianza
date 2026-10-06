@@ -5007,36 +5007,42 @@ function guardarCalificacion(){
 ========================================================= */
 
 function cargarCalificaciones(){
-
     const datos=obtenerDatos(KEY_CALIFICACIONES);
     const tabla=document.getElementById("tablaCalificaciones");
+    if(!tabla)return;
     const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value || "");
     const filtroCorte=document.getElementById("filtroCalCorte")?.value || "";
-
     const ses=obtenerSesionActual();
-    const lista=datos.filter(c=>{
 
-        if(ses?.rol==="Docente" && (String(c.docenteId||"")!==String(ses.docenteId||"") || !docenteTieneAsignatura(c.nivel,c.grado,c.seccion,c.asignatura,c.anio))) return false;
+    const lista=datos.filter(c=>{
+        if(ses?.rol==="Docente"){
+            const mismoCentro=String(c.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||"");
+            const mismoDocente=String(c.docenteId||"")===String(ses.docenteId||"");
+            const grupoAsignado=obtenerDatos(KEY_ASIGNACIONES).some(a=>
+                String(a.anio)===String(c.anio) &&
+                String(a.estado||"Activo")==="Activo" &&
+                normalizarNivel(a.nivel)===normalizarNivel(c.nivel) &&
+                normalizarGrado(a.grado)===normalizarGrado(c.grado) &&
+                normalizarSeccion(a.seccion)===normalizarSeccion(c.seccion) &&
+                (String(a.docenteId||"")===String(ses.docenteId||"") ||
+                 String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId||""))
+            );
+            if(!mismoCentro || (!mismoDocente && !grupoAsignado)) return false;
+        }
         const texto=limpiarTexto([
             c.anio,c.estudiante,c.nivel,c.grado,c.seccion,
             c.asignatura,c.corte,c.resultado,c.observacion
         ].join(" "));
-
         return (!buscar || texto.includes(buscar)) &&
                (!filtroCorte || c.corte===filtroCorte);
-
     }).sort((a,b)=>String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es"));
 
     tabla.innerHTML="";
-
     if(!lista.length){
         tabla.innerHTML='<tr><td colspan="12" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
     }
-
     lista.forEach((c,index)=>{
-
         let resultadoHTML="";
-
         if(c.tipo==="Numerica"){
             const nota=Number(c.resultado);
             let clase="badge-success";
@@ -5044,9 +5050,8 @@ function cargarCalificaciones(){
             else if(nota<70) clase="badge-warning";
             resultadoHTML='<span class="badge '+clase+'">'+nota+'</span>';
         }else{
-            resultadoHTML='<span class="badge badge-success">'+escaparHTML(c.resultado)+'</span>';
+            resultadoHTML='<span class="badge badge-success">'+escaparHTML(c.resultado||"")+'</span>';
         }
-
         tabla.innerHTML += '<tr>' +
             '<td>'+String(index+1)+'</td>' +
             '<td>'+escaparHTML(c.anio)+'</td>' +
@@ -5059,18 +5064,11 @@ function cargarCalificaciones(){
             '<td>'+escaparHTML(c.corte)+'</td>' +
             '<td>'+resultadoHTML+'</td>' +
             '<td>'+escaparHTML(c.observacion || "")+'</td>' +
-            '<td>' +
-                '<button class="btn-warning" onclick="editarCalificacion('+c.id+')">✏️ Editar</button> ' +
-                '<button class="btn-danger" onclick="eliminarCalificacion('+c.id+')">Eliminar</button>' +
-            '</td>' +
+            '<td><button class="btn-warning" onclick="editarCalificacion(&quot;undefined&quot;)">✏️ Editar</button> <button class="btn-danger" onclick="eliminarCalificacion(&quot;undefined&quot;)">Eliminar</button></td>' +
         '</tr>';
-
     });
-
     actualizarResumenCalificaciones(lista);
-
 }
-
 
 function actualizarResumenCalificaciones(lista){
 
