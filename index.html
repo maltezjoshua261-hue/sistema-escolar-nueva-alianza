@@ -7729,9 +7729,12 @@ window.guardarCalificacion=async function(){
   const nivel=document.getElementById("calNivel")?.value||e.nivel||"";
   const grado=document.getElementById("calGrado")?.value||e.grado||"";
   const seccion=document.getElementById("calSeccion")?.value||e.seccion||"";
-  const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
-  const resultado=(numerica?document.getElementById("calNota")?.value:document.getElementById("calCategoria")?.value||"").trim();
-  if(numerica && (resultado==="" || Number.isNaN(Number(resultado)))){alert("Ingrese una nota numérica válida de 0 a 100.");return;}
+  const notaCampo=document.getElementById("calNota");
+  const categoriaCampo=document.getElementById("calCategoria");
+  const notaValor=(notaCampo?.value||"").trim();
+  const numerica=notaCampo && !notaCampo.classList.contains("hidden") && notaValor!=="";
+  const resultado=(numerica?notaValor:(categoriaCampo?.value||"")).trim();
+  if(numerica && (resultado==="" || Number.isNaN(Number(resultado)) || Number(resultado)<0 || Number(resultado)>100)){alert("Ingrese una nota numérica válida de 0 a 100.");return;}
   const observacion=(document.getElementById("calObservacion")?.value||"").trim();
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(anio),nivel,grado,seccion,asignatura,periodo,
