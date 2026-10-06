@@ -7677,6 +7677,16 @@ async function NA_login(){
     if(err)err.textContent="";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
+
+    // V11.28.0 - Verificación final del panel del Director.
+    // Supabase es la fuente oficial; si está vacío, no se permite
+    // que una copia local antigua vuelva a mostrarse en los contadores.
+    if(NA_sesion()?.rol==="Director"){
+      [KEY_ESTUDIANTES,KEY_DOCENTES,KEY_ASISTENCIAS,KEY_CALIFICACIONES].forEach(k=>localStorage.removeItem(k));
+      localStorage.removeItem(KEY_AUDITORIA);
+      if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+      if(typeof cargarBitacora==="function")cargarBitacora();
+    }
   }catch(e){
     console.error("V11.25 login:",e);
     if(err)err.textContent=e?.message||"Usuario o contraseña incorrectos.";
