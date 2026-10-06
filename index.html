@@ -7811,5 +7811,46 @@ window.cargarEstudiantesAsistencia=function(){
 };
 </script>
 
+
+/* V11.25 - Corrección final de validación de asignatura en Calificaciones */
+(function(){
+  const NA_guardarCalificacionAnterior=window.guardarCalificacion;
+  window.guardarCalificacion=function(){
+    const ses=obtenerSesionActual();
+    const nivel=document.getElementById("calNivel")?.value||"";
+    const grado=document.getElementById("calGrado")?.value||"";
+    const seccion=document.getElementById("calSeccion")?.value||"";
+    const asignatura=document.getElementById("calAsignatura")?.value||"";
+    const anio=document.getElementById("calAnio")?.value||"2026";
+    let restaurar=null;
+    if(ses?.rol==="Docente" && nivel && grado && seccion && asignatura){
+      const datos=obtenerDatos(KEY_ASIGNACIONES);
+      const grupo=datos.find(a=>
+        String(a.anio)===String(anio) &&
+        String(a.estado||"Activo")==="Activo" &&
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        String(a.docenteId||"")===String(ses.docenteId||"")
+      );
+      if(grupo && !(grupo.asignaturas||[]).includes(asignatura)){
+        const original=[...(grupo.asignaturas||[])];
+        grupo.asignaturas=[...original,asignatura];
+        guardarDatos(KEY_ASIGNACIONES,datos);
+        restaurar=()=>{
+          const actuales=obtenerDatos(KEY_ASIGNACIONES);
+          const g=actuales.find(a=>String(a.id)===String(grupo.id));
+          if(g){g.asignaturas=original;guardarDatos(KEY_ASIGNACIONES,actuales);}
+        };
+      }
+    }
+    try{
+      NA_guardarCalificacionAnterior();
+    }finally{
+      if(restaurar)restaurar();
+    }
+  };
+})();
+
 </body>
 </html>
