@@ -7747,6 +7747,17 @@ async function NA_restaurarSesion(){
     if(typeof cargarTodo==="function")cargarTodo();
   }catch(e){console.warn("V11.25 restauración:",e);}
 }
+window.cargarEstudiantes=function(){
+  const tabla=document.getElementById("tablaEstudiantes"); if(!tabla)return;
+  const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
+  const ses=obtenerSesionActual();
+  let lista=obtenerDatos(KEY_ESTUDIANTES);
+  if(ses?.rol==="Docente"){
+    lista=lista.filter(e=>String(e.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
+  }
+  if(buscar) lista=lista.filter(e=>[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
+  tabla.innerHTML=lista.map((e,i)=>'<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(e.nombre||"")+'</td><td>'+escaparHTML(e.codigo||"")+'</td><td>'+escaparHTML(e.nivel||"")+'</td><td>'+escaparHTML(e.grado||"")+'</td><td>'+escaparHTML(e.seccion||"")+'</td><td>'+escaparHTML(e.responsable||"")+'</td><td>'+escaparHTML(e.estado||"Activo")+'</td><td><span style="color:#6b7280;font-size:12px;">Solo consulta</span></td></tr>').join("") || '<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados para este centro.</td></tr>';
+};
 window.NA_syncTodo=NA_syncTodo;
 window.NA_restaurarSesion=NA_restaurarSesion;
 
