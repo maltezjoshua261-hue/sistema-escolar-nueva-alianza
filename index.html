@@ -8085,6 +8085,24 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 })();
 
 <script>
+/* V11.27.7 - Limpieza automática de datos locales de prueba en producción */
+(function(){
+  try{
+    if(localStorage.getItem("NA_v11277_limpieza_local_aplicada")!=="1"){
+      [
+        "estudiantesNuevaAlianza",
+        "docentesNuevaAlianza",
+        "asistenciasNuevaAlianza",
+        "calificacionesNuevaAlianza",
+        "auditoriaNuevaAlianza"
+      ].forEach(function(k){ localStorage.removeItem(k); });
+      localStorage.setItem("NA_v11277_limpieza_local_aplicada","1");
+    }
+  }catch(e){ console.warn("V11.27.7 - No se pudo limpiar almacenamiento local:",e); }
+})();
+</script>
+
+<script>
 /* V11.27.5 - Herramienta segura para limpiar datos locales de prueba */
 window.NA_limpiarDatosLocalesPrueba = async function(){
   const ses = typeof obtenerSesionActual === "function" ? obtenerSesionActual() : null;
