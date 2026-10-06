@@ -7559,6 +7559,10 @@ async function NA_syncDocentes(){
     out.push({...d,id,nombre:d.nombre_completo,supabaseId:d.id});
   });
   guardarDatos(KEY_DOCENTES,out);
+  if(ses?.rol==="Docente"){
+    const localDoc=out.find(d=>String(d.supabaseId||"")===String(ses.docenteId||""));
+    if(localDoc) NA_setSesion({...ses,docenteId:String(localDoc.id)});
+  }
 }
 async function NA_syncAsignaciones(){
   const c=await NA_init(), ses=NA_sesion();
