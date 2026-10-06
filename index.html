@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - V11.2</title>
+<title>Sistema Escolar Nueva Alianza - v10.9</title>
 
 <style>
 *{
@@ -2996,41 +2996,6 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="v11/supabase-config.js"></script>
-<script>
-/* V11.2 - Conexión segura al proyecto Supabase */
-window.NUEVA_ALIANZA_SUPABASE_CLIENT = null;
-
-async function inicializarSupabaseNuevaAlianza(){
-    try{
-        const cfg = window.NUEVA_ALIANZA_SUPABASE;
-        if(!cfg || !cfg.url || !cfg.publishableKey){
-            console.error("V11.2: Falta la configuración de Supabase.");
-            return false;
-        }
-        if(!window.supabase || typeof window.supabase.createClient !== "function"){
-            console.error("V11.2: No se pudo cargar la librería de Supabase.");
-            return false;
-        }
-        window.NUEVA_ALIANZA_SUPABASE_CLIENT =
-            window.supabase.createClient(cfg.url, cfg.publishableKey);
-        const { error } = await window.NUEVA_ALIANZA_SUPABASE_CLIENT.auth.getSession();
-        if(error){
-            console.error("V11.2: Error de conexión con Supabase:", error);
-            return false;
-        }
-        console.info("V11.2: Supabase conectado correctamente.");
-        return true;
-    }catch(error){
-        console.error("V11.2: Error al inicializar Supabase:", error);
-        return false;
-    }
-}
-
-inicializarSupabaseNuevaAlianza();
-</script>
-
 <script>
 
 /* =========================================================
@@ -4534,8 +4499,6 @@ function cargarEstudiantesAsistencia(){
     const nivel=document.getElementById("asisNivel").value;
     const grado=document.getElementById("asisGrado").value;
     const seccion=document.getElementById("asisSeccion").value;
-    const fecha=document.getElementById("asisFecha")?.value||"";
-    const anio=fecha?fecha.slice(0,4):String(new Date().getFullYear());
 
     const select=document.getElementById("asisEstudiante");
 
@@ -4547,37 +4510,34 @@ function cargarEstudiantesAsistencia(){
     }
 
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
-    const matriculas=obtenerDatos(KEY_MATRICULAS);
 
     estudiantes
-        .filter(e=>{
-            if(String(e.estado||"Activo")!=="Activo") return false;
+        .filter(e =>
 
-            const matricula=matriculas.find(m=>
-                String(m.estudianteId)===String(e.id) &&
-                String(m.anio)===String(anio) &&
-                String(m.estado||"Matriculado")==="Matriculado" &&
-                normalizarNivel(m.nivel)===normalizarNivel(nivel) &&
-                normalizarGrado(m.grado)===normalizarGrado(grado) &&
-                normalizarSeccion(m.seccion)===normalizarSeccion(seccion)
-            );
+            normalizarNivel(e.nivel) ===
+            normalizarNivel(nivel)
 
-            if(matricula) return true;
+            &&
 
-            return !matriculas.some(m=>
-                String(m.estudianteId)===String(e.id) &&
-                String(m.anio)===String(anio) &&
-                String(m.estado||"Matriculado")==="Matriculado"
-            ) &&
-            normalizarNivel(e.nivel)===normalizarNivel(nivel) &&
-            normalizarGrado(e.grado)===normalizarGrado(grado) &&
-            normalizarSeccion(e.seccion)===normalizarSeccion(seccion);
-        })
+            normalizarGrado(e.grado) ===
+            normalizarGrado(grado)
+
+            &&
+
+            normalizarSeccion(e.seccion) ===
+            normalizarSeccion(seccion)
+
+        )
         .forEach(e=>{
+
             const option=document.createElement("option");
+
             option.value=e.id;
-            option.textContent=e.nombre||e.codigo||("Estudiante "+e.id);
+
+            option.textContent=e.nombre;
+
             select.appendChild(option);
+
         });
 
 }
@@ -4611,37 +4571,11 @@ function guardarAsistencia(){
             alert("No tiene asignación activa para este grupo.");return;
         }
     }
-    if(!fecha){alert("Seleccione la fecha.");return;}
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
-
-    // V11.4 - La asistencia debe tomar nivel, grado y sección
-    // de la matrícula vigente del estudiante cuando exista.
-    const matriculasAs=obtenerDatos(KEY_MATRICULAS);
-    const matriculaAs=matriculasAs.find(m=>
-        String(m.estudianteId)===String(estudiante.id) &&
-        String(m.anio)===String(fecha.slice(0,4)) &&
-        String(m.estado||"Matriculado")==="Matriculado"
-    );
-
-    const nivelAs=matriculaAs?.nivel || document.getElementById("asisNivel")?.value || estudiante.nivel || "";
-    const gradoAs=matriculaAs?.grado || document.getElementById("asisGrado")?.value || estudiante.grado || "";
-    const seccionAs=matriculaAs?.seccion || document.getElementById("asisSeccion")?.value || estudiante.seccion || "";
-    const nombreAs=String(estudiante.nombre||"").trim() || String(estudiante.codigo||"").trim() || String(matriculaAs?.codigo||"").trim() || ("Estudiante "+estudiante.id);
-
+    if(!fecha){alert("Seleccione la fecha.");return;}
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
-    const registro={
-        id:existe?existe.id:Date.now(),
-        fecha,
-        estudianteId:estudiante.id,
-        estudiante:nombreAs,
-        nivel:nivelAs,
-        grado:gradoAs,
-        seccion:seccionAs,
-        docenteId:docenteObj?.id||"",
-        docenteNombre:docenteObj?.nombre||"",
-        estado
-    };
+    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
     registrarAuditoria(existe?"Editar":"Crear","Asistencia",existe?"Actualización de asistencia":"Registro de asistencia",registro.id,{anio:anioAs});
@@ -4771,12 +4705,11 @@ function cargarEstudiantesCalificaciones(){
     const select=document.getElementById("calEstudiante");
     const valorAnterior=select.value;
 
-    select.innerHTML='<option value="\">Seleccione estudiante</option>';
+    select.innerHTML='<option value="">Seleccione estudiante</option>';
 
-    const nivel=document.getElementById("calNivel")?.value||"";
-    const grado=document.getElementById("calGrado")?.value||"";
-    const seccion=document.getElementById("calSeccion")?.value||"";
-    const anio=document.getElementById("calAnio")?.value || String(new Date().getFullYear());
+    const nivel=document.getElementById("calNivel").value;
+    const grado=document.getElementById("calGrado").value;
+    const seccion=document.getElementById("calSeccion").value;
 
     if(!nivel || !grado || !seccion) return;
 
@@ -4784,72 +4717,20 @@ function cargarEstudiantesCalificaciones(){
     const gradoBuscado=normalizarGrado(grado);
     const seccionBuscada=normalizarSeccion(seccion);
 
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
-    const matriculas=obtenerDatos(KEY_MATRICULAS);
-
-    const estudiantesPorId=new Map(
-        estudiantes.map(e=>[String(e.id),e])
+    const encontrados=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+        normalizarNivel(e.nivel)===nivelBuscado &&
+        normalizarGrado(e.grado)===gradoBuscado &&
+        normalizarSeccion(e.seccion)===seccionBuscada &&
+        String(e.estado||"Activo").toLowerCase()!=="retirado" &&
+        String(e.estado||"Activo").toLowerCase()!=="trasladado"
     );
 
-    const encontradosMap=new Map();
+    encontrados.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
 
-    // 1. Prioridad: estudiantes con matrícula activa del año y grupo seleccionado.
-    matriculas
-        .filter(m=>{
-            const estado=String(m.estado||"Matriculado").trim().toLowerCase();
-            return String(m.anio)===String(anio) &&
-                estado==="matriculado" &&
-                normalizarNivel(m.nivel)===nivelBuscado &&
-                normalizarGrado(m.grado)===gradoBuscado &&
-                normalizarSeccion(m.seccion)===seccionBuscada;
-        })
-        .forEach(m=>{
-            const e=estudiantesPorId.get(String(m.estudianteId));
-            if(e){
-                const estadoEstudiante=String(e.estado||"Activo").trim().toLowerCase();
-                if(estadoEstudiante!=="retirado" && estadoEstudiante!=="trasladado"){
-                    encontradosMap.set(String(e.id),{e,m});
-                }
-            }
-        });
-
-    // 2. Compatibilidad: estudiantes antiguos que aún tienen
-    // nivel, grado y sección directamente en su ficha maestra.
-    estudiantes.forEach(e=>{
-        const estadoEstudiante=String(e.estado||"Activo").trim().toLowerCase();
-        if(estadoEstudiante==="retirado" || estadoEstudiante==="trasladado") return;
-
-        const tieneMatriculaActiva=matriculas.some(m=>
-            String(m.estudianteId)===String(e.id) &&
-            String(m.anio)===String(anio) &&
-            String(m.estado||"Matriculado").trim().toLowerCase()==="matriculado"
-        );
-
-        if(tieneMatriculaActiva) return;
-
-        if(
-            normalizarNivel(e.nivel)===nivelBuscado &&
-            normalizarGrado(e.grado)===gradoBuscado &&
-            normalizarSeccion(e.seccion)===seccionBuscada
-        ){
-            encontradosMap.set(String(e.id),{e,m:null});
-        }
-    });
-
-    const encontrados=[...encontradosMap.values()].sort((a,b)=>{
-        const na=String(a.e.nombre||a.e.codigo||a.m?.codigo||"").trim();
-        const nb=String(b.e.nombre||b.e.codigo||b.m?.codigo||"").trim();
-        return na.localeCompare(nb,"es");
-    });
-
-    encontrados.forEach(({e,m})=>{
+    encontrados.forEach(e=>{
         const option=document.createElement("option");
         option.value=e.id;
-        option.textContent=
-            String(e.nombre||"").trim() ||
-            String(e.codigo||"").trim() ||
-            String(m?.codigo||"").trim() ||
-            ("Estudiante "+e.id);
+        option.textContent=e.nombre;
         select.appendChild(option);
     });
 
@@ -4861,6 +4742,7 @@ function cargarEstudiantesCalificaciones(){
     }else if([...select.options].some(o=>String(o.value)===String(valorAnterior))){
         select.value=valorAnterior;
     }
+
 }
 
 
@@ -5016,25 +4898,6 @@ function guardarCalificacion(){
         return;
     }
 
-    const matriculasCal=obtenerDatos(KEY_MATRICULAS);
-    const matriculaCal=matriculasCal.find(m=>
-        String(m.estudianteId)===String(estudiante.id) &&
-        String(m.anio)===String(anio) &&
-        String(m.estado||"Matriculado")==="Matriculado" &&
-        normalizarNivel(m.nivel)===normalizarNivel(nivel) &&
-        normalizarGrado(m.grado)===normalizarGrado(grado) &&
-        normalizarSeccion(m.seccion)===normalizarSeccion(seccion)
-    );
-
-    const opcionEstudiante=document.getElementById("calEstudiante")?.selectedOptions?.[0];
-    const textoOpcion=String(opcionEstudiante?.textContent||"").trim();
-    const nombreCal=String(estudiante.nombre||"").trim() ||
-        String(estudiante.codigo||"").trim() ||
-        String(matriculaCal?.estudiante||"").trim() ||
-        String(matriculaCal?.codigo||"").trim() ||
-        textoOpcion.replace(/^Sin nombre\s*[·|-]\s*/i,"").trim() ||
-        ("Estudiante "+estudiante.id);
-
     const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
     const categoriasValidas=categoriasPorNivelGrado(nivel,grado);
     let resultado="";
@@ -5103,7 +4966,7 @@ function guardarCalificacion(){
         id:calId ? Number(calId) : Date.now(),
         anio:anio,
         estudianteId:estudiante.id,
-        estudiante:nombreCal,
+        estudiante:estudiante.nombre,
         nivel:nivel,
         grado:grado,
         seccion:seccion,
@@ -7609,6 +7472,284 @@ function imprimirReunionesV107(){document.body.dataset.imprimiendo="reunionesAcu
 function prepararReporteOficialV108(){const s=document.getElementById("v108Anio");if(!s)return;const actual=new Date().getFullYear();s.innerHTML="";for(let y=actual+1;y>=actual-5;y--){s.innerHTML+='<option value="'+y+'">'+y+'</option>'}s.value=actual;generarReporteOficialV108()}
 function generarReporteOficialV108(){const anio=Number(document.getElementById("v108Anio")?.value||new Date().getFullYear()),nivel=document.getElementById("v108Nivel")?.value||"",estado=document.getElementById("v108Estado")?.value||"";let est=obtenerDatos(KEY_ESTUDIANTES);if(nivel)est=est.filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel));if(estado)est=est.filter(e=>String(e.estado||"Activo")===estado);const ids=new Set(est.map(e=>String(e.id)));const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>ids.has(String(x.estudianteId)));const asi=obtenerDatos(KEY_ASISTENCIAS).filter(x=>ids.has(String(x.estudianteId)));const vals=cal.map(x=>Number(x.calificacion??x.nota??x.valor)).filter(Number.isFinite);const prom=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;const pres=asi.filter(x=>String(x.estado||x.tipo||"").toLowerCase().includes("presen")).length;const asis=asi.length?Math.round(pres/asi.length*100):null;const aprob=vals.length?Math.round(vals.filter(x=>x>=60).length/vals.length*100):0;document.getElementById("v108KEst").textContent=est.length;document.getElementById("v108KAct").textContent=est.filter(e=>String(e.estado||"Activo")==="Activo").length;document.getElementById("v108KAsis").textContent=asis===null?"—":asis+"%";document.getElementById("v108KProm").textContent=prom===null?"—":prom.toFixed(2);document.getElementById("v108KAprob").textContent=aprob+"%";document.getElementById("v108KPromo").textContent=est.filter(e=>String(e.promocion||"").toLowerCase().includes("promov")).length;const tipo=document.getElementById("v108Tipo")?.value||"institucional";const tit={institucional:"RESUMEN INSTITUCIONAL",matricula:"REPORTE DE MATRÍCULA Y PERMANENCIA",asistencia:"REPORTE DE ASISTENCIA ESCOLAR",rendimiento:"REPORTE DE RENDIMIENTO ACADÉMICO",promocion:"REPORTE DE PROMOCIÓN Y SITUACIÓN ACADÉMICA"};document.getElementById("v108Subtitulo").textContent=tit[tipo];document.getElementById("v108Periodo").textContent="Año escolar "+anio+(nivel?" · Nivel: "+nivel:"");let h="<div class='v108-resumen'><div>Total estudiantes<strong>"+est.length+"</strong></div><div>Activos<strong>"+est.filter(e=>String(e.estado||"Activo")==="Activo").length+"</strong></div><div>Registros de notas<strong>"+cal.length+"</strong></div><div>Registros de asistencia<strong>"+asi.length+"</strong></div></div><h3>Resumen ejecutivo</h3><p>El universo seleccionado contiene <strong>"+est.length+"</strong> estudiantes. Se encontraron <strong>"+cal.length+"</strong> registros de evaluación y <strong>"+asi.length+"</strong> registros de asistencia.</p><div class='v108-alerta'><strong>Nota:</strong> El reporte consolida la información registrada en el sistema. Verifique los datos antes de utilizarlo como documento oficial.</div><div class='v108-table'><table><thead><tr><th>#</th><th>Estudiante</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Estado</th></tr></thead><tbody>"+(est.length?est.map((e,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(e.nombre||"")+"</td><td>"+escaparHTML(e.nivel||"")+"</td><td>"+escaparHTML(e.grado||"")+"</td><td>"+escaparHTML(e.seccion||"")+"</td><td>"+escaparHTML(e.estado||"Activo")+"</td></tr>").join(""):"<tr><td colspan='6'>No hay estudiantes.</td></tr>")+"</tbody></table></div>";document.getElementById("v108Contenido").innerHTML=h}
 function imprimirReporteOficialV108(){generarReporteOficialV108();document.body.dataset.imprimiendo="reportesOficiales";window.print();setTimeout(()=>delete document.body.dataset.imprimiendo,500)}
+</script>
+
+
+<!-- V11.25 - Motor permanente Supabase + compatibilidad V10.9 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="v11/supabase-config.js"></script>
+<script>
+(function(){
+"use strict";
+
+let NA_CLIENT=null;
+const NA_CODES = {
+  NuevaAlianza:"17683"
+};
+
+function NA_sesion(){
+  try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){return null;}
+}
+function NA_setSesion(p){
+  const s={
+    usuario:p.usuario||p.email||"",
+    rol:p.rol||"Docente",
+    docenteId:String(p.docenteId||""),
+    codigoCentro:String(p.codigoCentro||""),
+    authUserId:String(p.authUserId||""),
+    nombreCompleto:p.nombreCompleto||""
+  };
+  sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(s));
+  window.NUEVA_ALIANZA_SESION=s;
+  return s;
+}
+async function NA_init(){
+  if(NA_CLIENT)return NA_CLIENT;
+  const cfg=window.NUEVA_ALIANZA_SUPABASE;
+  if(!cfg?.url||!cfg?.publishableKey) throw new Error("Falta configuración Supabase.");
+  NA_CLIENT=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  window.NUEVA_ALIANZA_SUPABASE_CLIENT=NA_CLIENT;
+  return NA_CLIENT;
+}
+function NA_localId(lista, supaId){
+  const x=lista.find(e=>String(e.supabaseId||"")===String(supaId));
+  if(x)return x.id;
+  return lista.reduce((m,e)=>Math.max(m,Number(e.id)||0),0)+1;
+}
+function NA_studentLocal(sid){
+  return obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.supabaseId||"")===String(sid));
+}
+function NA_docLocal(did){
+  return obtenerDatos(KEY_DOCENTES).find(e=>String(e.supabaseId||"")===String(did));
+}
+async function NA_profile(user){
+  const c=await NA_init();
+  const {data:p,error}=await c.from("perfiles")
+    .select("id,nombre_completo,usuario,rol,activo,docente_id,codigo_centro")
+    .eq("id",user.id).single();
+  if(error||!p||!p.activo) throw new Error("Perfil no encontrado o inactivo.");
+  return NA_setSesion({
+    usuario:p.usuario||user.email,rol:p.rol,docenteId:p.docente_id,
+    codigoCentro:p.codigo_centro,authUserId:user.id,nombreCompleto:p.nombre_completo
+  });
+}
+
+async function NA_syncEstudiantes(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("estudiantes").select("*").order("nombre_completo");
+  if(ses?.rol!=="Director") q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;
+  if(error)throw error;
+  const old=obtenerDatos(KEY_ESTUDIANTES), out=[];
+  (data||[]).forEach(e=>{
+    const id=NA_localId(old,e.id);
+    const previo=old.find(x=>String(x.supabaseId||"")===String(e.id));
+    out.push({...e,id,nombre:e.nombre_completo,supabaseId:e.id});
+  });
+  guardarDatos(KEY_ESTUDIANTES,out);
+}
+async function NA_syncDocentes(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("docentes").select("*").order("nombre_completo");
+  if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;if(error)throw error;
+  const old=obtenerDatos(KEY_DOCENTES),out=[];
+  (data||[]).forEach(d=>{
+    const id=NA_localId(old,d.id);
+    out.push({...d,id,nombre:d.nombre_completo,supabaseId:d.id});
+  });
+  guardarDatos(KEY_DOCENTES,out);
+}
+async function NA_syncAsignaciones(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("asignaciones").select("*").order("grado");
+  if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;if(error)throw error;
+  const docs=obtenerDatos(KEY_DOCENTES),out=[];
+  (data||[]).forEach(a=>{
+    const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
+    out.push({
+      id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteNombre:d?.nombre||"",
+      nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
+      asignaturas:a.asignaturas||[]
+    });
+  });
+  guardarDatos(KEY_ASIGNACIONES,out);
+}
+async function NA_syncMatriculas(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("matriculas").select("*").order("fecha_matricula",{ascending:false});
+  if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;if(error)throw error;
+  const out=(data||[]).map(m=>{
+    const e=NA_studentLocal(m.estudiante_id);
+    return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
+      codigo:e?.codigo||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
+      fecha:m.fecha_matricula,estado:m.estado||"Activa"};
+  });
+  guardarDatos(KEY_MATRICULAS,out);
+}
+async function NA_syncAsistencias(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("asistencias").select("*").order("fecha",{ascending:false});
+  if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;if(error)throw error;
+  const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(a=>{
+    const e=NA_studentLocal(a.estudiante_id);
+    const d=docs.find(x=>String(x.supabaseId||"")===String(a.registrado_por));
+    return {id:a.id,supabaseId:a.id,fecha:a.fecha,estudianteId:e?.id||"",estudiante:e?.nombre||"",
+      nivel:e?.nivel||"",grado:e?.grado||"",seccion:e?.seccion||"",
+      docenteId:d?.id||"",docenteNombre:d?.nombre||"",estado:a.estado,observacion:a.observacion||""};
+  });
+  guardarDatos(KEY_ASISTENCIAS,out);
+}
+async function NA_syncCalificaciones(){
+  const c=await NA_init(), ses=NA_sesion();
+  let q=c.from("calificaciones").select("*").order("created_at",{ascending:false});
+  if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
+  const {data,error}=await q;if(error)throw error;
+  const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(x=>{
+    const e=NA_studentLocal(x.estudiante_id);
+    const d=docs.find(z=>String(z.supabaseId||"")===String(x.registrado_por));
+    const numerica=x.nota!==null&&x.nota!==undefined;
+    return {id:x.id,supabaseId:x.id,anio:x.anio,estudianteId:e?.id||"",estudiante:e?.nombre||"",
+      nivel:x.nivel,grado:x.grado,seccion:x.seccion,asignatura:x.asignatura,
+      docenteId:d?.id||"",docenteNombre:d?.nombre||"",corte:x.periodo,
+      tipo:numerica?"Numerica":"Cualitativa",resultado:numerica?x.nota:x.categoria,
+      observacion:x.observacion||""};
+  });
+  guardarDatos(KEY_CALIFICACIONES,out);
+}
+async function NA_syncTodo(){
+  await NA_syncEstudiantes();
+  await NA_syncDocentes();
+  await NA_syncAsignaciones();
+  await NA_syncMatriculas();
+  await NA_syncAsistencias();
+  await NA_syncCalificaciones();
+}
+
+async function NA_login(){
+  const usuario=(document.getElementById("loginUser")?.value||"").trim();
+  const password=(document.getElementById("loginPass")?.value||"").trim();
+  const err=document.getElementById("loginError");
+  if(!usuario||!password){if(err)err.textContent="Ingrese el usuario y la contraseña.";return;}
+  const email=usuario.toLowerCase()==="admin"?"maltezjoshua261@gmail.com":usuario;
+  try{
+    const c=await NA_init();
+    const {data,error}=await c.auth.signInWithPassword({email,password});
+    if(error||!data?.user)throw error||new Error("Credenciales incorrectas.");
+    await NA_profile(data.user);
+    await NA_syncTodo();
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="flex";
+    if(err)err.textContent="";
+    if(typeof aplicarPermisos==="function")aplicarPermisos();
+    if(typeof cargarTodo==="function")cargarTodo();
+  }catch(e){
+    console.error("V11.25 login:",e);
+    if(err)err.textContent=e?.message||"Usuario o contraseña incorrectos.";
+  }
+}
+window.iniciarSesion=NA_login;
+
+const oldGuardarEstudiante=window.guardarEstudiante;
+window.guardarEstudiante=async function(){
+  const idLocal=document.getElementById("estId")?.value||"";
+  const codigo=document.getElementById("estCodigo")?.value.trim()||"";
+  const previo=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(idLocal)||(!idLocal&&String(e.codigo||"")===codigo));
+  oldGuardarEstudiante();
+  const actual=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(idLocal)) ||
+               obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.codigo||"")===codigo);
+  if(!actual)return;
+  const ses=NA_sesion(), c=await NA_init();
+  const row={
+    codigo:actual.codigo||null,nombre_completo:actual.nombre,
+    sexo:actual.sexo||null,nacimiento:actual.nacimiento||null,
+    nivel:actual.nivel,grado:actual.grado,seccion:actual.seccion,
+    responsable:actual.responsable||null,telefono:actual.telefono||null,
+    direccion:actual.direccion||null,estado:actual.estado||"Activo"
+  };
+  let q;
+  if(actual.supabaseId){
+    q=await c.from("estudiantes").update(row).eq("id",actual.supabaseId).select().single();
+  }else{
+    q=await c.from("estudiantes").insert(row).select().single();
+    if(!q.error&&q.data){actual.supabaseId=q.data.id;guardarDatos(KEY_ESTUDIANTES,obtenerDatos(KEY_ESTUDIANTES).map(e=>String(e.id)===String(actual.id)?actual:e));}
+  }
+  if(q.error){console.error(q.error);alert("Guardado local, pero no se pudo sincronizar con Supabase: "+q.error.message);return;}
+  await NA_syncEstudiantes(); cargarEstudiantes();
+};
+
+const oldGuardarMatricula=window.guardarMatricula;
+window.guardarMatricula=async function(){
+  oldGuardarMatricula();
+  await new Promise(r=>setTimeout(r,0));
+  const id=document.getElementById("matId")?.value||"";
+  const lista=obtenerDatos(KEY_MATRICULAS);
+  const r=lista.find(x=>String(x.id)===String(id))||lista[lista.length-1];
+  if(!r)return;
+  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(r.estudianteId));
+  if(!e?.supabaseId)return;
+  const c=await NA_init();
+  const row={estudiante_id:e.supabaseId,anio:r.anio,nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa"};
+  const q=r.supabaseId?await c.from("matriculas").update(row).eq("id",r.supabaseId).select().single():await c.from("matriculas").insert(row).select().single();
+  if(q.error)console.error("Matrícula Supabase:",q.error);
+  await NA_syncMatriculas(); if(typeof cargarMatriculas==="function")cargarMatriculas();
+};
+
+const oldGuardarAsistencia=window.guardarAsistencia;
+window.guardarAsistencia=async function(){
+  const fecha=document.getElementById("asisFecha")?.value||"";
+  const sid=document.getElementById("asisEstudiante")?.value||"";
+  oldGuardarAsistencia();
+  const r=obtenerDatos(KEY_ASISTENCIAS).find(x=>String(x.estudianteId)===String(sid)&&x.fecha===fecha);
+  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(sid));
+  if(!r||!e?.supabaseId)return;
+  const c=await NA_init(), ses=NA_sesion();
+  const row={estudiante_id:e.supabaseId,anio:Number(fecha.slice(0,4)),fecha,estado:r.estado,observacion:r.observacion||null,registrado_por:ses?.authUserId};
+  const q=r.supabaseId?await c.from("asistencias").update(row).eq("id",r.supabaseId).select().single():await c.from("asistencias").insert(row).select().single();
+  if(q.error)console.error("Asistencia Supabase:",q.error);
+  await NA_syncAsistencias(); cargarAsistencias();
+};
+
+const oldGuardarCalificacion=window.guardarCalificacion;
+window.guardarCalificacion=async function(){
+  const sid=document.getElementById("calEstudiante")?.value||"";
+  const anio=document.getElementById("calAnio")?.value||"2026";
+  const asignatura=document.getElementById("calAsignatura")?.value||"";
+  const periodo=document.getElementById("calCorte")?.value||"";
+  oldGuardarCalificacion();
+  const r=obtenerDatos(KEY_CALIFICACIONES).find(x=>String(x.estudianteId)===String(sid)&&String(x.anio)===String(anio)&&x.asignatura===asignatura&&x.corte===periodo);
+  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(sid));
+  if(!r||!e?.supabaseId)return;
+  const c=await NA_init(), ses=NA_sesion(), numerica=r.tipo==="Numerica";
+  const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,asignatura:r.asignatura,periodo:r.corte,nota:numerica?Number(r.resultado):null,categoria:numerica?null:r.resultado,observacion:r.observacion||null,registrado_por:ses?.authUserId};
+  const q=r.supabaseId?await c.from("calificaciones").update(row).eq("id",r.supabaseId).select().single():await c.from("calificaciones").insert(row).select().single();
+  if(q.error)console.error("Calificación Supabase:",q.error);
+  await NA_syncCalificaciones(); cargarCalificaciones();
+};
+
+async function NA_restaurarSesion(){
+  try{
+    const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
+    if(!s?.user)return;
+    await NA_profile(s.user);
+    await NA_syncTodo();
+    const ses=NA_sesion();
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="flex";
+    if(typeof aplicarPermisos==="function")aplicarPermisos();
+    if(typeof cargarTodo==="function")cargarTodo();
+  }catch(e){console.warn("V11.25 restauración:",e);}
+}
+window.NA_syncTodo=NA_syncTodo;
+window.NA_restaurarSesion=NA_restaurarSesion;
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",NA_restaurarSesion);
+else NA_restaurarSesion();
+
+})();
 </script>
 
 </body>
