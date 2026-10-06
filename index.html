@@ -7779,6 +7779,36 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 else NA_restaurarSesion();
 
 })();
+
+/* V11.25 - Corrección final de selector de estudiantes en Asistencia por centro */
+window.cargarEstudiantesAsistencia=function(){
+  const nivel=document.getElementById("asisNivel")?.value||"";
+  const grado=document.getElementById("asisGrado")?.value||"";
+  const seccion=document.getElementById("asisSeccion")?.value||"";
+  const select=document.getElementById("asisEstudiante");
+  if(!select)return;
+  const anterior=select.value;
+  select.innerHTML='<option value="">Seleccione</option>';
+  if(!nivel||!grado||!seccion)return;
+  const ses=obtenerSesionActual();
+  let estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+    String(e.estado||"Activo")==="Activo" &&
+    normalizarNivel(e.nivel)===normalizarNivel(nivel) &&
+    normalizarGrado(e.grado)===normalizarGrado(grado) &&
+    normalizarSeccion(e.seccion)===normalizarSeccion(seccion)
+  );
+  if(ses?.rol==="Docente"){
+    estudiantes=estudiantes.filter(e=>String(e.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
+  }
+  estudiantes.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+  estudiantes.forEach(e=>{
+    const o=document.createElement("option");
+    o.value=e.id;
+    o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");
+    select.appendChild(o);
+  });
+  if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
+};
 </script>
 
 </body>
