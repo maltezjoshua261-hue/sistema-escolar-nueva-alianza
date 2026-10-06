@@ -117,6 +117,14 @@ window.addEventListener("load", function(){
       }
 
       if(errorBox) errorBox.textContent="";
+      // V11.27.1 - Sincronización obligatoria antes de mostrar el panel
+      // Evita que datos antiguos de localStorage aparezcan después de una limpieza de producción.
+      try{
+        if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
+        localStorage.removeItem("auditoriaNuevaAlianza");
+      }catch(syncError){
+        console.error("V11.27.1 - Error de sincronización inicial:",syncError);
+      }
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al cargar el panel:",errorCarga); aplicarPermisos(); }
@@ -142,6 +150,13 @@ window.addEventListener("load", function(){
       const user=data.session.user;
       const sesion=await cargarPerfilSesion(cliente,user);
       if(!sesion) return;
+      // V11.27.1 - Al restaurar sesión también se sincroniza antes de cargar el panel.
+      try{
+        if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
+        localStorage.removeItem("auditoriaNuevaAlianza");
+      }catch(syncError){
+        console.error("V11.27.1 - Error de sincronización al restaurar sesión:",syncError);
+      }
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); }
