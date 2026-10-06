@@ -69,6 +69,32 @@ window.addEventListener("load", function(){
     };
   }
 
+  async function cargarPerfilSesion(cliente,user){
+    const {data:perfil,error:errorPerfil}=await cliente.from("perfiles")
+      .select("id,nombre_completo,usuario,rol,activo,docente_id,codigo_centro")
+      .eq("id",user.id).single();
+
+    if(errorPerfil || !perfil || !perfil.activo){
+      console.error("V11.4 - Perfil no encontrado o inactivo:",errorPerfil);
+      return null;
+    }
+
+    if(!["Director","Docente"].includes(String(perfil.rol))) return null;
+
+    const sesion={
+      usuario:perfil.usuario || user.email,
+      rol:perfil.rol,
+      docenteId:String(perfil.docente_id||""),
+      codigoCentro:String(perfil.codigo_centro||""),
+      authUserId:user.id,
+      nombreCompleto:perfil.nombre_completo || ""
+    };
+
+    sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(sesion));
+    window.NUEVA_ALIANZA_SESION=sesion;
+    return sesion;
+  }
+
   window.iniciarSesion = async function(){
     const email=String(userInput?.value||"").trim();
     const password=String(passInput?.value||"").trim();
@@ -82,15 +108,14 @@ window.addEventListener("load", function(){
       if(error){ console.error("V11.4 - Error de autenticación:",error); if(errorBox) errorBox.textContent="Correo o contraseña incorrectos."; return; }
       const user=data?.user;
       if(!user){ if(errorBox) errorBox.textContent="No se recibió la cuenta autenticada."; return; }
-      const {data:perfil,error:errorPerfil}=await cliente.from("perfiles").select("id,nombre_completo,usuario,rol,activo").eq("id",user.id).single();
-      if(errorPerfil || !perfil || !perfil.activo){
-        await cliente.auth.signOut(); console.error("V11.4 - Perfil no encontrado o inactivo:",errorPerfil);
-        if(errorBox) errorBox.textContent="La cuenta no tiene un perfil escolar activo."; return;
+
+      const sesion=await cargarPerfilSesion(cliente,user);
+      if(!sesion){
+        await cliente.auth.signOut();
+        if(errorBox) errorBox.textContent="La cuenta no tiene un perfil escolar activo o autorizado.";
+        return;
       }
-      if(!["Director","Docente"].includes(String(perfil.rol))){
-        await cliente.auth.signOut(); if(errorBox) errorBox.textContent="El rol de esta cuenta no está autorizado."; return;
-      }
-      sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({usuario:perfil.usuario || user.email,rol:perfil.rol,docenteId:"",authUserId:user.id,nombreCompleto:perfil.nombre_completo || ""}));
+
       if(errorBox) errorBox.textContent="";
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
@@ -115,9 +140,8 @@ window.addEventListener("load", function(){
       if(error || !data?.session) return;
       if(recoveryMode) return;
       const user=data.session.user;
-      const {data:perfil,error:errorPerfil}=await cliente.from("perfiles").select("id,nombre_completo,usuario,rol,activo").eq("id",user.id).single();
-      if(errorPerfil || !perfil || !perfil.activo) return;
-      sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({usuario:perfil.usuario || user.email,rol:perfil.rol,docenteId:"",authUserId:user.id,nombreCompleto:perfil.nombre_completo || ""}));
+      const sesion=await cargarPerfilSesion(cliente,user);
+      if(!sesion) return;
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); }
