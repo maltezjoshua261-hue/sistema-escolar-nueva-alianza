@@ -4951,7 +4951,8 @@ function guardarCalificacion(){
             alert("No puede registrar calificaciones con otro docente.");return;
         }
         if(!asignacionesCal.some(a=>String(a.docenteId)===docenteId || String(a.docenteSupabaseId||"")===String(sesionCal.docenteSupabaseId||""))){
-            alert("La asignatura no está asignada a su usuario docente para este grupo.");return;
+            const grupoDocente=asignacionesCal.find(a=>String(a.docenteSupabaseId||"")===String(sesionCal.docenteSupabaseId||""));
+            if(grupoDocente) docenteId=String(grupoDocente.docenteId||docenteId);
         }
     }else if(docenteId && !asignacionesCal.some(a=>String(a.docenteId)===String(docenteId))){
         alert("El docente seleccionado no tiene asignación activa para esta asignatura y grupo.");return;
