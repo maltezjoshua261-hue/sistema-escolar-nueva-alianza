@@ -7732,9 +7732,10 @@ window.guardarCalificacion=async function(){
   const notaCampo=document.getElementById("calNota");
   const categoriaCampo=document.getElementById("calCategoria");
   const notaValor=(notaCampo?.value||"").trim();
-  const numerica=notaCampo && !notaCampo.classList.contains("hidden") && notaValor!=="";
+  const numerica=typeof esAsignaturaNumericaPorGrado==="function" ? !!esAsignaturaNumericaPorGrado(nivel,grado,asignatura) : !!notaCampo && !notaCampo.disabled;
   const resultado=(numerica?notaValor:(categoriaCampo?.value||"")).trim();
   if(numerica && (resultado==="" || Number.isNaN(Number(resultado)) || Number(resultado)<0 || Number(resultado)>100)){alert("Ingrese una nota numérica válida de 0 a 100.");return;}
+  if(!numerica && !resultado){alert("Seleccione una categoría válida.");return;}
   const observacion=(document.getElementById("calObservacion")?.value||"").trim();
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(anio),nivel,grado,seccion,asignatura,periodo,
