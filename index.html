@@ -4135,7 +4135,7 @@ function guardarEstudiante(){
     if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel, grado y sección.");return;}
     const datos=depurarDuplicadosEstudiantes();
     const estudiante={
-        id:id?Number(id):Date.now(),nombre,
+        id:id||Date.now(),nombre,
         codigo:document.getElementById("estCodigo").value.trim(),
         sexo:document.getElementById("estSexo").value,
         nacimiento:document.getElementById("estNacimiento").value,
@@ -4249,7 +4249,7 @@ function guardarDocente(){
     if(!nombre){alert("Ingrese el nombre del docente.");return;}
     const datos=obtenerDatos(KEY_DOCENTES);
     const docente={
-        id:id?Number(id):Date.now(),nombre,
+        id:id||Date.now(),nombre,
         codigo:document.getElementById("docCodigo").value.trim(),
         especialidad:document.getElementById("docEspecialidad").value.trim(),
         telefono:document.getElementById("docTelefono").value.trim(),
@@ -4370,7 +4370,7 @@ function guardarAsignacion(){
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
         return;
     }
-    const registro={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
+    const registro={id:id||Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
     const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
     guardarDatos(KEY_ASIGNACIONES,datos);
     registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
