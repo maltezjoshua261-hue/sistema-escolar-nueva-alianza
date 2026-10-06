@@ -22,6 +22,34 @@ window.addEventListener("load", function(){
 
   function obtenerCliente(){ return window.NUEVA_ALIANZA_SUPABASE_CLIENT || null; }
 
+  // V11.27.4 - Sincronización segura de producción.
+  // Si Supabase está completamente vacío, se pueden retirar copias antiguas del navegador.
+  // Si ya existen datos reales en Supabase, nunca se borran datos locales por esta rutina.
+  async function sincronizarProduccionSegura(cliente){
+    try{
+      const tablas=["estudiantes","docentes","asistencias","calificaciones"];
+      const resultados=await Promise.all(tablas.map(t=>cliente.from(t).select("id",{count:"exact",head:true})));
+      const error=resultados.find(r=>r.error);
+      if(error?.error) throw error.error;
+      const todoVacio=resultados.every(r=>Number(r.count||0)===0);
+      if(todoVacio){
+        ["estudiantesNuevaAlianza","docentesNuevaAlianza","asistenciasNuevaAlianza","calificacionesNuevaAlianza","auditoriaNuevaAlianza"].forEach(k=>localStorage.removeItem(k));
+        localStorage.setItem("NA_produccion_limpia_v11274","1");
+      }
+      for(let i=0;i<50;i++){
+        if(typeof window.NA_syncTodo==="function"){
+          await window.NA_syncTodo();
+          localStorage.removeItem("auditoriaNuevaAlianza");
+          return;
+        }
+        await new Promise(resolve=>setTimeout(resolve,100));
+      }
+      console.warn("V11.27.4 - NA_syncTodo aún no está disponible.");
+    }catch(error){
+      console.error("V11.27.4 - Error en sincronización segura:",error);
+    }
+  }
+
   async function esperarCliente(intentos=50){
     for(let i=0;i<intentos;i++){
       const cliente=obtenerCliente();
@@ -117,25 +145,7 @@ window.addEventListener("load", function(){
       }
 
       if(errorBox) errorBox.textContent="";
-      // V11.27.2 - Limpieza única de caché local de producción.
-      // Supabase ya fue verificado con datos reales en cero; se eliminan únicamente
-      // las copias antiguas del navegador y luego se intenta sincronizar desde Supabase.
-      try{
-        if(localStorage.getItem("NA_produccion_limpia_v11272")!=="1"){
-          [
-            "estudiantesNuevaAlianza",
-            "docentesNuevaAlianza",
-            "asistenciasNuevaAlianza",
-            "calificacionesNuevaAlianza",
-            "auditoriaNuevaAlianza"
-          ].forEach(k=>localStorage.removeItem(k));
-          localStorage.setItem("NA_produccion_limpia_v11272","1");
-        }
-        if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
-        localStorage.removeItem("auditoriaNuevaAlianza");
-      }catch(syncError){
-        console.error("V11.27.2 - Error de limpieza/sincronización inicial:",syncError);
-      }
+      await sincronizarProduccionSegura(cliente);
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al cargar el panel:",errorCarga); aplicarPermisos(); }
@@ -161,23 +171,7 @@ window.addEventListener("load", function(){
       const user=data.session.user;
       const sesion=await cargarPerfilSesion(cliente,user);
       if(!sesion) return;
-      // V11.27.2 - Al restaurar sesión se limpia una sola vez la caché antigua.
-      try{
-        if(localStorage.getItem("NA_produccion_limpia_v11272")!=="1"){
-          [
-            "estudiantesNuevaAlianza",
-            "docentesNuevaAlianza",
-            "asistenciasNuevaAlianza",
-            "calificacionesNuevaAlianza",
-            "auditoriaNuevaAlianza"
-          ].forEach(k=>localStorage.removeItem(k));
-          localStorage.setItem("NA_produccion_limpia_v11272","1");
-        }
-        if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
-        localStorage.removeItem("auditoriaNuevaAlianza");
-      }catch(syncError){
-        console.error("V11.27.2 - Error de limpieza/sincronización al restaurar sesión:",syncError);
-      }
+      await sincronizarProduccionSegura(cliente);
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); }
