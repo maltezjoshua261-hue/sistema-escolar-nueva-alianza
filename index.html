@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Escolar Nueva Alianza - V11.25</title>
+<title>Sistema Escolar Nueva Alianza - FINAL</title>
 
 <style>
 *{
@@ -7573,7 +7573,7 @@ async function NA_syncAsignaciones(){
     out.push({
       id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
       nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
-      asignaturas:a.asignaturas||[]
+      asignaturas:a.asignaturas||[],horasSemanales:a.horas_semanales||0,turno:a.turno||"",observacion:a.observacion||""
     });
   });
   guardarDatos(KEY_ASIGNACIONES,out);
@@ -7587,7 +7587,7 @@ async function NA_syncMatriculas(){
     const e=NA_studentLocal(m.estudiante_id);
     return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
       codigo:e?.codigo||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
-      fecha:m.fecha_matricula,estado:m.estado||"Activa"};
+      fecha:m.fecha_matricula,estado:m.estado||"Activa",responsable:m.responsable||"",telefono:m.telefono||"",direccion:m.direccion||"",tipoMatricula:m.tipo_matricula||"",procedencia:m.procedencia||"",documentos:m.documentos||"",observacion:m.observacion||""};
   });
   guardarDatos(KEY_MATRICULAS,out);
 }
@@ -7670,7 +7670,8 @@ window.guardarEstudiante=async function(){
     sexo:actual.sexo||null,nacimiento:actual.nacimiento||null,
     nivel:actual.nivel,grado:actual.grado,seccion:actual.seccion,
     responsable:actual.responsable||null,telefono:actual.telefono||null,
-    direccion:actual.direccion||null,estado:actual.estado||"Activo"
+    direccion:actual.direccion||null,estado:actual.estado||"Activo",
+    codigo_centro:ses?.codigoCentro||actual.codigo_centro||null
   };
   let q;
   if(actual.supabaseId){
@@ -7694,7 +7695,7 @@ window.guardarMatricula=async function(){
   const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(r.estudianteId));
   if(!e?.supabaseId)return;
   const c=await NA_init();
-  const row={estudiante_id:e.supabaseId,anio:r.anio,nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa"};
+  const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa",codigo_centro:NA_sesion()?.codigoCentro||e.codigo_centro||null,responsable:r.responsable||null,telefono:r.telefono||null,direccion:r.direccion||null,tipo_matricula:r.tipoMatricula||null,procedencia:r.procedencia||null,documentos:r.documentos||null,observacion:r.observacion||null};
   const q=r.supabaseId?await c.from("matriculas").update(row).eq("id",r.supabaseId).select().single():await c.from("matriculas").insert(row).select().single();
   if(q.error)console.error("Matrícula Supabase:",q.error);
   await NA_syncMatriculas(); if(typeof cargarMatriculas==="function")cargarMatriculas();
@@ -7709,7 +7710,7 @@ window.guardarAsistencia=async function(){
   const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(sid));
   if(!r||!e?.supabaseId)return;
   const c=await NA_init(), ses=NA_sesion();
-  const row={estudiante_id:e.supabaseId,anio:Number(fecha.slice(0,4)),fecha,estado:r.estado,observacion:r.observacion||null,registrado_por:ses?.authUserId};
+  const row={estudiante_id:e.supabaseId,anio:Number(fecha.slice(0,4)),fecha,estado:r.estado,observacion:r.observacion||null,registrado_por:ses?.authUserId,codigo_centro:ses?.codigoCentro||e.codigo_centro||null};
   const q=r.supabaseId?await c.from("asistencias").update(row).eq("id",r.supabaseId).select().single():await c.from("asistencias").insert(row).select().single();
   if(q.error)console.error("Asistencia Supabase:",q.error);
   await NA_syncAsistencias(); cargarAsistencias();
@@ -7759,7 +7760,8 @@ window.guardarCalificacion=async function(){
   };
   try{
     let q0=c.from("calificaciones").select("id").eq("estudiante_id",e.supabaseId)
-      .eq("anio",Number(anio)).eq("asignatura",asignatura).eq("periodo",periodo);
+      .eq("anio",Number(anio)).eq("nivel",nivel).eq("grado",grado).eq("seccion",seccion)
+      .eq("asignatura",asignatura).eq("periodo",periodo);
     if(ses?.rol!=="Director") q0=q0.eq("codigo_centro",ses.codigoCentro||"");
     const qe=await q0.limit(1);
     if(qe.error) throw qe.error;
@@ -7775,6 +7777,92 @@ window.guardarCalificacion=async function(){
     console.error("Calificación Supabase:",err);
     alert("No se pudo guardar la calificación en Supabase: "+(err?.message||"Error desconocido"));
   }
+};
+
+
+// V11.26 FINAL - CRUD centralizado completo de Docentes y Carga Académica
+const NA_oldGuardarDocente=window.guardarDocente;
+window.guardarDocente=async function(){
+  const id=document.getElementById("docId")?.value||"";
+  const c=await NA_init(), ses=NA_sesion();
+  const centro=ses?.codigoCentro||"";
+  NA_oldGuardarDocente();
+  const local=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(id)) || obtenerDatos(KEY_DOCENTES).find(d=>String(d.nombre||"")===String(document.getElementById("docNombre")?.value||"").trim());
+  if(!local)return;
+  const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:centro||local.codigo_centro||null};
+  try{
+    const q=local.supabaseId
+      ? await c.from("docentes").update(row).eq("id",local.supabaseId).select().single()
+      : await c.from("docentes").insert(row).select().single();
+    if(q.error)throw q.error;
+    if(q.data){local.supabaseId=q.data.id;local.codigo_centro=q.data.codigo_centro;guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)===String(local.id)?local:x));}
+    await NA_syncDocentes(); if(typeof cargarDocentes==="function")cargarDocentes();
+  }catch(e){console.error("Docente Supabase:",e);alert("No se pudo sincronizar el docente con Supabase: "+(e?.message||"Error desconocido"));}
+};
+
+const NA_oldGuardarAsignacion=window.guardarAsignacion;
+window.guardarAsignacion=async function(){
+  const id=document.getElementById("asigId")?.value||"";
+  const localBefore=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id));
+  NA_oldGuardarAsignacion();
+  const local=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id)) || (id?localBefore:null) || obtenerDatos(KEY_ASIGNACIONES)[obtenerDatos(KEY_ASIGNACIONES).length-1];
+  if(!local)return;
+  const d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId));
+  const ses=NA_sesion(), c=await NA_init();
+  const row={docente_id:d?.supabaseId||local.docenteSupabaseId||local.docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:ses?.codigoCentro||local.codigo_centro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
+  if(!row.docente_id){alert("La carga académica no tiene docente válido.");return;}
+  try{
+    const q=local.supabaseId
+      ? await c.from("asignaciones").update(row).eq("id",local.supabaseId).select().single()
+      : await c.from("asignaciones").insert(row).select().single();
+    if(q.error)throw q.error;
+    if(q.data){local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>String(x.id)===String(id)||String(x.supabaseId)===String(local.supabaseId)?local:x));}
+    await NA_syncAsignaciones(); if(typeof cargarAsignaciones==="function")cargarAsignaciones();
+  }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));}
+};
+
+// V11.26 FINAL - Eliminaciones sincronizadas con Supabase
+const NA_oldEliminarEstudiante=window.eliminarEstudiante;
+window.eliminarEstudiante=async function(id){
+  const r=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarEstudiante(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("estudiantes").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncEstudiantes();cargarEstudiantes();}catch(e){console.error(e);alert("No se pudo eliminar en Supabase: "+(e?.message||"Error desconocido"));}
+};
+const NA_oldEliminarDocente=window.eliminarDocente;
+window.eliminarDocente=async function(id){
+  const r=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarDocente(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("docentes").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncDocentes();cargarDocentes();}catch(e){console.error(e);alert("No se pudo eliminar el docente en Supabase: "+(e?.message||"Error desconocido"));}
+};
+const NA_oldEliminarAsignacion=window.eliminarAsignacion;
+window.eliminarAsignacion=async function(id){
+  const r=obtenerDatos(KEY_ASIGNACIONES).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarAsignacion(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("asignaciones").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncAsignaciones();cargarAsignaciones();}catch(e){console.error(e);alert("No se pudo eliminar la carga en Supabase: "+(e?.message||"Error desconocido"));}
+};
+const NA_oldEliminarMatricula=window.eliminarMatricula;
+window.eliminarMatricula=async function(id){
+  const r=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarMatricula(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("matriculas").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncMatriculas();cargarMatriculas();}catch(e){console.error(e);alert("No se pudo eliminar la matrícula en Supabase: "+(e?.message||"Error desconocido"));}
+};
+const NA_oldEliminarAsistencia=window.eliminarAsistencia;
+window.eliminarAsistencia=async function(id){
+  const r=obtenerDatos(KEY_ASISTENCIAS).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarAsistencia(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("asistencias").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncAsistencias();cargarAsistencias();}catch(e){console.error(e);alert("No se pudo eliminar la asistencia en Supabase: "+(e?.message||"Error desconocido"));}
+};
+const NA_oldEliminarCalificacion=window.eliminarCalificacion;
+window.eliminarCalificacion=async function(id){
+  const r=obtenerDatos(KEY_CALIFICACIONES).find(x=>String(x.id)===String(id)); if(!r)return;
+  NA_oldEliminarCalificacion(id);
+  if(!r.supabaseId)return;
+  try{const q=await NA_init();const z=await q.from("calificaciones").delete().eq("id",r.supabaseId);if(z.error)throw z.error;await NA_syncCalificaciones();cargarCalificaciones();}catch(e){console.error(e);alert("No se pudo eliminar la calificación en Supabase: "+(e?.message||"Error desconocido"));}
 };
 
 async function NA_restaurarSesion(){
@@ -7896,5 +7984,28 @@ window.cargarEstudiantesAsistencia=function(){
 })();
 </script>
 
+<script>
+/* V11.26 FINAL - tabla de calificaciones y controles */
+window.cargarCalificacionesFinal=function(){
+ const tabla=document.getElementById("tablaCalificaciones");if(!tabla)return;
+ const datos=obtenerDatos(KEY_CALIFICACIONES),ses=obtenerSesionActual();
+ const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value||""),fc=document.getElementById("filtroCalCorte")?.value||"";
+ const lista=datos.filter(c=>{
+   if(ses?.rol==="Docente"){
+     const centro=String(c.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||"");
+     const asign=obtenerDatos(KEY_ASIGNACIONES).some(a=>String(a.anio)===String(c.anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(c.nivel)&&normalizarGrado(a.grado)===normalizarGrado(c.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(c.seccion)&&String(a.docenteId||"")===String(ses.docenteId||""));
+     if(!centro||(!asign&&String(c.docenteId||"")!==String(ses.docenteId||"")))return false;
+   }
+   const t=limpiarTexto([c.anio,c.estudiante,c.nivel,c.grado,c.seccion,c.asignatura,c.corte,c.resultado,c.observacion].join(" "));
+   return (!buscar||t.includes(buscar))&&(!fc||c.corte===fc);
+ }).sort((a,b)=>String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es"));
+ tabla.innerHTML=lista.length?lista.map((c,i)=>{
+   const val=c.tipo==="Numerica"?String(Number(c.resultado)):String(c.resultado||"");
+   return '<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(c.anio)+'</td><td>'+escaparHTML(c.estudiante)+'</td><td>'+escaparHTML(c.nivel)+'</td><td>'+escaparHTML(c.grado)+'</td><td>'+escaparHTML(c.seccion)+'</td><td>'+escaparHTML(c.asignatura)+'</td><td>'+escaparHTML(c.docenteNombre||"")+'</td><td>'+escaparHTML(c.corte)+'</td><td><span class="badge '+(c.tipo==="Numerica"?(Number(c.resultado)<60?"badge-danger":Number(c.resultado)<70?"badge-warning":"badge-success"):"badge-success")+'">'+escaparHTML(val)+'</span></td><td>'+escaparHTML(c.observacion||"")+'</td><td><button class="btn-warning" onclick="editarCalificacion(\''+String(c.id)+'\')">✏️ Editar</button> <button class="btn-danger" onclick="eliminarCalificacion(\''+String(c.id)+'\')">Eliminar</button></td></tr>';
+ }).join(""):'<tr><td colspan="12" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
+ actualizarResumenCalificaciones(lista);
+};
+window.cargarCalificaciones=window.cargarCalificacionesFinal;
+</script>
 </body>
 </html>
