@@ -560,6 +560,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 </div>
 
 <!-- APP -->
+<!-- V11.27.8 - PRODUCCIÓN: sincronización limpia desde Supabase -->
 <div id="app" class="app">
 
     <!-- SIDEBAR -->
@@ -7639,6 +7640,25 @@ async function NA_syncTodo(){
 // V11.27.3 - Exponer la sincronización central para el inicio de sesión.
 window.NA_syncTodo = NA_syncTodo;
 
+async function NA_limpiarCacheCentralAntesDeMostrarPanel(){
+  // V11.27.8 - Los datos de estudiantes/docentes/asistencia/calificaciones
+  // son centralizados en Supabase. Se elimina cualquier copia local anterior
+  // antes de sincronizar para evitar que aparezcan datos de prueba antiguos.
+  [
+    KEY_ESTUDIANTES,
+    KEY_DOCENTES,
+    KEY_ASISTENCIAS,
+    KEY_CALIFICACIONES
+  ].forEach(k=>localStorage.removeItem(k));
+
+  // La bitácora histórica era local. Se limpia una sola vez durante la
+  // puesta en producción y luego queda disponible para el uso normal.
+  if(localStorage.getItem("NA_migracion_limpieza_11278")!=="1"){
+    localStorage.removeItem(KEY_AUDITORIA);
+    localStorage.setItem("NA_migracion_limpieza_11278","1");
+  }
+}
+
 async function NA_login(){
   const usuario=(document.getElementById("loginUser")?.value||"").trim();
   const password=(document.getElementById("loginPass")?.value||"").trim();
@@ -7650,6 +7670,7 @@ async function NA_login(){
     const {data,error}=await c.auth.signInWithPassword({email,password});
     if(error||!data?.user)throw error||new Error("Credenciales incorrectas.");
     await NA_profile(data.user);
+    await NA_limpiarCacheCentralAntesDeMostrarPanel();
     await NA_syncTodo();
     document.getElementById("loginScreen").style.display="none";
     document.getElementById("app").style.display="flex";
@@ -8130,7 +8151,6 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
   if(typeof cargarBitacora === "function") cargarBitacora();
   alert("Limpieza completada. Los datos locales de prueba fueron eliminados.");
 };
-</script>
 </script>
 </body>
 </html>
