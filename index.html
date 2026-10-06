@@ -7729,8 +7729,10 @@ window.guardarCalificacion=async function(){
     alert("Complete los datos de la calificación."); return;
   }
   const c=await NA_init();
-  const numerica=(document.getElementById("calTipo")?.value||"Numerica")==="Numerica";
-  const resultado=(document.getElementById("calResultado")?.value||"").trim();
+  const nivel=document.getElementById("calNivel")?.value||e.nivel||"";
+  const grado=document.getElementById("calGrado")?.value||e.grado||"";
+  const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
+  const resultado=(numerica?document.getElementById("calNota")?.value:document.getElementById("calCategoria")?.value||"").trim();
   const observacion=(document.getElementById("calObservacion")?.value||"").trim();
   const nivel=document.getElementById("calNivel")?.value||e.nivel||"";
   const grado=document.getElementById("calGrado")?.value||e.grado||"";
