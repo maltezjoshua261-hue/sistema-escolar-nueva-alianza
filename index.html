@@ -821,6 +821,12 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     Sistema de gestión escolar - Centro Escolar Nueva Alianza
                 </p>
 
+                <div class="card no-print" style="margin:18px 0;border-left:5px solid #dc3545;">
+                    <h2 style="margin-bottom:8px;">🧹 Limpieza de datos locales de prueba</h2>
+                    <p style="margin-bottom:12px;color:#555;">Esta herramienta elimina del navegador los datos locales de prueba de estudiantes, docentes, asistencias, calificaciones y bitácora. No elimina los datos de Supabase.</p>
+                    <button class="btn-danger solo-director" type="button" onclick="NA_limpiarDatosLocalesPrueba()">🧹 Limpiar datos locales de prueba</button>
+                </div>
+
                 <div class="stats">
 
                     <div class="stat">
@@ -8077,6 +8083,36 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
     aplicarPermisosProduccion();
   }
 })();
+
+<script>
+/* V11.27.5 - Herramienta segura para limpiar datos locales de prueba */
+window.NA_limpiarDatosLocalesPrueba = async function(){
+  const ses = typeof obtenerSesionActual === "function" ? obtenerSesionActual() : null;
+  if(!ses || ses.rol !== "Director"){
+    alert("Esta herramienta es exclusiva del Director.");
+    return;
+  }
+  const ok = confirm("¿Desea eliminar del navegador los datos locales de prueba?\n\nSe limpiarán estudiantes, docentes, asistencias, calificaciones y bitácora local.\n\nLos datos de Supabase NO serán eliminados.");
+  if(!ok)return;
+  const claves = [
+    "estudiantesNuevaAlianza",
+    "docentesNuevaAlianza",
+    "asistenciasNuevaAlianza",
+    "calificacionesNuevaAlianza",
+    "auditoriaNuevaAlianza"
+  ];
+  claves.forEach(k=>localStorage.removeItem(k));
+  try{
+    if(typeof window.NA_syncTodo === "function") await window.NA_syncTodo();
+  }catch(e){
+    console.warn("V11.27.5 - No fue posible sincronizar después de la limpieza:",e);
+  }
+  if(typeof cargarTodo === "function") cargarTodo();
+  if(typeof actualizarEstadisticas === "function") actualizarEstadisticas();
+  if(typeof cargarBitacora === "function") cargarBitacora();
+  alert("Limpieza completada. Los datos locales de prueba fueron eliminados.");
+};
+</script>
 </script>
 </body>
 </html>
