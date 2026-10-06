@@ -7758,6 +7758,20 @@ window.cargarEstudiantes=function(){
   if(buscar) lista=lista.filter(e=>[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
   tabla.innerHTML=lista.map((e,i)=>'<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(e.nombre||"")+'</td><td>'+escaparHTML(e.codigo||"")+'</td><td>'+escaparHTML(e.nivel||"")+'</td><td>'+escaparHTML(e.grado||"")+'</td><td>'+escaparHTML(e.seccion||"")+'</td><td>'+escaparHTML(e.responsable||"")+'</td><td>'+escaparHTML(e.estado||"Activo")+'</td><td><span style="color:#6b7280;font-size:12px;">Solo consulta</span></td></tr>').join("") || '<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados para este centro.</td></tr>';
 };
+window.cargarEstudiantesMatricula=function(){
+  const select=document.getElementById("matEstudiante"); if(!select)return;
+  const anterior=select.value;
+  const ses=obtenerSesionActual();
+  let estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo");
+  if(ses?.rol==="Docente"){
+    estudiantes=estudiantes.filter(e=>String(e.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
+  }
+  estudiantes.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+  select.innerHTML='<option value="">Seleccione un estudiante</option>';
+  estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
+  if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
+};
+
 window.NA_syncTodo=NA_syncTodo;
 window.NA_restaurarSesion=NA_restaurarSesion;
 
