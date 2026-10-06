@@ -117,13 +117,24 @@ window.addEventListener("load", function(){
       }
 
       if(errorBox) errorBox.textContent="";
-      // V11.27.1 - Sincronización obligatoria antes de mostrar el panel
-      // Evita que datos antiguos de localStorage aparezcan después de una limpieza de producción.
+      // V11.27.2 - Limpieza única de caché local de producción.
+      // Supabase ya fue verificado con datos reales en cero; se eliminan únicamente
+      // las copias antiguas del navegador y luego se intenta sincronizar desde Supabase.
       try{
+        if(localStorage.getItem("NA_produccion_limpia_v11272")!=="1"){
+          [
+            "estudiantesNuevaAlianza",
+            "docentesNuevaAlianza",
+            "asistenciasNuevaAlianza",
+            "calificacionesNuevaAlianza",
+            "auditoriaNuevaAlianza"
+          ].forEach(k=>localStorage.removeItem(k));
+          localStorage.setItem("NA_produccion_limpia_v11272","1");
+        }
         if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
         localStorage.removeItem("auditoriaNuevaAlianza");
       }catch(syncError){
-        console.error("V11.27.1 - Error de sincronización inicial:",syncError);
+        console.error("V11.27.2 - Error de limpieza/sincronización inicial:",syncError);
       }
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
@@ -150,12 +161,22 @@ window.addEventListener("load", function(){
       const user=data.session.user;
       const sesion=await cargarPerfilSesion(cliente,user);
       if(!sesion) return;
-      // V11.27.1 - Al restaurar sesión también se sincroniza antes de cargar el panel.
+      // V11.27.2 - Al restaurar sesión se limpia una sola vez la caché antigua.
       try{
+        if(localStorage.getItem("NA_produccion_limpia_v11272")!=="1"){
+          [
+            "estudiantesNuevaAlianza",
+            "docentesNuevaAlianza",
+            "asistenciasNuevaAlianza",
+            "calificacionesNuevaAlianza",
+            "auditoriaNuevaAlianza"
+          ].forEach(k=>localStorage.removeItem(k));
+          localStorage.setItem("NA_produccion_limpia_v11272","1");
+        }
         if(typeof window.NA_syncTodo==="function") await window.NA_syncTodo();
         localStorage.removeItem("auditoriaNuevaAlianza");
       }catch(syncError){
-        console.error("V11.27.1 - Error de sincronización al restaurar sesión:",syncError);
+        console.error("V11.27.2 - Error de limpieza/sincronización al restaurar sesión:",syncError);
       }
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
