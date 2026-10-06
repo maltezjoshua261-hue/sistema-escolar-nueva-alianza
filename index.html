@@ -4950,7 +4950,7 @@ function guardarCalificacion(){
         if(docenteId!==String(sesionCal.docenteId||"")){
             alert("No puede registrar calificaciones con otro docente.");return;
         }
-        if(!asignacionesCal.some(a=>String(a.docenteId)===docenteId)){
+        if(!asignacionesCal.some(a=>String(a.docenteId)===docenteId || String(a.docenteSupabaseId||"")===String(sesionCal.docenteSupabaseId||""))){
             alert("La asignatura no está asignada a su usuario docente para este grupo.");return;
         }
     }else if(docenteId && !asignacionesCal.some(a=>String(a.docenteId)===String(docenteId))){
@@ -7528,7 +7528,7 @@ async function NA_profile(user){
     .eq("id",user.id).single();
   if(error||!p||!p.activo) throw new Error("Perfil no encontrado o inactivo.");
   return NA_setSesion({
-    usuario:p.usuario||user.email,rol:p.rol,docenteId:p.docente_id,
+    usuario:p.usuario||user.email,rol:p.rol,docenteId:p.docente_id,docenteSupabaseId:p.docente_id,
     codigoCentro:p.codigo_centro,authUserId:user.id,nombreCompleto:p.nombre_completo
   });
 }
@@ -7572,7 +7572,7 @@ async function NA_syncAsignaciones(){
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
-      id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteNombre:d?.nombre||"",
+      id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
       nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
       asignaturas:a.asignaturas||[]
     });
