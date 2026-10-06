@@ -7630,6 +7630,8 @@ async function NA_syncTodo(){
   await NA_syncAsistencias();
   await NA_syncCalificaciones();
 }
+// V11.27.3 - Exponer la sincronización central para el inicio de sesión.
+window.NA_syncTodo = NA_syncTodo;
 
 async function NA_login(){
   const usuario=(document.getElementById("loginUser")?.value||"").trim();
