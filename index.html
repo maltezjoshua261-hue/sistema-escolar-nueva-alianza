@@ -8007,5 +8007,74 @@ window.cargarCalificacionesFinal=function(){
 };
 window.cargarCalificaciones=window.cargarCalificacionesFinal;
 </script>
+<script>
+/* V11.27 FINAL - PERMISOS DE PRODUCCIÓN
+   Director: acceso total.
+   Docente: estudiantes de su ámbito, asistencia, calificaciones, boleta y planificación.
+   Los módulos administrativos/reportes quedan ocultos y protegidos para Docente.
+*/
+(function(){
+  const SOLO_DIRECTOR=[
+    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+    "docentes","asignaciones","horarios",
+    "reportes","reportesOficiales","matricula","expediente","reporteMatricula",
+    "rendimiento","evaluacionAcademica","perfilAcademico","planesMejora",
+    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"
+  ];
+
+  function sesionPermisos(){
+    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
+    catch(e){return null;}
+  }
+
+  function esDirectorPermisos(){
+    return sesionPermisos()?.rol==="Director";
+  }
+
+  function aplicarPermisosProduccion(){
+    const ses=sesionPermisos();
+    if(!ses)return;
+    const director=ses.rol==="Director";
+    const titulo=document.querySelector(".topbar strong");
+    if(titulo)titulo.textContent=director?"Panel del Director":"Panel del Docente";
+
+    document.querySelectorAll(".solo-director").forEach(el=>{
+      el.style.display=director?"block":"none";
+    });
+
+    document.querySelectorAll(".menu button[onclick*="+"\"mostrarSeccion('"+"\""+"]").forEach(btn=>{
+      const m=btn.getAttribute("onclick")?.match(/mostrarSeccion\('([^']+)'/);
+      if(m && SOLO_DIRECTOR.includes(m[1])){
+        btn.classList.add("solo-director");
+        btn.style.display=director?"block":"none";
+      }
+    });
+
+    const top=document.querySelector(".topbar div:last-child");
+    if(top)top.textContent=(ses.usuario||"Usuario")+" · "+(ses.rol||"");
+  }
+
+  const mostrarOriginal=window.mostrarSeccion;
+  if(typeof mostrarOriginal==="function"){
+    window.mostrarSeccion=function(id,btn){
+      if(!esDirectorPermisos() && SOLO_DIRECTOR.includes(id)){
+        alert("Este módulo es exclusivo del Director.");
+        return false;
+      }
+      return mostrarOriginal.apply(this,arguments);
+    };
+  }
+
+  window.aplicarPermisos=aplicarPermisosProduccion;
+  window.NA_aplicarPermisosProduccion=aplicarPermisosProduccion;
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",aplicarPermisosProduccion);
+  }else{
+    aplicarPermisosProduccion();
+  }
+})();
+</script>
 </body>
 </html>
