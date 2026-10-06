@@ -3456,6 +3456,26 @@ function obtenerUsuarios(){
     return usuarios;
 }
 
+const CENTROS_NER_NUEVA_ALIANZA={
+    "nuevaalianza": "17683",
+    "hugo chavez frias": "39183",
+    "rosa sarmiento": "29271",
+    "la esperanza": "17751",
+    "la union n 3": "17858",
+    "la unión n.º 3": "17858",
+    "santa lucia": "17880",
+    "sector del limon": "37038",
+    "nueva jerusalen": "30870"
+};
+
+function normalizarUsuarioCentro(v){
+    return String(v||"").trim().toLowerCase().replace(/[_-]+/g," ").replace(/\s+/g," ");
+}
+function obtenerCodigoCentroSesion(){
+    const ses=obtenerSesionActual();
+    return ses?.rol==="Director" ? "" : String(ses?.codigoCentro||"");
+}
+
 function iniciarSesion(){
     const usuario=document.getElementById("loginUser").value.trim();
     const password=document.getElementById("loginPass").value.trim();
@@ -3466,41 +3486,31 @@ function iniciarSesion(){
     }
 
     let encontrado=null;
-
     try{
         const usuarios=obtenerUsuarios();
         encontrado=usuarios.find(u=>
             String(u?.usuario||"").trim().toLowerCase()===usuario.toLowerCase() &&
             String(u?.password??"").trim()===password
         );
-    }catch(error){
-        console.error("Error al leer usuarios:",error);
-    }
+    }catch(error){ console.error("Error al leer usuarios:",error); }
 
-    // Acceso base de emergencia: garantiza el ingreso del docente
-    // aunque el almacenamiento local tenga datos dañados o antiguos.
     if(!encontrado && usuario.toLowerCase()==="docente" && password==="2026"){
         encontrado={usuario:"docente",rol:"Docente",docenteId:""};
     }
 
     if(encontrado){
+        const centro=String(encontrado.codigoCentro||encontrado.codigo_centro||CENTROS_NER_NUEVA_ALIANZA[normalizarUsuarioCentro(encontrado.usuario)]||"");
         sessionStorage.removeItem("sesionNuevaAlianza");
         sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify({
             usuario:encontrado.usuario,
             rol:encontrado.rol||"Docente",
-            docenteId:String(encontrado.docenteId||"")
+            docenteId:String(encontrado.docenteId||""),
+            codigoCentro: centro
         }));
         document.getElementById("loginError").textContent="";
         document.getElementById("loginScreen").style.display="none";
         document.getElementById("app").style.display="flex";
-
-        try{
-            cargarTodo();
-            aplicarPermisos();
-        }catch(error){
-            console.error("Error al cargar el panel:",error);
-            aplicarPermisos();
-        }
+        try{ cargarTodo(); aplicarPermisos(); }catch(error){ console.error("Error al cargar el panel:",error); aplicarPermisos(); }
     }else{
         document.getElementById("loginError").textContent="Usuario o contraseña incorrectos.";
     }
@@ -4169,8 +4179,11 @@ function guardarEstudiante(){
     const id=document.getElementById("estId").value;
     if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel, grado y sección.");return;}
     const datos=depurarDuplicadosEstudiantes();
+    const ses=obtenerSesionActual();
     const estudiante={
         id:id?Number(id):Date.now(),nombre,
+        codigo_centro: ses?.rol==="Director" ? (id ? (datos.find(e=>Number(e.id)===Number(id))?.codigo_centro||"") : "") : String(ses?.codigoCentro||""),
+
         codigo:document.getElementById("estCodigo").value.trim(),
         sexo:document.getElementById("estSexo").value,
         nacimiento:document.getElementById("estNacimiento").value,
@@ -4248,6 +4261,8 @@ function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
 function estudianteVisibleParaRol(e,anio){
     const ses=obtenerSesionActual();
     if(!ses || ses.rol==="Director") return true;
+    const centro=obtenerCodigoCentroSesion();
+    if(centro && String(e.codigo_centro||e.codigoCentro||"")===centro) return true;
     return docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio||new Date().getFullYear());
 }
 function cargarEstudiantes(){
@@ -4256,7 +4271,7 @@ function cargarEstudiantes(){
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
     const lista=datos
-        .filter(e=>!ses||ses.rol==="Director"||docenteTieneGrupo(e.nivel,e.grado,e.seccion,e.anio||new Date().getFullYear()))
+        .filter(e=>estudianteVisibleParaRol(e,e.anio||new Date().getFullYear()))
         .filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((e,i)=>{
         const acciones=(!ses||ses.rol==="Director")
