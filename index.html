@@ -7728,9 +7728,9 @@ window.guardarCalificacion=async function(){
   const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(sid));
   if(!r||!e?.supabaseId)return;
   const c=await NA_init(), ses=NA_sesion(), numerica=r.tipo==="Numerica";
-  const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,asignatura:r.asignatura,periodo:r.corte,nota:numerica?Number(r.resultado):null,categoria:numerica?null:r.resultado,observacion:r.observacion||null,registrado_por:ses?.authUserId};
+  const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,asignatura:r.asignatura,periodo:r.corte,nota:numerica?Number(r.resultado):null,categoria:numerica?null:r.resultado,observacion:r.observacion||null,registrado_por:ses?.authUserId,codigo_centro:ses?.codigoCentro||e.codigo_centro||null};
   const q=r.supabaseId?await c.from("calificaciones").update(row).eq("id",r.supabaseId).select().single():await c.from("calificaciones").insert(row).select().single();
-  if(q.error)console.error("Calificación Supabase:",q.error);
+  if(q.error){ console.error("Calificación Supabase:",q.error); alert("No se pudo sincronizar la calificación con Supabase: "+(q.error.message||"Error desconocido")); return; }
   await NA_syncCalificaciones(); cargarCalificaciones();
 };
 
