@@ -4942,8 +4942,7 @@ function guardarCalificacion(){
         String(a.estado||"Activo")==="Activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
         normalizarGrado(a.grado)===normalizarGrado(grado) &&
-        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
-        (a.asignaturas||[]).includes(asignatura)
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
     );
     let docenteId=docenteSeleccionado;
     if(sesionCal?.rol==="Docente"){
