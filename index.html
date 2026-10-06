@@ -7725,57 +7725,33 @@ window.guardarCalificacion=async function(){
   const periodo=document.getElementById("calCorte")?.value||"";
   const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(sid));
   const ses=NA_sesion();
-  if(!sid||!asignatura||!periodo||!e?.supabaseId){
-    alert("Complete los datos de la calificación."); return;
-  }
-  const c=await NA_init();
-  const nivel=document.getElementById("calNivel")?.value||e.nivel||"";
-  const grado=document.getElementById("calGrado")?.value||e.grado||"";
-  const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
-  const resultado=(numerica?document.getElementById("calNota")?.value:document.getElementById("calCategoria")?.value||"").trim();
-  const observacion=(document.getElementById("calObservacion")?.value||"").trim();
+  if(!sid||!asignatura||!periodo||!e?.supabaseId){alert("Complete los datos de la calificación.");return;}
   const nivel=document.getElementById("calNivel")?.value||e.nivel||"";
   const grado=document.getElementById("calGrado")?.value||e.grado||"";
   const seccion=document.getElementById("calSeccion")?.value||e.seccion||"";
-  const row={
-    estudiante_id:e.supabaseId, anio:Number(anio), nivel, grado, seccion,
-    asignatura, periodo, nota:numerica?(resultado===""?null:Number(resultado)):null,
-    categoria:numerica?null:resultado, observacion:observacion||null,
-    registrado_por:ses?.authUserId||null, codigo_centro:ses?.codigoCentro||e.codigo_centro||null
-  };
+  const numerica=esAsignaturaNumericaPorGrado(nivel,grado,asignatura);
+  const resultado=(numerica?document.getElementById("calNota")?.value:document.getElementById("calCategoria")?.value||"").trim();
+  if(numerica && (resultado==="" || Number.isNaN(Number(resultado)))){alert("Ingrese una nota numérica válida de 0 a 100.");return;}
+  const observacion=(document.getElementById("calObservacion")?.value||"").trim();
+  const c=await NA_init();
+  const row={estudiante_id:e.supabaseId,anio:Number(anio),nivel,grado,seccion,asignatura,periodo,
+    nota:numerica?Number(resultado):null,categoria:numerica?null:resultado,observacion:observacion||null,
+    registrado_por:ses?.authUserId||null,codigo_centro:ses?.codigoCentro||e.codigo_centro||null};
   try{
-    let existente=null;
-    let q0=c.from("calificaciones").select("*")
-      .eq("estudiante_id",e.supabaseId).eq("anio",Number(anio))
-      .eq("asignatura",asignatura).eq("periodo",periodo);
+    let q0=c.from("calificaciones").select("*").eq("estudiante_id",e.supabaseId).eq("anio",Number(anio)).eq("asignatura",asignatura).eq("periodo",periodo);
     if(ses?.rol!=="Director")q0=q0.eq("codigo_centro",ses.codigoCentro||"");
-    const qExist=await q0.limit(1);
-    if(qExist.error)throw qExist.error;
-    existente=qExist.data?.[0]||null;
-    let q;
-    if(existente?.id){
-      q=await c.from("calificaciones").update(row).eq("id",existente.id).select().single();
-    }else{
-      q=await c.from("calificaciones").insert(row).select().single();
-    }
+    const qe=await q0.limit(1); if(qe.error)throw qe.error;
+    const existente=qe.data?.[0]||null;
+    const q=existente?.id
+      ?await c.from("calificaciones").update(row).eq("id",existente.id).select().single()
+      :await c.from("calificaciones").insert(row).select().single();
     if(q.error)throw q.error;
-    const local=obtenerDatos(KEY_CALIFICACIONES);
-    const nuevoLocal={
-      id:q.data.id,supabaseId:q.data.id,anio:Number(anio),estudianteId:e.id,estudiante:e.nombre||"",
-      nivel,grado,seccion,asignatura,docenteId:ses?.docenteId||"",docenteNombre:ses?.nombreCompleto||"",
-      corte:periodo,tipo:numerica?"Numerica":"Cualitativa",resultado:numerica?q.data.nota:q.data.categoria,
-      observacion:q.data.observacion||""
-    };
-    const sinActual=local.filter(x=>!(String(x.estudianteId)===String(e.id)&&String(x.anio)===String(anio)&&x.asignatura===asignatura&&x.corte===periodo));
-    guardarDatos(KEY_CALIFICACIONES,[nuevoLocal,...sinActual]);
     await NA_syncCalificaciones();
     if(typeof cargarCalificaciones==="function")cargarCalificaciones();
     alert(existente?"Calificación actualizada correctamente.":"Calificación guardada correctamente.");
-  }catch(err){
-    console.error("Calificación Supabase:",err);
-    alert("No se pudo guardar la calificación en Supabase: "+(err?.message||"Error desconocido"));
-  }
+  }catch(err){console.error("Calificación Supabase:",err);alert("No se pudo guardar la calificación en Supabase: "+(err?.message||"Error desconocido"));}
 };
+
 async function NA_restaurarSesion(){
   try{
     const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
