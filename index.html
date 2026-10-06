@@ -7815,7 +7815,7 @@ window.cargarEstudiantesAsistencia=function(){
 /* V11.25 - Corrección final de validación de asignatura en Calificaciones */
 (function(){
   const NA_guardarCalificacionAnterior=window.guardarCalificacion;
-  window.guardarCalificacion=function(){
+  window.guardarCalificacion=async function(){
     const ses=obtenerSesionActual();
     const nivel=document.getElementById("calNivel")?.value||"";
     const grado=document.getElementById("calGrado")?.value||"";
@@ -7845,7 +7845,7 @@ window.cargarEstudiantesAsistencia=function(){
       }
     }
     try{
-      NA_guardarCalificacionAnterior();
+      await NA_guardarCalificacionAnterior();
     }finally{
       if(restaurar)restaurar();
     }
