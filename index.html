@@ -6612,6 +6612,23 @@ function abrirModuloControl(id){
     mostrarSeccion(id,boton||null);
 }
 function cargarCentroControl(){
+    /* V11.29 - PROTECCION DIRECTA DEL CENTRO DE CONTROL
+       Esta función no puede ejecutarse para un Docente, aunque otra rutina
+       intente llamarla directamente después del inicio de sesión. */
+    const sesionControl=obtenerSesionActual();
+    if(sesionControl && sesionControl.rol!=="Director"){
+        const sec=document.getElementById("centroControl");
+        if(sec){
+            sec.classList.remove("active");
+            sec.style.setProperty("display","none","important");
+        }
+        const inicio=document.getElementById("inicio");
+        if(inicio){
+            inicio.style.removeProperty("display");
+            inicio.classList.add("active");
+        }
+        return false;
+    }
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
     const docentes=obtenerDatos(KEY_DOCENTES);
     const asistencias=obtenerDatos(KEY_ASISTENCIAS);
