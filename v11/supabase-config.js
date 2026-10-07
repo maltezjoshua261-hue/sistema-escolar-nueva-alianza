@@ -21,6 +21,23 @@ window.addEventListener("load", function(){
   }
 
   function obtenerCliente(){ return window.NUEVA_ALIANZA_SUPABASE_CLIENT || null; }
+  window.NA_rolDocenteV1138 = function(sesion){
+    if(!sesion) return;
+    const rol=String(sesion.rol||"").trim().toLowerCase();
+    if(rol!=="docente") return;
+    document.body.setAttribute("data-na-rol","Docente");
+    const ids=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
+    ids.forEach(function(id){ const sec=document.getElementById(id); if(sec){sec.classList.remove("active");sec.style.setProperty("display","none","important");} });
+    document.querySelectorAll(".menu button").forEach(function(btn){
+      const oc=String(btn.getAttribute("onclick")||"").toLowerCase();
+      if(ids.some(function(id){return oc.includes("mostrarseccion('" + id.toLowerCase() + "'");}) || btn.classList.contains("solo-director")){
+        btn.classList.remove("active"); btn.style.setProperty("display","none","important");
+      }
+    });
+    const inicio=document.getElementById("inicio"); if(inicio){inicio.style.removeProperty("display");inicio.classList.add("active");}
+    const titulo=document.querySelector(".topbar strong"); if(titulo) titulo.textContent="Panel del Docente";
+  };
+
   function NA_aplicarBloqueoRolDefinitivo(sesion){
     if(!sesion) return;
     const rol=String(sesion.rol||"").trim().toLowerCase();
@@ -152,6 +169,7 @@ window.addEventListener("load", function(){
     sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(sesion));
     window.NUEVA_ALIANZA_SESION=sesion;
     NA_aplicarBloqueoRolDefinitivo(sesion);
+    window.NA_rolDocenteV1138(sesion);
     setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},0);
     setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},300);
     setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},1000);
@@ -216,5 +234,14 @@ window.addEventListener("load", function(){
       NA_aplicarBloqueoRolDefinitivo(sesion);
       setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},300);
     }catch(error){ console.error("V11.4 - Error al iniciar autenticación central:",error); }
+  if(!window.NA_rolV1138Timer){
+    window.NA_rolV1138Timer=setInterval(function(){
+      try{
+        const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+        if(s && String(s.rol||"").trim().toLowerCase()==="docente") window.NA_rolDocenteV1138(s);
+      }catch(e){}
+    },500);
+  }
+
   })();
 });
