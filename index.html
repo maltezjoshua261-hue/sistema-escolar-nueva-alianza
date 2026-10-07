@@ -3479,9 +3479,19 @@ function iniciarSesion(){
 }
 
 
+function normalizarRolSistema(rol){
+    const r=String(rol??"").trim().toLowerCase();
+    if(r==="director") return "Director";
+    return "Docente";
+}
+
 function obtenerSesionActual(){
     try{
-        return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+        const sesion=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+        if(!sesion)return null;
+        sesion.rol=normalizarRolSistema(sesion.rol);
+        sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(sesion));
+        return sesion;
     }catch(e){
         return null;
     }
@@ -7571,13 +7581,23 @@ const NA_CODES = {
   NuevaAlianza:"17683"
 };
 
+function NA_normalizarRol(rol){
+  const r=String(rol??"").trim().toLowerCase();
+  return r==="director"?"Director":"Docente";
+}
 function NA_sesion(){
-  try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){return null;}
+  try{
+    const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+    if(!s)return null;
+    s.rol=NA_normalizarRol(s.rol);
+    sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(s));
+    return s;
+  }catch(e){return null;}
 }
 function NA_setSesion(p){
   const s={
     usuario:p.usuario||p.email||"",
-    rol:p.rol||"Docente",
+    rol:NA_normalizarRol(p.rol),
     docenteId:String(p.docenteId||""),
     codigoCentro:String(p.codigoCentro||""),
     authUserId:String(p.authUserId||""),
