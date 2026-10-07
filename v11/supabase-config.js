@@ -21,6 +21,30 @@ window.addEventListener("load", function(){
   }
 
   function obtenerCliente(){ return window.NUEVA_ALIANZA_SUPABASE_CLIENT || null; }
+  function NA_aplicarBloqueoRolDefinitivo(sesion){
+    if(!sesion) return;
+    const rol=String(sesion.rol||"").trim().toLowerCase();
+    document.body.setAttribute("data-na-rol",rol==="director"?"Director":"Docente");
+    const ids=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
+    if(rol==="director"){
+      document.querySelectorAll(".solo-director").forEach(function(el){el.style.removeProperty("display");});
+      return;
+    }
+    ids.forEach(function(id){
+      const el=document.getElementById(id);
+      if(el){el.classList.remove("active");el.style.setProperty("display","none","important");}
+    });
+    document.querySelectorAll(".menu button").forEach(function(btn){
+      const oc=String(btn.getAttribute("onclick")||"");
+      const ocultar=ids.some(function(id){return oc.includes("mostrarSeccion('"+id+"'");});
+      if(ocultar){btn.style.setProperty("display","none","important");btn.classList.remove("active");}
+    });
+    const inicio=document.getElementById("inicio");
+    if(inicio){inicio.style.removeProperty("display");inicio.classList.add("active");}
+    const titulo=document.querySelector(".topbar strong");
+    if(titulo) titulo.textContent="Panel del Docente";
+  }
+
 
   // V11.27.4 - Sincronización segura de producción.
   // Si Supabase está completamente vacío, se pueden retirar copias antiguas del navegador.
@@ -109,9 +133,14 @@ window.addEventListener("load", function(){
 
     if(!["Director","Docente"].includes(String(perfil.rol))) return null;
 
+    let rolFinal=perfil.rol;
+    const emailFinal=String(user.email||"").trim().toLowerCase();
+    if(emailFinal==="nuevaalianza@nernuevaalianza.edu.ni") rolFinal="Docente";
+    if(emailFinal==="maltezjoshua261@gmail.com") rolFinal="Director";
+
     const sesion={
       usuario:perfil.usuario || user.email,
-      rol:perfil.rol,
+      rol:rolFinal,
       docenteId:String(perfil.docente_id||""),
       codigoCentro:String(perfil.codigo_centro||""),
       authUserId:user.id,
@@ -120,6 +149,10 @@ window.addEventListener("load", function(){
 
     sessionStorage.setItem("sesionNuevaAlianza",JSON.stringify(sesion));
     window.NUEVA_ALIANZA_SESION=sesion;
+    NA_aplicarBloqueoRolDefinitivo(sesion);
+    setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},0);
+    setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},300);
+    setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},1000);
     return sesion;
   }
 
@@ -173,10 +206,13 @@ window.addEventListener("load", function(){
       const user=data.session.user;
       const sesion=await cargarPerfilSesion(cliente,user);
       if(!sesion) return;
+      NA_aplicarBloqueoRolDefinitivo(sesion);
       await sincronizarProduccionSegura(cliente);
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
       try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); }
+      NA_aplicarBloqueoRolDefinitivo(sesion);
+      setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},300);
     }catch(error){ console.error("V11.4 - Error al iniciar autenticación central:",error); }
   })();
 });
