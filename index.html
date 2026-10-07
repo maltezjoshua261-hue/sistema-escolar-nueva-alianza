@@ -8311,6 +8311,59 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
 </script>
 
 <style id="NA-ROL-CONTROL-FINAL">
+/* V11.35 - BLOQUEO VISUAL DIRECTO DEL MENÚ PARA DOCENTE */
+body[data-na-rol="Docente"] .menu button.solo-director,
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('centroControl'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('dashboardAcademico'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('seguimiento'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('alertasPreventivas'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('docentes'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('asignaciones'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('horarios'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('reportes'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('reportesOficiales'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('matricula'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('expediente'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('reporteMatricula'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('rendimiento'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('evaluacionAcademica'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('perfilAcademico'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('planesMejora'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('consolidacionEvaluacion'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('historialAcademico'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('promocion'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('estadisticas'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('cierreAnual'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('documentosOficiales'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('bitacora'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('reunionesAcuerdos'"],
+body[data-na-rol="Docente"] .menu button[onclick*="mostrarSeccion('configuracion'"]{display:none !important;}
+body[data-na-rol="Docente"] #centroControl,
+body[data-na-rol="Docente"] #dashboardAcademico,
+body[data-na-rol="Docente"] #seguimiento,
+body[data-na-rol="Docente"] #alertasPreventivas,
+body[data-na-rol="Docente"] #docentes,
+body[data-na-rol="Docente"] #asignaciones,
+body[data-na-rol="Docente"] #horarios,
+body[data-na-rol="Docente"] #reportes,
+body[data-na-rol="Docente"] #reportesOficiales,
+body[data-na-rol="Docente"] #matricula,
+body[data-na-rol="Docente"] #expediente,
+body[data-na-rol="Docente"] #reporteMatricula,
+body[data-na-rol="Docente"] #rendimiento,
+body[data-na-rol="Docente"] #evaluacionAcademica,
+body[data-na-rol="Docente"] #perfilAcademico,
+body[data-na-rol="Docente"] #planesMejora,
+body[data-na-rol="Docente"] #consolidacionEvaluacion,
+body[data-na-rol="Docente"] #historialAcademico,
+body[data-na-rol="Docente"] #promocion,
+body[data-na-rol="Docente"] #estadisticas,
+body[data-na-rol="Docente"] #cierreAnual,
+body[data-na-rol="Docente"] #documentosOficiales,
+body[data-na-rol="Docente"] #bitacora,
+body[data-na-rol="Docente"] #reunionesAcuerdos,
+body[data-na-rol="Docente"] #configuracion{display:none !important;}
+</style>
 /* ÚNICA FUENTE VISUAL DE CONTROL DE ROLES */
 body[data-na-rol="Docente"] .solo-director,
 body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
@@ -8347,10 +8400,10 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
     if(rol === "director") return "Director";
     if(rol === "docente") return "Docente";
     const usuario = String(s?.usuario || "").trim().toLowerCase();
-    if(usuario === DIRECTOR_EMAIL) return "Director";
-    if(usuario === DOCENTE_EMAIL) return "Docente";
+    if(usuario === DIRECTOR_EMAIL || usuario === "admin") return "Director";
+    if(usuario === DOCENTE_EMAIL || usuario === "docente" || usuario === "nuevaalianza") return "Docente";
     return "";
-  }
+  
 
   function esDocente(){
     return rolActual() === "Docente";
