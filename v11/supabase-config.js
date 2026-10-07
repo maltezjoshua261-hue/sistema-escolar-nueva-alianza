@@ -133,7 +133,9 @@ window.addEventListener("load", function(){
 
     if(!["Director","Docente"].includes(String(perfil.rol))) return null;
 
-    let rolFinal=perfil.rol;
+    let rolFinal=String(perfil.rol||"").trim();
+    if(rolFinal.toLowerCase()==="director") rolFinal="Director";
+    if(rolFinal.toLowerCase()==="docente") rolFinal="Docente";
     const emailFinal=String(user.email||"").trim().toLowerCase();
     if(emailFinal==="nuevaalianza@nernuevaalianza.edu.ni") rolFinal="Docente";
     if(emailFinal==="maltezjoshua261@gmail.com") rolFinal="Director";
@@ -183,7 +185,7 @@ window.addEventListener("load", function(){
       await sincronizarProduccionSegura(cliente);
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
-      try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al cargar el panel:",errorCarga); aplicarPermisos(); }
+      try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al cargar el panel:",errorCarga); aplicarPermisos(); } finally { NA_aplicarBloqueoRolDefinitivo(sesion); setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},100); setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},500); }
     }catch(error){ console.error("V11.4 - Error inesperado en login:",error); if(errorBox) errorBox.textContent="No fue posible iniciar sesión. Intente nuevamente."; }
   };
 
@@ -210,7 +212,7 @@ window.addEventListener("load", function(){
       await sincronizarProduccionSegura(cliente);
       document.getElementById("loginScreen").style.display="none";
       document.getElementById("app").style.display="flex";
-      try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); }
+      try{ cargarTodo(); aplicarPermisos(); }catch(errorCarga){ console.error("V11.4 - Error al restaurar sesión central:",errorCarga); aplicarPermisos(); } finally { NA_aplicarBloqueoRolDefinitivo(sesion); setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},100); setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},500); }
       NA_aplicarBloqueoRolDefinitivo(sesion);
       setTimeout(function(){NA_aplicarBloqueoRolDefinitivo(sesion);},300);
     }catch(error){ console.error("V11.4 - Error al iniciar autenticación central:",error); }
