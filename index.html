@@ -7977,6 +7977,12 @@ async function NA_restaurarSesion(){
     document.getElementById("app").style.display="flex";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
+    // V11.28.8 - aplicar el bloqueo DESPUÉS de restaurar sesión y cargar panel
+    if(typeof window.NA_bloquearModulosDirector==="function"){
+      window.NA_bloquearModulosDirector();
+      setTimeout(window.NA_bloquearModulosDirector,100);
+      setTimeout(window.NA_bloquearModulosDirector,500);
+    }
   }catch(e){console.warn("V11.25 restauración:",e);}
 }
 window.cargarEstudiantes=function(){
