@@ -997,8 +997,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         </div>
 
                         <div class="form-group">
-                            <label>Grado / Nivel</label>
-                            <select id="estGrado">
+                            <label>Grado / Nivel</label>                            <select id="estGrado">
                                 <option value="">Seleccione nivel primero</option>
                             </select>
                         </div>
@@ -1997,8 +1996,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         <div class="form-group">
                             <label>Nivel educativo</label>
                             <select id="repMatNivel" onchange="actualizarGradosReporteMatricula();cargarReporteMatricula();">
-                                <option value="">Todos los niveles</option>
-                                <option value="Inicial">Educación Inicial</option>
+                                <option value="">Todos los niveles</option>                                <option value="Inicial">Educación Inicial</option>
                                 <option value="Primaria">Primaria</option>
                                 <option value="Secundaria">Secundaria</option>
                             </select>
@@ -2997,8 +2995,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         1.º, 2.º, 3.º, 4.º, 5.º y 6.º grado
                     </p>
 
-                    <p>
-                        <strong>Secundaria:</strong>
+                    <p>                        <strong>Secundaria:</strong>
                         7.º, 8.º, 9.º, 10.º y 11.º grado
                     </p>
 
@@ -3997,8 +3994,7 @@ function generarExpedienteIntegral(){
     const evalAp=ev.filter(x=>x.resultado==="Requiere apoyo"||x.resultado==="AF").length;
     const esc=escaparHTML;
     const filas=(arr,cols,empty)=>arr.length?arr.map(x=>'<tr>'+cols.map(k=>'<td>'+esc(x[k]??"")+'</td>').join("")+'</tr>').join(""):'<tr><td colspan="'+cols.length+'">'+empty+'</td></tr>';
-    cont.innerHTML='<div class="card">'+
-      '<div class="print-header" style="text-align:center"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br><strong>EXPEDIENTE PEDAGÓGICO INTEGRAL</strong><br>Año lectivo '+esc(anio)+'</div>'+
+    cont.innerHTML='<div class="card">'+      '<div class="print-header" style="text-align:center"><strong>MINISTERIO DE EDUCACIÓN</strong><br>Centro Escolar Nueva Alianza<br><strong>EXPEDIENTE PEDAGÓGICO INTEGRAL</strong><br>Año lectivo '+esc(anio)+'</div>'+
       '<div class="stats"><div class="stat"><h3>Estudiante</h3><strong style="font-size:18px">'+esc(e.nombre)+'</strong></div><div class="stat"><h3>Grupo</h3><strong>'+esc(e.nivel||"")+' · '+esc(e.grado||"")+' '+esc(e.seccion||"")+'</strong></div><div class="stat"><h3>Matrícula</h3><strong>'+mats.length+'</strong></div><div class="stat"><h3>Evaluaciones</h3><strong>'+ev.length+'</strong></div></div>'+
       '<h3>👤 Datos personales</h3><div class="table-container"><table><tbody><tr><th>Código/Cédula</th><td>'+esc(e.codigo||"")+'</td><th>Sexo</th><td>'+esc(e.sexo||"")+'</td></tr><tr><th>Fecha de nacimiento</th><td>'+esc(e.fechaNacimiento||"")+'</td><th>Responsable</th><td>'+esc(e.responsable||"")+'</td></tr><tr><th>Teléfono</th><td>'+esc(e.telefonoResponsable||"")+'</td><th>Comunidad</th><td>'+esc(e.direccion||e.comunidad||"")+'</td></tr></tbody></table></div>'+
       '<h3>📝 Matrícula</h3><div class="table-container"><table><thead><tr><th>Año</th><th>Grado</th><th>Sección</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+filas(mats,["anio","grado","seccion","estado","fecha"])+'</tbody></table></div>'+
@@ -4997,8 +4993,7 @@ function guardarCalificacion(){
         }
         resultado=nota;
     }else{
-        resultado=document.getElementById("calCategoria").value;
-        if(!categoriasValidas.includes(resultado)){
+        resultado=document.getElementById("calCategoria").value;        if(!categoriasValidas.includes(resultado)){
             alert("Seleccione una categoría válida para este nivel y grado: "+categoriasValidas.join(", ")+".");
             return;
         }
@@ -5997,8 +5992,7 @@ function guardarUsuario(){
     }
 
     if(rol==="Docente"&&!docenteId){
-        alert("Seleccione el docente que utilizará este usuario.");
-        return;
+        alert("Seleccione el docente que utilizará este usuario.");        return;
     }
 
     const usuarios=obtenerUsuarios();
@@ -6997,8 +6991,7 @@ function cargarDashboardAcademico(){
  let cal=obtenerDatos(KEY_CALIFICACIONES).filter(e=>String(e.anio||anio)===String(anio)&&fil(e));
  let pro=obtenerDatos(KEY_PROMOCIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
  let car=obtenerDatos(KEY_ASIGNACIONES).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e));
- let hor=obtenerDatos(KEY_HORARIOS).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e));
- let pla=obtenerDatos(KEY_PLANIFICACIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
+ let hor=obtenerDatos(KEY_HORARIOS).filter(e=>String(e.anio)===String(anio)&&String(e.estado||"Activo")==="Activo"&&fil(e)); let pla=obtenerDatos(KEY_PLANIFICACIONES).filter(e=>String(e.anio)===String(anio)&&fil(e));
  if(ses?.rol==="Docente"){
    const did=String(ses.docenteId||"");
    // El docente solo visualiza los grupos que tiene asignados activamente.
@@ -7998,7 +7991,6 @@ window.guardarAsignacion=async function(){
     await NA_syncAsignaciones(); if(typeof cargarAsignaciones==="function")cargarAsignaciones();
   }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));}
 };
-
 // V11.26 FINAL - Eliminaciones sincronizadas con Supabase
 const NA_oldEliminarEstudiante=window.eliminarEstudiante;
 window.eliminarEstudiante=async function(id){
@@ -8596,5 +8588,121 @@ body[data-na-rol="Director"] #dashboardAcademico{
 })();
 </script>
 
+
+<style id="NA-V11-30-FINAL-ROLES">
+/* V11.30 FINAL - Control definitivo de módulos por rol */
+body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{display:none !important;}
+</style>
+<script>
+/* V11.30 FINAL - BLOQUEO DEFINITIVO DE MÓDULOS EXCLUSIVOS DEL DIRECTOR */
+(function(){
+  "use strict";
+  const SOLO_DIRECTOR=[
+    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "matricula","expediente","reporteMatricula","rendimiento",
+    "evaluacionAcademica","perfilAcademico","planesMejora",
+    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
+    "configuracion"
+  ];
+  const TEXTOS_DIRECTOR=[
+    "centro de control del director","centro de control",
+    "estadísticas y gráficos","estadisticas y graficos",
+    "cierre del año escolar","cierre anual",
+    "documentos oficiales automáticos","documentos oficiales automaticos",
+    "historial académico anual del estudiante","historial academico anual del estudiante"
+  ];
+
+  function sesion(){
+    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
+    catch(e){return null;}
+  }
+  function esDocente(){
+    const s=sesion();
+    return !!s && String(s.rol||"").trim().toLowerCase()==="docente";
+  }
+  function marcarYBloquear(){
+    const s=sesion();
+    if(!s)return;
+    const rol=String(s.rol||"").trim().toLowerCase();
+    document.body.setAttribute("data-na-rol",rol==="director"?"Director":"Docente");
+    if(rol==="director")return;
+
+    SOLO_DIRECTOR.forEach(function(id){
+      const sec=document.getElementById(id);
+      if(sec){
+        sec.classList.remove("active");
+        sec.style.setProperty("display","none","important");
+        sec.setAttribute("aria-hidden","true");
+      }
+    });
+
+    document.querySelectorAll(".menu button").forEach(function(btn){
+      const onclick=String(btn.getAttribute("onclick")||"").toLowerCase();
+      const texto=String(btn.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
+      const porId=SOLO_DIRECTOR.some(function(id){
+        return onclick.includes("mostrarseccion('"+id.toLowerCase()+"'");
+      });
+      const porTexto=TEXTOS_DIRECTOR.some(function(t){return texto.includes(t);});
+      if(porId||porTexto){
+        btn.setAttribute("data-na-director-final","1");
+        btn.classList.remove("active");
+        btn.style.setProperty("display","none","important");
+        btn.setAttribute("aria-hidden","true");
+      }
+    });
+
+    const inicio=document.getElementById("inicio");
+    if(inicio){
+      inicio.style.removeProperty("display");
+      inicio.classList.add("active");
+    }
+  }
+
+  window.NA_bloqueoFinalRoles=marcarYBloquear;
+
+  const anteriorMostrar=window.mostrarSeccion;
+  if(typeof anteriorMostrar==="function" && !anteriorMostrar.__NA_V11_30){
+    const mostrarFinal=function(id,btn){
+      if(esDocente() && SOLO_DIRECTOR.includes(String(id))){
+        marcarYBloquear();
+        return false;
+      }
+      const r=anteriorMostrar.apply(this,arguments);
+      marcarYBloquear();
+      return r;
+    };
+    mostrarFinal.__NA_V11_30=true;
+    window.mostrarSeccion=mostrarFinal;
+  }
+
+  const anteriorPermisos=window.aplicarPermisos;
+  if(typeof anteriorPermisos==="function" && !anteriorPermisos.__NA_V11_30){
+    const permisosFinal=function(){
+      let r;
+      try{r=anteriorPermisos.apply(this,arguments);}catch(e){console.warn("Permisos anteriores:",e);}
+      marcarYBloquear();
+      return r;
+    };
+    permisosFinal.__NA_V11_30=true;
+    window.aplicarPermisos=permisosFinal;
+  }
+
+  [0,50,150,300,600,1000,2000,4000,7000].forEach(function(ms){
+    setTimeout(marcarYBloquear,ms);
+  });
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",marcarYBloquear);
+  }else{
+    marcarYBloquear();
+  }
+  window.addEventListener("load",marcarYBloquear);
+  window.addEventListener("pageshow",marcarYBloquear);
+
+  const obs=new MutationObserver(function(){marcarYBloquear();});
+  if(document.body)obs.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
