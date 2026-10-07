@@ -8704,5 +8704,42 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{display:non
   if(document.body)obs.observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+
+<script id="NA-V11-33-FINAL-BLOQUEO-DOCENTE">
+(function(){
+  "use strict";
+  const IDS=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
+  const DOCENTE_EMAIL="nuevaalianza@nernuevaalianza.edu.ni";
+  function bloquear(){
+    let s=null; try{s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){}
+    if(!s)return;
+    const u=String(s.usuario||"").trim().toLowerCase();
+    const rol=String(s.rol||"").trim().toLowerCase();
+    const docente=(rol==="docente"||u===DOCENTE_EMAIL);
+    document.body.setAttribute("data-na-rol",docente?"Docente":"Director");
+    if(!docente)return;
+    IDS.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.classList.remove("active");el.style.setProperty("display","none","important");el.setAttribute("aria-hidden","true");}
+    });
+    document.querySelectorAll(".menu button").forEach(btn=>{
+      const oc=String(btn.getAttribute("onclick")||"").toLowerCase();
+      if(IDS.some(id=>oc.includes("mostrarseccion('"+id.toLowerCase()+"'"))){
+        btn.style.setProperty("display","none","important");
+        btn.classList.remove("active");
+        btn.setAttribute("aria-hidden","true");
+      }
+    });
+    const inicio=document.getElementById("inicio");
+    if(inicio){inicio.style.removeProperty("display");inicio.classList.add("active");}
+    const t=document.querySelector(".topbar strong"); if(t)t.textContent="Panel del Docente";
+  }
+  window.NA_BLOQUEO_DOCENTE_FINAL= bloquear;
+  [0,100,300,700,1500,3000].forEach(ms=>setTimeout(bloquear,ms));
+  window.addEventListener("load",()=>setTimeout(bloquear,100));
+  window.addEventListener("pageshow",()=>setTimeout(bloquear,100));
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bloquear); else bloquear();
+})();
+</script>
 </body>
 </html>
