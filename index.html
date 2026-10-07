@@ -8290,314 +8290,39 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 })();
 </script>
 
+
 <script>
 /* V11.27.5 - Herramienta segura para limpiar datos locales de prueba */
 window.NA_limpiarDatosLocalesPrueba = async function(){
   const ses = typeof obtenerSesionActual === "function" ? obtenerSesionActual() : null;
-  if(!ses || ses.rol !== "Director"){
+  if(!ses || String(ses.rol||"").trim().toLowerCase() !== "director"){
     alert("Esta herramienta es exclusiva del Director.");
     return;
   }
   const ok = confirm("¿Desea eliminar del navegador los datos locales de prueba?\n\nSe limpiarán estudiantes, docentes, asistencias, calificaciones y bitácora local.\n\nLos datos de Supabase NO serán eliminados.");
   if(!ok)return;
-  const claves = [
-    "estudiantesNuevaAlianza",
-    "docentesNuevaAlianza",
-    "asistenciasNuevaAlianza",
-    "calificacionesNuevaAlianza",
-    "auditoriaNuevaAlianza"
-  ];
-  claves.forEach(k=>localStorage.removeItem(k));
-  try{
-    if(typeof window.NA_syncTodo === "function") await window.NA_syncTodo();
-  }catch(e){
-    console.warn("V11.27.5 - No fue posible sincronizar después de la limpieza:",e);
-  }
+  ["estudiantesNuevaAlianza","docentesNuevaAlianza","asistenciasNuevaAlianza","calificacionesNuevaAlianza","auditoriaNuevaAlianza"].forEach(k=>localStorage.removeItem(k));
+  try{ if(typeof window.NA_syncTodo === "function") await window.NA_syncTodo(); }catch(e){ console.warn("Limpieza:",e); }
   if(typeof cargarTodo === "function") cargarTodo();
   if(typeof actualizarEstadisticas === "function") actualizarEstadisticas();
   if(typeof cargarBitacora === "function") cargarBitacora();
   alert("Limpieza completada. Los datos locales de prueba fueron eliminados.");
 };
-
-/* V11.28.5 - PROTECCIÓN FINAL DEL DASHBOARD PARA DOCENTE */
-(function(){
-  function protegerDashboardDocente(){
-    try{
-      const ses=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
-      if(ses?.rol!=="Director"){
-        const sec=document.getElementById("dashboardAcademico");
-        if(sec){sec.classList.remove("active");sec.style.display="none";}
-        const botones=document.querySelectorAll('.menu button[onclick*="dashboardAcademico"]');
-        botones.forEach(b=>b.style.display="none");
-        const activo=document.querySelector(".section.active");
-        if(!activo || activo===sec){
-          const inicio=document.getElementById("inicio");
-          if(inicio){inicio.style.display="";inicio.classList.add("active");}
-        }
-      }
-    }catch(e){}
-  }
-  window.NA_protegerDashboardDocente=protegerDashboardDocente;
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",protegerDashboardDocente);
-  else protegerDashboardDocente();
-})();
 </script>
 
-<script>
-/* V11.28.6 - BLOQUEO REAL DEL CENTRO DE CONTROL PARA DOCENTE */
-(function(){
-  const SOLO_DIRECTOR_NA=[
-    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-    "docentes","asignaciones","horarios","reportes","reportesOficiales",
-    "matricula","expediente","reporteMatricula","rendimiento",
-    "evaluacionAcademica","perfilAcademico","planesMejora",
-    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
-    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
-    "configuracion"
-  ];
-  function sesionNA(){
-    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
-    catch(e){return null;}
-  }
-  function bloquearModulosDirectorNA(){
-    const ses=sesionNA();
-    if(!ses || ses.rol==="Director") return;
-    SOLO_DIRECTOR_NA.forEach(function(id){
-      const sec=document.getElementById(id);
-      if(sec){sec.classList.remove("active");sec.style.display="none";}
-    });
-    const inicio=document.getElementById("inicio");
-    if(inicio){inicio.style.display="";inicio.classList.add("active");}
-  }
-  const mostrarAnterior=window.mostrarSeccion;
-  if(typeof mostrarAnterior==="function"){
-    window.mostrarSeccion=function(id,boton){
-      const ses=sesionNA();
-      if(ses && ses.rol!=="Director" && SOLO_DIRECTOR_NA.includes(id)){
-        alert("Este módulo es exclusivo del Director.");
-        bloquearModulosDirectorNA();
-        return false;
-      }
-      const resultado=mostrarAnterior.apply(this,arguments);
-      bloquearModulosDirectorNA();
-      return resultado;
-    };
-  }
-  const cargarCentroAnterior=window.cargarCentroControl;
-  if(typeof cargarCentroAnterior==="function"){
-    window.cargarCentroControl=function(){
-      const ses=sesionNA();
-      if(ses && ses.rol!=="Director"){
-        bloquearModulosDirectorNA();
-        return false;
-      }
-      return cargarCentroAnterior.apply(this,arguments);
-    };
-  }
-  window.NA_bloquearModulosDirector= bloquearModulosDirectorNA;
-  document.addEventListener("DOMContentLoaded",function(){setTimeout(bloquearModulosDirectorNA,0);});
-  window.addEventListener("load",function(){setTimeout(bloquearModulosDirectorNA,0);});
-})();
-</script>
-<script>
-/* V11.28.9 - BARRERA PERMANENTE DE ROL PARA DOCENTE */
-(function(){
-  const SOLO_DIRECTOR_FINAL=[
-    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-    "docentes","asignaciones","horarios","reportes","reportesOficiales",
-    "matricula","expediente","reporteMatricula","rendimiento",
-    "evaluacionAcademica","perfilAcademico","planesMejora",
-    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
-    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
-    "configuracion"
-  ];
-  function NA_rolActualFinal(){
-    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
-    catch(e){return null;}
-  }
-  function NA_forzarRolFinal(){
-    const ses=NA_rolActualFinal();
-    if(!ses || ses.rol==="Director") return;
-    SOLO_DIRECTOR_FINAL.forEach(id=>{
-      const sec=document.getElementById(id);
-      if(sec){
-        sec.classList.remove("active");
-        sec.style.setProperty("display","none","important");
-      }
-    });
-    document.querySelectorAll(".menu button").forEach(btn=>{
-      const oc=btn.getAttribute("onclick")||"";
-      if(SOLO_DIRECTOR_FINAL.some(id=>oc.includes("mostrarSeccion('"+id+"'"))){
-        btn.style.setProperty("display","none","important");
-      }
-    });
-    const inicio=document.getElementById("inicio");
-    if(inicio){
-      inicio.style.removeProperty("display");
-      inicio.classList.add("active");
-    }
-  }
-  window.NA_forzarRolFinal=NA_forzarRolFinal;
-  [0,100,300,700,1500].forEach(ms=>setTimeout(NA_forzarRolFinal,ms));
-  window.addEventListener("load",function(){
-    [0,100,300,700,1500].forEach(ms=>setTimeout(NA_forzarRolFinal,ms));
-  });
-})();
-</script>
-<script>
-/* V11.29.3 - BLOQUEO ABSOLUTO CENTRO DE CONTROL PARA DOCENTE */
-(function(){
-  const ID="centroControl";
-  function rolActual(){
-    try{
-      const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
-      return String(s?.rol||"").trim().toLowerCase();
-    }catch(e){ return ""; }
-  }
-  function esDirector(){ return rolActual()==="director"; }
-
-  function ocultarCentro(){
-    if(esDirector()) return;
-    const sec=document.getElementById(ID);
-    if(sec){
-      sec.classList.remove("active");
-      sec.style.setProperty("display","none","important");
-      sec.setAttribute("aria-hidden","true");
-    }
-
-    document.querySelectorAll(".menu button, .menu a, button, a").forEach(function(el){
-      const oc=String(el.getAttribute("onclick")||"");
-      const txt=String(el.textContent||"").replace(/\\s+/g," ").trim().toLowerCase();
-      if(oc.includes("centroControl") || txt.includes("centro de control")){
-        el.style.setProperty("display","none","important");
-        el.setAttribute("aria-hidden","true");
-      }
-    });
-  }
-
-  function protegerNavegacion(){
-    if(esDirector()) return;
-    const original=window.mostrarSeccion;
-    if(typeof original==="function" && !original.__NA29_3){
-      const bloqueada=function(id){
-        if(String(id)===ID){
-          ocultarCentro();
-          return false;
-        }
-        const r=original.apply(this,arguments);
-        ocultarCentro();
-        return r;
-      };
-      bloqueada.__NA29_3=true;
-      window.mostrarSeccion=bloqueada;
-    }
-    ocultarCentro();
-  }
-
-  window.NA_bloqueoAbsolutoCentroControl=ocultarCentro;
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",protegerNavegacion);
-  }else{
-    protegerNavegacion();
-  }
-
-  [0,50,150,300,600,1000,2000,4000].forEach(function(ms){
-    setTimeout(function(){ protegerNavegacion(); ocultarCentro(); },ms);
-  });
-
-  const obs=new MutationObserver(function(){ ocultarCentro(); });
-  if(document.body) obs.observe(document.body,{childList:true,subtree:true});
-  window.addEventListener("load",function(){ ocultarCentro(); });
-})();
-</script>
-
-<style id="NA-V11-29-5-ROL-UI">
-/* V11.29.5 - El rol de sesión manda sobre cualquier permiso visual anterior */
-body[data-na-rol="Docente"] #centroControl,
-body[data-na-rol="Docente"] #dashboardAcademico,
-body[data-na-rol="Docente"] .menu button[data-na-director="1"]{
+<style id="NA-ROL-CONTROL-FINAL">
+/* ÚNICA FUENTE VISUAL DE CONTROL DE ROLES */
+body[data-na-rol="Docente"] .solo-director,
+body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
   display:none !important;
 }
-body[data-na-rol="Director"] #centroControl{
-  display:block;
-}
-body[data-na-rol="Director"] #dashboardAcademico{
-  display:block;
-}
 </style>
-<script>
-/* V11.29.5 - FUENTE ÚNICA DEL ROL VISUAL */
-(function(){
-  function obtenerRolSeguro(){
-    try{
-      const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
-      const r=String(s?.rol||"").trim().toLowerCase();
-      return r==="director" ? "Director" : (r==="docente" ? "Docente" : "");
-    }catch(e){ return ""; }
-  }
 
-  function aplicarRolUI(){
-    const rol=obtenerRolSeguro();
-    if(!rol)return;
-    document.body.setAttribute("data-na-rol",rol);
-
-    document.querySelectorAll(".menu button").forEach(function(btn){
-      const oc=String(btn.getAttribute("onclick")||"");
-      if(oc.includes("mostrarSeccion('centroControl'") ||
-         oc.includes("mostrarSeccion('dashboardAcademico'")){
-        btn.setAttribute("data-na-director","1");
-      }
-    });
-
-    if(rol==="Docente"){
-      const ids=["centroControl","dashboardAcademico"];
-      ids.forEach(function(id){
-        const el=document.getElementById(id);
-        if(el){
-          el.classList.remove("active");
-          el.style.setProperty("display","none","important");
-        }
-      });
-      document.querySelectorAll('.menu button[data-na-director="1"]').forEach(function(b){
-        b.style.setProperty("display","none","important");
-        b.classList.remove("active");
-      });
-      const inicio=document.getElementById("inicio");
-      if(inicio){
-        inicio.style.removeProperty("display");
-        inicio.classList.add("active");
-      }
-    }
-  }
-
-  window.NA_aplicarRolUI=aplicarRolUI;
-
-  /* Se ejecuta repetidamente durante el arranque y después de cargar datos. */
-  [0,100,300,700,1500,3000].forEach(function(ms){
-    setTimeout(aplicarRolUI,ms);
-  });
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",aplicarRolUI);
-  }else{
-    aplicarRolUI();
-  }
-
-  window.addEventListener("load",aplicarRolUI);
-})();
-</script>
-
-
-<style id="NA-V11-30-FINAL-ROLES">
-/* V11.30 FINAL - Control definitivo de módulos por rol */
-body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{display:none !important;}
-</style>
-<script>
-/* V11.30 FINAL - BLOQUEO DEFINITIVO DE MÓDULOS EXCLUSIVOS DEL DIRECTOR */
+<script id="NA-ROL-CONTROL-FINAL-SCRIPT">
 (function(){
   "use strict";
-  const SOLO_DIRECTOR=[
+
+  const SOLO_DIRECTOR = [
     "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
     "docentes","asignaciones","horarios","reportes","reportesOficiales",
     "matricula","expediente","reporteMatricula","rendimiento",
@@ -8606,31 +8331,52 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{display:non
     "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
     "configuracion"
   ];
-  const TEXTOS_DIRECTOR=[
-    "centro de control del director","centro de control",
-    "estadísticas y gráficos","estadisticas y graficos",
-    "cierre del año escolar","cierre anual",
-    "documentos oficiales automáticos","documentos oficiales automaticos",
-    "historial académico anual del estudiante","historial academico anual del estudiante"
-  ];
 
-  function sesion(){
-    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
-    catch(e){return null;}
+  const DIRECTOR_EMAIL = "maltezjoshua261@gmail.com";
+  const DOCENTE_EMAIL = "nuevaalianza@nernuevaalianza.edu.ni";
+
+  function leerSesion(){
+    try{
+      return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza") || "null");
+    }catch(e){ return null; }
   }
+
+  function rolActual(){
+    const s = leerSesion();
+    const rol = String(s?.rol || "").trim().toLowerCase();
+    if(rol === "director") return "Director";
+    if(rol === "docente") return "Docente";
+    const usuario = String(s?.usuario || "").trim().toLowerCase();
+    if(usuario === DIRECTOR_EMAIL) return "Director";
+    if(usuario === DOCENTE_EMAIL) return "Docente";
+    return "";
+  }
+
   function esDocente(){
-    const s=sesion();
-    return !!s && String(s.rol||"").trim().toLowerCase()==="docente";
+    return rolActual() === "Docente";
   }
-  function marcarYBloquear(){
-    const s=sesion();
-    if(!s)return;
-    const rol=String(s.rol||"").trim().toLowerCase();
-    document.body.setAttribute("data-na-rol",rol==="director"?"Director":"Docente");
-    if(rol==="director")return;
+
+  function esDirector(){
+    return rolActual() === "Director";
+  }
+
+  function esRestringido(id){
+    return SOLO_DIRECTOR.includes(String(id || ""));
+  }
+
+  function marcarRol(){
+    const rol = rolActual();
+    if(rol) document.body.setAttribute("data-na-rol", rol);
+    return rol;
+  }
+
+  function bloquearDocente(){
+    if(!esDocente()) return;
+
+    marcarRol();
 
     SOLO_DIRECTOR.forEach(function(id){
-      const sec=document.getElementById(id);
+      const sec = document.getElementById(id);
       if(sec){
         sec.classList.remove("active");
         sec.style.setProperty("display","none","important");
@@ -8639,106 +8385,99 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{display:non
     });
 
     document.querySelectorAll(".menu button").forEach(function(btn){
-      const onclick=String(btn.getAttribute("onclick")||"").toLowerCase();
-      const texto=String(btn.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
-      const porId=SOLO_DIRECTOR.some(function(id){
-        return onclick.includes("mostrarseccion('"+id.toLowerCase()+"'");
+      const onclick = String(btn.getAttribute("onclick") || "");
+      const texto = String(btn.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
+
+      const porId = SOLO_DIRECTOR.some(function(id){
+        return onclick.toLowerCase().includes("mostrarseccion('" + id.toLowerCase() + "'");
       });
-      const porTexto=TEXTOS_DIRECTOR.some(function(t){return texto.includes(t);});
-      if(porId||porTexto){
-        btn.setAttribute("data-na-director-final","1");
+
+      const porClase = btn.classList.contains("solo-director");
+
+      const porTexto = [
+        "centro de control del director","centro de control",
+        "estadísticas y gráficos","estadisticas y graficos",
+        "cierre del año escolar","cierre anual",
+        "documentos oficiales automáticos","documentos oficiales automaticos",
+        "historial académico anual del estudiante",
+        "historial academico anual del estudiante"
+      ].some(function(t){ return texto.includes(t); });
+
+      if(porId || porClase || porTexto){
         btn.classList.remove("active");
         btn.style.setProperty("display","none","important");
         btn.setAttribute("aria-hidden","true");
+        btn.setAttribute("data-na-director-final","1");
       }
     });
 
-    const inicio=document.getElementById("inicio");
+    const inicio = document.getElementById("inicio");
     if(inicio){
       inicio.style.removeProperty("display");
       inicio.classList.add("active");
     }
+
+    const top = document.querySelector(".topbar strong");
+    if(top) top.textContent = "Panel del Docente";
   }
 
-  window.NA_bloqueoFinalRoles=marcarYBloquear;
+  function restaurarDirector(){
+    if(!esDirector()) return;
+    marcarRol();
 
-  const anteriorMostrar=window.mostrarSeccion;
-  if(typeof anteriorMostrar==="function" && !anteriorMostrar.__NA_V11_30){
-    const mostrarFinal=function(id,btn){
-      if(esDocente() && SOLO_DIRECTOR.includes(String(id))){
-        marcarYBloquear();
+    document.querySelectorAll(".menu button.solo-director, .menu button[data-na-director-final='1']").forEach(function(btn){
+      btn.style.removeProperty("display");
+      btn.removeAttribute("aria-hidden");
+    });
+  }
+
+  function controlar(){
+    const rol = marcarRol();
+    if(!rol) return;
+    if(rol === "Docente") bloquearDocente();
+    if(rol === "Director") restaurarDirector();
+  }
+
+  const mostrarOriginal = window.mostrarSeccion;
+  if(typeof mostrarOriginal === "function" && !mostrarOriginal.__NA_ROL_FINAL){
+    const mostrarProtegido = function(id, boton){
+      if(esDocente() && esRestringido(id)){
+        bloquearDocente();
         return false;
       }
-      const r=anteriorMostrar.apply(this,arguments);
-      marcarYBloquear();
-      return r;
+      const resultado = mostrarOriginal.apply(this, arguments);
+      controlar();
+      return resultado;
     };
-    mostrarFinal.__NA_V11_30=true;
-    window.mostrarSeccion=mostrarFinal;
+    mostrarProtegido.__NA_ROL_FINAL = true;
+    window.mostrarSeccion = mostrarProtegido;
   }
 
-  const anteriorPermisos=window.aplicarPermisos;
-  if(typeof anteriorPermisos==="function" && !anteriorPermisos.__NA_V11_30){
-    const permisosFinal=function(){
-      let r;
-      try{r=anteriorPermisos.apply(this,arguments);}catch(e){console.warn("Permisos anteriores:",e);}
-      marcarYBloquear();
-      return r;
+  const permisosOriginal = window.aplicarPermisos;
+  if(typeof permisosOriginal === "function" && !permisosOriginal.__NA_ROL_FINAL){
+    const permisosProtegidos = function(){
+      const resultado = permisosOriginal.apply(this, arguments);
+      controlar();
+      return resultado;
     };
-    permisosFinal.__NA_V11_30=true;
-    window.aplicarPermisos=permisosFinal;
+    permisosProtegidos.__NA_ROL_FINAL = true;
+    window.aplicarPermisos = permisosProtegidos;
   }
 
-  [0,50,150,300,600,1000,2000,4000,7000].forEach(function(ms){
-    setTimeout(marcarYBloquear,ms);
-  });
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",marcarYBloquear);
+  window.NA_controlarRolFinal = controlar;
+  window.NA_bloquearDocenteFinal = bloquearDocente;
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", controlar);
   }else{
-    marcarYBloquear();
+    controlar();
   }
-  window.addEventListener("load",marcarYBloquear);
-  window.addEventListener("pageshow",marcarYBloquear);
+  window.addEventListener("load", controlar);
+  window.addEventListener("pageshow", controlar);
 
-  const obs=new MutationObserver(function(){marcarYBloquear();});
-  if(document.body)obs.observe(document.body,{childList:true,subtree:true});
-})();
-</script>
-
-<script id="NA-V11-33-FINAL-BLOQUEO-DOCENTE">
-(function(){
-  "use strict";
-  const IDS=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
-  const DOCENTE_EMAIL="nuevaalianza@nernuevaalianza.edu.ni";
-  function bloquear(){
-    let s=null; try{s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){}
-    if(!s)return;
-    const u=String(s.usuario||"").trim().toLowerCase();
-    const rol=String(s.rol||"").trim().toLowerCase();
-    const docente=(rol==="docente"||u===DOCENTE_EMAIL);
-    document.body.setAttribute("data-na-rol",docente?"Docente":"Director");
-    if(!docente)return;
-    IDS.forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){el.classList.remove("active");el.style.setProperty("display","none","important");el.setAttribute("aria-hidden","true");}
-    });
-    document.querySelectorAll(".menu button").forEach(btn=>{
-      const oc=String(btn.getAttribute("onclick")||"").toLowerCase();
-      if(IDS.some(id=>oc.includes("mostrarseccion('"+id.toLowerCase()+"'"))){
-        btn.style.setProperty("display","none","important");
-        btn.classList.remove("active");
-        btn.setAttribute("aria-hidden","true");
-      }
-    });
-    const inicio=document.getElementById("inicio");
-    if(inicio){inicio.style.removeProperty("display");inicio.classList.add("active");}
-    const t=document.querySelector(".topbar strong"); if(t)t.textContent="Panel del Docente";
-  }
-  window.NA_BLOQUEO_DOCENTE_FINAL= bloquear;
-  [0,100,300,700,1500,3000].forEach(ms=>setTimeout(bloquear,ms));
-  window.addEventListener("load",()=>setTimeout(bloquear,100));
-  window.addEventListener("pageshow",()=>setTimeout(bloquear,100));
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bloquear); else bloquear();
+  [0,100,300,700,1500,3000].forEach(function(ms){
+    setTimeout(controlar, ms);
+  });
 })();
 </script>
 </body>
