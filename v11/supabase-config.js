@@ -124,6 +124,8 @@ window.addEventListener("load", function(){
   }
 
   window.iniciarSesion = async function(){
+    /* V11.31 - Una sola ruta de login: NA_login es la fuente oficial de permisos y rol. */
+    if(typeof window.NA_login === "function") return window.NA_login();
     const email=String(userInput?.value||"").trim();
     const password=String(passInput?.value||"").trim();
     if(!email || !password){ if(errorBox) errorBox.textContent="Ingrese el correo y la contraseña."; return; }
