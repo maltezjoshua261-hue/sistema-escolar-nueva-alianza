@@ -7740,6 +7740,38 @@ async function NA_login(){
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
 
+    // V11.28.9 - BARRERA FINAL DE ROL DESPUÉS DE CARGAR TODO.
+    // El Docente nunca puede mostrar el Centro de Control ni módulos administrativos.
+    if(NA_sesion()?.rol!=="Director"){
+      const soloDirectorFinal=[
+        "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+        "docentes","asignaciones","horarios","reportes","reportesOficiales",
+        "matricula","expediente","reporteMatricula","rendimiento",
+        "evaluacionAcademica","perfilAcademico","planesMejora",
+        "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+        "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
+        "configuracion"
+      ];
+      soloDirectorFinal.forEach(id=>{
+        const sec=document.getElementById(id);
+        if(sec){
+          sec.classList.remove("active");
+          sec.style.setProperty("display","none","important");
+        }
+      });
+      document.querySelectorAll(".menu button").forEach(btn=>{
+        const oc=btn.getAttribute("onclick")||"";
+        if(soloDirectorFinal.some(id=>oc.includes("mostrarSeccion('"+id+"'"))){
+          btn.style.setProperty("display","none","important");
+        }
+      });
+      const inicio=document.getElementById("inicio");
+      if(inicio){
+        inicio.style.removeProperty("display");
+        inicio.classList.add("active");
+      }
+    }
+
     // V11.28.0 - Verificación final del panel del Director.
     // Supabase es la fuente oficial; si está vacío, no se permite
     // que una copia local antigua vuelva a mostrarse en los contadores.
@@ -8328,6 +8360,51 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
   window.NA_bloquearModulosDirector= bloquearModulosDirectorNA;
   document.addEventListener("DOMContentLoaded",function(){setTimeout(bloquearModulosDirectorNA,0);});
   window.addEventListener("load",function(){setTimeout(bloquearModulosDirectorNA,0);});
+})();
+</script>
+<script>
+/* V11.28.9 - BARRERA PERMANENTE DE ROL PARA DOCENTE */
+(function(){
+  const SOLO_DIRECTOR_FINAL=[
+    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "matricula","expediente","reporteMatricula","rendimiento",
+    "evaluacionAcademica","perfilAcademico","planesMejora",
+    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
+    "configuracion"
+  ];
+  function NA_rolActualFinal(){
+    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
+    catch(e){return null;}
+  }
+  function NA_forzarRolFinal(){
+    const ses=NA_rolActualFinal();
+    if(!ses || ses.rol==="Director") return;
+    SOLO_DIRECTOR_FINAL.forEach(id=>{
+      const sec=document.getElementById(id);
+      if(sec){
+        sec.classList.remove("active");
+        sec.style.setProperty("display","none","important");
+      }
+    });
+    document.querySelectorAll(".menu button").forEach(btn=>{
+      const oc=btn.getAttribute("onclick")||"";
+      if(SOLO_DIRECTOR_FINAL.some(id=>oc.includes("mostrarSeccion('"+id+"'"))){
+        btn.style.setProperty("display","none","important");
+      }
+    });
+    const inicio=document.getElementById("inicio");
+    if(inicio){
+      inicio.style.removeProperty("display");
+      inicio.classList.add("active");
+    }
+  }
+  window.NA_forzarRolFinal=NA_forzarRolFinal;
+  [0,100,300,700,1500].forEach(ms=>setTimeout(NA_forzarRolFinal,ms));
+  window.addEventListener("load",function(){
+    [0,100,300,700,1500].forEach(ms=>setTimeout(NA_forzarRolFinal,ms));
+  });
 })();
 </script>
 </body>
