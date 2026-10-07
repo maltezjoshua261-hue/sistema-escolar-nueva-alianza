@@ -8007,5 +8007,54 @@ window.cargarCalificacionesFinal=function(){
 };
 window.cargarCalificaciones=window.cargarCalificacionesFinal;
 </script>
+
+<!-- CONTROL DEFINITIVO DE ROLES - V11.27 FINAL -->
+<script>
+(function(){
+  const SOLO_DIRECTOR=[
+    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "matricula","expediente","reporteMatricula","rendimiento",
+    "evaluacionAcademica","perfilAcademico","planesMejora",
+    "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+    "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
+    "configuracion"
+  ];
+  function sesion(){try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null")}catch(e){return null}}
+  function esDirector(){return String((sesion()||{}).rol||"").trim().toLowerCase()==="director"}
+  function aplicar(){
+    const s=sesion(); if(!s)return;
+    const director=esDirector();
+    const titulo=document.querySelector(".topbar strong");
+    if(titulo)titulo.textContent=director?"Panel del Director":"Panel del Docente";
+    SOLO_DIRECTOR.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.classList.toggle("active",director&&el.classList.contains("active"));el.style.display=director?"":"none";}
+    });
+    document.querySelectorAll(".menu button").forEach(btn=>{
+      const m=(btn.getAttribute("onclick")||"").match(/mostrarSeccion\\(['"]([^'"]+)/);
+      if(m&&SOLO_DIRECTOR.includes(m[1]))btn.style.display=director?"":"none";
+    });
+    if(!director){
+      const inicio=document.getElementById("inicio")||document.querySelector(".section");
+      document.querySelectorAll(".section").forEach(sec=>{if(SOLO_DIRECTOR.includes(sec.id)){sec.classList.remove("active");sec.style.display="none"}});
+      if(inicio){inicio.style.display="";inicio.classList.add("active");}
+    }
+    const top=document.querySelector(".topbar div:last-child");
+    if(top)top.textContent=(s.usuario||"Usuario")+" · "+(s.rol||"");
+  }
+  const original=window.mostrarSeccion;
+  if(typeof original==="function"){
+    window.mostrarSeccion=function(id,btn){
+      if(!esDirector()&&SOLO_DIRECTOR.includes(id)){alert("Este módulo es exclusivo del Director.");return false;}
+      return original.apply(this,arguments);
+    };
+  }
+  window.NA_aplicarPermisosProduccion=aplicar;
+  window.aplicarPermisos=aplicar;
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",aplicar);else aplicar();
+  [100,500,1200,2500].forEach(t=>setTimeout(aplicar,t));
+})();
+</script>
 </body>
 </html>
