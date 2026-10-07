@@ -8452,5 +8452,73 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
   });
 })();
 </script>
+<script>
+/* V11.29.3 - BLOQUEO ABSOLUTO CENTRO DE CONTROL PARA DOCENTE */
+(function(){
+  const ID="centroControl";
+  function rolActual(){
+    try{
+      const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+      return String(s?.rol||"").trim().toLowerCase();
+    }catch(e){ return ""; }
+  }
+  function esDirector(){ return rolActual()==="director"; }
+
+  function ocultarCentro(){
+    if(esDirector()) return;
+    const sec=document.getElementById(ID);
+    if(sec){
+      sec.classList.remove("active");
+      sec.style.setProperty("display","none","important");
+      sec.setAttribute("aria-hidden","true");
+    }
+
+    document.querySelectorAll(".menu button, .menu a, button, a").forEach(function(el){
+      const oc=String(el.getAttribute("onclick")||"");
+      const txt=String(el.textContent||"").replace(/\\s+/g," ").trim().toLowerCase();
+      if(oc.includes("centroControl") || txt.includes("centro de control")){
+        el.style.setProperty("display","none","important");
+        el.setAttribute("aria-hidden","true");
+      }
+    });
+  }
+
+  function protegerNavegacion(){
+    if(esDirector()) return;
+    const original=window.mostrarSeccion;
+    if(typeof original==="function" && !original.__NA29_3){
+      const bloqueada=function(id){
+        if(String(id)===ID){
+          ocultarCentro();
+          return false;
+        }
+        const r=original.apply(this,arguments);
+        ocultarCentro();
+        return r;
+      };
+      bloqueada.__NA29_3=true;
+      window.mostrarSeccion=bloqueada;
+    }
+    ocultarCentro();
+  }
+
+  window.NA_bloqueoAbsolutoCentroControl=ocultarCentro;
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",protegerNavegacion);
+  }else{
+    protegerNavegacion();
+  }
+
+  [0,50,150,300,600,1000,2000,4000].forEach(function(ms){
+    setTimeout(function(){ protegerNavegacion(); ocultarCentro(); },ms);
+  });
+
+  const obs=new MutationObserver(function(){ ocultarCentro(); });
+  if(document.body) obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class"]});
+  window.addEventListener("load",function(){ ocultarCentro(); });
+})();
+</script>
+
 </body>
 </html>
