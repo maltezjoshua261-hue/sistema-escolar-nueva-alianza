@@ -579,7 +579,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
             <button class="solo-director" onclick="mostrarSeccion('centroControl',this)">
                 🎯 Centro de Control
             </button>
-            <button onclick="mostrarSeccion('dashboardAcademico',this)">
+            <button class="solo-director" onclick="mostrarSeccion('dashboardAcademico',this)">
                 🚀 Dashboard académico
             </button>
 
@@ -855,7 +855,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
             </section>
 
             <!-- CENTRO DE CONTROL DEL DIRECTOR 8.4 -->
-            <section id="dashboardAcademico" class="section">
+            <section id="dashboardAcademico" class="section solo-director">
 <div class="dash9-header">
   <h2>🚀 Dashboard académico avanzado</h2>
   <p>Vista integral para el seguimiento de matrícula, asistencia, rendimiento, promoción, carga académica, horarios y planificación.</p>
@@ -8243,6 +8243,29 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
   if(typeof cargarBitacora === "function") cargarBitacora();
   alert("Limpieza completada. Los datos locales de prueba fueron eliminados.");
 };
+
+/* V11.28.5 - PROTECCIÓN FINAL DEL DASHBOARD PARA DOCENTE */
+(function(){
+  function protegerDashboardDocente(){
+    try{
+      const ses=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+      if(ses?.rol!=="Director"){
+        const sec=document.getElementById("dashboardAcademico");
+        if(sec){sec.classList.remove("active");sec.style.display="none";}
+        const botones=document.querySelectorAll('.menu button[onclick*="dashboardAcademico"]');
+        botones.forEach(b=>b.style.display="none");
+        const activo=document.querySelector(".section.active");
+        if(!activo || activo===sec){
+          const inicio=document.getElementById("inicio");
+          if(inicio){inicio.style.display="";inicio.classList.add("active");}
+        }
+      }
+    }catch(e){}
+  }
+  window.NA_protegerDashboardDocente=protegerDashboardDocente;
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",protegerDashboardDocente);
+  else protegerDashboardDocente();
+})();
 </script>
 </body>
 </html>
