@@ -8403,7 +8403,7 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
     if(usuario === DIRECTOR_EMAIL || usuario === "admin") return "Director";
     if(usuario === DOCENTE_EMAIL || usuario === "docente" || usuario === "nuevaalianza") return "Docente";
     return "";
-  
+  }
 
   function esDocente(){
     return rolActual() === "Docente";
