@@ -8515,7 +8515,7 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
   });
 
   const obs=new MutationObserver(function(){ ocultarCentro(); });
-  if(document.body) obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class"]});
+  if(document.body) obs.observe(document.body,{childList:true,subtree:true});
   window.addEventListener("load",function(){ ocultarCentro(); });
 })();
 </script>
