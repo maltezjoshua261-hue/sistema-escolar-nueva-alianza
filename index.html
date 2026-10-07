@@ -3503,10 +3503,59 @@ function exigirDirector(){
 function aplicarPermisos(){
     const sesion=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
     if(!sesion) return;
+
     const esDirector=sesion.rol==="Director";
+    const soloDirector=[
+        "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+        "docentes","asignaciones","horarios","reportes","reportesOficiales",
+        "matricula","expediente","reporteMatricula","rendimiento",
+        "evaluacionAcademica","perfilAcademico","planesMejora",
+        "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
+        "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
+        "configuracion"
+    ];
+
     const titulo=document.querySelector(".topbar strong");
     if(titulo) titulo.textContent=esDirector?"Panel del Director":"Panel del Docente";
-    document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"block":"none");
+
+    document.querySelectorAll(".solo-director").forEach(el=>{
+        el.style.display=esDirector?"block":"none";
+    });
+
+    if(!esDirector){
+        // Protección real de las secciones, incluso cuando cargarTodo()
+        // llama directamente a esta función antigua.
+        soloDirector.forEach(id=>{
+            const sec=document.getElementById(id);
+            if(sec){
+                sec.classList.remove("active");
+                sec.style.display="none";
+            }
+        });
+
+        const inicio=document.getElementById("inicio");
+        if(inicio){
+            inicio.style.display="";
+            inicio.classList.add("active");
+        }
+
+        // Ocultar del menú cualquier acceso administrativo aunque
+        // todavía no tenga la clase solo-director.
+        document.querySelectorAll(".menu button").forEach(btn=>{
+            const onclick=btn.getAttribute("onclick")||"";
+            const m=onclick.match(/mostrarSeccion\\('([^']+)'/);
+            if(m && soloDirector.includes(m[1])){
+                btn.classList.add("solo-director");
+                btn.style.display="none";
+            }
+        });
+    }else{
+        soloDirector.forEach(id=>{
+            const sec=document.getElementById(id);
+            if(sec) sec.style.display="";
+        });
+    }
+
     const top=document.querySelector(".topbar div:last-child");
     if(top) top.textContent=sesion.usuario+" · "+sesion.rol;
 }
