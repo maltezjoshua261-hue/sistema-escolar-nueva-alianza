@@ -8032,7 +8032,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
       if(el){el.classList.toggle("active",director&&el.classList.contains("active"));el.style.display=director?"":"none";}
     });
     document.querySelectorAll(".menu button").forEach(btn=>{
-      const m=(btn.getAttribute("onclick")||"").match(/mostrarSeccion\\(['"]([^'"]+)/);
+      const m=(btn.getAttribute("onclick")||"").match(/mostrarSeccion\(['"]([^'"]+)/);
       if(m&&SOLO_DIRECTOR.includes(m[1]))btn.style.display=director?"":"none";
     });
     if(!director){
