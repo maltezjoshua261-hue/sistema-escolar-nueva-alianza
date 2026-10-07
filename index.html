@@ -8082,7 +8082,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
       el.style.display=director?"block":"none";
     });
 
-    document.querySelectorAll(".menu button[onclick*="+"\"mostrarSeccion('"+"\""+"]").forEach(btn=>{
+    document.querySelectorAll(".menu button").forEach(btn=>{
       const m=btn.getAttribute("onclick")?.match(/mostrarSeccion\('([^']+)'/);
       if(m && SOLO_DIRECTOR.includes(m[1])){
         btn.classList.add("solo-director");
