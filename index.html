@@ -8533,5 +8533,58 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
   });
 })();
 </script>
+<script id="NA-BLOQUEO-DOCENTE-V11-41">
+(function(){
+  "use strict";
+  const SOLO_DIRECTOR_IDS=[
+    "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
+    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "matricula","expediente","reporteMatricula","rendimiento",
+    "evaluacionAcademica","perfilAcademico","planesMejora",
+    "consolidacionEvaluacion","historialAcademico","promocion",
+    "estadisticas","cierreAnual","documentosOficiales","bitacora",
+    "reunionesAcuerdos","configuracion"
+  ];
+  function sesion(){
+    try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}
+    catch(e){return null;}
+  }
+  function esDocente(){
+    const s=sesion();
+    return String(s&&s.rol||"").trim().toLowerCase()==="docente";
+  }
+  function bloquear(){
+    if(!esDocente()) return;
+    document.body.setAttribute("data-na-rol","Docente");
+    document.querySelectorAll(".menu button").forEach(function(btn){
+      const oc=String(btn.getAttribute("onclick")||"");
+      const es=SOLO_DIRECTOR_IDS.some(function(id){return oc.indexOf("mostrarSeccion('"+id+"'")!==-1;});
+      if(es || btn.classList.contains("solo-director")){
+        btn.hidden=true;
+        btn.classList.remove("active");
+        btn.style.setProperty("display","none","important");
+      }
+    });
+    SOLO_DIRECTOR_IDS.forEach(function(id){
+      const sec=document.getElementById(id);
+      if(sec){
+        sec.hidden=true;
+        sec.classList.remove("active");
+        sec.style.setProperty("display","none","important");
+      }
+    });
+    const inicio=document.getElementById("inicio");
+    if(inicio){inicio.hidden=false;inicio.style.removeProperty("display");inicio.classList.add("active");}
+    const titulo=document.querySelector(".topbar strong");
+    if(titulo) titulo.textContent="Panel del Docente";
+  }
+  bloquear();
+  [0,100,300,700,1500,3000].forEach(function(ms){setTimeout(bloquear,ms);});
+  if(window.MutationObserver){
+    new MutationObserver(function(){if(esDocente()) bloquear();})
+      .observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class"]});
+  }
+})();
+</script>
 </body>
 </html>
