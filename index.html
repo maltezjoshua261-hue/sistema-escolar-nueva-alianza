@@ -8520,5 +8520,81 @@ window.NA_limpiarDatosLocalesPrueba = async function(){
 })();
 </script>
 
+<style id="NA-V11-29-5-ROL-UI">
+/* V11.29.5 - El rol de sesión manda sobre cualquier permiso visual anterior */
+body[data-na-rol="Docente"] #centroControl,
+body[data-na-rol="Docente"] #dashboardAcademico,
+body[data-na-rol="Docente"] .menu button[data-na-director="1"]{
+  display:none !important;
+}
+body[data-na-rol="Director"] #centroControl{
+  display:block;
+}
+body[data-na-rol="Director"] #dashboardAcademico{
+  display:block;
+}
+</style>
+<script>
+/* V11.29.5 - FUENTE ÚNICA DEL ROL VISUAL */
+(function(){
+  function obtenerRolSeguro(){
+    try{
+      const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+      const r=String(s?.rol||"").trim().toLowerCase();
+      return r==="director" ? "Director" : (r==="docente" ? "Docente" : "");
+    }catch(e){ return ""; }
+  }
+
+  function aplicarRolUI(){
+    const rol=obtenerRolSeguro();
+    if(!rol)return;
+    document.body.setAttribute("data-na-rol",rol);
+
+    document.querySelectorAll(".menu button").forEach(function(btn){
+      const oc=String(btn.getAttribute("onclick")||"");
+      if(oc.includes("mostrarSeccion('centroControl'") ||
+         oc.includes("mostrarSeccion('dashboardAcademico'")){
+        btn.setAttribute("data-na-director","1");
+      }
+    });
+
+    if(rol==="Docente"){
+      const ids=["centroControl","dashboardAcademico"];
+      ids.forEach(function(id){
+        const el=document.getElementById(id);
+        if(el){
+          el.classList.remove("active");
+          el.style.setProperty("display","none","important");
+        }
+      });
+      document.querySelectorAll('.menu button[data-na-director="1"]').forEach(function(b){
+        b.style.setProperty("display","none","important");
+        b.classList.remove("active");
+      });
+      const inicio=document.getElementById("inicio");
+      if(inicio){
+        inicio.style.removeProperty("display");
+        inicio.classList.add("active");
+      }
+    }
+  }
+
+  window.NA_aplicarRolUI=aplicarRolUI;
+
+  /* Se ejecuta repetidamente durante el arranque y después de cargar datos. */
+  [0,100,300,700,1500,3000].forEach(function(ms){
+    setTimeout(aplicarRolUI,ms);
+  });
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",aplicarRolUI);
+  }else{
+    aplicarRolUI();
+  }
+
+  window.addEventListener("load",aplicarRolUI);
+})();
+</script>
+
 </body>
 </html>
