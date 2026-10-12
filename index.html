@@ -8040,7 +8040,7 @@ window.cargarCalificacionesFinal=function(){
    html+='<h3 style="margin:0 0 6px">📘 '+escaparHTML(g.nivel||"Nivel")+' · Grado '+escaparHTML(g.grado||"—")+(g.seccion?' · Sección '+escaparHTML(g.seccion):'')+' · Año '+escaparHTML(g.anio||"—")+'</h3>';
    html+='<div style="overflow:auto"><table class="calificaciones-matriz-tabla" style="min-width:700px;width:100%;border-collapse:collapse"><thead><tr><th style="position:sticky;left:0;background:var(--card,#fff);z-index:1">Estudiante</th>'+materias.map(m=>'<th>'+escaparHTML(m)+'</th>').join("")+'</tr></thead><tbody>';
    [...alumnos.values()].sort((a,b)=>ordenar(a.nombre,b.nombre)).forEach(al=>{
-     html+='<tr><th style="text-align:left;position:sticky;left:0;background:var(--card,#fff);z-index:1;min-width:170px">'+escaparHTML(al.nombre)+'</th>';
+     html+='<tr><th style="text-align:left;position:sticky;left:0;background:#e8f1ff;color:#102a56;font-weight:900;text-shadow:0 0 0 #102a56;z-index:1;min-width:190px;border-right:3px solid #2563eb">'+escaparHTML(al.nombre)+'</th>';
      materias.forEach(m=>{
        const rs=al.registros.filter(c=>String(c.asignatura||"")===String(m)).sort((a,b)=>ordenar(a.corte,b.corte));
        html+='<td style="vertical-align:top;min-width:125px">'+(rs.length?rs.map(c=>{
