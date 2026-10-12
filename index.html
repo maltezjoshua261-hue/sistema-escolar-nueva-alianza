@@ -1594,34 +1594,8 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         Seleccione un grupo para registrar y consultar calificaciones.
                     </div>
 
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>#</th>
-                                    <th>Año</th>
-                                    <th>Estudiante</th>
-                                    <th>Nivel</th>
-                                    <th>Grado</th>
-                                    <th>Sección</th>
-                                    <th>Asignatura</th>
-                                    <th>Docente</th>
-                                    <th>Corte</th>
-                                    <th>Resultado</th>
-                                    <th>Observación</th>
-                                    <th>Acciones</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody id="tablaCalificaciones"></tbody>
-
-                        </table>
-
-                    </div>
+                    <div id="calificacionesRegistradasVista" class="calificaciones-matriz"></div>
+                    <tbody id="tablaCalificaciones" style="display:none"></tbody>
 
                 </div>
 
@@ -8023,24 +7997,63 @@ window.cargarEstudiantesAsistencia=function(){
 </script>
 
 <script>
-/* V11.26 FINAL - tabla de calificaciones y controles */
+/* V11.28 - Calificaciones organizadas por grado, estudiante y disciplina */
 window.cargarCalificacionesFinal=function(){
- const tabla=document.getElementById("tablaCalificaciones");if(!tabla)return;
+ const vista=document.getElementById("calificacionesRegistradasVista");
+ const tabla=document.getElementById("tablaCalificaciones");
+ if(!vista){if(tabla)tabla.innerHTML="";return;}
  const datos=obtenerDatos(KEY_CALIFICACIONES),ses=obtenerSesionActual();
- const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value||""),fc=document.getElementById("filtroCalCorte")?.value||"";
+ const buscar=limpiarTexto(document.getElementById("buscarCalificacion")?.value||"");
+ const fc=document.getElementById("filtroCalCorte")?.value||"";
  const lista=datos.filter(c=>{
    if(ses?.rol==="Docente"){
      const centro=String(c.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||"");
-     const asign=obtenerDatos(KEY_ASIGNACIONES).some(a=>String(a.anio)===String(c.anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(c.nivel)&&normalizarGrado(a.grado)===normalizarGrado(c.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(c.seccion)&&String(a.docenteId||"")===String(ses.docenteId||""));
+     const asign=obtenerDatos(KEY_ASIGNACIONES).some(a=>String(a.anio)===String(c.anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(c.nivel)&&normalizarGrado(a.grado)===normalizarGrado(c.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(c.seccion)&&(String(a.docenteId||"")===String(ses.docenteId||"")||String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId||"")));
      if(!centro||(!asign&&String(c.docenteId||"")!==String(ses.docenteId||"")))return false;
    }
    const t=limpiarTexto([c.anio,c.estudiante,c.nivel,c.grado,c.seccion,c.asignatura,c.corte,c.resultado,c.observacion].join(" "));
    return (!buscar||t.includes(buscar))&&(!fc||c.corte===fc);
- }).sort((a,b)=>String(a.estudiante||"").localeCompare(String(b.estudiante||""),"es"));
- tabla.innerHTML=lista.length?lista.map((c,i)=>{
-   const val=c.tipo==="Numerica"?String(Number(c.resultado)):String(c.resultado||"");
-   return '<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(c.anio)+'</td><td>'+escaparHTML(c.estudiante)+'</td><td>'+escaparHTML(c.nivel)+'</td><td>'+escaparHTML(c.grado)+'</td><td>'+escaparHTML(c.seccion)+'</td><td>'+escaparHTML(c.asignatura)+'</td><td>'+escaparHTML(c.docenteNombre||"")+'</td><td>'+escaparHTML(c.corte)+'</td><td><span class="badge '+(c.tipo==="Numerica"?(Number(c.resultado)<60?"badge-danger":Number(c.resultado)<70?"badge-warning":"badge-success"):"badge-success")+'">'+escaparHTML(val)+'</span></td><td>'+escaparHTML(c.observacion||"")+'</td><td><button class="btn-warning" onclick="editarCalificacion(\''+String(c.id)+'\')">✏️ Editar</button> <button class="btn-danger" onclick="eliminarCalificacion(\''+String(c.id)+'\')">Eliminar</button></td></tr>';
- }).join(""):'<tr><td colspan="12" style="text-align:center;padding:20px;color:#777;">No hay calificaciones que coincidan con el filtro.</td></tr>';
+ });
+ const key=v=>String(v??"").trim();
+ const grupoKey=c=>[c.anio,c.nivel,c.grado,c.seccion].map(key).join("¦");
+ const estudianteKey=c=>String(c.estudianteId||c.estudianteSupabaseId||c.estudiante||"");
+ const grupos=new Map();
+ lista.forEach(c=>{
+   const k=grupoKey(c);
+   if(!grupos.has(k))grupos.set(k,{anio:c.anio,nivel:c.nivel,grado:c.grado,seccion:c.seccion,registros:[]});
+   grupos.get(k).registros.push(c);
+ });
+ const ordenar=(a,b)=>String(a).localeCompare(String(b),"es",{numeric:true,sensitivity:"base"});
+ let html="";
+ [...grupos.values()].sort((a,b)=>ordenar(a.nivel,b.nivel)||ordenar(a.grado,b.grado)||ordenar(a.seccion,b.seccion)||ordenar(a.anio,b.anio)).forEach(g=>{
+   const alumnos=new Map();
+   g.registros.forEach(c=>{
+     const k=estudianteKey(c);
+     if(!alumnos.has(k))alumnos.set(k,{nombre:c.estudiante||"Estudiante sin nombre",registros:[]});
+     alumnos.get(k).registros.push(c);
+   });
+   const materias=[...new Set([
+     ...(typeof obtenerAsignaturasDisponibles==="function"?obtenerAsignaturasDisponibles(g.nivel,g.grado):[]),
+     ...g.registros.map(c=>c.asignatura).filter(Boolean)
+   ])].sort((a,b)=>ordenar(a,b));
+   html+='<section class="card calificaciones-grupo" style="margin:16px 0;overflow:hidden">';
+   html+='<h3 style="margin:0 0 6px">📘 '+escaparHTML(g.nivel||"Nivel")+' · Grado '+escaparHTML(g.grado||"—")+(g.seccion?' · Sección '+escaparHTML(g.seccion):'')+' · Año '+escaparHTML(g.anio||"—")+'</h3>';
+   html+='<div style="overflow:auto"><table class="calificaciones-matriz-tabla" style="min-width:700px;width:100%;border-collapse:collapse"><thead><tr><th style="position:sticky;left:0;background:var(--card,#fff);z-index:1">Estudiante</th>'+materias.map(m=>'<th>'+escaparHTML(m)+'</th>').join("")+'</tr></thead><tbody>';
+   [...alumnos.values()].sort((a,b)=>ordenar(a.nombre,b.nombre)).forEach(al=>{
+     html+='<tr><th style="text-align:left;position:sticky;left:0;background:var(--card,#fff);z-index:1;min-width:170px">'+escaparHTML(al.nombre)+'</th>';
+     materias.forEach(m=>{
+       const rs=al.registros.filter(c=>String(c.asignatura||"")===String(m)).sort((a,b)=>ordenar(a.corte,b.corte));
+       html+='<td style="vertical-align:top;min-width:125px">'+(rs.length?rs.map(c=>{
+         const val=String(c.resultado??"");
+         const badge=c.tipo==="Numerica"?(Number(c.resultado)<60?"badge-danger":Number(c.resultado)<70?"badge-warning":"badge-success"):"badge-success";
+         return '<div style="border-bottom:1px solid #ddd;padding:4px 2px;margin-bottom:4px"><small style="display:block;white-space:nowrap">'+escaparHTML(c.corte||"Sin corte")+'</small><span class="badge '+badge+'">'+escaparHTML(val)+'</span><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px"><button class="btn-warning" style="padding:3px 6px;font-size:12px" onclick="editarCalificacion(\''+String(c.id||"").replace(/'/g,"\\'")+'\')">✏️</button><button class="btn-danger" style="padding:3px 6px;font-size:12px" onclick="eliminarCalificacion(\''+String(c.id||"").replace(/'/g,"\\'")+'\')">🗑️</button></div></div>';
+       }).join(""):'<span style="color:#999">—</span>')+'</td>';
+     });
+     html+='</tr>';
+   });
+   html+='</tbody></table></div></section>';
+ });
+ vista.innerHTML=html||'<div class="notice" style="text-align:center;padding:20px">No hay calificaciones que coincidan con el filtro seleccionado.</div>';
  actualizarResumenCalificaciones(lista);
 };
 window.cargarCalificaciones=window.cargarCalificacionesFinal;
