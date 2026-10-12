@@ -8153,6 +8153,8 @@ async function NA_restaurarSesion(){
     const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
     if(!s?.user)return;
     await NA_profile(s.user);
+    // V11.29: limpiar calificaciones locales de prueba antes de sincronizar la base central.
+    localStorage.removeItem(KEY_CALIFICACIONES);
     await NA_syncTodo();
     const ses=NA_sesion();
     document.getElementById("loginScreen").style.display="none";
