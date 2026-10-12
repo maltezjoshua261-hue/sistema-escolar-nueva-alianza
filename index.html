@@ -7614,6 +7614,8 @@ async function NA_login(){
     const {data,error}=await c.auth.signInWithPassword({email,password});
     if(error||!data?.user)throw error||new Error("Credenciales incorrectas.");
     await NA_profile(data.user);
+    // V11.29: eliminar notas de prueba guardadas en el navegador antes de cargar Supabase.
+    localStorage.removeItem(KEY_CALIFICACIONES);
     await NA_syncTodo();
     document.getElementById("loginScreen").style.display="none";
     document.getElementById("app").style.display="flex";
@@ -7885,6 +7887,8 @@ async function NA_restaurarSesion(){
     const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
     if(!s?.user)return;
     await NA_profile(s.user);
+    // V11.29: eliminar notas de prueba guardadas en el navegador antes de cargar Supabase.
+    localStorage.removeItem(KEY_CALIFICACIONES);
     await NA_syncTodo();
     const ses=NA_sesion();
     document.getElementById("loginScreen").style.display="none";
