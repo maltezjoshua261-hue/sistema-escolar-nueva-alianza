@@ -7775,24 +7775,67 @@ window.guardarCalificacion=async function(){
 };
 
 
-// V11.26 FINAL - CRUD centralizado completo de Docentes y Carga Académica
+// V11.27.10 - Corrección de guardado docente: capturar formulario antes de limpiar y evitar duplicados.
 const NA_oldGuardarDocente=window.guardarDocente;
 window.guardarDocente=async function(){
-  const id=document.getElementById("docId")?.value||"";
-  const c=await NA_init(), ses=NA_sesion();
+  const form={
+    id:document.getElementById("docId")?.value||"",
+    nombre:document.getElementById("docNombre")?.value?.trim()||"",
+    codigo:document.getElementById("docCodigo")?.value?.trim()||"",
+    especialidad:document.getElementById("docEspecialidad")?.value?.trim()||"",
+    telefono:document.getElementById("docTelefono")?.value?.trim()||"",
+    correo:document.getElementById("docCorreo")?.value?.trim()||"",
+    nivel:document.getElementById("docNivel")?.value||"",
+    asignacion:document.getElementById("docAsignacion")?.value?.trim()||"",
+    estado:document.getElementById("docEstado")?.value||"Activo"
+  };
+  if(!form.nombre){NA_oldGuardarDocente();return;}
+  let c,ses;
+  try{
+    c=await NA_init(); ses=NA_sesion();
+  }catch(e){
+    console.error("Inicialización Supabase para docente:",e);
+    alert("No se pudo iniciar la conexión para guardar el docente. No vuelvas a pulsar Guardar varias veces; revisaremos el mensaje antes de continuar.");
+    return;
+  }
   const centro=ses?.codigoCentro||"";
   NA_oldGuardarDocente();
-  const local=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(id)) || obtenerDatos(KEY_DOCENTES).find(d=>String(d.nombre||"")===String(document.getElementById("docNombre")?.value||"").trim());
+  const lista=obtenerDatos(KEY_DOCENTES);
+  const local=(form.id?lista.find(d=>String(d.id)===String(form.id)):null)
+    || [...lista].reverse().find(d=>String(d.nombre||"").trim().toLowerCase()===form.nombre.toLowerCase() && (!form.codigo || String(d.codigo||"").trim()===form.codigo));
   if(!local)return;
   const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:centro||local.codigo_centro||null};
   try{
-    const q=local.supabaseId
-      ? await c.from("docentes").update(row).eq("id",local.supabaseId).select().single()
-      : await c.from("docentes").insert(row).select().single();
+    let q;
+    if(local.supabaseId){
+      q=await c.from("docentes").update(row).eq("id",local.supabaseId).select().single();
+    }else{
+      // Si ya existe en Supabase, actualizar ese registro en vez de insertar otro.
+      let buscar=c.from("docentes").select("id,codigo_centro").ilike("nombre_completo",local.nombre);
+      if(row.codigo)buscar=buscar.eq("codigo",row.codigo);
+      if(row.codigo_centro)buscar=buscar.eq("codigo_centro",row.codigo_centro);
+      const previo=await buscar.limit(2);
+      if(previo.error)throw previo.error;
+      if((previo.data||[]).length>1)throw new Error("Hay más de un docente con ese nombre/código. No se guardó para evitar duplicados.");
+      if((previo.data||[]).length===1){
+        q=await c.from("docentes").update(row).eq("id",previo.data[0].id).select().single();
+      }else{
+        q=await c.from("docentes").insert(row).select().single();
+      }
+    }
     if(q.error)throw q.error;
-    if(q.data){local.supabaseId=q.data.id;local.codigo_centro=q.data.codigo_centro;guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)===String(local.id)?local:x));}
-    await NA_syncDocentes(); if(typeof cargarDocentes==="function")cargarDocentes();
-  }catch(e){console.error("Docente Supabase:",e);alert("No se pudo sincronizar el docente con Supabase: "+(e?.message||"Error desconocido"));}
+    if(q.data){
+      local.supabaseId=q.data.id;local.codigo_centro=q.data.codigo_centro;
+      guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)===String(local.id)?local:x));
+    }
+    await NA_syncDocentes();
+    if(typeof cargarDocentes==="function")cargarDocentes();
+    if(typeof cargarDocentesAsignacion==="function")cargarDocentesAsignacion();
+    alert("Docente guardado y sincronizado correctamente.");
+  }catch(e){
+    console.error("Docente Supabase:",e);
+    alert("El docente quedó en el registro local, pero no se confirmó en la base central: "+(e?.message||"Error desconocido")+". No vuelvas a registrarlo; revisaremos este error.");
+  }
 };
 
 const NA_oldGuardarAsignacion=window.guardarAsignacion;
