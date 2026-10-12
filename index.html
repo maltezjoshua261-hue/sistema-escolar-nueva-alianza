@@ -4418,7 +4418,7 @@ function actualizarGradosAsignacion(){
 function obtenerAsignaturasDisponibles(nivel,grado){
     const g=normalizarGrado(grado);
     if(nivel==="Inicial") return ["Sin disciplina"];
-    if(nivel==="Primaria" && (g==="1"||g==="2")) return [...DISCIPLINAS_CUALITATIVAS];
+    if(nivel==="Primaria" && (g==="1"||g==="2")) return ["Lengua y Literatura","Matemática",...DISCIPLINAS_CUALITATIVAS];
     if(nivel==="Primaria" || nivel==="Secundaria") return [...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     return [];
 }
