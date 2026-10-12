@@ -7679,7 +7679,9 @@ async function NA_syncDocentes(){
     const id=NA_localId(old,d.id);
     out.push({...d,id,nombre:d.nombre_completo,supabaseId:d.id});
   });
-  guardarDatos(KEY_DOCENTES,out);
+  // No borrar una lista local existente si Supabase responde vacío: permite recuperarla y evita pérdida visible de docentes.
+  if(out.length>0 || old.length===0) guardarDatos(KEY_DOCENTES,out);
+  else console.warn("Supabase devolvió cero docentes; se conserva la lista local existente.");
   if(ses?.rol==="Docente"){
     const localDoc=out.find(d=>String(d.supabaseId||"")===String(ses.docenteId||""));
     if(localDoc) NA_setSesion({...ses,docenteId:String(localDoc.id)});
@@ -7762,10 +7764,10 @@ async function NA_limpiarCacheCentralAntesDeMostrarPanel(){
   // antes de sincronizar para evitar que aparezcan datos de prueba antiguos.
   [
     KEY_ESTUDIANTES,
-    KEY_DOCENTES,
     KEY_ASISTENCIAS,
     KEY_CALIFICACIONES
   ].forEach(k=>localStorage.removeItem(k));
+  // Conservamos KEY_DOCENTES: si la tabla central aún está vacía, no borrar la lista local de docentes.
 
   // La bitácora histórica era local. Se limpia una sola vez durante la
   // puesta en producción y luego queda disponible para el uso normal.
