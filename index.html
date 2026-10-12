@@ -4842,31 +4842,39 @@ function cargarEstudiantesCalificaciones(){
 
 function cargarAsignaturas(){
 
-    const nivel=document.getElementById("calNivel").value;
-    const grado=normalizarGrado(document.getElementById("calGrado").value);
+    const nivel=document.getElementById("calNivel")?.value || "";
+    const nivelNormalizado=normalizarNivel(nivel);
+    const grado=normalizarGrado(document.getElementById("calGrado")?.value || "");
     const select=document.getElementById("calAsignatura");
+    if(!select) return;
 
+    const asignaturaAnterior=select.value;
     select.innerHTML='<option value="">Seleccione</option>';
 
-    if(!nivel || !grado) return;
+    if(!nivelNormalizado || !grado) return;
 
     let lista=[];
 
-    if(nivel==="Inicial"){
+    if(nivelNormalizado==="inicial"){
         lista=["Sin disciplina"];
-    }else if(nivel==="Primaria" && (grado==="1" || grado==="2")){
-        // 1.º y 2.º incluyen Lengua y Literatura y Matemática, con evaluación cualitativa.
+    }else if(nivelNormalizado==="primaria" && ["1","2"].includes(grado)){
+        // En 1.º y 2.º se incluyen explícitamente las dos disciplinas solicitadas.
         lista=["Lengua y Literatura","Matemática",...DISCIPLINAS_CUALITATIVAS];
-    }else if(nivel==="Primaria" || nivel==="Secundaria"){
+    }else if(nivelNormalizado==="primaria" || nivelNormalizado==="secundaria"){
         lista=[...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     }
 
-    lista.forEach(asignatura=>{
+    // Evitar opciones repetidas y conservar la selección cuando siga disponible.
+    [...new Set(lista)].forEach(asignatura=>{
         const option=document.createElement("option");
         option.value=asignatura;
         option.textContent=asignatura;
         select.appendChild(option);
     });
+
+    if([...select.options].some(o=>o.value===asignaturaAnterior)){
+        select.value=asignaturaAnterior;
+    }
 
 }
 
