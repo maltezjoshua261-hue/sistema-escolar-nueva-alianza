@@ -4323,7 +4323,7 @@ function actualizarGradosAsignacion(){
 function obtenerAsignaturasDisponibles(nivel,grado){
     const g=normalizarGrado(grado);
     if(nivel==="Inicial") return ["Sin disciplina"];
-    if(nivel==="Primaria" && (g==="1"||g==="2")) return [...DISCIPLINAS_CUALITATIVAS];
+    if(nivel==="Primaria" && (g==="1"||g==="2")) return ["Lengua y Literatura","Matemática",...DISCIPLINAS_CUALITATIVAS];
     if(nivel==="Primaria" || nivel==="Secundaria") return [...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     return [];
 }
@@ -4760,7 +4760,7 @@ function cargarAsignaturas(){
     if(nivel==="Inicial"){
         lista=["Sin disciplina"];
     }else if(nivel==="Primaria" && (grado==="1" || grado==="2")){
-        lista=[...DISCIPLINAS_CUALITATIVAS];
+        lista=["Lengua y Literatura","Matemática",...DISCIPLINAS_CUALITATIVAS];
     }else if(nivel==="Primaria" || nivel==="Secundaria"){
         lista=[...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     }
