@@ -7988,24 +7988,76 @@ window.guardarDocente=async function(){
 };
 
 const NA_oldGuardarAsignacion=window.guardarAsignacion;
+function NA_esUUID(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v||""));}
 window.guardarAsignacion=async function(){
   const id=document.getElementById("asigId")?.value||"";
   const localBefore=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id));
   NA_oldGuardarAsignacion();
-  const local=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id)) || (id?localBefore:null) || obtenerDatos(KEY_ASIGNACIONES)[obtenerDatos(KEY_ASIGNACIONES).length-1];
+  const todas=obtenerDatos(KEY_ASIGNACIONES);
+  const local=todas.find(a=>String(a.id)===String(id)) || (id?localBefore:null) || todas[todas.length-1];
   if(!local)return;
-  const d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId));
-  const ses=NA_sesion(), c=await NA_init();
-  const row={docente_id:d?.supabaseId||local.docenteSupabaseId||local.docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:ses?.codigoCentro||local.codigo_centro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
-  if(!row.docente_id){alert("La carga académica no tiene docente válido.");return;}
+  const idLocalAsignacion=String(local.id||"");
+  const ses=NA_sesion();
   try{
-    const q=local.supabaseId
-      ? await c.from("asignaciones").update(row).eq("id",local.supabaseId).select().single()
+    const c=await NA_init();
+    let d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId))
+      || obtenerDatos(KEY_DOCENTES).find(x=>String(x.nombre||x.nombre_completo||"").trim()===String(local.docenteNombre||"").trim());
+    let docenteSupa=d?.supabaseId||local.docenteSupabaseId||"";
+
+    // Nunca enviar IDs locales numéricos (por ejemplo Date.now()) a una columna UUID.
+    if(!NA_esUUID(docenteSupa)){
+      const nombre=String(d?.nombre||d?.nombre_completo||local.docenteNombre||"").trim();
+      if(!nombre) throw new Error("No se encontró el nombre del docente seleccionado. Vuelva a seleccionar el docente.");
+      let consulta=c.from("docentes").select("id,nombre_completo,codigo_centro").eq("nombre_completo",nombre);
+      const centro=String(ses?.codigoCentro||d?.codigo_centro||local.codigo_centro||"").trim();
+      if(centro) consulta=consulta.eq("codigo_centro",centro);
+      const encontrado=await consulta.limit(2);
+      if(encontrado.error) throw encontrado.error;
+      if((encontrado.data||[]).length>1) throw new Error("Hay más de un docente con ese nombre en el centro. Revise el registro de docentes antes de asignar la carga.");
+      if((encontrado.data||[]).length===1){
+        docenteSupa=encontrado.data[0].id;
+      }else{
+        if(!d) throw new Error("El docente todavía no existe en Supabase. Regístrelo primero en el módulo Docentes y vuelva a guardar la carga académica.");
+        const nuevoDocente={
+          codigo:d.codigo||null,nombre_completo:nombre,
+          especialidad:d.especialidad||null,telefono:d.telefono||null,correo:d.correo||null,
+          nivel:d.nivel||null,estado:d.estado||"Activo",asignacion:d.asignacion||null,
+          codigo_centro:centro||null
+        };
+        const creado=await c.from("docentes").insert(nuevoDocente).select("id").single();
+        if(creado.error) throw creado.error;
+        docenteSupa=creado.data?.id||"";
+        d.supabaseId=docenteSupa;
+        d.codigo_centro=centro||d.codigo_centro;
+        guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)===String(d.id)?d:x));
+      }
+    }
+    if(!NA_esUUID(docenteSupa)) throw new Error("No se pudo obtener el identificador UUID del docente. Revise el registro del docente y vuelva a intentar.");
+
+    const row={
+      docente_id:docenteSupa,nivel:local.nivel,grado:local.grado,seccion:local.seccion,
+      anio:Number(local.anio),estado:local.estado||"Activo",
+      codigo_centro:ses?.codigoCentro||local.codigo_centro||d?.codigo_centro||null,
+      asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),
+      turno:local.turno||null,observacion:local.observacion||null
+    };
+    const asignacionSupa=NA_esUUID(local.supabaseId)?local.supabaseId:(NA_esUUID(local.id)?local.id:"");
+    const q=asignacionSupa
+      ? await c.from("asignaciones").update(row).eq("id",asignacionSupa).select().single()
       : await c.from("asignaciones").insert(row).select().single();
     if(q.error)throw q.error;
-    if(q.data){local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>String(x.id)===String(id)||String(x.supabaseId)===String(local.supabaseId)?local:x));}
-    await NA_syncAsignaciones(); if(typeof cargarAsignaciones==="function")cargarAsignaciones();
-  }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));}
+    if(q.data){
+      local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;
+      guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>
+        String(x.id)===idLocalAsignacion||String(x.id)===String(id)||String(x.supabaseId)===String(q.data.id)?local:x
+      ));
+    }
+    await NA_syncAsignaciones();
+    if(typeof cargarAsignaciones==="function")cargarAsignaciones();
+  }catch(e){
+    console.error("Asignación Supabase:",e);
+    alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));
+  }
 };
 // V11.26 FINAL - Eliminaciones sincronizadas con Supabase
 const NA_oldEliminarEstudiante=window.eliminarEstudiante;
