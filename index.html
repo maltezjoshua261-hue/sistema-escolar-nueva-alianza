@@ -4855,7 +4855,8 @@ function cargarAsignaturas(){
     if(nivel==="Inicial"){
         lista=["Sin disciplina"];
     }else if(nivel==="Primaria" && (grado==="1" || grado==="2")){
-        lista=[...DISCIPLINAS_CUALITATIVAS];
+        // 1.º y 2.º incluyen Lengua y Literatura y Matemática, con evaluación cualitativa.
+        lista=["Lengua y Literatura","Matemática",...DISCIPLINAS_CUALITATIVAS];
     }else if(nivel==="Primaria" || nivel==="Secundaria"){
         lista=[...BASICAS_NUMERICAS,...DISCIPLINAS_CUALITATIVAS];
     }
