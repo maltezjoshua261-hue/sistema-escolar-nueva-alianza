@@ -8067,7 +8067,18 @@ window.guardarDocente=async function(){
         throw new Error("Hay más de un docente coincidente en la escuela seleccionada. Revise los registros antes de guardar.");
       }
       if((encontrado.data||[]).length===1){
-        q=await c.from("docentes").update(row).eq("id",encontrado.data[0].id).select().single();
+        const registroCentral=encontrado.data[0];
+        const centroCentral=String(registroCentral.codigo_centro||"").trim();
+        if(centroCentral && centroCentral!==centro){
+          const {data:asigs,error:asigError}=await c.from("asignaciones")
+            .select("id").eq("docente_id",registroCentral.id)
+            .eq("codigo_centro",centroCentral).limit(1);
+          if(asigError) throw asigError;
+          if((asigs||[]).length){
+            throw new Error("Este docente tiene asignaciones académicas en su escuela actual. Primero actualice o retire esas asignaciones; después podrá cambiarlo de centro.");
+          }
+        }
+        q=await c.from("docentes").update(row).eq("id",registroCentral.id).select().single();
       }else if(form.id){
         // Si el formulario está en modo edición, nunca convertir silenciosamente
         // una edición no localizada en un alta nueva: evita duplicados.
