@@ -8012,6 +8012,18 @@ window.guardarDocente=async function(){
     alert("No se pudo iniciar la conexión para guardar el docente. No vuelvas a pulsar Guardar varias veces; revisaremos el mensaje antes de continuar.");
     return;
   }
+  // Mantener el alcance de acceso existente: solo Dirección puede elegir otro centro.
+  if(ses?.rol!=="Director"){
+    const centroSesion=String(ses?.codigoCentro||"").trim();
+    if(!centroSesion){
+      alert("No se pudo verificar el centro asignado a su usuario. No se guardó el docente.");
+      return;
+    }
+    if(centroSesion!==centro){
+      alert("Su usuario solo puede registrar docentes en el centro educativo que tiene asignado.");
+      return;
+    }
+  }
   NA_oldGuardarDocente();
   const lista=obtenerDatos(KEY_DOCENTES);
   local=(form.id?lista.find(d=>String(d.id)===String(form.id)):null)
