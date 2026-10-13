@@ -1103,6 +1103,21 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         </div>
 
                         <div class="form-group">
+                            <label>Centro educativo</label>
+                            <select id="docCentro" required>
+                                <option value="">Seleccione la escuela</option>
+                                <option value="17683">Nueva Alianza</option>
+                                <option value="39183">Hugo Chávez Frías</option>
+                                <option value="29271">Rosa Sarmiento</option>
+                                <option value="17751">La Esperanza</option>
+                                <option value="17858">La Unión N.º 3</option>
+                                <option value="17880">Santa Lucía</option>
+                                <option value="37038">Sector del Limón</option>
+                                <option value="30870">Nueva Jerusalén</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label>Nivel educativo</label>
                             <select id="docNivel">
                                 <option value="">Seleccione</option>
@@ -4359,6 +4374,7 @@ function guardarDocente(){
 }
 function limpiarDocente(){
     ["docId","docNombre","docCodigo","docEspecialidad","docTelefono","docCorreo","docAsignacion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
+    if(document.getElementById("docCentro"))document.getElementById("docCentro").value="";
     document.getElementById("docNivel").value=""; document.getElementById("docEstado").value="Activo";
     document.getElementById("btnGuardarDocente").textContent="💾 Guardar docente";
 }
@@ -4369,6 +4385,7 @@ function editarDocente(id){
     document.getElementById("docCodigo").value=d.codigo||""; document.getElementById("docEspecialidad").value=d.especialidad||"";
     document.getElementById("docTelefono").value=d.telefono||""; document.getElementById("docCorreo").value=d.correo||"";
     document.getElementById("docNivel").value=d.nivel||""; document.getElementById("docAsignacion").value=d.asignacion||"";
+    if(document.getElementById("docCentro"))document.getElementById("docCentro").value=d.codigo_centro||d.codigoCentro||"";
     document.getElementById("docEstado").value=d.estado||"Activo";
     document.getElementById("btnGuardarDocente").textContent="✏️ Actualizar docente"; document.getElementById("docNombre").focus();
 }
@@ -7981,9 +7998,11 @@ window.guardarDocente=async function(){
     correo:document.getElementById("docCorreo")?.value?.trim()||"",
     nivel:document.getElementById("docNivel")?.value||"",
     asignacion:document.getElementById("docAsignacion")?.value?.trim()||"",
+    centro:document.getElementById("docCentro")?.value||"",
     estado:document.getElementById("docEstado")?.value||"Activo"
   };
-  if(!form.nombre){NA_oldGuardarDocente();return;}
+  if(!form.nombre){alert("Escribe el nombre completo del docente.");return;}
+  if(!form.centro){alert("Selecciona el centro educativo al que pertenece el docente.");return;}
   let c,ses,local;
   try{
     c=await NA_init(); ses=NA_sesion();
@@ -7998,7 +8017,7 @@ window.guardarDocente=async function(){
   local=(form.id?lista.find(d=>String(d.id)===String(form.id)):null)
     || [...lista].reverse().find(d=>String(d.nombre||"").trim().toLowerCase()===form.nombre.toLowerCase() && (!form.codigo || String(d.codigo||"").trim()===form.codigo));
   if(!local)return;
-  const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:centro||local.codigo_centro||null};
+  const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:form.centro||local.codigo_centro||centro||null};
   try{
     let q;
     if(local.supabaseId){
