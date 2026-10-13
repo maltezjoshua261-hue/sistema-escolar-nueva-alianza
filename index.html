@@ -8040,9 +8040,14 @@ window.guardarDocente=async function(){
     if(previo?.supabaseId){
       q=await c.from("docentes").update(row).eq("id",previo.supabaseId).select().single();
     }else{
+      // En una edición local sin supabaseId, localizar usando los datos anteriores
+      // para actualizar el registro existente aunque el nombre o el centro cambien.
+      const nombreBusqueda=String(previo?.nombre||previo?.nombre_completo||form.nombre).trim();
+      const centroBusqueda=String(previo?.codigo_centro||previo?.codigoCentro||centro).trim();
+      const codigoBusqueda=String(previo?.codigo||form.codigo).trim();
       let buscar=c.from("docentes").select("id,codigo_centro")
-        .ilike("nombre_completo",form.nombre).eq("codigo_centro",centro);
-      if(form.codigo) buscar=buscar.eq("codigo",form.codigo);
+        .ilike("nombre_completo",nombreBusqueda).eq("codigo_centro",centroBusqueda);
+      if(codigoBusqueda) buscar=buscar.eq("codigo",codigoBusqueda);
       const encontrado=await buscar.limit(2);
       if(encontrado.error) throw encontrado.error;
       if((encontrado.data||[]).length>1){
