@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba aislada · Docentes por centro</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#172b4d;background:#f2f6fb}
+*{box-sizing:border-box}body{margin:0;padding:24px;display:flex;justify-content:center;min-height:100vh}
+main{width:100%;max-width:620px;background:#fff;border:1px solid #d8e2ef;border-radius:16px;padding:24px;box-shadow:0 8px 24px #172b4d12}
+h1{font-size:1.5rem;margin-top:0}p{line-height:1.5;color:#475569}
+label{display:block;font-weight:700;margin:18px 0 8px}input,select,button{font:inherit;width:100%;padding:12px;border:1px solid #b8c7da;border-radius:8px}
+button{margin-top:20px;background:#155eef;color:white;border:0;font-weight:700;cursor:pointer}
+#resultado{margin-top:20px;padding:14px;background:#eef7ff;border-radius:8px;display:none}
+small{display:block;margin-top:16px;color:#64748b}
+</style>
+</head>
+<body><main>
+<h1>Prueba aislada: docentes por centro</h1>
+<p>Esta pantalla sirve únicamente para comprobar la selección de un centro educativo. No guarda datos ni se conecta al sistema escolar.</p>
+<form id="prueba">
+<label for="docente">Nombre de docente de prueba</label>
+<input id="docente" name="docente" placeholder="Escriba un nombre ficticio" required>
+<label for="centro">Centro educativo</label>
+<select id="centro" name="centro" required>
+<option value="">Seleccione una escuela</option>
+<option value="17683">Nueva Alianza — 17683</option>
+<option value="39183">Hugo Chávez Frías — 39183</option>
+<option value="29271">Rosa Sarmiento — 29271</option>
+<option value="17751">La Esperanza — 17751</option>
+<option value="17858">La Unión N.º 3 — 17858</option>
+<option value="17880">Santa Lucía — 17880</option>
+<option value="37038">Sector del Limón — 37038</option>
+<option value="30870">Nueva Jerusalén — 30870</option>
+</select>
+<button type="submit">Probar selección</button>
+</form>
+<div id="resultado" role="status"></div>
+<small>Modo de prueba local: los datos desaparecen al cerrar o recargar esta página.</small>
+</main>
+<script>
+document.getElementById('prueba').addEventListener('submit',function(e){
+ e.preventDefault();
+ const nombre=document.getElementById('docente').value.trim();
+ const sel=document.getElementById('centro');
+ if(!nombre||!sel.value)return;
+ const out=document.getElementById('resultado');
+ out.textContent='Prueba correcta. Docente: '+nombre+'. Centro seleccionado: '+sel.options[sel.selectedIndex].text+'. No se guardó ningún dato.';
+ out.style.display='block';
+});
+</script></body></html>
