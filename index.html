@@ -3580,7 +3580,7 @@ function aplicarPermisos(){
         // todavía no tenga la clase solo-director.
         document.querySelectorAll(".menu button").forEach(btn=>{
             const onclick=btn.getAttribute("onclick")||"";
-            const m=onclick.match(/mostrarSeccion\\('([^']+)'/);
+            const m=onclick.match(/mostrarSeccion\('([^']+)'/);
             if(m && soloDirector.includes(m[1])){
                 btn.classList.add("solo-director");
                 btn.style.display="none";
