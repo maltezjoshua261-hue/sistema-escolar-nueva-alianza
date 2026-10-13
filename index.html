@@ -1193,7 +1193,8 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <input type="hidden" id="asigId">
                     <div class="form-grid">
                         <div class="form-group"><label>Año escolar</label><select id="asigAnio" onchange="cargarAsignaciones()"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
-                        <div class="form-group"><label>Docente</label><select id="asigDocente"><option value="">Seleccione docente</option></select></div>
+                        <div class="form-group"><label>Centro educativo</label><select id="asigCentro" onchange="cargarDocentesAsignacion()"><option value="">Seleccione escuela primero</option><option value="17683">Nueva Alianza</option><option value="39183">Hugo Chávez Frías</option><option value="29271">Rosa Sarmiento</option><option value="17751">La Esperanza</option><option value="17858">La Unión N.º 3</option><option value="17880">Santa Lucía</option><option value="37038">Sector del Limón</option><option value="30870">Nueva Jerusalén</option></select></div>
+                        <div class="form-group"><label>Docente</label><select id="asigDocente"><option value="">Seleccione escuela primero</option></select></div>
                         <div class="form-group"><label>Nivel educativo</label><select id="asigNivel" onchange="actualizarGradosAsignacion()"><option value="">Seleccione</option><option value="Inicial">Educación Inicial</option><option value="Primaria">Primaria</option><option value="Secundaria">Secundaria</option></select></div>
                         <div class="form-group"><label>Grado / Nivel</label><select id="asigGrado" onchange="actualizarAsignaturasAsignacion()"><option value="">Seleccione nivel primero</option></select></div>
                         <div class="form-group"><label>Sección</label><select id="asigSeccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
@@ -1212,7 +1213,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         <div class="form-group"><label>Filtrar año</label><select id="filtroAsigAnio" onchange="cargarAsignaciones()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
                     </div>
                     <div id="resumenAsignaciones" class="notice">No hay asignaciones registradas.</div>
-                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Docente</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
+                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Escuela</th><th>Docente</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
                 </div>
             </section>
 
@@ -4409,13 +4410,18 @@ function eliminarDocente(id){
 ========================================================= */
 
 function cargarDocentesAsignacion(){
-    const select=document.getElementById("asigDocente");
-    if(!select) return;
-    const anterior=select.value;
-    const docentes=obtenerDatos(KEY_DOCENTES).filter(d=>(d.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const select=document.getElementById("asigDocente"),centroSelect=document.getElementById("asigCentro");
+    if(!select||!centroSelect)return;
+    const ses=typeof NA_sesion==="function"?NA_sesion():null;
+    if(ses&&ses.rol!=="Director"){
+      const centroSesion=String(ses.codigoCentro||"").trim();centroSelect.value=centroSesion;centroSelect.disabled=true;
+    }else centroSelect.disabled=false;
+    const centro=String(centroSelect.value||"").trim(),anterior=select.value;
     select.innerHTML='<option value="">Seleccione docente</option>';
+    if(!centro){select.innerHTML='<option value="">Seleccione escuela primero</option>';return;}
+    const docentes=obtenerDatos(KEY_DOCENTES).filter(d=>(d.estado||"Activo")==="Activo"&&String(d.codigo_centro||d.codigoCentro||"").trim()===centro).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     docentes.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.nombre;select.appendChild(o);});
-    if([...select.options].some(o=>String(o.value)===String(anterior))) select.value=anterior;
+    if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
 }
 
 function actualizarGradosAsignacion(){
@@ -4451,6 +4457,8 @@ function actualizarAsignaturasAsignacion(){
 
 function limpiarAsignacion(){
     ["asigId","asigHoras","asigObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const centro=document.getElementById("asigCentro"),ses=typeof NA_sesion==="function"?NA_sesion():null;
+    if(centro){if(ses&&ses.rol!=="Director"){centro.value=String(ses.codigoCentro||"");centro.disabled=true;}else{centro.disabled=false;centro.value="";}}
     const d=document.getElementById("asigDocente");if(d)d.value="";
     const n=document.getElementById("asigNivel");if(n)n.value="";
     actualizarGradosAsignacion();
@@ -4464,8 +4472,10 @@ function limpiarAsignacion(){
 function guardarAsignacion(){
     const id=document.getElementById("asigId").value, anio=document.getElementById("asigAnio").value, docenteId=document.getElementById("asigDocente").value, nivel=document.getElementById("asigNivel").value, grado=document.getElementById("asigGrado").value, seccion=document.getElementById("asigSeccion").value;
     const asignaturas=[...document.getElementById("asigAsignaturas").selectedOptions].map(o=>o.value);
-    const docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteId));
-    if(!docenteId||!docente||!nivel||!grado||!seccion||!asignaturas.length){alert("Complete año, docente, nivel, grado, sección y al menos una asignatura.");return;}
+    const centro=document.getElementById("asigCentro")?.value||"",docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteId));
+    if(!centro||!docenteId||!docente||!nivel||!grado||!seccion||!asignaturas.length){alert("Seleccione escuela y complete docente, nivel, grado, sección y al menos una asignatura.");return;}
+    const centroDocente=String(docente.codigo_centro||docente.codigoCentro||"").trim();
+    if(centroDocente && centroDocente!==String(centro)){alert("El docente seleccionado pertenece a otra escuela. Seleccione un docente de la escuela elegida.");return;}
     const horas=Number(document.getElementById("asigHoras").value||0);
     if(horas<0||horas>60){alert("Las horas semanales deben estar entre 0 y 60.");return;}
     const datos=obtenerDatos(KEY_ASIGNACIONES);
@@ -4477,7 +4487,7 @@ function guardarAsignacion(){
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
         return;
     }
-    const registro={id:id||Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
+    const registro={id:id||Date.now(),anio,nivel,grado,seccion,codigo_centro:String(centro),docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
     const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
     guardarDatos(KEY_ASIGNACIONES,datos);
     registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
@@ -4490,15 +4500,15 @@ function cargarAsignaciones(){
     const buscar=limpiarTexto(document.getElementById("buscarAsignacion")?.value||""), filtro=document.getElementById("filtroAsigAnio")?.value||"", datos=obtenerDatos(KEY_ASIGNACIONES);
     const lista=datos.filter(a=>{const texto=limpiarTexto([a.anio,a.docenteNombre,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
     tabla.innerHTML="";
-    lista.forEach((a,i)=>{tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button class="btn-warning" onclick="editarAsignacion('+a.id+')">✏️</button> <button class="btn-danger" onclick="eliminarAsignacion('+a.id+')">Eliminar</button></td></tr>';});
-    if(!lista.length)tabla.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
+    lista.forEach((a,i)=>{const esc=({17683:"Nueva Alianza",39183:"Hugo Chávez Frías",29271:"Rosa Sarmiento",17751:"La Esperanza",17858:"La Unión N.º 3",17880:"Santa Lucía",37038:"Sector del Limón",30870:"Nueva Jerusalén"})[String(a.codigo_centro||"")]||"Sin escuela";tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(esc)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button class="btn-warning" onclick="editarAsignacion('+a.id+')">✏️</button> <button class="btn-danger" onclick="eliminarAsignacion('+a.id+')">Eliminar</button></td></tr>';});
+    if(!lista.length)tabla.innerHTML='<tr><td colspan="12" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
     const horas=lista.reduce((s,a)=>s+Number(a.horasSemanales||0),0), docentes=new Set(lista.map(a=>String(a.docenteId))).size;
     document.getElementById("resumenAsignaciones").innerHTML="<strong>Asignaciones:</strong> "+lista.length+" &nbsp; | &nbsp; <strong>Docentes:</strong> "+docentes+" &nbsp; | &nbsp; <strong>Horas semanales:</strong> "+horas;
 }
 
 function editarAsignacion(id){
     const a=obtenerDatos(KEY_ASIGNACIONES).find(x=>String(x.id)===String(id));if(!a){alert("No se encontró la asignación.");return;}
-    document.getElementById("asigId").value=a.id;document.getElementById("asigAnio").value=a.anio||"2026";cargarDocentesAsignacion();document.getElementById("asigDocente").value=a.docenteId||"";document.getElementById("asigNivel").value=a.nivel||"";actualizarGradosAsignacion();document.getElementById("asigGrado").value=a.grado||"";actualizarAsignaturasAsignacion();document.getElementById("asigSeccion").value=a.seccion||"";document.getElementById("asigHoras").value=a.horasSemanales||"";document.getElementById("asigTurno").value=a.turno||"Matutino";document.getElementById("asigEstado").value=a.estado||"Activo";document.getElementById("asigObservacion").value=a.observacion||"";
+    document.getElementById("asigId").value=a.id;document.getElementById("asigAnio").value=a.anio||"2026";const centroSel=document.getElementById("asigCentro");if(centroSel)centroSel.value=a.codigo_centro||NA_sesion()?.codigoCentro||"";cargarDocentesAsignacion();document.getElementById("asigDocente").value=a.docenteId||"";document.getElementById("asigNivel").value=a.nivel||"";actualizarGradosAsignacion();document.getElementById("asigGrado").value=a.grado||"";actualizarAsignaturasAsignacion();document.getElementById("asigSeccion").value=a.seccion||"";document.getElementById("asigHoras").value=a.horasSemanales||"";document.getElementById("asigTurno").value=a.turno||"Matutino";document.getElementById("asigEstado").value=a.estado||"Activo";document.getElementById("asigObservacion").value=a.observacion||"";
     const sel=document.getElementById("asigAsignaturas");[...sel.options].forEach(o=>o.selected=(a.asignaturas||[]).includes(o.value));document.getElementById("btnGuardarAsignacion").textContent="✏️ Actualizar asignación";
 }
 
@@ -7713,7 +7723,7 @@ async function NA_syncAsignaciones(){
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
-      id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
+      id:a.id, supabaseId:a.id, codigo_centro:a.codigo_centro||d?.codigo_centro||"", docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
       nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
       asignaturas:a.asignaturas||[],horasSemanales:a.horas_semanales||0,turno:a.turno||"",observacion:a.observacion||""
     });
@@ -8169,7 +8179,7 @@ window.guardarAsignacion=async function(){
     const row={
       docente_id:docenteSupa,nivel:local.nivel,grado:local.grado,seccion:local.seccion,
       anio:Number(local.anio),estado:local.estado||"Activo",
-      codigo_centro:ses?.codigoCentro||local.codigo_centro||d?.codigo_centro||null,
+      codigo_centro:local.codigo_centro||d?.codigo_centro||ses?.codigoCentro||null,
       asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),
       turno:local.turno||null,observacion:local.observacion||null
     };
