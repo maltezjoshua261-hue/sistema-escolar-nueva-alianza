@@ -1103,6 +1103,21 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         </div>
 
                         <div class="form-group">
+                            <label>Centro educativo</label>
+                            <select id="docCentro" required>
+                                <option value="">Seleccione la escuela</option>
+                                <option value="17683">Nueva Alianza</option>
+                                <option value="39183">Hugo Chávez Frías</option>
+                                <option value="29271">Rosa Sarmiento</option>
+                                <option value="17751">La Esperanza</option>
+                                <option value="17858">La Unión N.º 3</option>
+                                <option value="17880">Santa Lucía</option>
+                                <option value="37038">Sector del Limón</option>
+                                <option value="30870">Nueva Jerusalén</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label>Nivel educativo</label>
                             <select id="docNivel">
                                 <option value="">Seleccione</option>
@@ -3565,7 +3580,7 @@ function aplicarPermisos(){
         // todavía no tenga la clase solo-director.
         document.querySelectorAll(".menu button").forEach(btn=>{
             const onclick=btn.getAttribute("onclick")||"";
-            const m=onclick.match(/mostrarSeccion\\('([^']+)'/);
+            const m=onclick.match(/mostrarSeccion\('([^']+)'/);
             if(m && soloDirector.includes(m[1])){
                 btn.classList.add("solo-director");
                 btn.style.display="none";
@@ -4360,6 +4375,7 @@ function guardarDocente(){
 function limpiarDocente(){
     ["docId","docNombre","docCodigo","docEspecialidad","docTelefono","docCorreo","docAsignacion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
     document.getElementById("docNivel").value=""; document.getElementById("docEstado").value="Activo";
+    if(document.getElementById("docCentro"))document.getElementById("docCentro").value="";
     document.getElementById("btnGuardarDocente").textContent="💾 Guardar docente";
 }
 function editarDocente(id){
@@ -4369,6 +4385,7 @@ function editarDocente(id){
     document.getElementById("docCodigo").value=d.codigo||""; document.getElementById("docEspecialidad").value=d.especialidad||"";
     document.getElementById("docTelefono").value=d.telefono||""; document.getElementById("docCorreo").value=d.correo||"";
     document.getElementById("docNivel").value=d.nivel||""; document.getElementById("docAsignacion").value=d.asignacion||"";
+    if(document.getElementById("docCentro"))document.getElementById("docCentro").value=d.codigo_centro||d.codigoCentro||"";
     document.getElementById("docEstado").value=d.estado||"Activo";
     document.getElementById("btnGuardarDocente").textContent="✏️ Actualizar docente"; document.getElementById("docNombre").focus();
 }
@@ -7969,66 +7986,136 @@ window.guardarCalificacion=async function(){
 };
 
 
-// V11.27.10 - Corrección de guardado docente: capturar formulario antes de limpiar y evitar duplicados.
-const NA_oldGuardarDocente=window.guardarDocente;
+// Guardado de docente: confirmar Supabase antes de mostrar éxito o limpiar el formulario.
 window.guardarDocente=async function(){
+  const campo=id=>document.getElementById(id);
   const form={
-    id:document.getElementById("docId")?.value||"",
-    nombre:document.getElementById("docNombre")?.value?.trim()||"",
-    codigo:document.getElementById("docCodigo")?.value?.trim()||"",
-    especialidad:document.getElementById("docEspecialidad")?.value?.trim()||"",
-    telefono:document.getElementById("docTelefono")?.value?.trim()||"",
-    correo:document.getElementById("docCorreo")?.value?.trim()||"",
-    nivel:document.getElementById("docNivel")?.value||"",
-    asignacion:document.getElementById("docAsignacion")?.value?.trim()||"",
-    estado:document.getElementById("docEstado")?.value||"Activo"
+    id:campo("docId")?.value||"",
+    nombre:campo("docNombre")?.value?.trim()||"",
+    codigo:campo("docCodigo")?.value?.trim()||"",
+    especialidad:campo("docEspecialidad")?.value?.trim()||"",
+    telefono:campo("docTelefono")?.value?.trim()||"",
+    correo:campo("docCorreo")?.value?.trim()||"",
+    nivel:campo("docNivel")?.value||"",
+    asignacion:campo("docAsignacion")?.value?.trim()||"",
+    estado:campo("docEstado")?.value||"Activo"
   };
-  if(!form.nombre){NA_oldGuardarDocente();return;}
-  let c,ses,local;
+  const centroSelect=campo("docCentro"), centro=centroSelect?.value||"";
+  if(!form.nombre){alert("Ingrese el nombre del docente.");campo("docNombre")?.focus();return;}
+  if(!centro){alert("Seleccione el centro educativo del docente.");centroSelect?.focus();return;}
+
+  let c,ses;
   try{
     c=await NA_init(); ses=NA_sesion();
   }catch(e){
     console.error("Inicialización Supabase para docente:",e);
-    alert("No se pudo iniciar la conexión para guardar el docente. No vuelvas a pulsar Guardar varias veces; revisaremos el mensaje antes de continuar.");
+    alert("No se pudo conectar con la base central. No se guardó el docente; revise la conexión e inténtelo de nuevo.");
     return;
   }
-  const centro=ses?.codigoCentro||"";
-  NA_oldGuardarDocente();
-  const lista=obtenerDatos(KEY_DOCENTES);
-  local=(form.id?lista.find(d=>String(d.id)===String(form.id)):null)
-    || [...lista].reverse().find(d=>String(d.nombre||"").trim().toLowerCase()===form.nombre.toLowerCase() && (!form.codigo || String(d.codigo||"").trim()===form.codigo));
-  if(!local)return;
-  const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:centro||local.codigo_centro||null};
+  if(ses?.rol!=="Director"){
+    const centroSesion=String(ses?.codigoCentro||"").trim();
+    if(!centroSesion){
+      alert("No se pudo verificar el centro asignado a su usuario. No se guardó el docente.");
+      return;
+    }
+    if(centroSesion!==centro){
+      alert("Su usuario solo puede registrar docentes en el centro educativo que tiene asignado.");
+      return;
+    }
+  }
+
+  const listaAntes=obtenerDatos(KEY_DOCENTES);
+  const previo=form.id?listaAntes.find(d=>String(d.id)===String(form.id)):null;
+  const localId=previo?.id||Date.now();
+  const row={
+    codigo:form.codigo||null,nombre_completo:form.nombre,
+    especialidad:form.especialidad||null,telefono:form.telefono||null,
+    correo:form.correo||null,nivel:form.nivel||null,
+    estado:form.estado||"Activo",asignacion:form.asignacion||null,
+    codigo_centro:centro
+  };
+
   try{
+    // Evitar que un cambio de escuela deje las asignaciones académicas en el centro anterior.
+    if(previo?.supabaseId){
+      const centroAnterior=String(previo.codigo_centro||previo.codigoCentro||"").trim();
+      if(centroAnterior && centroAnterior!==centro){
+        const {data:asigs,error:asigError}=await c.from("asignaciones")
+          .select("id").eq("docente_id",previo.supabaseId)
+          .eq("codigo_centro",centroAnterior).limit(1);
+        if(asigError) throw asigError;
+        if((asigs||[]).length){
+          throw new Error("Este docente tiene asignaciones académicas en su escuela actual. Primero actualice o retire esas asignaciones; después podrá cambiarlo de centro.");
+        }
+      }
+    }
     let q;
-    if(local.supabaseId){
-      q=await c.from("docentes").update(row).eq("id",local.supabaseId).select().single();
+    if(previo?.supabaseId){
+      q=await c.from("docentes").update(row).eq("id",previo.supabaseId).select().single();
     }else{
-      // Si ya existe en Supabase, actualizar ese registro en vez de insertar otro.
-      let buscar=c.from("docentes").select("id,codigo_centro").ilike("nombre_completo",local.nombre);
-      if(row.codigo)buscar=buscar.eq("codigo",row.codigo);
-      if(row.codigo_centro)buscar=buscar.eq("codigo_centro",row.codigo_centro);
-      const previo=await buscar.limit(2);
-      if(previo.error)throw previo.error;
-      if((previo.data||[]).length>1)throw new Error("Hay más de un docente con ese nombre/código. No se guardó para evitar duplicados.");
-      if((previo.data||[]).length===1){
-        q=await c.from("docentes").update(row).eq("id",previo.data[0].id).select().single();
+      // En una edición local sin supabaseId, localizar usando los datos anteriores
+      // para actualizar el registro existente aunque el nombre o el centro cambien.
+      const nombreBusqueda=String(previo?.nombre||previo?.nombre_completo||form.nombre).trim();
+      const centroBusqueda=String(previo?.codigo_centro||previo?.codigoCentro||centro).trim();
+      const codigoBusqueda=String(previo?.codigo||form.codigo).trim();
+      let buscar=c.from("docentes").select("id,codigo_centro")
+        .ilike("nombre_completo",nombreBusqueda).eq("codigo_centro",centroBusqueda);
+      if(codigoBusqueda) buscar=buscar.eq("codigo",codigoBusqueda);
+      const encontrado=await buscar.limit(2);
+      if(encontrado.error) throw encontrado.error;
+      if((encontrado.data||[]).length>1){
+        throw new Error("Hay más de un docente coincidente en la escuela seleccionada. Revise los registros antes de guardar.");
+      }
+      if((encontrado.data||[]).length===1){
+        const registroCentral=encontrado.data[0];
+        const centroCentral=String(registroCentral.codigo_centro||"").trim();
+        if(centroCentral && centroCentral!==centro){
+          const {data:asigs,error:asigError}=await c.from("asignaciones")
+            .select("id").eq("docente_id",registroCentral.id)
+            .eq("codigo_centro",centroCentral).limit(1);
+          if(asigError) throw asigError;
+          if((asigs||[]).length){
+            throw new Error("Este docente tiene asignaciones académicas en su escuela actual. Primero actualice o retire esas asignaciones; después podrá cambiarlo de centro.");
+          }
+        }
+        q=await c.from("docentes").update(row).eq("id",registroCentral.id).select().single();
+      }else if(form.id){
+        // Si el formulario está en modo edición, nunca convertir silenciosamente
+        // una edición no localizada en un alta nueva: evita duplicados.
+        throw new Error("No se pudo localizar el registro central que intenta editar. No se creó otro docente; recargue la página y vuelva a intentarlo.");
       }else{
         q=await c.from("docentes").insert(row).select().single();
       }
     }
-    if(q.error)throw q.error;
-    if(q.data){
-      local.supabaseId=q.data.id;local.codigo_centro=q.data.codigo_centro;
-      guardarDatos(KEY_DOCENTES,obtenerDatos(KEY_DOCENTES).map(x=>String(x.id)===String(local.id)?local:x));
+    if(q.error) throw q.error;
+    if(!q.data?.id) throw new Error("La base central no confirmó el registro guardado.");
+
+    const guardado={
+      ...(previo||{}),...form,id:localId,supabaseId:q.data.id,
+      codigo_centro:q.data.codigo_centro||centro
+    };
+    const listaActual=obtenerDatos(KEY_DOCENTES);
+    const index=listaActual.findIndex(d=>String(d.id)===String(localId));
+    if(index>=0) listaActual[index]=guardado; else listaActual.push(guardado);
+    guardarDatos(KEY_DOCENTES,listaActual);
+    registrarAuditoria(form.id?"Editar":"Crear","Docentes",
+      form.id?"Actualización de datos del docente":"Nuevo docente",localId);
+
+    limpiarDocente();
+    try{
+      await NA_syncDocentes();
+      if(typeof cargarDocentes==="function") cargarDocentes();
+      if(typeof cargarDocentesAsignacion==="function") cargarDocentesAsignacion();
+      if(typeof actualizarEstadisticas==="function") actualizarEstadisticas();
+      alert("Docente guardado y confirmado en la base central, en el centro seleccionado.");
+    }catch(syncError){
+      console.error("Docente guardado; error al actualizar la vista:",syncError);
+      if(typeof cargarDocentes==="function") cargarDocentes();
+      alert("El docente sí quedó guardado en la base central. No se pudo actualizar la lista en pantalla; recargue la página para sincronizar.");
     }
-    await NA_syncDocentes();
-    if(typeof cargarDocentes==="function")cargarDocentes();
-    if(typeof cargarDocentesAsignacion==="function")cargarDocentesAsignacion();
-    alert("Docente guardado y sincronizado correctamente.");
   }catch(e){
-    console.error("Docente Supabase:",e);
-    alert("El docente quedó en el registro local, pero no se confirmó en la base central: "+(e?.message||"Error desconocido")+". No vuelvas a registrarlo; revisaremos este error.");
+    console.error("No se pudo guardar el docente en Supabase:",e);
+    alert("No se confirmó el guardado en la base central. El formulario se conserva y no se mostró un mensaje de éxito. Detalle: "+(e?.message||"Error desconocido"));
   }
 };
 
