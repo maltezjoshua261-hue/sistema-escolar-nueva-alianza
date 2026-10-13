@@ -8036,6 +8036,19 @@ window.guardarDocente=async function(){
   };
 
   try{
+    // Evitar que un cambio de escuela deje las asignaciones académicas en el centro anterior.
+    if(previo?.supabaseId){
+      const centroAnterior=String(previo.codigo_centro||previo.codigoCentro||"").trim();
+      if(centroAnterior && centroAnterior!==centro){
+        const {data:asigs,error:asigError}=await c.from("asignaciones")
+          .select("id").eq("docente_id",previo.supabaseId)
+          .eq("codigo_centro",centroAnterior).limit(1);
+        if(asigError) throw asigError;
+        if((asigs||[]).length){
+          throw new Error("Este docente tiene asignaciones académicas en su escuela actual. Primero actualice o retire esas asignaciones; después podrá cambiarlo de centro.");
+        }
+      }
+    }
     let q;
     if(previo?.supabaseId){
       q=await c.from("docentes").update(row).eq("id",previo.supabaseId).select().single();
