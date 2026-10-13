@@ -8053,9 +8053,15 @@ window.guardarDocente=async function(){
       if((encontrado.data||[]).length>1){
         throw new Error("Hay más de un docente coincidente en la escuela seleccionada. Revise los registros antes de guardar.");
       }
-      q=(encontrado.data||[]).length===1
-        ? await c.from("docentes").update(row).eq("id",encontrado.data[0].id).select().single()
-        : await c.from("docentes").insert(row).select().single();
+      if((encontrado.data||[]).length===1){
+        q=await c.from("docentes").update(row).eq("id",encontrado.data[0].id).select().single();
+      }else if(form.id){
+        // Si el formulario está en modo edición, nunca convertir silenciosamente
+        // una edición no localizada en un alta nueva: evita duplicados.
+        throw new Error("No se pudo localizar el registro central que intenta editar. No se creó otro docente; recargue la página y vuelva a intentarlo.");
+      }else{
+        q=await c.from("docentes").insert(row).select().single();
+      }
     }
     if(q.error) throw q.error;
     if(!q.data?.id) throw new Error("La base central no confirmó el registro guardado.");
