@@ -1076,6 +1076,21 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                             <input id="docEspecialidad" type="text">
                         </div>
 
+                        <div class="form-group" style="background:#eef5ff;border:2px solid #0d6efd;border-radius:10px;padding:10px;min-width:0;">
+                            <label for="docCentro" style="display:block;color:#123b6d;font-size:14px;margin-bottom:5px;">🏫 ESCUELA DEL DOCENTE (OBLIGATORIO)</label>
+                            <select id="docCentro" name="docCentro" required aria-label="Seleccione la escuela del docente" style="display:block;width:100%;min-height:44px;background:#fff;color:#111;border:2px solid #0d6efd;font-size:15px;">
+                                <option value="">— Seleccione una de las 8 escuelas —</option>
+                                <option value="17683">Nueva Alianza (17683)</option>
+                                <option value="39183">Hugo Chávez Frías (39183)</option>
+                                <option value="29271">Rosa Sarmiento (29271)</option>
+                                <option value="17751">La Esperanza (17751)</option>
+                                <option value="17858">La Unión N.º 3 (17858)</option>
+                                <option value="17880">Santa Lucía (17880)</option>
+                                <option value="37038">Sector del Limón (37038)</option>
+                                <option value="30870">Nueva Jerusalén (30870)</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label>Nivel educativo</label>
                             <select id="docNivel">
@@ -1130,6 +1145,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                                     <th>Código</th>
                                     <th>Especialidad</th>
                                     <th>Nivel</th>
+                                    <th>Escuela asignada</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -4216,6 +4232,8 @@ function guardarDocente(){
     const nombre=document.getElementById("docNombre").value.trim();
     const id=document.getElementById("docId").value;
     if(!nombre){alert("Ingrese el nombre del docente.");return;}
+    const centro=document.getElementById("docCentro");
+    if(!centro || !centro.value){alert("Seleccione la escuela del docente.");centro?.focus();return;}
     const datos=obtenerDatos(KEY_DOCENTES);
     const docente={
         id:id||Date.now(),nombre,
@@ -4224,6 +4242,7 @@ function guardarDocente(){
         telefono:document.getElementById("docTelefono").value.trim(),
         correo:document.getElementById("docCorreo").value.trim(),
         nivel:document.getElementById("docNivel").value,
+        codigo_centro:document.getElementById("docCentro").value,
         asignacion:document.getElementById("docAsignacion").value.trim(),
         estado:document.getElementById("docEstado").value
     };
@@ -4239,6 +4258,7 @@ function guardarDocente(){
 function limpiarDocente(){
     ["docId","docNombre","docCodigo","docEspecialidad","docTelefono","docCorreo","docAsignacion"].forEach(id=>{const x=document.getElementById(id);if(x)x.value="";});
     document.getElementById("docNivel").value=""; document.getElementById("docEstado").value="Activo";
+    const centro=document.getElementById("docCentro");if(centro)centro.value="";
     document.getElementById("btnGuardarDocente").textContent="💾 Guardar docente";
 }
 function editarDocente(id){
@@ -4248,6 +4268,7 @@ function editarDocente(id){
     document.getElementById("docCodigo").value=d.codigo||""; document.getElementById("docEspecialidad").value=d.especialidad||"";
     document.getElementById("docTelefono").value=d.telefono||""; document.getElementById("docCorreo").value=d.correo||"";
     document.getElementById("docNivel").value=d.nivel||""; document.getElementById("docAsignacion").value=d.asignacion||"";
+    const centro=document.getElementById("docCentro");if(centro)centro.value=d.codigo_centro||d.codigoCentro||"";
     document.getElementById("docEstado").value=d.estado||"Activo";
     document.getElementById("btnGuardarDocente").textContent="✏️ Actualizar docente"; document.getElementById("docNombre").focus();
 }
@@ -4255,9 +4276,10 @@ function cargarDocentes(){
     const datos=obtenerDatos(KEY_DOCENTES), tabla=document.getElementById("tablaDocentes");
     const buscar=(document.getElementById("buscarDocente")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
-    const lista=datos.filter(d=>!buscar||[d.nombre,d.codigo,d.especialidad,d.nivel,d.asignacion,d.estado].join(" ").toLowerCase().includes(buscar));
-    lista.forEach((d,i)=>tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(d.nombre)}</td><td>${escaparHTML(d.codigo)}</td><td>${escaparHTML(d.especialidad)}</td><td>${escaparHTML(d.nivel)}</td><td>${escaparHTML(d.asignacion||"")}</td><td>${escaparHTML(d.estado||"Activo")}</td><td><button class="btn-warning" onclick="editarDocente(${d.id})">✏️ Editar</button> <button class="btn-danger" onclick="eliminarDocente(${d.id})">Eliminar</button></td></tr>`);
-    if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay docentes registrados.</td></tr>';
+    const centrosDocente={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+    const lista=datos.filter(d=>!buscar||[d.nombre,d.codigo,d.especialidad,d.nivel,d.asignacion,d.estado,d.codigo_centro,d.codigoCentro,centrosDocente[d.codigo_centro||d.codigoCentro]||""].join(" ").toLowerCase().includes(buscar));
+    lista.forEach((d,i)=>{const codigoCentro=d.codigo_centro||d.codigoCentro||"";const escuela=centrosDocente[codigoCentro]||"Sin asignar";tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(d.nombre)}</td><td>${escaparHTML(d.codigo)}</td><td>${escaparHTML(d.especialidad)}</td><td>${escaparHTML(d.nivel)}</td><td>${escaparHTML(escuela)}${codigoCentro?" ("+escaparHTML(codigoCentro)+")":""}</td><td>${escaparHTML(d.asignacion||"")}</td><td>${escaparHTML(d.estado||"Activo")}</td><td><button class="btn-warning" onclick="editarDocente(${d.id})">✏️ Editar</button> <button class="btn-danger" onclick="eliminarDocente(${d.id})">Eliminar</button></td></tr>`;});
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay docentes registrados.</td></tr>';
 }
 function eliminarDocente(id){
     const registro=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(id));
