@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba aislada · Docentes por centro</title>
+<style>
+:root{color-scheme:light;font-family:Arial,Helvetica,sans-serif;background:#f2f6fb;color:#172b4d}
+*{box-sizing:border-box}body{margin:0;padding:24px;display:flex;justify-content:center;align-items:flex-start;min-height:100vh}
+main{width:100%;max-width:620px;background:#fff;border:1px solid #d8e2ef;border-radius:16px;padding:26px;box-shadow:0 8px 28px #17365d12}
+h1{font-size:1.5rem;margin:0 0 8px;color:#123c68}p{line-height:1.5;color:#43546a}
+.notice{background:#fff8e6;border:1px solid #f1d58a;border-radius:10px;padding:12px;color:#674d08;font-size:.94rem}
+label{display:block;font-weight:700;margin:20px 0 7px}
+input,select{width:100%;font:inherit;padding:12px;border:1px solid #aebed0;border-radius:8px;background:white;color:#172b4d}
+button{margin-top:18px;width:100%;padding:13px;border:0;border-radius:8px;background:#145da0;color:white;font-size:1rem;font-weight:700;cursor:pointer}
+button:focus,input:focus,select:focus{outline:3px solid #9ac8f3;outline-offset:2px}
+#resultado{margin-top:18px;padding:14px;border-radius:9px;background:#edf8f0;border:1px solid #b8dfc2;white-space:pre-line;display:none}
+small{display:block;margin-top:18px;color:#65758a}
+</style>
+</head>
+<body>
+<main>
+<h1>Prueba aislada: asignación de docentes</h1>
+<p>Esta página sirve únicamente para comprobar que el selector identifica correctamente una de las ocho escuelas del NER Nueva Alianza.</p>
+<div class="notice"><strong>Modo seguro:</strong> esta prueba no guarda información, no se conecta a Supabase y no modifica el sistema escolar oficial.</div>
+<form id="prueba">
+<label for="nombre">Nombre de docente de prueba</label>
+<input id="nombre" name="nombre" placeholder="Ej.: Docente de prueba" autocomplete="off" required>
+<label for="centro">Selecciona la escuela</label>
+<select id="centro" name="centro" required>
+<option value="">— Selecciona un centro —</option>
+<option value="17683">Nueva Alianza — 17683</option>
+<option value="39183">Hugo Chávez Frías — 39183</option>
+<option value="29271">Rosa Sarmiento — 29271</option>
+<option value="17751">La Esperanza — 17751</option>
+<option value="17858">La Unión N.º 3 — 17858</option>
+<option value="17880">Santa Lucía — 17880</option>
+<option value="37038">Sector del Limón — 37038</option>
+<option value="30870">Nueva Jerusalén — 30870</option>
+</select>
+<button type="submit">Probar selección</button>
+</form>
+<div id="resultado" role="status" aria-live="polite"></div>
+<small>Los datos solo se muestran en esta pantalla. Al recargarla, la prueba comienza de nuevo.</small>
+</main>
+<script>
+document.getElementById("prueba").addEventListener("submit",function(event){
+ event.preventDefault();
+ const nombre=document.getElementById("nombre").value.trim();
+ const selector=document.getElementById("centro");
+ const codigo=selector.value;
+ const centro=selector.options[selector.selectedIndex].text;
+ const resultado=document.getElementById("resultado");
+ if(!nombre||!codigo){resultado.style.display="block";resultado.textContent="Completa el nombre y selecciona una escuela.";return;}
+ resultado.textContent="PRUEBA CORRECTA\n\nDocente de prueba: "+nombre+"\nCentro seleccionado: "+centro+"\nCódigo del centro: "+codigo+"\n\nNo se guardó ni modificó ningún registro.";
+ resultado.style.display="block";
+});
+</script>
+</body>
+</html>
