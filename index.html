@@ -8017,6 +8017,9 @@ window.guardarDocente=async function(){
   local=(form.id?lista.find(d=>String(d.id)===String(form.id)):null)
     || [...lista].reverse().find(d=>String(d.nombre||"").trim().toLowerCase()===form.nombre.toLowerCase() && (!form.codigo || String(d.codigo||"").trim()===form.codigo));
   if(!local)return;
+  // Conservar el centro también en el registro local, incluso si Supabase falla.
+  local.codigo_centro=form.centro;
+  guardarDatos(KEY_DOCENTES,lista.map(x=>String(x.id)===String(local.id)?local:x));
   const row={codigo:local.codigo||null,nombre_completo:local.nombre,especialidad:local.especialidad||null,telefono:local.telefono||null,correo:local.correo||null,nivel:local.nivel||null,estado:local.estado||"Activo",asignacion:local.asignacion||null,codigo_centro:form.centro||local.codigo_centro||centro||null};
   try{
     let q;
