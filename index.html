@@ -4397,7 +4397,7 @@ function guardarAsignacion(){
     let asignacionesFusionables=[];
     if(id && gradosIncluidos(grado).length>1){
         const gradosDestino=gradosIncluidos(grado);
-        asignacionesFusionables=datos.filter(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&gradosIncluidos(a.grado).length<gradosDestino.length&&gradosIncluidos(a.grado).every(g=>gradosDestino.includes(g)));
+        asignacionesFusionables=datos.filter(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===String(docente.codigo_centro||docente.codigoCentro||"")&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&gradosIncluidos(a.grado).length<gradosDestino.length&&gradosIncluidos(a.grado).every(g=>gradosDestino.includes(g)));
         if(asignacionesFusionables.length){
             if(!confirm("Se encontraron otras filas de este docente dentro del grupo seleccionado ("+grado+"). ¿Desea unificarlas? Se conservarán las horas de la fila que está editando, se combinarán las asignaturas y se eliminarán las filas duplicadas."))return false;
             asignaturas=[...new Set([...asignaturas,...asignacionesFusionables.flatMap(a=>a.asignaturas||[])])];
@@ -4405,9 +4405,9 @@ function guardarAsignacion(){
         }
     }
     const idsFusionables=new Set(asignacionesFusionables.map(a=>String(a.id)));
-    const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===String(docente.codigo_centro||docente.codigoCentro||"")&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
     if(asignacionMismoDocente){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return false;}
-    const asignacionConflicto=normalizarNivel(nivel)==="inicial"?null:datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
+    const asignacionConflicto=normalizarNivel(nivel)==="inicial"?null:datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===String(docente.codigo_centro||docente.codigoCentro||"")&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
     if(asignacionConflicto){
         const repetidas=(a=>a.filter(x=>asignaturas.includes(x)))(asignacionConflicto.asignaturas||[]);
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
