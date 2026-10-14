@@ -4407,7 +4407,10 @@ function guardarAsignacion(){
     const idsFusionables=new Set(asignacionesFusionables.map(a=>String(a.id)));
     const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===String(docente.codigo_centro||docente.codigoCentro||"")&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
     if(asignacionMismoDocente){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return false;}
-    const asignacionConflicto=normalizarNivel(nivel)==="inicial"?null:datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===String(docente.codigo_centro||docente.codigoCentro||"")&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
+    const codigoCentroValidacion=String(docente.codigo_centro||docente.codigoCentro||"");
+    const docentesActivosCentro=obtenerDatos(KEY_DOCENTES).filter(d=>(d.estado||"Activo")==="Activo"&&codigoCentroValidacion&&String(d.codigo_centro||d.codigoCentro||"")===codigoCentroValidacion);
+    const centroEsUnidocente=docentesActivosCentro.length===1;
+    const asignacionConflicto=normalizarNivel(nivel)==="inicial"||centroEsUnidocente?null:datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.codigo_centro||"")===codigoCentroValidacion&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
     if(asignacionConflicto){
         const repetidas=(a=>a.filter(x=>asignaturas.includes(x)))(asignacionConflicto.asignaturas||[]);
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
