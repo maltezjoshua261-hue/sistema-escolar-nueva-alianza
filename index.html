@@ -3142,6 +3142,8 @@ function normalizarNivel(valor){
 function gradosIncluidos(valor){
     const original=String(valor??"").trim();
     const v=limpiarTexto(original).replace(/[º°]/g,"").replace(/grado/g,"").replace(/nivel/g,"").trim();
+    // La carga de Inicial representa a una docente que atiende los tres niveles juntos.
+    if(/inicial/.test(limpiarTexto(original)) || /i\s*,\s*ii\s*y\s*iii/.test(limpiarTexto(original))) return ["I","II","III"];
     const rango=v.match(/\b(\d{1,2})\s*(?:a|hasta|al|[-–])\s*(\d{1,2})\b/);
     if(rango){
         const inicio=Number(rango[1]), fin=Number(rango[2]);
@@ -4343,7 +4345,7 @@ function actualizarGradosAsignacion(){
     if(!select)return;
     const anterior=select.value;
     let lista=[];
-    if(nivel==="Inicial") lista=GRADOS_INICIAL;
+    if(nivel==="Inicial") lista=["I, II y III Nivel"];
     else if(nivel==="Primaria") lista=["1° y 2°","3° y 4°","5° y 6°","1° a 3°","4° a 6°","1° a 6°"];
     else if(nivel==="Secundaria") lista=GRADOS_SECUNDARIA;
     select.innerHTML='<option value="">Seleccione</option>';
