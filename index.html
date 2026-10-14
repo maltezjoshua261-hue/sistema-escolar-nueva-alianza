@@ -7897,21 +7897,42 @@ window.guardarAsignacion=async function(){
   const localBefore=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id));
   NA_oldGuardarAsignacion();
   const fusionadas=window.NA_asignacionesFusionadasPendientes||[]; window.NA_asignacionesFusionadasPendientes=[];
-  const local=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id)) || (id?localBefore:null) || obtenerDatos(KEY_ASIGNACIONES)[obtenerDatos(KEY_ASIGNACIONES).length-1];
+  const locales=obtenerDatos(KEY_ASIGNACIONES);
+  const local=locales.find(a=>String(a.id)===String(id)) || (id?localBefore:null) || locales[locales.length-1];
   if(!local)return;
   const d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId));
   const ses=NA_sesion(), c=await NA_init();
-  const row={docente_id:d?.supabaseId||local.docenteSupabaseId||local.docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:ses?.codigoCentro||local.codigo_centro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
+  const docenteId=d?.supabaseId||local.docenteSupabaseId||local.docenteId;
+  const row={docente_id:docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:ses?.codigoCentro||local.codigo_centro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
   if(!row.docente_id){alert("La carga académica no tiene docente válido.");return;}
   try{
     const q=local.supabaseId
       ? await c.from("asignaciones").update(row).eq("id",local.supabaseId).select().single()
       : await c.from("asignaciones").insert(row).select().single();
     if(q.error)throw q.error;
-    if(q.data){local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>String(x.id)===String(id)||String(x.supabaseId)===String(local.supabaseId)?local:x));}
-    for(const duplicada of fusionadas){if(duplicada.supabaseId){const del=await c.from("asignaciones").delete().eq("id",duplicada.supabaseId);if(del.error)throw del.error;}}
+    if(!q.data)throw new Error("Supabase no confirmó la asignación guardada.");
+    local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;
+    guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>String(x.id)===String(id)||String(x.supabaseId)===String(q.data.id)?local:x));
+    // V11.30: buscar en la base central las filas parciales que pertenecen al grupo multigrado y eliminarlas después de guardar la fila unificada.
+    const grupoDestino=typeof gradosIncluidos==="function"?gradosIncluidos(local.grado).map(String):[];
+    if(grupoDestino.length>1){
+      const encontrados=await c.from("asignaciones").select("id,grado").eq("docente_id",docenteId).eq("anio",Number(local.anio)).eq("nivel",local.nivel).eq("seccion",local.seccion);
+      if(encontrados.error)throw encontrados.error;
+      const idsEliminar=new Set();
+      (encontrados.data||[]).forEach(a=>{
+        if(String(a.id)===String(q.data.id))return;
+        const gradosFila=typeof gradosIncluidos==="function"?gradosIncluidos(a.grado).map(String):[];
+        if(gradosFila.length>0&&gradosFila.length<grupoDestino.length&&gradosFila.every(g=>grupoDestino.includes(g)))idsEliminar.add(String(a.id));
+      });
+      // También incluir duplicados identificados durante la fusión local, pero solo si pertenecen al mismo docente.
+      fusionadas.forEach(a=>{if(a.supabaseId&&String(a.supabaseId)!==String(q.data.id))idsEliminar.add(String(a.supabaseId));});
+      for(const dupId of idsEliminar){
+        const del=await c.from("asignaciones").delete().eq("id",dupId).eq("docente_id",docenteId).eq("anio",Number(local.anio));
+        if(del.error)throw del.error;
+      }
+    }
     await NA_syncAsignaciones(); if(typeof cargarAsignaciones==="function")cargarAsignaciones();
-  }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));}
+  }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo completar la sincronización de la carga académica: "+(e?.message||"Error desconocido")+". No vuelva a guardar varias veces; revise la lista antes de intentarlo de nuevo.");}
 };
 
 // V11.26 FINAL - Eliminaciones sincronizadas con Supabase
