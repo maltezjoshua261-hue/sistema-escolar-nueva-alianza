@@ -4387,15 +4387,27 @@ function limpiarAsignacion(){
 
 function guardarAsignacion(){
     const id=document.getElementById("asigId").value, anio=document.getElementById("asigAnio").value, docenteId=document.getElementById("asigDocente").value, nivel=document.getElementById("asigNivel").value, grado=document.getElementById("asigGrado").value, seccion=document.getElementById("asigSeccion").value;
-    const asignaturas=[...document.getElementById("asigAsignaturas").selectedOptions].map(o=>o.value);
+    let asignaturas=[...document.getElementById("asigAsignaturas").selectedOptions].map(o=>o.value);
     const docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteId));
     if(!docenteId||!docente||!nivel||!grado||!seccion||!asignaturas.length){alert("Complete año, docente, nivel, grado, sección y al menos una asignatura.");return;}
     const horas=Number(document.getElementById("asigHoras").value||0);
     if(horas<0||horas>60){alert("Las horas semanales deben estar entre 0 y 60.");return;}
     const datos=obtenerDatos(KEY_ASIGNACIONES);
-    const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    // Si al editar se elige un grupo multigrado, permitir unificar las filas individuales del mismo docente.
+    let asignacionesFusionables=[];
+    if(id && gradosIncluidos(grado).length>1){
+        const gradosDestino=gradosIncluidos(grado);
+        asignacionesFusionables=datos.filter(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&gradosIncluidos(a.grado).length<gradosDestino.length&&gradosIncluidos(a.grado).every(g=>gradosDestino.includes(g)));
+        if(asignacionesFusionables.length){
+            if(!confirm("Se encontraron otras filas de este docente dentro del grupo seleccionado ("+grado+"). ¿Desea unificarlas? Se conservarán las horas de la fila que está editando, se combinarán las asignaturas y se eliminarán las filas duplicadas."))return;
+            asignaturas=[...new Set([...asignaturas,...asignacionesFusionables.flatMap(a=>a.asignaturas||[])])];
+            const selFusion=document.getElementById("asigAsignaturas");[...selFusion.options].forEach(o=>o.selected=asignaturas.includes(o.value));
+        }
+    }
+    const idsFusionables=new Set(asignacionesFusionables.map(a=>String(a.id)));
+    const asignacionMismoDocente=datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
     if(asignacionMismoDocente){alert("Ese docente ya tiene una asignación para el mismo año, grado y sección. Edite la existente para cambiar sus asignaturas.");return;}
-    const asignacionConflicto=datos.find(a=>String(a.id)!==String(id)&&String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
+    const asignacionConflicto=datos.find(a=>String(a.id)!==String(id)&&!idsFusionables.has(String(a.id))&&String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).some(as=>asignaturas.includes(as)));
     if(asignacionConflicto){
         const repetidas=(a=>a.filter(x=>asignaturas.includes(x)))(asignacionConflicto.asignaturas||[]);
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
@@ -4403,8 +4415,10 @@ function guardarAsignacion(){
     }
     const centroDocente=obtenerCentroDocenteAsignacion(docente);
     const registro={id:id||Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,codigo_centro:centroDocente.codigo,escuelaAsignada:centroDocente.escuela,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
-    const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
-    guardarDatos(KEY_ASIGNACIONES,datos);
+    const datosFinal=datos.filter(a=>!idsFusionables.has(String(a.id)));
+    const i=datosFinal.findIndex(a=>String(a.id)===String(id));if(i>=0)datosFinal[i]=registro;else datosFinal.push(registro);
+    window.NA_asignacionesFusionadasPendientes=asignacionesFusionables;
+    guardarDatos(KEY_ASIGNACIONES,datosFinal);
     registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
     limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
     alert(id?"Asignación actualizada correctamente.":"Carga académica guardada correctamente.");
@@ -7882,6 +7896,7 @@ window.guardarAsignacion=async function(){
   const id=document.getElementById("asigId")?.value||"";
   const localBefore=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id));
   NA_oldGuardarAsignacion();
+  const fusionadas=window.NA_asignacionesFusionadasPendientes||[]; window.NA_asignacionesFusionadasPendientes=[];
   const local=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.id)===String(id)) || (id?localBefore:null) || obtenerDatos(KEY_ASIGNACIONES)[obtenerDatos(KEY_ASIGNACIONES).length-1];
   if(!local)return;
   const d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId));
@@ -7894,6 +7909,7 @@ window.guardarAsignacion=async function(){
       : await c.from("asignaciones").insert(row).select().single();
     if(q.error)throw q.error;
     if(q.data){local.supabaseId=q.data.id;local.id=q.data.id;local.docenteSupabaseId=q.data.docente_id;guardarDatos(KEY_ASIGNACIONES,obtenerDatos(KEY_ASIGNACIONES).map(x=>String(x.id)===String(id)||String(x.supabaseId)===String(local.supabaseId)?local:x));}
+    for(const duplicada of fusionadas){if(duplicada.supabaseId){const del=await c.from("asignaciones").delete().eq("id",duplicada.supabaseId);if(del.error)throw del.error;}}
     await NA_syncAsignaciones(); if(typeof cargarAsignaciones==="function")cargarAsignaciones();
   }catch(e){console.error("Asignación Supabase:",e);alert("No se pudo sincronizar la carga académica: "+(e?.message||"Error desconocido"));}
 };
