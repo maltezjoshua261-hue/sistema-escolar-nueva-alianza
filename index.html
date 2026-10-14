@@ -1169,7 +1169,9 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <input type="hidden" id="asigId">
                     <div class="form-grid">
                         <div class="form-group"><label>Año escolar</label><select id="asigAnio" onchange="cargarAsignaciones()"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div>
-                        <div class="form-group"><label>Docente</label><select id="asigDocente"><option value="">Seleccione docente</option></select></div>
+                        <div class="form-group"><label>Docente</label><select id="asigDocente" onchange="actualizarEscuelaAsignacion()"><option value="">Seleccione docente</option></select></div>
+                        <div class="form-group"><label>Escuela asignada</label><input id="asigEscuela" type="text" readonly placeholder="Se mostrará al seleccionar docente"></div>
+                        <div class="form-group"><label>Código de centro</label><input id="asigCodigoCentro" type="text" readonly placeholder="Código del centro"></div>
                         <div class="form-group"><label>Nivel educativo</label><select id="asigNivel" onchange="actualizarGradosAsignacion()"><option value="">Seleccione</option><option value="Inicial">Educación Inicial</option><option value="Primaria">Primaria</option><option value="Secundaria">Secundaria</option></select></div>
                         <div class="form-group"><label>Grado / Nivel</label><select id="asigGrado" onchange="actualizarAsignaturasAsignacion()"><option value="">Seleccione nivel primero</option></select></div>
                         <div class="form-group"><label>Sección</label><select id="asigSeccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
@@ -1188,7 +1190,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         <div class="form-group"><label>Filtrar año</label><select id="filtroAsigAnio" onchange="cargarAsignaciones()"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
                     </div>
                     <div id="resumenAsignaciones" class="notice">No hay asignaciones registradas.</div>
-                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Docente</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
+                    <div class="table-container"><table><thead><tr><th>#</th><th>Año</th><th>Docente</th><th>Escuela asignada</th><th>Código de centro</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Asignaturas</th><th>Horas</th><th>Turno</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaAsignaciones"></tbody></table></div>
                 </div>
             </section>
 
@@ -4293,6 +4295,19 @@ function eliminarDocente(id){
    CARGA ACADÉMICA 8.7
 ========================================================= */
 
+function obtenerCentroDocenteAsignacion(docente){
+    const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+    const codigo=String(docente?.codigo_centro||docente?.codigoCentro||"");
+    return {codigo,escuela:centros[codigo]||"Sin asignar"};
+}
+function actualizarEscuelaAsignacion(){
+    const id=document.getElementById("asigDocente")?.value||"";
+    const docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(id));
+    const centro=obtenerCentroDocenteAsignacion(docente);
+    const escuela=document.getElementById("asigEscuela"), codigo=document.getElementById("asigCodigoCentro");
+    if(escuela) escuela.value=docente?centro.escuela:"";
+    if(codigo) codigo.value=docente?centro.codigo:"";
+}
 function cargarDocentesAsignacion(){
     const select=document.getElementById("asigDocente");
     if(!select) return;
@@ -4301,6 +4316,7 @@ function cargarDocentesAsignacion(){
     select.innerHTML='<option value="">Seleccione docente</option>';
     docentes.forEach(d=>{const o=document.createElement("option");o.value=d.id;o.textContent=d.nombre;select.appendChild(o);});
     if([...select.options].some(o=>String(o.value)===String(anterior))) select.value=anterior;
+    actualizarEscuelaAsignacion();
 }
 
 function actualizarGradosAsignacion(){
@@ -4336,8 +4352,9 @@ function actualizarAsignaturasAsignacion(){
 }
 
 function limpiarAsignacion(){
-    ["asigId","asigHoras","asigObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    ["asigId","asigHoras","asigObservacion","asigEscuela","asigCodigoCentro"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     const d=document.getElementById("asigDocente");if(d)d.value="";
+    actualizarEscuelaAsignacion();
     const n=document.getElementById("asigNivel");if(n)n.value="";
     actualizarGradosAsignacion();
     const s=document.getElementById("asigSeccion");if(s)s.value="";
@@ -4363,7 +4380,8 @@ function guardarAsignacion(){
         alert("La asignatura "+repetidas.join(", ")+" ya está asignada a otro docente en este grupo. Un mismo grupo y asignatura debe quedar vinculada a un solo docente.");
         return;
     }
-    const registro={id:id||Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
+    const centroDocente=obtenerCentroDocenteAsignacion(docente);
+    const registro={id:id||Date.now(),anio,nivel,grado,seccion,docenteId:String(docenteId),docenteNombre:docente.nombre,codigo_centro:centroDocente.codigo,escuelaAsignada:centroDocente.escuela,asignaturas,horasSemanales:horas,turno:document.getElementById("asigTurno").value,estado:document.getElementById("asigEstado").value,observacion:document.getElementById("asigObservacion").value.trim()};
     const i=datos.findIndex(a=>String(a.id)===String(id));if(i>=0)datos[i]=registro;else datos.push(registro);
     guardarDatos(KEY_ASIGNACIONES,datos);
     registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
@@ -4374,17 +4392,17 @@ function guardarAsignacion(){
 function cargarAsignaciones(){
     const tabla=document.getElementById("tablaAsignaciones");if(!tabla)return;
     const buscar=limpiarTexto(document.getElementById("buscarAsignacion")?.value||""), filtro=document.getElementById("filtroAsigAnio")?.value||"", datos=obtenerDatos(KEY_ASIGNACIONES);
-    const lista=datos.filter(a=>{const texto=limpiarTexto([a.anio,a.docenteNombre,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
+    const lista=datos.filter(a=>{const docenteActual=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(a.docenteId));const centroActual=obtenerCentroDocenteAsignacion(docenteActual);const escuela=a.escuelaAsignada||centroActual.escuela;const codigoCentro=a.codigo_centro||centroActual.codigo;const texto=limpiarTexto([a.anio,a.docenteNombre,escuela,codigoCentro,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
     tabla.innerHTML="";
-    lista.forEach((a,i)=>{tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button class="btn-warning" onclick="editarAsignacion('+a.id+')">✏️</button> <button class="btn-danger" onclick="eliminarAsignacion('+a.id+')">Eliminar</button></td></tr>';});
-    if(!lista.length)tabla.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
+    lista.forEach((a,i)=>{const docenteActual=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(a.docenteId));const centroActual=obtenerCentroDocenteAsignacion(docenteActual);const escuela=a.escuelaAsignada||centroActual.escuela;const codigoCentro=a.codigo_centro||centroActual.codigo;tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(escuela)+'</td><td>'+escaparHTML(codigoCentro)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button class="btn-warning" onclick="editarAsignacion('+a.id+')">✏️</button> <button class="btn-danger" onclick="eliminarAsignacion('+a.id+')">Eliminar</button></td></tr>';});
+    if(!lista.length)tabla.innerHTML='<tr><td colspan="13" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
     const horas=lista.reduce((s,a)=>s+Number(a.horasSemanales||0),0), docentes=new Set(lista.map(a=>String(a.docenteId))).size;
     document.getElementById("resumenAsignaciones").innerHTML="<strong>Asignaciones:</strong> "+lista.length+" &nbsp; | &nbsp; <strong>Docentes:</strong> "+docentes+" &nbsp; | &nbsp; <strong>Horas semanales:</strong> "+horas;
 }
 
 function editarAsignacion(id){
     const a=obtenerDatos(KEY_ASIGNACIONES).find(x=>String(x.id)===String(id));if(!a){alert("No se encontró la asignación.");return;}
-    document.getElementById("asigId").value=a.id;document.getElementById("asigAnio").value=a.anio||"2026";cargarDocentesAsignacion();document.getElementById("asigDocente").value=a.docenteId||"";document.getElementById("asigNivel").value=a.nivel||"";actualizarGradosAsignacion();document.getElementById("asigGrado").value=a.grado||"";actualizarAsignaturasAsignacion();document.getElementById("asigSeccion").value=a.seccion||"";document.getElementById("asigHoras").value=a.horasSemanales||"";document.getElementById("asigTurno").value=a.turno||"Matutino";document.getElementById("asigEstado").value=a.estado||"Activo";document.getElementById("asigObservacion").value=a.observacion||"";
+    document.getElementById("asigId").value=a.id;document.getElementById("asigAnio").value=a.anio||"2026";cargarDocentesAsignacion();document.getElementById("asigDocente").value=a.docenteId||"";actualizarEscuelaAsignacion();document.getElementById("asigNivel").value=a.nivel||"";actualizarGradosAsignacion();document.getElementById("asigGrado").value=a.grado||"";actualizarAsignaturasAsignacion();document.getElementById("asigSeccion").value=a.seccion||"";document.getElementById("asigHoras").value=a.horasSemanales||"";document.getElementById("asigTurno").value=a.turno||"Matutino";document.getElementById("asigEstado").value=a.estado||"Activo";document.getElementById("asigObservacion").value=a.observacion||"";
     const sel=document.getElementById("asigAsignaturas");[...sel.options].forEach(o=>o.selected=(a.asignaturas||[]).includes(o.value));document.getElementById("btnGuardarAsignacion").textContent="✏️ Actualizar asignación";
 }
 
