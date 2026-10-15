@@ -8530,7 +8530,7 @@ async function NA_impPrepare(file){
   NA_impRenderPreview({activos:activos,retirados:retirados,duplicados:duplicados,invalidos:invalidos,sinCodigo:sinCodigo,porCentro:porCentro,insertar:toInsert,vista:vista});
  }catch(e){console.error("Importador Excel:",e);NA_impStatus(e&&e.message?e.message:"No se pudo leer el archivo.",true);}
 }
-async functiasync function NA_impSave(){
+async function NA_impSave(){
  const ses=typeof NA_sesion==="function"?NA_sesion():null;
  if(!ses||ses.rol!=="Director"){NA_impStatus("Solo el Director puede guardar la importación.",true);return;}
  if(!NA_impPlan||!NA_impPlan.insertar.length||NA_impPlan.invalidos){NA_impStatus("No hay una importación válida para guardar.",true);return;}
@@ -8540,34 +8540,21 @@ async functiasync function NA_impSave(){
  let saved=0;
  try{
   const c=await NA_init();
-  const {data:current,error:readError}=await c.from("estudiantes")
-   .select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
+  const {data:current,error:readError}=await c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
   if(readError)throw readError;
-  const keys=NA_impKeySet(current||[]);
-  const remaining=[];
+  const keys=NA_impKeySet(current||[]), remaining=[];
   let nowDuplicated=0;
   for(const x of NA_impPlan.insertar){
-   const code=NA_impCode(x.codigo);
-   const identity=NA_impIdentity(x);
+   const code=NA_impCode(x.codigo), identity=NA_impIdentity(x);
    if((code&&keys.codes.has(code))||keys.identities.has(identity)){nowDuplicated++;continue;}
-   remaining.push(x);
-   if(code)keys.codes.add(code);
-   keys.identities.add(identity);
+   remaining.push(x);if(code)keys.codes.add(code);keys.identities.add(identity);
   }
-  NA_impPlan.insertar=remaining;
-  NA_impPlan.duplicados+=nowDuplicated;
-  if(!remaining.length){
-   NA_impStatus("No hay registros nuevos que guardar: los estudiantes ya existen en la base de datos.",false);
-   btn.textContent="Nada nuevo que importar";btn.disabled=true;return;
-  }
+  NA_impPlan.insertar=remaining;NA_impPlan.duplicados+=nowDuplicated;
+  if(!remaining.length){NA_impStatus("No hay registros nuevos que guardar: los estudiantes ya existen en la base de datos.",false);btn.textContent="Nada nuevo que importar";btn.disabled=true;return;}
   const total=remaining.length;
   for(let i=0;i<remaining.length;i+=50){
    btn.textContent="Guardando "+Math.min(i+50,total)+" de "+total+"…";
-   const rows=remaining.slice(i,i+50).map(function(x){
-    return {codigo:x.codigo,nombre_completo:x.nombre_completo,nacimiento:x.nacimiento,sexo:x.sexo,
-     responsable:x.responsable,telefono:x.telefono,direccion:x.direccion,nivel:x.nivel,grado:x.grado,
-     seccion:x.seccion,estado:x.estado,codigo_centro:x.codigo_centro};
-   });
+   const rows=remaining.slice(i,i+50).map(function(x){return {codigo:x.codigo,nombre_completo:x.nombre_completo,nacimiento:x.nacimiento,sexo:x.sexo,responsable:x.responsable,telefono:x.telefono,direccion:x.direccion,nivel:x.nivel,grado:x.grado,seccion:x.seccion,estado:x.estado,codigo_centro:x.codigo_centro};});
    const {data,error}=await c.from("estudiantes").insert(rows).select("id,codigo_centro");
    if(error)throw new Error("Se guardaron "+saved+" estudiantes antes del error. "+error.message);
    saved+=(data||[]).length;
