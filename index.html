@@ -6882,10 +6882,20 @@ function generarHorarioInicialBrenda(){
     ];
     const asignacionesPorNivel=[];
     for(const nivel of nivelesInicial){
-        const candidatas=asignaciones.filter(a=>
-            gradosCoinciden(a.grado,nivel.grado)&&
-            (a.asignaturas||[]).some(x=>String(x)==="Sin disciplina"||String(x)==="Atención educativa")
-        );
+        const candidatas=asignaciones.filter(a=>{
+            // En Educación Inicial una sola carga puede cubrir los tres niveles.
+            // Aceptar tanto coincidencia normalizada como el rótulo agrupado "I, II y III Nivel".
+            const gradoCarga=normalizarNombreHorario(a.grado);
+            const cargaAgrupaInicial=/I\s*,\s*II\s+Y\s+III(?:\s+NIVEL)?/.test(gradoCarga);
+            const coincideGrado=gradosCoinciden(a.grado,nivel.grado)||
+                cargaAgrupaInicial||
+                gradoCarga.includes(normalizarNombreHorario(nivel.grado));
+            const tieneAsignaturaInicial=(a.asignaturas||[]).some(x=>{
+                const materia=normalizarNombreHorario(x);
+                return materia==="SIN DISCIPLINA"||materia==="ATENCION EDUCATIVA";
+            });
+            return coincideGrado&&tieneAsignaturaInicial;
+        });
         if(candidatas.length!==1){
             alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa. Verifique la carga académica del año 2026; no se guardó ningún horario.");
             return;
