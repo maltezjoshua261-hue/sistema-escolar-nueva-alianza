@@ -6816,10 +6816,13 @@ function obtenerAsignacionesGrupoHorario(){
     const anio=document.getElementById("horarioAnio")?.value||"2026",nivel=document.getElementById("horarioNivel")?.value,grado=document.getElementById("horarioGrado")?.value,seccion=document.getElementById("horarioSeccion")?.value;
     return obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&(!grado||gradosCoinciden(a.grado,grado))&&(!seccion||normalizarSeccion(a.seccion)===normalizarSeccion(seccion)));
 }
+function nombreAsignaturaHorario(asignatura){
+    return String(asignatura||"")==="Sin disciplina"?"Atención educativa":String(asignatura||"");
+}
 function cargarOpcionesHorario(){
     const asel=document.getElementById("horarioAsignatura"),dsel=document.getElementById("horarioDocente");if(!asel||!dsel)return;
     const asign=obtenerAsignacionesGrupoHorario(),subjects=[...new Set(asign.flatMap(a=>a.asignaturas||[]))],prevA=asel.value,prevD=dsel.value;
-    asel.innerHTML='<option value="">Seleccione asignatura</option>';subjects.forEach(a=>{const o=document.createElement("option");o.value=a;o.textContent=a;asel.appendChild(o);});
+    asel.innerHTML='<option value="">Seleccione asignatura</option>';subjects.forEach(a=>{const o=document.createElement("option");o.value=a;o.textContent=nombreAsignaturaHorario(a);asel.appendChild(o);});
     dsel.innerHTML='<option value="">Seleccione docente</option>';const docentes=[...new Map(asign.map(a=>[String(a.docenteId),a])).values()];docentes.forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;dsel.appendChild(o);});
     if([...asel.options].some(o=>o.value===prevA))asel.value=prevA;if([...dsel.options].some(o=>o.value===prevD))dsel.value=prevD;
 }
@@ -6879,12 +6882,12 @@ function renderGridHorarios(box,lista,tipo){
     const bloques=[...new Map(lista.map(h=>[h.horaInicio+"-"+h.horaFin,h])).values()].sort((a,b)=>a.horaInicio.localeCompare(b.horaInicio));
     let html='<h3 style="margin:10px 0;color:#123b6d;">'+escaparHTML(entidad)+'</h3><div class="horario-grid"><table><thead><tr><th>Hora</th>'+dias.map(d=>'<th>'+d+'</th>').join("")+'</tr></thead><tbody>';
     if(!bloques.length){box.innerHTML='<div class="horario-ok">No hay clases registradas con los filtros seleccionados.</div>';return;}
-    bloques.forEach(b=>{html+='<tr><th>'+b.horaInicio+'–'+b.horaFin+'</th>';dias.forEach(d=>{const hs=lista.filter(h=>h.dia===d&&h.horaInicio===b.horaInicio&&h.horaFin===b.horaFin);html+='<td>'+hs.map(h=>'<div class="horario-celda"><strong>'+escaparHTML(h.asignatura)+'</strong><small>'+escaparHTML(h.docenteNombre)+'</small><small>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</small>'+(h.aula?'<small>📍 '+escaparHTML(h.aula)+'</small>':'')+'<div class="no-print" style="margin-top:5px;"><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></div></div>').join("")+'</td>';});html+='</tr>';});
+    bloques.forEach(b=>{html+='<tr><th>'+b.horaInicio+'–'+b.horaFin+'</th>';dias.forEach(d=>{const hs=lista.filter(h=>h.dia===d&&h.horaInicio===b.horaInicio&&h.horaFin===b.horaFin);html+='<td>'+hs.map(h=>'<div class="horario-celda"><strong>'+escaparHTML(nombreAsignaturaHorario(h.asignatura))+'</strong><small>'+escaparHTML(h.docenteNombre)+'</small><small>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</small>'+(h.aula?'<small>📍 '+escaparHTML(h.aula)+'</small>':'')+'<div class="no-print" style="margin-top:5px;"><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></div></div>').join("")+'</td>';});html+='</tr>';});
     box.innerHTML=html+'</tbody></table></div>';
 }
 function renderListaHorarios(box,lista){
     let html='<div class="horario-lista"><table><thead><tr><th>#</th><th>Día</th><th>Hora</th><th>Grupo</th><th>Asignatura</th><th>Docente</th><th>Aula</th><th>Acciones</th></tr></thead><tbody>';
-    lista.forEach((h,i)=>html+='<tr><td>'+((i+1))+'</td><td>'+escaparHTML(h.dia)+'</td><td>'+h.horaInicio+'–'+h.horaFin+'</td><td>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</td><td>'+escaparHTML(h.asignatura)+'</td><td>'+escaparHTML(h.docenteNombre)+'</td><td>'+escaparHTML(h.aula||"—")+'</td><td><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></td></tr>');
+    lista.forEach((h,i)=>html+='<tr><td>'+((i+1))+'</td><td>'+escaparHTML(h.dia)+'</td><td>'+h.horaInicio+'–'+h.horaFin+'</td><td>'+escaparHTML(h.nivel+' '+h.grado+' '+h.seccion)+'</td><td>'+escaparHTML(nombreAsignaturaHorario(h.asignatura))+'</td><td>'+escaparHTML(h.docenteNombre)+'</td><td>'+escaparHTML(h.aula||"—")+'</td><td><button class="btn-warning" onclick="editarHorario('+h.id+')">✏️</button> <button class="btn-danger" onclick="eliminarHorario('+h.id+')">🗑️</button></td></tr>');
     box.innerHTML=html+'</tbody></table></div>';
 }
 function editarHorario(id){
