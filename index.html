@@ -6844,6 +6844,10 @@ function intervalosSolapan(a,b){return a.horaInicio<b.horaFin&&b.horaInicio<a.ho
 function codigoCentroDeHorario(h){
     const codigoDirecto=String(h?.codigo_centro||h?.codigoCentro||"").trim();
     if(codigoDirecto)return codigoDirecto;
+    // Los horarios antiguos pueden no tener centro guardado; recuperar primero el centro del docente.
+    const docente=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(h?.docenteId));
+    const codigoDocente=String(docente?.codigo_centro||docente?.codigoCentro||"").trim();
+    if(codigoDocente)return codigoDocente;
     const carga=obtenerDatos(KEY_ASIGNACIONES).find(a=>
         String(a.anio)===String(h?.anio)&&
         String(a.docenteId)===String(h?.docenteId)&&
@@ -6857,7 +6861,7 @@ function codigoCentroDeHorario(h){
 function mismoCentroParaConflicto(a,b){
     const centroA=codigoCentroDeHorario(a),centroB=codigoCentroDeHorario(b);
     // Si ambos centros están identificados, solo hay conflicto de grupo dentro del mismo centro.
-    // Si falta información en registros antiguos, se conserva la validación estricta anterior.
+    // Si falta información en registros antiguos, mantener la validación estricta por seguridad.
     return !centroA||!centroB||centroA===centroB;
 }
 function conflictosConHorario(nuevo,datos,ignorarId){
@@ -6879,7 +6883,7 @@ function guardarHorario(){
     if(horaFin<=horaInicio){alert("La hora de finalización debe ser posterior a la hora de inicio.");return;}
     const asign=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).includes(asignatura)&&String(a.estado||"Activo")==="Activo");
     if(!asign){alert("El docente seleccionado no tiene una carga académica activa para esa asignatura y grupo.");return;}
-    const datos=obtenerDatos(KEY_HORARIOS),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,codigo_centro:String(asign.codigo_centro||asign.codigoCentro||""),escuelaAsignada:String(asign.escuelaAsignada||""),aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
+    const datos=obtenerDatos(KEY_HORARIOS),docenteHorario=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteId)),centroHorario=obtenerCentroDocenteAsignacion(docenteHorario),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,codigo_centro:String(docenteHorario?.codigo_centro||docenteHorario?.codigoCentro||asign.codigo_centro||asign.codigoCentro||""),escuelaAsignada:String(centroHorario.escuela!=="Sin asignar"?centroHorario.escuela:asign.escuelaAsignada||""),aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
     const conf=conflictosConHorario(nuevo,datos,id);if(conf.length){alert("⚠️ No se puede guardar por conflicto:\n\n• "+conf.join("\n• "));return;}
     const i=datos.findIndex(x=>String(x.id)===String(id));if(i>=0)datos[i]=nuevo;else datos.push(nuevo);guardarDatos(KEY_HORARIOS,datos);registrarAuditoria(id?"Editar":"Crear","Horario",id?"Actualización de horario":"Nueva clase en horario",nuevo.id,{anio:anio});limpiarHorario();cargarHorarios();detectarConflictosHorario(false);alert(id?"Horario actualizado correctamente.":"Horario guardado correctamente.");
 }
