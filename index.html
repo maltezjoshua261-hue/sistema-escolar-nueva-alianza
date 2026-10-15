@@ -6869,7 +6869,7 @@ function generarHorarioInicialBrenda(){
     const anio="2026";
     if(estaCerradoAnio(anio))return;
     const normalizarNombreHorario=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toUpperCase().replace(/\s+/g," ");
-    const nombreObjetivo=normalizarNombreHorario("BRENDA GUADALUPE CASTRO LOAISA");
+    const nombreObjetivo=normalizarNombreHorario("BRENDA GUADALUPE CASTRO LOAISIGA");
     const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===anio&&String(a.estado||"Activo")==="Activo"&&
         normalizarNivel(a.nivel)==="inicial"&&
