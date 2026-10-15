@@ -6866,7 +6866,7 @@ function guardarHorario(){
 }
 function generarHorarioInicialBrenda(){
     if(!exigirDirector())return;
-    const anio="2026";
+    const anio="2027";
     if(estaCerradoAnio(anio))return;
     const normalizarNombreHorario=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toUpperCase().replace(/\s+/g," ");
     const nombreObjetivo=normalizarNombreHorario("BRENDA GUADALUPE CASTRO LOAISIGA");
