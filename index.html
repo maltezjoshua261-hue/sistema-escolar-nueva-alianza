@@ -8575,8 +8575,10 @@ function NA_impClose(){const m=document.getElementById("naImportModal");if(m)m.s
 function NA_impOpen(){const m=document.getElementById("naImportModal");if(m)m.style.display="flex";}
 function NA_impUpdateRole(){
  const btn=document.getElementById("naImportOpen");
- const ses=typeof NA_sesion==="function"?NA_sesion():null;
- if(btn)btn.style.display=ses&&ses.rol==="Director"?"inline-flex":"none";
+ let ses=null;
+ try{ses=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){}
+ const rol=String(ses&&ses.rol||"").trim().toLowerCase();
+ if(btn)btn.style.display=rol==="director"?"inline-flex":"none";
 }
 function NA_impInitUI(){
  if(document.getElementById("naImportOpen"))return;
