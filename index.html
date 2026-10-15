@@ -6897,7 +6897,7 @@ function generarHorarioInicialBrenda(){
             return coincideGrado&&tieneAsignaturaInicial;
         });
         if(candidatas.length!==1){
-            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa. Verifique la carga académica del año 2026; no se guardó ningún horario.");
+            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa. Verifique la carga académica del año "+anio+"; no se guardó ningún horario.");
             return;
         }
         const a=candidatas[0];
