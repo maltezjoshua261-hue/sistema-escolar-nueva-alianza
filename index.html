@@ -6841,10 +6841,29 @@ function limpiarHorario(){
 }
 function claveHorario(h){return [h.anio,h.dia,h.horaInicio,h.horaFin].join("|");}
 function intervalosSolapan(a,b){return a.horaInicio<b.horaFin&&b.horaInicio<a.horaFin;}
+function codigoCentroDeHorario(h){
+    const codigoDirecto=String(h?.codigo_centro||h?.codigoCentro||"").trim();
+    if(codigoDirecto)return codigoDirecto;
+    const carga=obtenerDatos(KEY_ASIGNACIONES).find(a=>
+        String(a.anio)===String(h?.anio)&&
+        String(a.docenteId)===String(h?.docenteId)&&
+        normalizarNivel(a.nivel)===normalizarNivel(h?.nivel)&&
+        gradosCoinciden(a.grado,h?.grado)&&
+        normalizarSeccion(a.seccion)===normalizarSeccion(h?.seccion)&&
+        (a.asignaturas||[]).some(x=>String(x)===String(h?.asignatura))
+    );
+    return String(carga?.codigo_centro||carga?.codigoCentro||"").trim();
+}
+function mismoCentroParaConflicto(a,b){
+    const centroA=codigoCentroDeHorario(a),centroB=codigoCentroDeHorario(b);
+    // Si ambos centros están identificados, solo hay conflicto de grupo dentro del mismo centro.
+    // Si falta información en registros antiguos, se conserva la validación estricta anterior.
+    return !centroA||!centroB||centroA===centroB;
+}
 function conflictosConHorario(nuevo,datos,ignorarId){
     const conflictos=[];datos.filter(h=>String(h.id)!==String(ignorarId)&&String(h.anio)===String(nuevo.anio)&&String(h.estado||"Activo")==="Activo"&&String(h.dia)===String(nuevo.dia)&&intervalosSolapan(nuevo,h)).forEach(h=>{
         if(String(h.docenteId)===String(nuevo.docenteId))conflictos.push("Docente ocupado: "+h.docenteNombre+" ya tiene "+h.asignatura+" de "+h.horaInicio+" a "+h.horaFin+" el "+h.dia+".");
-        if(normalizarNivel(h.nivel)===normalizarNivel(nuevo.nivel)&&gradosCoinciden(h.grado,nuevo.grado)&&normalizarSeccion(h.seccion)===normalizarSeccion(nuevo.seccion))conflictos.push("Grupo ocupado: "+h.nivel+" "+h.grado+" "+h.seccion+" ya tiene "+h.asignatura+" en ese horario.");
+        if(mismoCentroParaConflicto(h,nuevo)&&normalizarNivel(h.nivel)===normalizarNivel(nuevo.nivel)&&gradosCoinciden(h.grado,nuevo.grado)&&normalizarSeccion(h.seccion)===normalizarSeccion(nuevo.seccion))conflictos.push("Grupo ocupado: "+h.nivel+" "+h.grado+" "+h.seccion+" ya tiene "+h.asignatura+" en ese horario.");
     });
     return conflictos;
 }
@@ -6860,7 +6879,7 @@ function guardarHorario(){
     if(horaFin<=horaInicio){alert("La hora de finalización debe ser posterior a la hora de inicio.");return;}
     const asign=obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.anio)===String(anio)&&String(a.docenteId)===String(docenteId)&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).includes(asignatura)&&String(a.estado||"Activo")==="Activo");
     if(!asign){alert("El docente seleccionado no tiene una carga académica activa para esa asignatura y grupo.");return;}
-    const datos=obtenerDatos(KEY_HORARIOS),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
+    const datos=obtenerDatos(KEY_HORARIOS),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,codigo_centro:String(asign.codigo_centro||asign.codigoCentro||""),escuelaAsignada:String(asign.escuelaAsignada||""),aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
     const conf=conflictosConHorario(nuevo,datos,id);if(conf.length){alert("⚠️ No se puede guardar por conflicto:\n\n• "+conf.join("\n• "));return;}
     const i=datos.findIndex(x=>String(x.id)===String(id));if(i>=0)datos[i]=nuevo;else datos.push(nuevo);guardarDatos(KEY_HORARIOS,datos);registrarAuditoria(id?"Editar":"Crear","Horario",id?"Actualización de horario":"Nueva clase en horario",nuevo.id,{anio:anio});limpiarHorario();cargarHorarios();detectarConflictosHorario(false);alert(id?"Horario actualizado correctamente.":"Horario guardado correctamente.");
 }
@@ -7014,7 +7033,7 @@ function editarHorario(id){
 function eliminarHorario(id){if(!exigirDirector())return;const h=obtenerDatos(KEY_HORARIOS).find(x=>String(x.id)===String(id));if(h&&estaCerradoAnio(h.anio))return;if(!confirm("¿Desea eliminar esta clase del horario?"))return;guardarDatos(KEY_HORARIOS,obtenerDatos(KEY_HORARIOS).filter(x=>String(x.id)!==String(id)));registrarAuditoria("Eliminar","Horario","Eliminación de clase del horario",h?.id||id,{anio:h?.anio||"2026"});cargarHorarios();}
 function detectarConflictosHorario(mostrar=true){
     const datos=obtenerDatos(KEY_HORARIOS).filter(h=>String(h.estado||"Activo")==="Activo"),conf=[],vistos=new Set();
-    for(let i=0;i<datos.length;i++)for(let j=i+1;j<datos.length;j++){const a=datos[i],b=datos[j];if(String(a.anio)!==String(b.anio)||a.dia!==b.dia||!intervalosSolapan(a,b))continue;if(String(a.docenteId)===String(b.docenteId))conf.push("Docente ocupado el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+": "+a.docenteNombre+" ("+a.asignatura+" / "+b.asignatura+").");if(normalizarNivel(a.nivel)===normalizarNivel(b.nivel)&&gradosCoinciden(a.grado,b.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(b.seccion))conf.push("Grupo con dos clases simultáneas: "+a.nivel+" "+a.grado+" "+a.seccion+" el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+".");}
+    for(let i=0;i<datos.length;i++)for(let j=i+1;j<datos.length;j++){const a=datos[i],b=datos[j];if(String(a.anio)!==String(b.anio)||a.dia!==b.dia||!intervalosSolapan(a,b))continue;if(String(a.docenteId)===String(b.docenteId))conf.push("Docente ocupado el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+": "+a.docenteNombre+" ("+a.asignatura+" / "+b.asignatura+").");if(mismoCentroParaConflicto(a,b)&&normalizarNivel(a.nivel)===normalizarNivel(b.nivel)&&gradosCoinciden(a.grado,b.grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(b.seccion))conf.push("Grupo con dos clases simultáneas: "+a.nivel+" "+a.grado+" "+a.seccion+" el "+a.dia+" "+a.horaInicio+"–"+a.horaFin+".");}
     const asigs=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.estado||"Activo")==="Activo");asigs.forEach(a=>{const horas=horasProgramadasHorario(a.anio,a.docenteId,a.nivel,a.grado,a.seccion),objetivo=horasAsignadasHorario(a);if(objetivo>0&&horas>objetivo+0.01)conf.push("Exceso de horas: "+a.docenteNombre+" — "+a.nivel+" "+a.grado+" "+a.seccion+" tiene "+horas.toFixed(1)+" h programadas frente a "+objetivo+" h asignadas.");});
     const box=document.getElementById("alertasHorario");if(box){box.innerHTML=conf.length?conf.map(x=>'<div class="horario-alerta">⚠️ '+escaparHTML(x)+'</div>').join(""):'<div class="horario-ok">✅ No se detectaron conflictos en los horarios activos.</div>';}
     if(mostrar)alert(conf.length?"⚠️ Se encontraron "+conf.length+" situación(es). Revise el panel de conflictos.":"✅ No se detectaron conflictos en los horarios activos.");return conf;
