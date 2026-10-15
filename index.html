@@ -8371,6 +8371,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 (function(){
 "use strict";
 const NA_IMP_SHEETS = ["PREESCOLAR","PRIMARIA","SECUNDARIA EN EL CAMPO"];
+function NA_impSession(){try{return JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");}catch(e){return null;}}
 const NA_IMP_CENTROS = {
  "17683":"Nueva Alianza","17751":"La Esperanza","17858":"La Unión","17880":"Santa Lucía",
  "29271":"Rosa Sarmiento","30870":"Nueva Jerusalén","37038":"Sector de Limón","39183":"Hugo Chávez Frías"
@@ -8467,7 +8468,7 @@ function NA_impRenderPreview(plan){
  else NA_impStatus("Revise el resumen. Los datos todavía no se han guardado.",false);
 }
 async function NA_impPrepare(file){
- const ses=typeof NA_sesion==="function"?NA_sesion():null;
+ const ses=NA_impSession();
  if(!ses||ses.rol!=="Director"){NA_impStatus("Solo el Director puede importar estudiantes.",true);return;}
  NA_impFile=file;NA_impPlan=null;
  document.getElementById("naImportSave").disabled=true;
