@@ -6917,7 +6917,7 @@ function generarHorarioInicialBrenda(){
                 seccion:normalizarNombreHorario(carga.seccion||""),
                 turno:normalizarNombreHorario(carga.turno||""),
                 asignaturas:(carga.asignaturas||[]).map(normalizarNombreHorario).sort(),
-                horasSemanales:String(carga.horasSemanales||""),
+                // Las horas semanales de la carga no distinguen un grupo para crear este horario.
                 estado:normalizarNombreHorario(carga.estado||"Activo")
             });
             if(!firmas.has(firma)){firmas.add(firma);cargasUnicas.push(carga);}
