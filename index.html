@@ -6903,11 +6903,30 @@ function generarHorarioInicialBrenda(){
             /I\s*,\s*II\s+Y\s+III(?:\s+NIVEL)?/.test(normalizarNombreHorario(a.grado))
         );
         const candidatas=especificas.length?especificas:agrupadas.length?agrupadas:elegibles;
-        if(candidatas.length!==1){
-            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa en 2027. No se guardó ningún horario.");
+        // Ignorar duplicados exactos de una misma carga; no fusiona ni borra registros.
+        const cargasUnicas=[];
+        const firmas=new Set();
+        for(const carga of candidatas){
+            const firma=JSON.stringify({
+                anio:String(carga.anio||""),
+                docenteId:String(carga.docenteId||""),
+                codigo_centro:String(carga.codigo_centro||""),
+                escuelaAsignada:normalizarNombreHorario(carga.escuelaAsignada||""),
+                nivel:normalizarNombreHorario(carga.nivel||""),
+                grado:normalizarNombreHorario(carga.grado||""),
+                seccion:normalizarNombreHorario(carga.seccion||""),
+                turno:normalizarNombreHorario(carga.turno||""),
+                asignaturas:(carga.asignaturas||[]).map(normalizarNombreHorario).sort(),
+                horasSemanales:String(carga.horasSemanales||""),
+                estado:normalizarNombreHorario(carga.estado||"Activo")
+            });
+            if(!firmas.has(firma)){firmas.add(firma);cargasUnicas.push(carga);}
+        }
+        if(cargasUnicas.length!==1){
+            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+cargasUnicas.length+" cargas distintas de Brenda en 2027. No se guardó ningún horario. Revise las cargas activas de ese nivel.");
             return;
         }
-        const a=candidatas[0];
+        const a=cargasUnicas[0];
         const materia=(a.asignaturas||[]).find(x=>String(x)==="Sin disciplina"||String(x)==="Atención educativa");
         asignacionesPorNivel.push({ ...nivel, asignacion:a, asignatura:materia });
     }
