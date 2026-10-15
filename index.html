@@ -6882,22 +6882,29 @@ function generarHorarioInicialBrenda(){
     ];
     const asignacionesPorNivel=[];
     for(const nivel of nivelesInicial){
-        const candidatas=asignaciones.filter(a=>{
-            // En Educación Inicial una sola carga puede cubrir los tres niveles.
-            // Aceptar tanto coincidencia normalizada como el rótulo agrupado "I, II y III Nivel".
+        const elegibles=asignaciones.filter(a=>{
             const gradoCarga=normalizarNombreHorario(a.grado);
-            const cargaAgrupaInicial=/I\s*,\s*II\s+Y\s+III(?:\s+NIVEL)?/.test(gradoCarga);
-            const coincideGrado=gradosCoinciden(a.grado,nivel.grado)||
-                cargaAgrupaInicial||
-                gradoCarga.includes(normalizarNombreHorario(nivel.grado));
             const tieneAsignaturaInicial=(a.asignaturas||[]).some(x=>{
                 const materia=normalizarNombreHorario(x);
                 return materia==="SIN DISCIPLINA"||materia==="ATENCION EDUCATIVA";
             });
-            return coincideGrado&&tieneAsignaturaInicial;
+            return tieneAsignaturaInicial&&(
+                gradosCoinciden(a.grado,nivel.grado)||
+                /I\s*,\s*II\s+Y\s+III(?:\s+NIVEL)?/.test(gradoCarga)||
+                gradoCarga.includes(normalizarNombreHorario(nivel.grado))
+            );
         });
+        // Si existe una carga específica para el nivel, preferirla a la carga agrupada
+        // "I, II y III Nivel", para no contar ambas como duplicadas.
+        const especificas=elegibles.filter(a=>
+            normalizarNombreHorario(a.grado)===normalizarNombreHorario(nivel.grado)
+        );
+        const agrupadas=elegibles.filter(a=>
+            /I\s*,\s*II\s+Y\s+III(?:\s+NIVEL)?/.test(normalizarNombreHorario(a.grado))
+        );
+        const candidatas=especificas.length?especificas:agrupadas.length?agrupadas:elegibles;
         if(candidatas.length!==1){
-            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa. Verifique la carga académica del año "+anio+"; no se guardó ningún horario.");
+            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa en 2027. No se guardó ningún horario.");
             return;
         }
         const a=candidatas[0];
@@ -6945,9 +6952,9 @@ function generarHorarioInicialBrenda(){
         alert("El horario de Brenda ya está completo: 15 bloques de lunes a viernes. No se hicieron cambios.");
         return;
     }
-    if(!confirm("Se agregarán "+pendientes.length+" bloques del horario de Brenda Guadalupe Castro Loaisiga para 2026.\n\nI Nivel: 08:00–09:00\nII Nivel: 09:00–10:00\nIII Nivel: 10:00–11:00\nLunes a viernes.\n\nNo se modificarán otros horarios. ¿Desea continuar?"))return;
+    if(!confirm("Se agregarán "+pendientes.length+" bloques del horario de Brenda Guadalupe Castro Loaisiga para 2027.\n\nI Nivel: 08:00–09:00\nII Nivel: 09:00–10:00\nIII Nivel: 10:00–11:00\nLunes a viernes.\n\nNo se modificarán otros horarios. ¿Desea continuar?"))return;
     guardarDatos(KEY_HORARIOS,actuales.concat(pendientes));
-    registrarAuditoria("Crear","Horario","Generación de horario semanal de Educación Inicial para Brenda Guadalupe Castro Loaisiga", "GENERADO-BRENDA-2026",{anio});
+    registrarAuditoria("Crear","Horario","Generación de horario semanal de Educación Inicial para Brenda Guadalupe Castro Loaisiga", "GENERADO-BRENDA-2027",{anio});
     const filtroAnio=document.getElementById("filtroHorarioAnio");if(filtroAnio)filtroAnio.value=anio;
     const filtroNivel=document.getElementById("filtroHorarioNivel");if(filtroNivel)filtroNivel.value="Inicial";
     const vista=document.getElementById("vistaHorario");if(vista)vista.value="docente";
