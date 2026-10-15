@@ -8535,23 +8535,51 @@ async function NA_impSave(){
  if(!ses||ses.rol!=="Director"){NA_impStatus("Solo el Director puede guardar la importación.",true);return;}
  if(!NA_impPlan||!NA_impPlan.insertar.length||NA_impPlan.invalidos){NA_impStatus("No hay una importación válida para guardar.",true);return;}
  const btn=document.getElementById("naImportSave");
- btn.disabled=true;btn.textContent="Guardando…";NA_impStatus("Guardando los registros nuevos. No cierre esta ventana…",false);
+ btn.disabled=true;btn.textContent="Verificando y guardando…";NA_impStatus("Comprobando de nuevo los duplicados antes de guardar. No cierre esta ventana…",false);
+ let inserted=0;
  try{
   const c=await NA_init();
-  const rows=NA_impPlan.insertar.map(function(x){
-   return {codigo:x.codigo,nombre_completo:x.nombre_completo,nacimiento:x.nacimiento,sexo:x.sexo,
+  const {data:current,error:readError}=await c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
+  if(readError)throw readError;
+  const keys=NA_impKeySet(current||[]);
+  const rows=[];
+  for(const x of NA_impPlan.insertar){
+   const code=NA_impCode(x.codigo),identity=NA_impIdentity(x);
+   if((code&&keys.codes.has(code))||keys.identities.has(identity))continue;
+   rows.push({codigo:code||null,nombre_completo:x.nombre_completo,nacimiento:x.nacimiento,sexo:x.sexo,
     responsable:x.responsable,telefono:x.telefono,direccion:x.direccion,nivel:x.nivel,grado:x.grado,
-    seccion:x.seccion,estado:x.estado,codigo_centro:x.codigo_centro};
-  });
-  const {data,error}=await c.from("estudiantes").insert(rows).select("id,codigo_centro");
-  if(error)throw error;
-  await NA_syncEstudiantes();
-  if(typeof cargarEstudiantes==="function")cargarEstudiantes();
-  if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
-  if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
-  NA_impStatus("Importación completada: "+(data||[]).length+" estudiantes nuevos guardados. Los duplicados y retirados fueron omitidos.",false);
+    seccion:x.seccion,estado:x.estado,codigo_centro:x.codigo_centro});
+   if(code)keys.codes.add(code);
+   keys.identities.add(identity);
+  }
+  if(!rows.length){
+   NA_impStatus("No hay estudiantes nuevos para guardar: los registros ya existen o fueron importados previamente.",false);
+   btn.textContent="Sin registros nuevos";btn.disabled=true;return;
+  }
+  const batchSize=50;
+  for(let i=0;i<rows.length;i+=batchSize){
+   const batch=rows.slice(i,i+batchSize);
+   const {data,error}=await c.from("estudiantes").insert(batch).select("id,codigo_centro");
+   if(error)throw new Error("Se guardaron "+inserted+" estudiantes antes de detenerse. "+error.message+" Puede volver a pulsar el botón: se comprobarán los duplicados antes de continuar.");
+   inserted+=(data||[]).length;
+   NA_impStatus("Guardados "+inserted+" de "+rows.length+" estudiantes…",false);
+  }
+  NA_impStatus("Importación completada: "+inserted+" estudiantes nuevos guardados. Los duplicados y retirados fueron omitidos.",false);
   btn.textContent="Importación completada";btn.disabled=true;
- }catch(e){console.error("Guardar importación:",e);NA_impStatus("No se guardó la importación: "+(e&&e.message?e.message:"Error desconocido")+". No vuelva a intentar hasta revisar el mensaje.",true);btn.disabled=false;btn.textContent="Reintentar guardar "+NA_impPlan.insertar.length+" estudiantes";}
+  try{
+   await NA_syncEstudiantes();
+   if(typeof cargarEstudiantes==="function")cargarEstudiantes();
+   if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+   if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
+  }catch(syncError){
+   console.error("Actualización de la vista después de importar:",syncError);
+   NA_impStatus("Los "+inserted+" estudiantes quedaron guardados en la base de datos, pero no se pudo actualizar la vista local. Recargue la página antes de volver a importar.",true);
+  }
+ }catch(e){
+  console.error("Guardar importación:",e);
+  NA_impStatus((e&&e.message?e.message:"Error desconocido")+(inserted===0?" No se confirmó ningún lote guardado.":""),true);
+  btn.disabled=false;btn.textContent="Verificar e intentar continuar";
+ }
 }
 function NA_impClose(){const m=document.getElementById("naImportModal");if(m)m.style.display="none";}
 function NA_impOpen(){const m=document.getElementById("naImportModal");if(m)m.style.display="flex";}
