@@ -1276,6 +1276,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <div class="form-group"><label>Observación</label><textarea id="horarioObservacion" rows="2" placeholder="Ej.: bloque, actividad práctica, atención multigrado..."></textarea></div>
                     <div class="actions">
                         <button id="btnGuardarHorario" class="btn-success" onclick="guardarHorario()">💾 Guardar horario</button>
+                        <button class="btn-primary" onclick="generarHorarioInicialBrenda()">📅 Generar horario de Brenda (Inicial)</button>
                         <button class="btn-secondary" onclick="limpiarHorario()">Limpiar</button>
                         <button class="btn-info" onclick="detectarConflictosHorario(true)">⚠️ Revisar conflictos</button>
                     </div>
@@ -6862,6 +6863,87 @@ function guardarHorario(){
     const datos=obtenerDatos(KEY_HORARIOS),nuevo={id:id?Number(id):Date.now(),anio,nivel,grado,seccion,dia,horaInicio,horaFin,asignatura,docenteId:String(docenteId),docenteNombre:asign.docenteNombre,aula:document.getElementById("horarioAula")?.value.trim()||"",estado:document.getElementById("horarioEstado")?.value||"Activo",observacion:document.getElementById("horarioObservacion")?.value.trim()||""};
     const conf=conflictosConHorario(nuevo,datos,id);if(conf.length){alert("⚠️ No se puede guardar por conflicto:\n\n• "+conf.join("\n• "));return;}
     const i=datos.findIndex(x=>String(x.id)===String(id));if(i>=0)datos[i]=nuevo;else datos.push(nuevo);guardarDatos(KEY_HORARIOS,datos);registrarAuditoria(id?"Editar":"Crear","Horario",id?"Actualización de horario":"Nueva clase en horario",nuevo.id,{anio:anio});limpiarHorario();cargarHorarios();detectarConflictosHorario(false);alert(id?"Horario actualizado correctamente.":"Horario guardado correctamente.");
+}
+function generarHorarioInicialBrenda(){
+    if(!exigirDirector())return;
+    const anio="2026";
+    if(estaCerradoAnio(anio))return;
+    const normalizarNombreHorario=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toUpperCase().replace(/\s+/g," ");
+    const nombreObjetivo=normalizarNombreHorario("BRENDA GUADALUPE CASTRO LOAISA");
+    const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
+        String(a.anio)===anio&&String(a.estado||"Activo")==="Activo"&&
+        normalizarNivel(a.nivel)==="inicial"&&
+        normalizarNombreHorario(a.docenteNombre)===nombreObjetivo
+    );
+    const nivelesInicial=[
+        {grado:"I Nivel",inicio:"08:00",fin:"09:00"},
+        {grado:"II Nivel",inicio:"09:00",fin:"10:00"},
+        {grado:"III Nivel",inicio:"10:00",fin:"11:00"}
+    ];
+    const asignacionesPorNivel=[];
+    for(const nivel of nivelesInicial){
+        const candidatas=asignaciones.filter(a=>
+            gradosCoinciden(a.grado,nivel.grado)&&
+            (a.asignaturas||[]).some(x=>String(x)==="Sin disciplina"||String(x)==="Atención educativa")
+        );
+        if(candidatas.length!==1){
+            alert("No puedo generar el horario todavía. Para "+nivel.grado+" encontré "+candidatas.length+" cargas activas de Brenda con Atención educativa. Verifique la carga académica del año 2026; no se guardó ningún horario.");
+            return;
+        }
+        const a=candidatas[0];
+        const materia=(a.asignaturas||[]).find(x=>String(x)==="Sin disciplina"||String(x)==="Atención educativa");
+        asignacionesPorNivel.push({ ...nivel, asignacion:a, asignatura:materia });
+    }
+    const dias=["Lunes","Martes","Miércoles","Jueves","Viernes"];
+    const actuales=obtenerDatos(KEY_HORARIOS);
+    const pendientes=[];
+    for(const nivel of asignacionesPorNivel){
+        for(const dia of dias){
+            const a=nivel.asignacion;
+            const nuevo={
+                id:Date.now()+pendientes.length,
+                anio,nivel:"Inicial",grado:nivel.grado,seccion:a.seccion,
+                dia,horaInicio:nivel.inicio,horaFin:nivel.fin,
+                asignatura:nivel.asignatura,docenteId:String(a.docenteId),
+                docenteNombre:a.docenteNombre,aula:"",estado:"Activo",
+                observacion:"Horario semanal de Educación Inicial"
+            };
+            const yaExiste=actuales.some(h=>
+                String(h.anio)===anio&&String(h.estado||"Activo")==="Activo"&&
+                String(h.docenteId)===nuevo.docenteId&&String(h.dia)===dia&&
+                String(h.horaInicio)===nuevo.horaInicio&&String(h.horaFin)===nuevo.horaFin&&
+                normalizarNivel(h.nivel)===normalizarNivel(nuevo.nivel)&&
+                gradosCoinciden(h.grado,nuevo.grado)&&
+                normalizarSeccion(h.seccion)===normalizarSeccion(nuevo.seccion)&&
+                String(h.asignatura)===String(nuevo.asignatura)
+            )||pendientes.some(h=>
+                String(h.docenteId)===nuevo.docenteId&&String(h.dia)===dia&&
+                String(h.horaInicio)===nuevo.horaInicio&&String(h.horaFin)===nuevo.horaFin&&
+                gradosCoinciden(h.grado,nuevo.grado)&&
+                normalizarSeccion(h.seccion)===normalizarSeccion(nuevo.seccion)
+            );
+            if(yaExiste)continue;
+            const conflictos=conflictosConHorario(nuevo,actuales.concat(pendientes));
+            if(conflictos.length){
+                alert("No se guardó ningún horario porque hay un conflicto para "+nivel.grado+" el "+dia+":\n\n• "+conflictos.join("\n• "));
+                return;
+            }
+            pendientes.push(nuevo);
+        }
+    }
+    if(!pendientes.length){
+        alert("El horario de Brenda ya está completo: 15 bloques de lunes a viernes. No se hicieron cambios.");
+        return;
+    }
+    if(!confirm("Se agregarán "+pendientes.length+" bloques del horario de Brenda Guadalupe Castro Loaisiga para 2026.\n\nI Nivel: 08:00–09:00\nII Nivel: 09:00–10:00\nIII Nivel: 10:00–11:00\nLunes a viernes.\n\nNo se modificarán otros horarios. ¿Desea continuar?"))return;
+    guardarDatos(KEY_HORARIOS,actuales.concat(pendientes));
+    registrarAuditoria("Crear","Horario","Generación de horario semanal de Educación Inicial para Brenda Guadalupe Castro Loaisiga", "GENERADO-BRENDA-2026",{anio});
+    const filtroAnio=document.getElementById("filtroHorarioAnio");if(filtroAnio)filtroAnio.value=anio;
+    const filtroNivel=document.getElementById("filtroHorarioNivel");if(filtroNivel)filtroNivel.value="Inicial";
+    const vista=document.getElementById("vistaHorario");if(vista)vista.value="docente";
+    cargarHorarios();
+    detectarConflictosHorario(false);
+    alert("Horario generado correctamente. Se agregaron "+pendientes.length+" bloques. Revise la vista por docente para comprobar los 15 horarios.");
 }
 function cargarHorarios(){
     const box=document.getElementById("contenedorHorario");if(!box)return;
