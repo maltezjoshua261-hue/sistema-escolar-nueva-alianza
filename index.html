@@ -1863,7 +1863,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <h2>🧾 Matrícula escolar</h2><div class="notice" style="margin-top:12px;">v9.9: control avanzado de matrícula con tipo de ingreso, procedencia y requisitos/documentos registrados. Los registros anteriores se conservan y se muestran como <strong>Continuidad</strong> cuando no tenían este campo.</div>
                     <input type="hidden" id="matId">
                     <div class="form-grid">
-                        <div class="form-group"><label>Año escolar *</label><input id="matAnio" type="number" value="2026"></div>
+                        <div class="form-group"><label>Año escolar *</label><input id="matAnio" type="number" value="2027"></div>
                         <div class="form-group"><label>Estudiante *</label><select id="matEstudiante" onchange="cargarDatosMatricula()"><option value="">Seleccione un estudiante</option></select></div>
                         <div class="form-group"><label>Centro educativo actual</label><input id="matCentroActual" type="text" readonly placeholder="Se completa al seleccionar el estudiante"></div>
                         <div class="form-group"><label>Nivel educativo *</label><select id="matNivel"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
@@ -4224,6 +4224,10 @@ function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
 function estudianteVisibleParaRol(e,anio){
     const ses=obtenerSesionActual();
     if(!ses || ses.rol==="Director") return true;
+    if(ses.rol!=="Docente") return false;
+    const codigoSesion=String(ses.codigoCentro||"").trim();
+    const codigoEstudiante=String(e?.codigo_centro||e?.codigoCentro||"").trim();
+    if(!codigoSesion || !codigoEstudiante || codigoSesion!==codigoEstudiante) return false;
     return docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio||new Date().getFullYear());
 }
 function cargarEstudiantes(){
@@ -6042,14 +6046,22 @@ function cargarDatosMatricula(){
     document.getElementById("matTelefono").value=e.telefono||"";
     document.getElementById("matDireccion").value=e.direccion||"";
 }
-function guardarMatricula(){if(!exigirDirector())return;
-    const anioCierre=document.getElementById("matAnio")?.value.trim()||"2026";
+function guardarMatricula(){
+    const ses=obtenerSesionActual();
+    if(!ses || !["Director","Docente"].includes(ses.rol)){alert("No tiene permiso para registrar matrículas.");return;}
+    const anioCierre=document.getElementById("matAnio")?.value.trim()||"2027";
     if(estaCerradoAnio(anioCierre)) return;
     let id=document.getElementById("matId").value; const estudianteSeleccionado=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
     if(!estudianteSeleccionado||!anio){alert("Seleccione estudiante e indique el año escolar.");return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.supabaseId||"")===String(estudianteSeleccionado))||obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteSeleccionado));if(!e){alert("No se encontró el estudiante.");return;}
+    if(ses.rol==="Docente"){
+      if(String(anio)!=="2027"){alert("Los docentes deben realizar las matrículas para el año escolar 2027.");return;}
+      const codigoSesion=String(ses.codigoCentro||"").trim(), codigoEstudiante=String(e.codigo_centro||e.codigoCentro||"").trim();
+      if(!codigoSesion||!codigoEstudiante||codigoSesion!==codigoEstudiante){alert("No puede matricular estudiantes de otro centro educativo.");return;}
+      if(id){alert("El docente solo puede registrar matrículas nuevas. Para modificar una matrícula existente, solicite apoyo al Administrador.");return;}
+    }
     const estudianteId=String(e.id), mats=obtenerDatos(KEY_MATRICULAS), estudiantes=obtenerDatos(KEY_ESTUDIANTES), dup=mats.find(m=>{if(String(m.anio)!==String(anio)||String(m.id)===String(id))return false;const relacionado=estudiantes.find(x=>String(x.id)===String(m.estudianteId));const mismoUuid=!!e.supabaseId&&(String(m.supabaseId||"")===String(e.supabaseId)||String(relacionado?.supabaseId||"")===String(e.supabaseId));const nombreMat=String(m.estudiante||"").trim().toLocaleUpperCase();const nombreSel=String(e.nombre||"").trim().toLocaleUpperCase();return mismoUuid||(nombreMat&&nombreSel&&nombreMat===nombreSel)||(!relacionado&&String(m.estudianteId)===String(estudianteId));});
-    if(dup){id=dup.id;document.getElementById("matId").value=String(dup.id); }
+    if(dup){if(ses.rol==="Docente"){alert("Este estudiante ya tiene una matrícula registrada para "+anio+". No se creó otra.");return;}id=dup.id;document.getElementById("matId").value=String(dup.id); }
     const registro={id:id||Date.now().toString(),estudianteId,estudiante:e.nombre||"",codigo:e.codigo||e.cedula||"",anio,nivel:document.getElementById("matNivel").value,grado:document.getElementById("matGrado").value.trim(),seccion:document.getElementById("matSeccion").value,fecha:document.getElementById("matFecha").value,responsable:document.getElementById("matResponsable").value.trim(),telefono:document.getElementById("matTelefono").value.trim(),direccion:document.getElementById("matDireccion").value.trim(),tipoMatricula:document.getElementById("matTipo").value,procedencia:document.getElementById("matProcedencia").value.trim(),documentos:document.getElementById("matDocumentos").value.trim(),estado:document.getElementById("matEstado").value,observacion:document.getElementById("matObservacion").value.trim()};
     if(!registro.fecha){alert("Indique la fecha de matrícula.");return;}
     const pos=mats.findIndex(m=>String(m.id)===String(id));if(pos>=0)mats[pos]=registro;else mats.push(registro);
@@ -6060,7 +6072,7 @@ function guardarMatricula(){if(!exigirDirector())return;
 }
 function limpiarMatricula(){
     ["matId","matGrado","matCentroActual","matResponsable","matTelefono","matDireccion","matProcedencia","matDocumentos","matObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
-    document.getElementById("matEstudiante").value="";document.getElementById("matNivel").value="";document.getElementById("matSeccion").value="";document.getElementById("matEstado").value="Matriculado";document.getElementById("matAnio").value="2026";document.getElementById("matFecha").value=new Date().toISOString().slice(0,10);document.getElementById("btnGuardarMatricula").textContent="💾 Guardar matrícula";
+    document.getElementById("matEstudiante").value="";document.getElementById("matNivel").value="";document.getElementById("matSeccion").value="";document.getElementById("matEstado").value="Matriculado";document.getElementById("matAnio").value="2027";document.getElementById("matFecha").value=new Date().toISOString().slice(0,10);document.getElementById("btnGuardarMatricula").textContent="💾 Guardar matrícula";
 }
 function editarMatricula(id){if(!exigirDirector())return;
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
@@ -6070,7 +6082,7 @@ function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtene
 function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
-    const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||docenteTieneGrupo(m.nivel,m.grado,m.seccion,m.anio))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
+    const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||(String(m.codigo_centro||obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(m.estudianteId))?.codigo_centro||"").trim()===String(ses.codigoCentro||"").trim()&&docenteTieneGrupo(m.nivel,m.grado,m.seccion,m.anio)))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
     tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.tipoMatricula||"Continuidad")+"</td><td>"+escaparHTML(m.estado)+"</td><td><button class='btn-warning' onclick='editarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>🗑️</button></td></tr>").join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
 }
 function cargarSelectorConstancia(){
@@ -7795,7 +7807,7 @@ async function NA_syncMatriculas(){
   const out=(data||[]).map(m=>{
     const e=NA_studentLocal(m.estudiante_id);
     return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
-      codigo:e?.codigo||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
+      codigo:e?.codigo||"",codigo_centro:m.codigo_centro||e?.codigo_centro||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
       fecha:m.fecha_matricula,estado:m.estado||"Activa",responsable:m.responsable||"",telefono:m.telefono||"",direccion:m.direccion||"",tipoMatricula:m.tipo_matricula||"",procedencia:m.procedencia||"",documentos:m.documentos||"",observacion:m.observacion||""};
   });
   guardarDatos(KEY_MATRICULAS,out);
