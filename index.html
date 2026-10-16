@@ -8448,8 +8448,8 @@ function NA_impRenderPreview(plan){
  box.innerHTML=
   '<div class="na-imp-stats">'+
   '<div><b>'+plan.activos+'</b><span>Activos encontrados</span></div>'+
-  '<div><b>'+plan.insertar.length+'</b><span>Nuevos para importar</span></div>'+
-  '<div><b>'+plan.duplicados+'</b><span>Duplicados omitidos</span></div>'+
+  '<div><b>'+plan.insertar.length+'</b><span>Nuevos para agregar</span></div>'+
+  '<div><b>'+plan.actualizar.length+'</b><span>Existentes para actualizar</span></div>'+
   '<div><b>'+plan.retirados+'</b><span>Retirados excluidos</span></div>'+
   '</div>'+
   '<p><b>Hojas incluidas:</b> Educación Inicial, Primaria y Secundaria en el Campo.</p>'+
@@ -8463,8 +8463,8 @@ function NA_impRenderPreview(plan){
   [x.codigo_centro,x.nombre_completo,x.nivel,x.grado,x.seccion,x._estadoPlan].forEach(function(v){const td=document.createElement("td");td.textContent=String(v||"");tr.appendChild(td);});
   table.appendChild(tr);
  });
- save.disabled=plan.insertar.length===0 || plan.invalidos>0;
- save.textContent=plan.invalidos>0?"Corrija los datos antes de importar":"Importar "+plan.insertar.length+" estudiantes";
+ save.disabled=(plan.insertar.length===0&&plan.actualizar.length===0) || plan.invalidos>0;
+ save.textContent=plan.invalidos>0?"Corrija los datos antes de importar":"Guardar: "+plan.insertar.length+" nuevos y actualizar "+plan.actualizar.length;
  if(plan.invalidos>0)NA_impStatus("No se permite guardar mientras haya filas con centro o nombre inválido.",true);
  else NA_impStatus("Revise el resumen. Los datos todavía no se han guardado.",false);
 }
@@ -8483,7 +8483,7 @@ async function NA_impPrepare(file){
   const c=await window.NA_init();
   const [centresQ, studentsQ]=await Promise.all([
    c.from("centros").select("codigo_centro,nombre,activo").eq("activo",true),
-   c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado")
+   c.from("estudiantes").select("id,codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado")
   ]);
   if(centresQ.error)throw centresQ.error;
   if(studentsQ.error)throw studentsQ.error;
@@ -8491,7 +8491,7 @@ async function NA_impPrepare(file){
   const existing=studentsQ.data||[];
   const existingKeys=NA_impKeySet(existing);
   const seenCodes=new Set(),seenIdentities=new Set();
-  const toInsert=[],vista=[];
+  const toInsert=[],toUpdate=[],vista=[],updatedIds=new Set();
   let activos=0,retirados=0,duplicados=0,invalidos=0,sinCodigo=0;
   const porCentro={};
   for(const sheetName of NA_IMP_SHEETS){
@@ -8521,6 +8521,17 @@ async function NA_impPrepare(file){
     }
     porCentro[centerCode]=(porCentro[centerCode]||0)+1;
     const id=NA_impIdentity(row);
+    const existingMatch=existing.find(ex=>(personCode&&NA_impCode(ex.codigo)===personCode)||NA_impIdentity(ex)===id);
+    if(existingMatch){
+     if(updatedIds.has(existingMatch.id)||(personCode&&seenCodes.has(personCode))||seenIdentities.has(id)){
+      duplicados++;row._estadoPlan="Duplicado dentro del Excel — se omitirá";vista.push(row);continue;
+     }
+     updatedIds.add(existingMatch.id);
+     toUpdate.push({id:existingMatch.id,row:row});
+     row._estadoPlan="Actualizar estudiante existente";
+     seenIdentities.add(id);if(personCode)seenCodes.add(personCode);
+     vista.push(row);continue;
+    }
     if((personCode&&existingKeys.codes.has(personCode))||existingKeys.identities.has(id)||
        (personCode&&seenCodes.has(personCode))||seenIdentities.has(id)){
      duplicados++;row._estadoPlan="Duplicado — se omitirá";vista.push(row);continue;
@@ -8529,21 +8540,22 @@ async function NA_impPrepare(file){
     toInsert.push(row);vista.push(row);
    }
   }
-  NA_impRenderPreview({activos:activos,retirados:retirados,duplicados:duplicados,invalidos:invalidos,sinCodigo:sinCodigo,porCentro:porCentro,insertar:toInsert,vista:vista});
+  NA_impRenderPreview({activos:activos,retirados:retirados,duplicados:duplicados,invalidos:invalidos,sinCodigo:sinCodigo,porCentro:porCentro,insertar:toInsert,actualizar:toUpdate,vista:vista});
  }catch(e){console.error("Importador Excel:",e);NA_impStatus(e&&e.message?e.message:"No se pudo leer el archivo.",true);}
 }
 async function NA_impSave(){
- const ses=typeof NA_sesion==="function"?NA_sesion():null;
- if(!ses||ses.rol!=="Director"){NA_impStatus("Solo el Director puede guardar la importación.",true);return;}
- if(!NA_impPlan||!NA_impPlan.insertar.length||NA_impPlan.invalidos){NA_impStatus("No hay una importación válida para guardar.",true);return;}
+ const ses=NA_impSession();
+ if(!ses||String(ses.rol||"").trim().toLowerCase()!=="director"){NA_impStatus("Solo el Director puede guardar la importación.",true);return;}
+ if(!NA_impPlan||(!NA_impPlan.insertar.length&&!NA_impPlan.actualizar.length)||NA_impPlan.invalidos){NA_impStatus("No hay una importación válida para guardar.",true);return;}
  const btn=document.getElementById("naImportSave");
- btn.disabled=true;btn.textContent="Comprobando duplicados…";
- NA_impStatus("Volviendo a comprobar los registros en la base de datos antes de guardar…",false);
- let saved=0;
+ btn.disabled=true;btn.textContent="Comprobando registros…";
+ NA_impStatus("Volviendo a comprobar los registros antes de actualizar o guardar…",false);
+ let saved=0,updated=0;
  try{
   const c=await window.NA_init();
-  const {data:current,error:readError}=await c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
+  const {data:current,error:readError}=await c.from("estudiantes").select("id,codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
   if(readError)throw readError;
+  const byId=new Map((current||[]).map(x=>[x.id,x]));
   const keys=NA_impKeySet(current||[]), remaining=[];
   let nowDuplicated=0;
   for(const x of NA_impPlan.insertar){
@@ -8552,24 +8564,35 @@ async function NA_impSave(){
    remaining.push(x);if(code)keys.codes.add(code);keys.identities.add(identity);
   }
   NA_impPlan.insertar=remaining;NA_impPlan.duplicados+=nowDuplicated;
-  if(!remaining.length){NA_impStatus("No hay registros nuevos que guardar: los estudiantes ya existen en la base de datos.",false);btn.textContent="Nada nuevo que importar";btn.disabled=true;return;}
+  const updates=NA_impPlan.actualizar.filter(u=>byId.has(u.id));
+  if(updates.length!==NA_impPlan.actualizar.length)throw new Error("Un estudiante marcado para actualizar ya no está disponible. Vuelva a seleccionar el Excel para revisar la vista previa.");
+  for(let i=0;i<updates.length;i++){
+   const u=updates[i],x=u.row;
+   btn.textContent="Actualizando "+(i+1)+" de "+updates.length+"…";
+   const patch={nombre_completo:x.nombre_completo,nivel:x.nivel,grado:x.grado,seccion:x.seccion,estado:"Activo",codigo_centro:x.codigo_centro};
+   if(NA_impCode(x.codigo))patch.codigo=NA_impCode(x.codigo);
+   const {error}=await c.from("estudiantes").update(patch).eq("id",u.id);
+   if(error)throw new Error("Se actualizaron "+updated+" estudiantes antes del error. "+error.message);
+   updated++;
+  }
+  if(!remaining.length&&!updated){NA_impStatus("No hay registros nuevos ni existentes seguros para actualizar.",false);btn.textContent="Nada que guardar";btn.disabled=true;return;}
   const total=remaining.length;
   for(let i=0;i<remaining.length;i+=50){
    btn.textContent="Guardando "+Math.min(i+50,total)+" de "+total+"…";
    const rows=remaining.slice(i,i+50).map(function(x){return {codigo:x.codigo,nombre_completo:x.nombre_completo,nacimiento:x.nacimiento,sexo:x.sexo,responsable:x.responsable,telefono:x.telefono,direccion:x.direccion,nivel:x.nivel,grado:x.grado,seccion:x.seccion,estado:x.estado,codigo_centro:x.codigo_centro};});
    const {data,error}=await c.from("estudiantes").insert(rows).select("id,codigo_centro");
-   if(error)throw new Error("Se guardaron "+saved+" estudiantes antes del error. "+error.message);
+   if(error)throw new Error("Se actualizaron "+updated+" y se guardaron "+saved+" estudiantes antes del error. "+error.message);
    saved+=(data||[]).length;
   }
   await NA_syncEstudiantes();
   if(typeof cargarEstudiantes==="function")cargarEstudiantes();
   if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
   if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
-  NA_impStatus("Importación completada: "+saved+" estudiantes nuevos guardados. Los duplicados y retirados fueron omitidos.",false);
+  NA_impStatus("Importación completada: "+saved+" estudiantes nuevos agregados y "+updated+" existentes actualizados. Los duplicados internos y retirados fueron omitidos.",false);
   btn.textContent="Importación completada";btn.disabled=true;
  }catch(e){
   console.error("Guardar importación:",e);
-  NA_impStatus("No se pudo completar la importación. "+(e&&e.message?e.message:"Error desconocido")+". Antes de reintentar, el sistema volverá a comprobar los duplicados para no insertar dos veces los registros ya guardados.",true);
+  NA_impStatus("No se pudo completar toda la operación. "+(e&&e.message?e.message:"Error desconocido")+". Antes de reintentar, vuelva a seleccionar el Excel y revise la vista previa.",true);
   btn.disabled=false;btn.textContent="Volver a comprobar e intentar guardar";
  }
 }
