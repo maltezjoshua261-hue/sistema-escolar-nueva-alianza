@@ -4775,20 +4775,26 @@ function registrarAsistenciaGrupo(){
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel)&&normalizarGrado(e.grado)===normalizarGrado(grado)&&normalizarSeccion(e.seccion)===normalizarSeccion(seccion)&&String(e.estado||"Activo")==="Activo"&&(sesionGrupo?.rol!=="Docente"||!sesionGrupo.codigoCentro||String(e.codigo_centro||"")===String(sesionGrupo.codigoCentro)));
     if(!estudiantes.length){alert("No hay estudiantes activos en este grupo.");return;}
     const estado=document.getElementById("asisEstado").value;
-    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
+    let docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
     const asignacionesGrupo=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===String(fecha.slice(0,4)) &&
         String(a.estado||"Activo")==="Activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
         gradoAsignacionCoincide(a.grado,grado) &&
-        normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (sesionGrupo?.rol!=="Docente"||!sesionGrupo.codigoCentro||String(a.codigo_centro||"")===String(sesionGrupo.codigoCentro))
     );
     if(sesionGrupo?.rol==="Docente"){
-        const asignacionValida=asignacionesGrupo.some(a=>String(a.docenteId)===String(docenteSeleccionado)&&(!sesionGrupo.codigoCentro||String(a.codigo_centro||"")===String(sesionGrupo.codigoCentro)));
-        const docentePropio=!!sesionGrupo.docenteId&&String(docenteSeleccionado)===String(sesionGrupo.docenteId)&&asignacionValida;
-        const docenteDelCentro=!sesionGrupo.docenteId&&!!sesionGrupo.codigoCentro&&asignacionValida;
-        if(!docentePropio&&!docenteDelCentro){
-            alert("No tiene permiso para registrar asistencia en este grupo o el docente no pertenece a su centro.");return;
+        if(sesionGrupo.docenteId){
+            const asignacionValida=asignacionesGrupo.some(a=>String(a.docenteId)===String(sesionGrupo.docenteId));
+            if(!asignacionValida){alert("No tiene permiso para registrar asistencia en este grupo.");return;}
+            docenteSeleccionado=String(sesionGrupo.docenteId);
+        }else{
+            // Las cuentas generales de cada centro no necesitan seleccionar al maestro:
+            // el sistema atribuye el registro al docente asignado a ese grupo en ese centro.
+            const asignacionCentro=asignacionesGrupo.find(a=>!!a.docenteId);
+            if(!sesionGrupo.codigoCentro||!asignacionCentro){alert("No hay una asignación activa para este grupo en su centro educativo.");return;}
+            docenteSeleccionado=String(asignacionCentro.docenteId);
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
@@ -4796,7 +4802,7 @@ function registrarAsistenciaGrupo(){
     let nuevos=0,actualizados=0;
     estudiantes.forEach(e=>{
         const existe=datos.find(a=>String(a.estudianteId)===String(e.id)&&a.fecha===fecha);
-        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
+        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,docenteId:docenteObj?.id||docenteSeleccionado||"",docenteNombre:docenteObj?.nombre||"",codigo_centro:sesionGrupo?.codigoCentro||docenteObj?.codigo_centro||estudiantes[0]?.codigo_centro||"",estado};
         if(existe){datos[datos.indexOf(existe)]=registro;actualizados++;}else{datos.push(registro);nuevos++;}
     });
     guardarDatos(KEY_ASISTENCIAS,datos);
@@ -4816,7 +4822,7 @@ function cargarAsistencias(){
     const buscar=(document.getElementById("buscarAsistencia")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
-    const lista=datos.filter(a=>ses?.rol==="Docente" ? (String(a.docenteId||"")===String(ses.docenteId||"") && docenteTieneGrupo(a.nivel,a.grado,a.seccion,String(a.fecha||"").slice(0,4))) : true).filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
+    const lista=datos.filter(a=>ses?.rol==="Docente" ? (ses.docenteId ? (String(a.docenteId||"")===String(ses.docenteId) && docenteTieneGrupo(a.nivel,a.grado,a.seccion,String(a.fecha||"").slice(0,4))) : (!!ses.codigoCentro && String(a.codigo_centro||"")===String(ses.codigoCentro))) : true).filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
     if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
@@ -4824,7 +4830,7 @@ function eliminarAsistencia(id){
     const registro=obtenerDatos(KEY_ASISTENCIAS).find(a=>String(a.id)===String(id));
     if(!registro)return;
     const ses=obtenerSesionActual();
-    if(ses?.rol==="Docente" && String(registro.docenteId||"")!==String(ses.docenteId||"")){
+    if(ses?.rol==="Docente" && (ses.docenteId ? String(registro.docenteId||"")!==String(ses.docenteId) : (!ses.codigoCentro||String(registro.codigo_centro||"")!==String(ses.codigoCentro)))){
         alert("No tiene permiso para eliminar esta asistencia.");return;
     }
     if(estaCerradoAnio(String(registro.fecha||"").slice(0,4)))return;
