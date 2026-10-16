@@ -1027,7 +1027,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                                     <th>#</th>
                                     <th>Nombre</th>
                                     <th>Código</th>
-                                    
+                                    <th>Centro educativo</th>
                                     <th>Nivel</th>
                                     <th>Grado/Nivel</th>
                                     <th>Sección</th>
@@ -4235,16 +4235,18 @@ function cargarEstudiantes(){
     const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
+    const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+    const centroDe=e=>{const c=String(e?.codigo_centro||e?.codigoCentro||"").trim();return c?(centros[c]||"Centro no reconocido")+" ("+c+")":"Sin centro asignado";};
     const lista=datos
         .filter(e=>!ses||ses.rol==="Director"||estudianteVisibleParaRol(e,2027))
-        .filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
+        .filter(e=>!buscar||[e.nombre,e.codigo,e.codigo_centro,e.codigoCentro,centroDe(e),e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((e,i)=>{
         const acciones=(!ses||ses.rol==="Director")
             ? '<button class="btn-warning" onclick="editarEstudiante('+e.id+')">✏️ Editar</button> <button class="btn-danger" onclick="eliminarEstudiante('+e.id+')">Eliminar</button>'
             : '<span style="color:#6b7280;font-size:12px;">Solo consulta</span>';
-        tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.codigo)}</td><td>${escaparHTML(e.nivel)}</td><td>${escaparHTML(e.grado)}</td><td>${escaparHTML(e.seccion)}</td><td>${escaparHTML(e.responsable||"")}</td><td>${escaparHTML(e.estado||"Activo")}</td><td>${acciones}</td></tr>`;
+        tabla.innerHTML+=`<tr><td>${i+1}</td><td>${escaparHTML(e.nombre)}</td><td>${escaparHTML(e.codigo)}</td><td>${escaparHTML(centroDe(e))}</td><td>${escaparHTML(e.nivel)}</td><td>${escaparHTML(e.grado)}</td><td>${escaparHTML(e.seccion)}</td><td>${escaparHTML(e.responsable||"")}</td><td>${escaparHTML(e.estado||"Activo")}</td><td>${acciones}</td></tr>`;
     });
-    if(!lista.length) tabla.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes asignados a su usuario docente.</td></tr>';
+    if(!lista.length) tabla.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:#777;">No hay estudiantes asignados a su usuario docente.</td></tr>';
 }
 function eliminarEstudiante(id){
     if(!exigirDirector())return;
