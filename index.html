@@ -6025,13 +6025,14 @@ function cargarEstudiantesMatricula(){
     const anterior=select.value;
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo"&&estudianteVisibleParaRol(e,document.getElementById("boletaAnio")?.value||new Date().getFullYear())).sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     select.innerHTML='<option value="">Seleccione un estudiante</option>';
-    estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
+    // Usar el UUID de Supabase como valor evita confundir estudiantes si el ID local antiguo está duplicado.
+    estudiantes.forEach(e=>{const o=document.createElement("option");o.value=e.supabaseId||e.id;o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"");select.appendChild(o);});
     if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
 }
 function cargarDatosMatricula(){
     const id=document.getElementById("matEstudiante")?.value;
     if(!id){const centro=document.getElementById("matCentroActual");if(centro)centro.value="";return;}
-    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.supabaseId||"")===String(id))||obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
     document.getElementById("matNivel").value=e.nivel||"";
     document.getElementById("matGrado").value=e.grado||"";
     document.getElementById("matSeccion").value=e.seccion||"";
@@ -6044,10 +6045,10 @@ function cargarDatosMatricula(){
 function guardarMatricula(){if(!exigirDirector())return;
     const anioCierre=document.getElementById("matAnio")?.value.trim()||"2026";
     if(estaCerradoAnio(anioCierre)) return;
-    const id=document.getElementById("matId").value, estudianteId=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
-    if(!estudianteId||!anio){alert("Seleccione estudiante e indique el año escolar.");return;}
-    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteId));if(!e){alert("No se encontró el estudiante.");return;}
-    const mats=obtenerDatos(KEY_MATRICULAS), dup=mats.find(m=>String(m.estudianteId)===String(estudianteId)&&String(m.anio)===String(anio)&&String(m.id)!==String(id));
+    const id=document.getElementById("matId").value, estudianteSeleccionado=document.getElementById("matEstudiante").value, anio=document.getElementById("matAnio").value.trim();
+    if(!estudianteSeleccionado||!anio){alert("Seleccione estudiante e indique el año escolar.");return;}
+    const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.supabaseId||"")===String(estudianteSeleccionado))||obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteSeleccionado));if(!e){alert("No se encontró el estudiante.");return;}
+    const estudianteId=String(e.id), mats=obtenerDatos(KEY_MATRICULAS), dup=mats.find(m=>String(m.estudianteId)===String(estudianteId)&&String(m.anio)===String(anio)&&String(m.id)!==String(id));
     if(dup){alert("El estudiante ya tiene una matrícula registrada para ese año escolar.");return;}
     const registro={id:id||Date.now().toString(),estudianteId,estudiante:e.nombre||"",codigo:e.codigo||e.cedula||"",anio,nivel:document.getElementById("matNivel").value,grado:document.getElementById("matGrado").value.trim(),seccion:document.getElementById("matSeccion").value,fecha:document.getElementById("matFecha").value,responsable:document.getElementById("matResponsable").value.trim(),telefono:document.getElementById("matTelefono").value.trim(),direccion:document.getElementById("matDireccion").value.trim(),tipoMatricula:document.getElementById("matTipo").value,procedencia:document.getElementById("matProcedencia").value.trim(),documentos:document.getElementById("matDocumentos").value.trim(),estado:document.getElementById("matEstado").value,observacion:document.getElementById("matObservacion").value.trim()};
     if(!registro.fecha){alert("Indique la fecha de matrícula.");return;}
@@ -6063,7 +6064,7 @@ function limpiarMatricula(){
 }
 function editarMatricula(id){if(!exigirDirector())return;
     const m=obtenerDatos(KEY_MATRICULAS).find(x=>String(x.id)===String(id));if(!m)return;
-    document.getElementById("matId").value=m.id;document.getElementById("matEstudiante").value=m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matTipo").value=m.tipoMatricula||"Continuidad";document.getElementById("matProcedencia").value=m.procedencia||"";document.getElementById("matDocumentos").value=m.documentos||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
+    document.getElementById("matId").value=m.id;const estudianteEdicion=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(m.estudianteId));document.getElementById("matEstudiante").value=estudianteEdicion?.supabaseId||m.estudianteId;document.getElementById("matAnio").value=m.anio||"";document.getElementById("matNivel").value=m.nivel||"";document.getElementById("matGrado").value=m.grado||"";document.getElementById("matSeccion").value=m.seccion||"";document.getElementById("matFecha").value=m.fecha||"";document.getElementById("matResponsable").value=m.responsable||"";document.getElementById("matTelefono").value=m.telefono||"";document.getElementById("matDireccion").value=m.direccion||"";document.getElementById("matTipo").value=m.tipoMatricula||"Continuidad";document.getElementById("matProcedencia").value=m.procedencia||"";document.getElementById("matDocumentos").value=m.documentos||"";document.getElementById("matEstado").value=m.estado||"Matriculado";document.getElementById("matObservacion").value=m.observacion||"";document.getElementById("btnGuardarMatricula").textContent="💾 Actualizar matrícula";document.getElementById("matricula").scrollIntoView({behavior:"smooth"});
 }
 function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtenerDatos(KEY_MATRICULAS).find(m=>String(m.id)===String(id));if(registro&&estaCerradoAnio(String(registro.anio)))return;if(!confirm("¿Eliminar esta matrícula?"))return;guardarDatos(KEY_MATRICULAS,obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.id)!==String(id)));registrarAuditoria("Eliminar","Matrícula","Eliminación de matrícula",registro?.id||id,{anio:registro?.anio||"2026"});cargarMatriculas();cargarSelectorConstancia();actualizarEstadisticas();}
 function cargarMatriculas(){
@@ -7896,21 +7897,21 @@ window.guardarEstudiante=async function(){
 
 const oldGuardarMatricula=window.guardarMatricula;
 window.guardarMatricula=async function(){
-  const estudianteIdAntes=document.getElementById("matEstudiante")?.value||"";
+  const estudianteSeleccionadoAntes=document.getElementById("matEstudiante")?.value||"";
+  const eAntes=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.supabaseId||"")===String(estudianteSeleccionadoAntes))||obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteSeleccionadoAntes));
+  const estudianteIdAntes=eAntes?.id;
   const anioAntes=document.getElementById("matAnio")?.value.trim()||"";
-  const idAntes=document.getElementById("matId")?.value||"";
-  if(!estudianteIdAntes||!anioAntes){oldGuardarMatricula();return;}
+  if(!estudianteSeleccionadoAntes||!anioAntes){oldGuardarMatricula();return;}
   oldGuardarMatricula();
   await new Promise(r=>setTimeout(r,0));
   // Si la validación local rechazó el guardado, el formulario permanece abierto.
-  // En ese caso no sincronizar ni modificar ningún registro de Supabase.
   const estudianteDespues=document.getElementById("matEstudiante")?.value||"";
   const idDespues=document.getElementById("matId")?.value||"";
   if(estudianteDespues||idDespues)return;
   const lista=obtenerDatos(KEY_MATRICULAS);
   const r=lista.find(x=>String(x.estudianteId)===String(estudianteIdAntes)&&String(x.anio)===String(anioAntes));
   if(!r)return;
-  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteIdAntes));
+  const e=eAntes;
   if(!e?.supabaseId)return;
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa",codigo_centro:NA_sesion()?.codigoCentro||e.codigo_centro||null,responsable:r.responsable||null,telefono:r.telefono||null,direccion:r.direccion||null,tipo_matricula:r.tipoMatricula||null,procedencia:r.procedencia||null,documentos:r.documentos||null,observacion:r.observacion||null};
