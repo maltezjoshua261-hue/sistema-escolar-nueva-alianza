@@ -7744,8 +7744,26 @@ async function NA_profile(user){
   });
 }
 
+// V11.30: reconstruir el rol y centro desde el perfil autenticado de Supabase antes de sincronizar.
+async function NA_sesionDesdeAuth(c){
+  try{
+    const {data:{user},error:authError}=await c.auth.getUser();
+    if(authError||!user)return NA_sesion();
+    const {data:p,error}=await c.from("perfiles")
+      .select("id,nombre_completo,usuario,rol,activo,docente_id,codigo_centro")
+      .eq("id",user.id).single();
+    if(error||!p||!p.activo)return NA_sesion();
+    return NA_setSesion({
+      usuario:p.usuario||user.email,rol:p.rol,docenteId:p.docente_id,
+      codigoCentro:p.codigo_centro,authUserId:user.id,nombreCompleto:p.nombre_completo
+    });
+  }catch(e){
+    console.warn("No se pudo actualizar el perfil de sesión; se conserva la sesión actual.",e);
+    return NA_sesion();
+  }
+}
 async function NA_syncEstudiantes(){
-  const c=await NA_init(), ses=NA_sesion();
+  const c=await NA_init(), ses=await NA_sesionDesdeAuth(c);
   let q=c.from("estudiantes").select("*").order("nombre_completo");
   if(ses?.rol!=="Director") q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;
@@ -7768,7 +7786,7 @@ async function NA_syncEstudiantes(){
 }
 window.NA_syncEstudiantes=NA_syncEstudiantes;
 async function NA_syncDocentes(){
-  const c=await NA_init(), ses=NA_sesion();
+  const c=await NA_init(), ses=await NA_sesionDesdeAuth(c);
   let q=c.from("docentes").select("*").order("nombre_completo");
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
