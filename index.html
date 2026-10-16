@@ -4236,7 +4236,7 @@ function cargarEstudiantes(){
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
     const lista=datos
-        .filter(e=>!ses||ses.rol==="Director"||docenteTieneGrupo(e.nivel,e.grado,e.seccion,e.anio||new Date().getFullYear()))
+        .filter(e=>!ses||ses.rol==="Director"||estudianteVisibleParaRol(e,2027))
         .filter(e=>!buscar||[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((e,i)=>{
         const acciones=(!ses||ses.rol==="Director")
@@ -6083,7 +6083,7 @@ function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
     const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||(String(m.codigo_centro||obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(m.estudianteId))?.codigo_centro||"").trim()===String(ses.codigoCentro||"").trim()&&docenteTieneGrupo(m.nivel,m.grado,m.seccion,m.anio)))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
-    tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.tipoMatricula||"Continuidad")+"</td><td>"+escaparHTML(m.estado)+"</td><td><button class='btn-warning' onclick='editarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>🗑️</button></td></tr>").join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
+    tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.tipoMatricula||"Continuidad")+"</td><td>"+escaparHTML(m.estado)+"</td><td>"+(ses?.rol==="Director"?"<button class='btn-warning' onclick='editarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>🗑️</button>":"<span style='color:#6b7280;font-size:12px'>Solo consulta</span>")+"</td></tr>").join(""):'<tr><td colspan="10" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
 }
 function cargarSelectorConstancia(){
     const s=document.getElementById("constanciaMatricula");if(!s)return;const anterior=s.value;s.innerHTML='<option value="">Seleccione</option>';
@@ -8389,7 +8389,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
   const SOLO_DIRECTOR=[
     "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
     "docentes","asignaciones","horarios","reportes","reportesOficiales",
-    "matricula","expediente","reporteMatricula","rendimiento",
+    "expediente","reporteMatricula","rendimiento",
     "evaluacionAcademica","perfilAcademico","planesMejora",
     "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
     "cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos",
@@ -8411,6 +8411,9 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
       if(m&&SOLO_DIRECTOR.includes(m[1]))btn.style.display=director?"":"none";
     });
     if(!director){
+      const seccionEstudiantes=document.getElementById("estudiantes");
+      const formularioEstudiantes=seccionEstudiantes?.querySelector(".card");
+      if(formularioEstudiantes) formularioEstudiantes.style.display="none";
       const inicio=document.getElementById("inicio")||document.querySelector(".section");
       document.querySelectorAll(".section").forEach(sec=>{if(SOLO_DIRECTOR.includes(sec.id)){sec.classList.remove("active");sec.style.display="none"}});
       if(inicio){inicio.style.display="";inicio.classList.add("active");}
