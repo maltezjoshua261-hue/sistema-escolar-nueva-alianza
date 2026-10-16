@@ -4763,7 +4763,7 @@ function guardarAsistencia(){
     alert(existe?"Asistencia actualizada.":"Asistencia guardada correctamente.");
     cargarAsistencias(); actualizarEstadisticas();
 }
-function registrarAsistenciaGrupo(){
+async function registrarAsistenciaGrupo(){
     const fechaCierre=document.getElementById("asisFecha")?.value||"";
     if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
     const fecha=document.getElementById("asisFecha").value;
@@ -4772,6 +4772,11 @@ function registrarAsistenciaGrupo(){
     const seccion=document.getElementById("asisSeccion").value;
     if(!fecha||!nivel||!grado||!seccion){alert("Seleccione fecha, nivel, grado y sección.");return;}
     const sesionGrupo=obtenerSesionActual();
+    // Cargar asignaciones y docentes desde Supabase antes de validar el grupo; evita usar una copia local desactualizada.
+    if(sesionGrupo?.rol==="Docente"){
+        try{if(typeof NA_syncDocentes==="function")await NA_syncDocentes();if(typeof NA_syncAsignaciones==="function")await NA_syncAsignaciones();}
+        catch(error){console.error("No se pudieron actualizar las asignaciones de asistencia:",error);alert("No se pudo verificar la asignación del grupo. Revise la conexión e inténtelo de nuevo.");return;}
+    }
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel)&&normalizarGrado(e.grado)===normalizarGrado(grado)&&normalizarSeccion(e.seccion)===normalizarSeccion(seccion)&&String(e.estado||"Activo")==="Activo"&&(sesionGrupo?.rol!=="Docente"||!sesionGrupo.codigoCentro||String(e.codigo_centro||"")===String(sesionGrupo.codigoCentro)));
     if(!estudiantes.length){alert("No hay estudiantes activos en este grupo.");return;}
     const estado=document.getElementById("asisEstado").value;
