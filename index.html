@@ -4668,9 +4668,20 @@ document.addEventListener("DOMContentLoaded",function(){
     const grado=document.getElementById("asisGrado");
     const seccion=document.getElementById("asisSeccion");
 
-    if(nivel) nivel.addEventListener("change",cargarEstudiantesAsistencia);
-    if(grado) grado.addEventListener("change",cargarEstudiantesAsistencia);
-    if(seccion) seccion.addEventListener("change",cargarEstudiantesAsistencia);
+    // Mantener sincronizados estudiantes y docente responsable al cambiar el grupo.
+    if(fecha) fecha.addEventListener("change",cargarDocenteAsistencia);
+    if(nivel) nivel.addEventListener("change",function(){
+        cargarEstudiantesAsistencia();
+        cargarDocenteAsistencia();
+    });
+    if(grado) grado.addEventListener("change",function(){
+        cargarEstudiantesAsistencia();
+        cargarDocenteAsistencia();
+    });
+    if(seccion) seccion.addEventListener("change",function(){
+        cargarEstudiantesAsistencia();
+        cargarDocenteAsistencia();
+    });
 
 });
 
