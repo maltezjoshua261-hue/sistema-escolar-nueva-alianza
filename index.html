@@ -7737,10 +7737,18 @@ async function NA_syncEstudiantes(){
   if(ses?.rol!=="Director") q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;
   if(error)throw error;
-  const old=obtenerDatos(KEY_ESTUDIANTES), out=[];
+  const old=obtenerDatos(KEY_ESTUDIANTES), out=[], usados=new Set();
+  let siguiente=Math.max(0,...old.map(x=>Number(x.id)||0))+1;
   (data||[]).forEach(e=>{
-    const id=NA_localId(old,e.id);
     const previo=old.find(x=>String(x.supabaseId||"")===String(e.id));
+    let id=previo?.id;
+    // Cada opción del selector necesita un ID local único. Si el ID anterior
+    // estaba duplicado, reasignar uno libre para que no se elija otro estudiante.
+    if(id===undefined||id===null||id===""||usados.has(String(id))){
+      while(usados.has(String(siguiente)))siguiente++;
+      id=siguiente++;
+    }
+    usados.add(String(id));
     out.push({...e,id,nombre:e.nombre_completo,supabaseId:e.id});
   });
   guardarDatos(KEY_ESTUDIANTES,out);
@@ -7907,8 +7915,13 @@ window.guardarMatricula=async function(){
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa",codigo_centro:NA_sesion()?.codigoCentro||e.codigo_centro||null,responsable:r.responsable||null,telefono:r.telefono||null,direccion:r.direccion||null,tipo_matricula:r.tipoMatricula||null,procedencia:r.procedencia||null,documentos:r.documentos||null,observacion:r.observacion||null};
   const q=r.supabaseId?await c.from("matriculas").update(row).eq("id",r.supabaseId).select().single():await c.from("matriculas").insert(row).select().single();
-  if(q.error)console.error("Matrícula Supabase:",q.error);
-  await NA_syncMatriculas(); if(typeof cargarMatriculas==="function")cargarMatriculas();
+  if(q.error){
+    console.error("Matrícula Supabase:",q.error);
+    alert("La matrícula quedó en el navegador, pero no se confirmó en la base de datos. No vuelva a registrarla todavía. Detalle: "+q.error.message);
+    return;
+  }
+  try{await NA_syncMatriculas(); if(typeof cargarMatriculas==="function")cargarMatriculas();}
+  catch(err){console.error("Sincronización de matrículas:",err);alert("La matrícula se guardó, pero no se pudo actualizar la tabla. Recargue la página antes de intentar guardarla otra vez.");}
 };
 
 const oldGuardarAsistencia=window.guardarAsistencia;
