@@ -8458,7 +8458,9 @@ function NA_impRenderPreview(plan){
   '<p><b>Sin código de persona:</b> '+plan.sinCodigo+'. Se guardarán sin código y se revisarán por nombre, centro y grado para evitar duplicados.</p>'+
   '<p><b>Centros:</b> '+Object.keys(plan.porCentro).sort().map(c=>NA_impEsc(c+" "+(NA_IMP_CENTROS[c]||""))+" ("+plan.porCentro[c]+")").join(" · ")+'</p>';
  table.innerHTML="";
- plan.vista.slice(0,12).forEach(function(x){
+ const previewRows=plan.vista.slice(0,12);
+ (plan.actualizar||[]).forEach(function(item){if(item&&item.row&&!previewRows.includes(item.row))previewRows.push(item.row);});
+ previewRows.forEach(function(x){
   const tr=document.createElement("tr");
   [x.codigo_centro,x.nombre_completo,x.nivel,x.grado,x.seccion,x._estadoPlan].forEach(function(v){const td=document.createElement("td");td.textContent=String(v||"");tr.appendChild(td);});
   table.appendChild(tr);
