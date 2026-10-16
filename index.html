@@ -7741,6 +7741,7 @@ async function NA_syncEstudiantes(){
   });
   guardarDatos(KEY_ESTUDIANTES,out);
 }
+window.NA_syncEstudiantes=NA_syncEstudiantes;
 async function NA_syncDocentes(){
   const c=await NA_init(), ses=NA_sesion();
   let q=c.from("docentes").select("*").order("nombre_completo");
@@ -8586,7 +8587,7 @@ async function NA_impSave(){
    if(error)throw new Error("Se actualizaron "+updated+" y se guardaron "+saved+" estudiantes antes del error. "+error.message);
    saved+=(data||[]).length;
   }
-  await NA_syncEstudiantes();
+  await window.NA_syncEstudiantes();
   if(typeof cargarEstudiantes==="function")cargarEstudiantes();
   if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
   if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
