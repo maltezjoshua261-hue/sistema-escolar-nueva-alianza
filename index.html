@@ -8299,12 +8299,21 @@ window.cargarEstudiantes=function(){
   const tabla=document.getElementById("tablaEstudiantes"); if(!tabla)return;
   const buscar=(document.getElementById("buscarEstudiante")?.value||"").trim().toLowerCase();
   const ses=obtenerSesionActual();
+  const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+  const centroDe=e=>{
+    const valor=String(e?.codigo_centro??e?.codigoCentro??e?.centro_codigo??e?.codigo_centro_educativo??e?.centro??e?.centro_educativo??"").trim();
+    if(!valor)return "Sin centro asignado";
+    const codigo=valor.replace(/\\.0$/,"");
+    if(centros[codigo])return centros[codigo]+" ("+codigo+")";
+    const encontrado=Object.entries(centros).find(([c,n])=>n.toLowerCase()===codigo.toLowerCase());
+    return encontrado?encontrado[1]+" ("+encontrado[0]+")":codigo;
+  };
   let lista=obtenerDatos(KEY_ESTUDIANTES);
   if(ses?.rol==="Docente"){
-    lista=lista.filter(e=>String(e.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
+    lista=lista.filter(e=>String(e.codigo_centro||e.codigoCentro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
   }
-  if(buscar) lista=lista.filter(e=>[e.nombre,e.codigo,e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
-  tabla.innerHTML=lista.map((e,i)=>'<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(e.nombre||"")+'</td><td>'+escaparHTML(e.codigo||"")+'</td><td>'+escaparHTML(e.nivel||"")+'</td><td>'+escaparHTML(e.grado||"")+'</td><td>'+escaparHTML(e.seccion||"")+'</td><td>'+escaparHTML(e.responsable||"")+'</td><td>'+escaparHTML(e.estado||"Activo")+'</td><td><span style="color:#6b7280;font-size:12px;">Solo consulta</span></td></tr>').join("") || '<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados para este centro.</td></tr>';
+  if(buscar) lista=lista.filter(e=>[e.nombre,e.codigo,e.codigo_centro,e.codigoCentro,centroDe(e),e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
+  tabla.innerHTML=lista.map((e,i)=>'<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(e.nombre||"")+'</td><td>'+escaparHTML(e.codigo||"")+'</td><td data-columna="centro-educativo" style="min-width:190px;font-weight:600;">'+escaparHTML(centroDe(e))+'</td><td>'+escaparHTML(e.nivel||"")+'</td><td>'+escaparHTML(e.grado||"")+'</td><td>'+escaparHTML(e.seccion||"")+'</td><td>'+escaparHTML(e.responsable||"")+'</td><td>'+escaparHTML(e.estado||"Activo")+'</td><td><span style="color:#6b7280;font-size:12px;">Solo consulta</span></td></tr>').join("") || '<tr><td colspan="10" style="text-align:center;padding:20px;color:#777;">No hay estudiantes registrados para este centro.</td></tr>';
 };
 window.cargarEstudiantesMatricula=function(){
   const select=document.getElementById("matEstudiante"); if(!select)return;
