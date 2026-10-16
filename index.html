@@ -4724,39 +4724,61 @@ function cargarEstudiantesAsistencia(){
 }
 
 
-function guardarAsistencia(){
+async function guardarAsistencia(){
     const fechaCierre=document.getElementById("asisFecha")?.value||"";
     if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
+    const fecha=document.getElementById("asisFecha").value;
+    if(!fecha){alert("Seleccione la fecha.");return;}
     const estudianteId=document.getElementById("asisEstudiante").value;
     if(!estudianteId){alert("Seleccione un estudiante.");return;}
+    const sesionAs=obtenerSesionActual();
+    // Las cuentas generales de centro no están vinculadas a un docente individual:
+    // refrescar datos y atribuir la asistencia al docente asignado al grupo.
+    if(sesionAs?.rol==="Docente"){
+        try{
+            if(typeof NA_syncDocentes==="function") await NA_syncDocentes();
+            if(typeof NA_syncAsignaciones==="function") await NA_syncAsignaciones();
+        }catch(error){
+            console.error("No se pudieron actualizar las asignaciones de asistencia:",error);
+            alert("No se pudo verificar la asignación del grupo. Revise la conexión e inténtelo de nuevo.");
+            return;
+        }
+    }
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
     const estudiante=estudiantes.find(e=>String(e.id)===String(estudianteId));
     if(!estudiante){alert("No se encontró el estudiante.");return;}
-    const fecha=document.getElementById("asisFecha").value;
+    if(sesionAs?.rol==="Docente" && sesionAs.codigoCentro && String(estudiante.codigo_centro||"")!==String(sesionAs.codigoCentro)){
+        alert("Solo puede registrar asistencia a estudiantes de su centro educativo.");return;
+    }
     const estado=document.getElementById("asisEstado").value;
-    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
-    const sesionAs=obtenerSesionActual();
-    const anioAs=fecha?fecha.slice(0,4):"";
+    let docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
+    const anioAs=fecha.slice(0,4);
     const asignacionesAs=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===String(anioAs) &&
         String(a.estado||"Activo")==="Activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(estudiante.nivel) &&
         gradoAsignacionCoincide(a.grado,estudiante.grado) &&
-        normalizarSeccion(a.seccion)===normalizarSeccion(estudiante.seccion)
+        normalizarSeccion(a.seccion)===normalizarSeccion(estudiante.seccion) &&
+        (sesionAs?.rol!=="Docente"||!sesionAs.codigoCentro||String(a.codigo_centro||"")===String(sesionAs.codigoCentro))
     );
     if(sesionAs?.rol==="Docente"){
-        if(String(docenteSeleccionado)!==String(sesionAs.docenteId||"")){
-            alert("Seleccione su usuario docente antes de registrar asistencia.");return;
-        }
-        if(!asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId||""))){
-            alert("No tiene asignación activa para este grupo.");return;
+        if(sesionAs.docenteId){
+            if(!asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId))){
+                alert("No tiene asignación activa para este grupo.");return;
+            }
+            docenteSeleccionado=String(sesionAs.docenteId);
+        }else{
+            const asignacionCentro=asignacionesAs.find(a=>!!a.docenteId);
+            if(!sesionAs.codigoCentro||!asignacionCentro){
+                alert("No hay una asignación activa para este grupo en su centro educativo.");return;
+            }
+            docenteSeleccionado=String(asignacionCentro.docenteId);
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
-    if(!fecha){alert("Seleccione la fecha.");return;}
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
-    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
+    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||docenteSeleccionado||"",docenteNombre:docenteObj?.nombre||"",codigo_centro:sesionAs?.codigoCentro||docenteObj?.codigo_centro||estudiante.codigo_centro||"",estado};
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
     registrarAuditoria(existe?"Editar":"Crear","Asistencia",existe?"Actualización de asistencia":"Registro de asistencia",registro.id,{anio:anioAs});
