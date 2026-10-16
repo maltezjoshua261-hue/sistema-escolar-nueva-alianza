@@ -6157,12 +6157,12 @@ function eliminarMatricula(id){if(!exigirDirector())return;const registro=obtene
 function cargarMatriculas(){
     const tbody=document.getElementById("tablaMatriculas");if(!tbody)return;
     const anio=limpiarTexto(document.getElementById("buscarMatAnio")?.value||""),nivel=limpiarTexto(document.getElementById("buscarMatNivel")?.value||""),grado=limpiarTexto(document.getElementById("buscarMatGrado")?.value||""),seccion=limpiarTexto(document.getElementById("buscarMatSeccion")?.value||""),buscar=limpiarTexto(document.getElementById("buscarMatricula")?.value||"");
-    const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||docenteTieneGrupoMatricula(m.nivel,m.grado,m.seccion,m.anio))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
+    const ses=obtenerSesionActual(); const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>(!ses||ses.rol==="Director"||String(m.codigo_centro||"")===String(ses.codigoCentro||""))&&(()=>{const texto=limpiarTexto([m.estudiante,m.codigo].join(" "));return(!anio||String(m.anio)===anio)&&(!nivel||limpiarTexto(m.nivel)===nivel)&&(!grado||limpiarTexto(m.grado).includes(grado))&&(!seccion||limpiarTexto(m.seccion)===seccion)&&(!buscar||texto.includes(buscar));})()).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es"));
     tbody.innerHTML=mats.length?mats.map((m,i)=>"<tr><td>"+(i+1)+"</td><td>"+escaparHTML(m.anio)+"</td><td>"+escaparHTML(m.estudiante)+"<br><small>"+escaparHTML(m.codigo||"")+"</small></td><td>"+escaparHTML(m.nivel)+"</td><td>"+escaparHTML(m.grado)+"</td><td>"+escaparHTML(m.seccion)+"</td><td>"+escaparHTML(m.fecha)+"</td><td>"+escaparHTML(m.tipoMatricula||"Continuidad")+"</td><td>"+escaparHTML(m.estado)+"</td><td><button class='btn-warning' onclick='editarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>✏️</button> <button class='btn-danger' onclick='eliminarMatricula(&quot;"+escaparHTML(m.id)+"&quot;)'>🗑️</button></td></tr>").join(""):'<tr><td colspan="9" style="text-align:center;padding:20px;color:#777;">No hay matrículas registradas.</td></tr>';
 }
 function cargarSelectorConstancia(){
     const s=document.getElementById("constanciaMatricula");if(!s)return;const anterior=s.value;s.innerHTML='<option value="">Seleccione</option>';
-    obtenerDatos(KEY_MATRICULAS).filter(m=>{const ses=obtenerSesionActual();return !ses||ses.rol==="Director"||docenteTieneGrupoMatricula(m.nivel,m.grado,m.seccion,m.anio);}).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es")).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.estudiante+" · "+m.anio+" · "+(m.grado||m.nivel);s.appendChild(o);});
+    obtenerDatos(KEY_MATRICULAS).filter(m=>{const ses=obtenerSesionActual();return !ses||ses.rol==="Director"||String(m.codigo_centro||"")===String(ses.codigoCentro||"");}).sort((a,b)=>String(b.anio).localeCompare(String(a.anio))||String(a.estudiante).localeCompare(String(b.estudiante),"es")).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.estudiante+" · "+m.anio+" · "+(m.grado||m.nivel);s.appendChild(o);});
     if([...s.options].some(o=>o.value===anterior))s.value=anterior;
 }
 function imprimirConstanciaMatricula(){
@@ -7758,7 +7758,7 @@ async function NA_syncMatriculas(){
   const out=(data||[]).map(m=>{
     const e=NA_studentLocal(m.estudiante_id);
     return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
-      codigo:e?.codigo||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
+      codigo:e?.codigo||"",codigo_centro:m.codigo_centro||"",anio:m.anio,nivel:m.nivel,grado:m.grado,seccion:m.seccion,
       fecha:m.fecha_matricula,estado:m.estado||"Activa",responsable:m.responsable||"",telefono:m.telefono||"",direccion:m.direccion||"",tipoMatricula:m.tipo_matricula||"",procedencia:m.procedencia||"",documentos:m.documentos||"",observacion:m.observacion||""};
   });
   guardarDatos(KEY_MATRICULAS,out);
