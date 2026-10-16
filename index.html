@@ -7888,13 +7888,21 @@ window.guardarEstudiante=async function(){
 
 const oldGuardarMatricula=window.guardarMatricula;
 window.guardarMatricula=async function(){
+  const estudianteIdAntes=document.getElementById("matEstudiante")?.value||"";
+  const anioAntes=document.getElementById("matAnio")?.value.trim()||"";
+  const idAntes=document.getElementById("matId")?.value||"";
+  if(!estudianteIdAntes||!anioAntes){oldGuardarMatricula();return;}
   oldGuardarMatricula();
   await new Promise(r=>setTimeout(r,0));
-  const id=document.getElementById("matId")?.value||"";
+  // Si la validación local rechazó el guardado, el formulario permanece abierto.
+  // En ese caso no sincronizar ni modificar ningún registro de Supabase.
+  const estudianteDespues=document.getElementById("matEstudiante")?.value||"";
+  const idDespues=document.getElementById("matId")?.value||"";
+  if(estudianteDespues||idDespues)return;
   const lista=obtenerDatos(KEY_MATRICULAS);
-  const r=lista.find(x=>String(x.id)===String(id))||lista[lista.length-1];
+  const r=lista.find(x=>String(x.estudianteId)===String(estudianteIdAntes)&&String(x.anio)===String(anioAntes));
   if(!r)return;
-  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(r.estudianteId));
+  const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(estudianteIdAntes));
   if(!e?.supabaseId)return;
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa",codigo_centro:NA_sesion()?.codigoCentro||e.codigo_centro||null,responsable:r.responsable||null,telefono:r.telefono||null,direccion:r.direccion||null,tipo_matricula:r.tipoMatricula||null,procedencia:r.procedencia||null,documentos:r.documentos||null,observacion:r.observacion||null};
