@@ -4581,16 +4581,33 @@ function cargarDocenteCalificacion(){
     const encontrado=buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura);if(encontrado)select.value=encontrado.docenteId;
 }
 
-function cargarDocenteAsistencia(){
+async function cargarDocenteAsistencia(){
     const select=document.getElementById("asisDocente");if(!select)return;
-    const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):"2026",nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
+    const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):String(new Date().getFullYear()),nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
     const sesion=obtenerSesionActual();
-    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradoAsignacionCoincide(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    select.innerHTML='<option value="">Buscando asignación...</option>';
+    // Refrescar asignaciones desde Supabase para evitar que la vista dependa de una copia local desactualizada.
+    try{if(typeof NA_syncAsignaciones==="function")await NA_syncAsignaciones();}catch(error){console.warn("No se pudo actualizar la lista de asignaciones:",error);}
+    const centroSesion=String(sesion?.codigoCentro||"").trim();
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>{
+        const mismoAnio=String(a.anio)===String(anio);
+        const activo=String(a.estado||"Activo").trim().toLowerCase()==="activo";
+        const mismoNivel=normalizarNivel(a.nivel)===normalizarNivel(nivel);
+        const mismaSeccion=normalizarSeccion(a.seccion)===normalizarSeccion(seccion);
+        const gradoOk=gradoAsignacionCoincide(a.grado,grado);
+        const mismoCentro=!centroSesion||String(a.codigo_centro||"").trim()===centroSesion;
+        return mismoAnio&&activo&&mismoNivel&&mismaSeccion&&gradoOk&&mismoCentro;
+    });
     if(sesion?.rol==="Docente" && sesion.docenteId) lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId));
-    if(sesion?.rol==="Docente" && sesion.codigoCentro) lista=lista.filter(a=>String(a.codigo_centro||"")===String(sesion.codigoCentro));
+    const unicos=[...new Map(lista.filter(a=>a.docenteId).map(a=>[String(a.docenteId),a])).values()];
     select.innerHTML='<option value="">Sin asignación</option>';
-    [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
-    if(lista.length===1)select.value=String(lista[0].docenteId);
+    unicos.forEach(a=>{
+        const o=document.createElement("option");
+        o.value=String(a.docenteId);
+        o.textContent=a.docenteNombre||obtenerDatos(KEY_DOCENTES).find(d=>String(d.supabaseId||"")===String(a.docenteSupabaseId||a.docenteId))?.nombre||"Docente asignado";
+        select.appendChild(o);
+    });
+    if(unicos.length===1)select.value=String(unicos[0].docenteId);
 }
 
 /* =========================================================
