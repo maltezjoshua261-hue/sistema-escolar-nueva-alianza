@@ -3336,6 +3336,23 @@ function normalizarGrado(valor){
 }
 
 
+/* Reconoce grados individuales y rangos multigrado sin alterar las cargas guardadas. */
+function gradoAsignacionCoincide(gradoAsignado, gradoSeleccionado){
+    const seleccionado=normalizarGrado(gradoSeleccionado);
+    const asignado=normalizarGrado(gradoAsignado);
+    if(asignado===seleccionado) return true;
+    const texto=limpiarTexto(String(gradoAsignado||"")).replace(/[º°]/g,"").trim();
+    const objetivo=Number(seleccionado);
+    if(!Number.isInteger(objetivo)||objetivo<1||objetivo>11) return false;
+    const numeros=(texto.match(/\d+/g)||[]).map(Number);
+    if(numeros.length<2) return false;
+    if(/\b(a|hasta|al)\b|[-–—]/.test(texto)){
+        return objetivo>=Math.min(numeros[0],numeros[1]) && objetivo<=Math.max(numeros[0],numeros[1]);
+    }
+    if(/\b(y|e)\b|,/.test(texto)) return numeros.includes(objetivo);
+    return false;
+}
+
 function normalizarSeccion(valor){
 
     let v = limpiarTexto(valor);
@@ -4568,7 +4585,7 @@ function cargarDocenteAsistencia(){
     const select=document.getElementById("asisDocente");if(!select)return;
     const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):"2026",nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
     const sesion=obtenerSesionActual();
-    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradoAsignacionCoincide(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
     if(sesion?.rol==="Docente") lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId||""));
     select.innerHTML='<option value="">Sin asignación</option>';
     [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
@@ -4706,7 +4723,7 @@ function guardarAsistencia(){
         String(a.anio)===String(anioAs) &&
         String(a.estado||"Activo")==="Activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(estudiante.nivel) &&
-        normalizarGrado(a.grado)===normalizarGrado(estudiante.grado) &&
+        gradoAsignacionCoincide(a.grado,estudiante.grado) &&
         normalizarSeccion(a.seccion)===normalizarSeccion(estudiante.seccion)
     );
     if(sesionAs?.rol==="Docente"){
@@ -4745,7 +4762,7 @@ function registrarAsistenciaGrupo(){
         String(a.anio)===String(fecha.slice(0,4)) &&
         String(a.estado||"Activo")==="Activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
-        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        gradoAsignacionCoincide(a.grado,grado) &&
         normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
     );
     if(sesionGrupo?.rol==="Docente"){
