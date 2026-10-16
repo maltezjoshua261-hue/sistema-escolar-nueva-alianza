@@ -1865,6 +1865,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <div class="form-grid">
                         <div class="form-group"><label>Año escolar *</label><input id="matAnio" type="number" value="2026"></div>
                         <div class="form-group"><label>Estudiante *</label><select id="matEstudiante" onchange="cargarDatosMatricula()"><option value="">Seleccione un estudiante</option></select></div>
+                        <div class="form-group"><label>Centro educativo actual</label><input id="matCentroActual" type="text" readonly placeholder="Se completa al seleccionar el estudiante"></div>
                         <div class="form-group"><label>Nivel educativo *</label><select id="matNivel"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
                         <div class="form-group"><label>Grado / Nivel</label><input id="matGrado" type="text"></div>
                         <div class="form-group"><label>Sección</label><select id="matSeccion"><option value="">Seleccione</option><option>A</option><option>B</option><option>C</option><option>Única</option></select></div>
@@ -6028,11 +6029,14 @@ function cargarEstudiantesMatricula(){
     if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
 }
 function cargarDatosMatricula(){
-    const id=document.getElementById("matEstudiante")?.value;if(!id)return;
+    const id=document.getElementById("matEstudiante")?.value;
+    if(!id){const centro=document.getElementById("matCentroActual");if(centro)centro.value="";return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));if(!e)return;
     document.getElementById("matNivel").value=e.nivel||"";
     document.getElementById("matGrado").value=e.grado||"";
     document.getElementById("matSeccion").value=e.seccion||"";
+    const centro=document.getElementById("matCentroActual");
+    if(centro)centro.value=(window.NA_nombreCentroMatricula?window.NA_nombreCentroMatricula(e.codigo_centro):("Centro "+(e.codigo_centro||"sin código")));
     document.getElementById("matResponsable").value=e.responsable||"";
     document.getElementById("matTelefono").value=e.telefono||"";
     document.getElementById("matDireccion").value=e.direccion||"";
@@ -6054,7 +6058,7 @@ function guardarMatricula(){if(!exigirDirector())return;
     alert(pos>=0?"Matrícula actualizada correctamente.":"Matrícula registrada correctamente.");
 }
 function limpiarMatricula(){
-    ["matId","matGrado","matResponsable","matTelefono","matDireccion","matProcedencia","matDocumentos","matObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    ["matId","matGrado","matCentroActual","matResponsable","matTelefono","matDireccion","matProcedencia","matDocumentos","matObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     document.getElementById("matEstudiante").value="";document.getElementById("matNivel").value="";document.getElementById("matSeccion").value="";document.getElementById("matEstado").value="Matriculado";document.getElementById("matAnio").value="2026";document.getElementById("matFecha").value=new Date().toISOString().slice(0,10);document.getElementById("btnGuardarMatricula").textContent="💾 Guardar matrícula";
 }
 function editarMatricula(id){if(!exigirDirector())return;
@@ -8180,6 +8184,32 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 else NA_restaurarSesion();
 
 })();
+
+/* Matrícula: identificar escuela en cada estudiante y mostrar su centro actual */
+window.NA_nombreCentroMatricula=function(codigo){
+  const centros={"17683":"Nueva Alianza","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","29271":"Rosa Sarmiento","30870":"Nueva Jerusalén","37038":"Sector del Limón","39183":"Hugo Chávez Frías"};
+  const c=String(codigo||"").trim();
+  return (centros[c]||"Centro educativo no identificado")+(c?" ("+c+")":"");
+};
+window.cargarEstudiantesMatricula=function(){
+  const select=document.getElementById("matEstudiante"); if(!select)return;
+  const anterior=select.value;
+  const ses=obtenerSesionActual();
+  let estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo");
+  if(ses?.rol==="Docente"){
+    estudiantes=estudiantes.filter(e=>String(e.codigo_centro||"")===String(ses.codigoCentro||""));
+  }
+  estudiantes.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+  select.innerHTML='<option value="">Seleccione un estudiante</option>';
+  estudiantes.forEach(e=>{
+    const o=document.createElement("option");o.value=e.id;
+    const centro=window.NA_nombreCentroMatricula(e.codigo_centro);
+    const grado=(e.grado?" · Grado "+e.grado:"")+(e.seccion?" · Sección "+e.seccion:"");
+    o.textContent=(e.nombre||"Sin nombre")+(e.codigo?" · "+e.codigo:"")+grado+" · "+centro;
+    select.appendChild(o);
+  });
+  if([...select.options].some(o=>String(o.value)===String(anterior)))select.value=anterior;
+};
 
 /* V11.25 - Corrección final de selector de estudiantes en Asistencia por centro */
 window.cargarEstudiantesAsistencia=function(){
