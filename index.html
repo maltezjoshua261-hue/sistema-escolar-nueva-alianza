@@ -4763,16 +4763,18 @@ async function guardarAsistencia(){
     );
     if(sesionAs?.rol==="Docente"){
         if(sesionAs.docenteId){
-            if(!asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId))){
-                alert("No tiene asignación activa para este grupo.");return;
+            if(asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId))){
+                docenteSeleccionado=String(sesionAs.docenteId);
+            }else{
+                alert("Este grupo no coincide con una asignación de su usuario docente.");return;
             }
-            docenteSeleccionado=String(sesionAs.docenteId);
         }else{
+            // La cuenta general del centro puede registrar asistencia sin elegir docente.
+            // Si existe una asignación compatible, se atribuye al docente automáticamente;
+            // si no, se guarda sin docente responsable, siempre dentro del centro autorizado.
             const asignacionCentro=asignacionesAs.find(a=>!!a.docenteId);
-            if(!sesionAs.codigoCentro||!asignacionCentro){
-                alert("No hay una asignación activa para este grupo en su centro educativo.");return;
-            }
-            docenteSeleccionado=String(asignacionCentro.docenteId);
+            if(asignacionCentro) docenteSeleccionado=String(asignacionCentro.docenteId);
+            else docenteSeleccionado="";
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
@@ -4817,11 +4819,11 @@ async function registrarAsistenciaGrupo(){
             if(!asignacionValida){alert("No tiene permiso para registrar asistencia en este grupo.");return;}
             docenteSeleccionado=String(sesionGrupo.docenteId);
         }else{
-            // Las cuentas generales de cada centro no necesitan seleccionar al maestro:
-            // el sistema atribuye el registro al docente asignado a ese grupo en ese centro.
+            // La cuenta general del centro no está obligada a elegir docente.
+            // Se atribuye automáticamente si hay asignación compatible; si no,
+            // se registra sin docente, manteniendo la restricción del centro.
             const asignacionCentro=asignacionesGrupo.find(a=>!!a.docenteId);
-            if(!sesionGrupo.codigoCentro||!asignacionCentro){alert("No hay una asignación activa para este grupo en su centro educativo.");return;}
-            docenteSeleccionado=String(asignacionCentro.docenteId);
+            docenteSeleccionado=asignacionCentro?String(asignacionCentro.docenteId):"";
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
