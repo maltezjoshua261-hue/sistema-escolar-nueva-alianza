@@ -7703,6 +7703,7 @@ async function NA_init(){
   window.NUEVA_ALIANZA_SUPABASE_CLIENT=NA_CLIENT;
   return NA_CLIENT;
 }
+window.NA_init=NA_init;
 function NA_localId(lista, supaId){
   const x=lista.find(e=>String(e.supabaseId||"")===String(supaId));
   if(x)return x.id;
@@ -8479,7 +8480,7 @@ async function NA_impPrepare(file){
   const wb=window.XLSX.read(buf,{type:"array",cellDates:false});
   const missing=NA_IMP_SHEETS.filter(s=>!wb.SheetNames.some(n=>NA_impNorm(n)===NA_impNorm(s)));
   if(missing.length)throw new Error("Faltan estas pestañas obligatorias: "+missing.join(", "));
-  const c=await NA_init();
+  const c=await window.NA_init();
   const [centresQ, studentsQ]=await Promise.all([
    c.from("centros").select("codigo_centro,nombre,activo").eq("activo",true),
    c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado")
@@ -8540,7 +8541,7 @@ async function NA_impSave(){
  NA_impStatus("Volviendo a comprobar los registros en la base de datos antes de guardar…",false);
  let saved=0;
  try{
-  const c=await NA_init();
+  const c=await window.NA_init();
   const {data:current,error:readError}=await c.from("estudiantes").select("codigo,nombre_completo,nivel,grado,seccion,codigo_centro,estado");
   if(readError)throw readError;
   const keys=NA_impKeySet(current||[]), remaining=[];
