@@ -4150,7 +4150,23 @@ function mostrarSeccion(id, boton){
     }
 
     if(id === "calificaciones"){
+        // Cargar primero las calificaciones centrales al entrar al módulo.
+        // Así la tabla no depende de guardar una nota nueva para refrescarse.
         actualizarCalificaciones();
+        if(typeof window.NA_syncCalificaciones==="function"){
+            window.NA_syncCalificaciones().then(()=>{
+                if(document.getElementById("calificaciones")?.classList.contains("active")){
+                    actualizarCalificaciones();
+                    cargarCalificaciones();
+                    actualizarEstadisticas();
+                }
+            }).catch(error=>{
+                console.error("No se pudieron cargar las calificaciones al abrir el módulo:",error);
+                cargarCalificaciones();
+            });
+        }else{
+            cargarCalificaciones();
+        }
     }
 
     if(id === "centroControl"){
