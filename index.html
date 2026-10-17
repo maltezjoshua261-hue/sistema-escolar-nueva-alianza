@@ -7689,7 +7689,7 @@ function cargarEstudiantesPadresTutores(){
     if([...sel.options].some(o=>String(o.value)===String(anterior)))sel.value=anterior;
 }
 function guardarPadreTutor(){
-    const id=document.getElementById("padreId")?.value||"";
+    let id=document.getElementById("padreId")?.value||"";
     const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
     const estudianteId=document.getElementById("padreEstudiante")?.value||"";
     const estudiante=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(estudianteId));
@@ -7703,15 +7703,32 @@ function guardarPadreTutor(){
         const estudianteAnterior=existente&&obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(existente.estudianteId));
         if(!existente||!puedeGestionarPadreTutor(estudianteAnterior)){alert("No tiene permiso para modificar este registro.");return}
     }
+    const parentesco=document.getElementById("padreParentesco")?.value||"Madre";
+    const telefono=limpiarTexto(document.getElementById("padreTelefono")?.value||"");
+    // Si el formulario es nuevo, reutiliza el registro existente de la misma persona
+    // para el mismo estudiante, año y parentesco, en vez de crear un duplicado.
+    if(!id){
+        const normalizar=v=>String(v||"").trim().toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/\\s+/g," ");
+        const coincidencias=datos.filter(x=>
+            String(x.estudianteId)===String(estudianteId) &&
+            String(x.anio)===String(anio) &&
+            normalizar(x.nombre)===normalizar(nombre) &&
+            normalizar(x.parentesco||"Madre")===normalizar(parentesco)
+        );
+        if(coincidencias.length){
+            const existente=coincidencias.find(x=>String(x.principal)==="Sí")||coincidencias[0];
+            id=String(existente.id);
+        }
+    }
     const obj={
         id:id||"PT-"+Date.now(),
         anio:String(anio),
         estudianteId:String(estudianteId),
         estudianteNombre:estudiante.nombre,
-        parentesco:document.getElementById("padreParentesco")?.value||"Madre",
+        parentesco,
         nombre,
         cedula:limpiarTexto(document.getElementById("padreCedula")?.value||""),
-        telefono:limpiarTexto(document.getElementById("padreTelefono")?.value||""),
+        telefono,
         correo:limpiarTexto(document.getElementById("padreCorreo")?.value||""),
         ocupacion:limpiarTexto(document.getElementById("padreOcupacion")?.value||""),
         direccion:limpiarTexto(document.getElementById("padreDireccion")?.value||""),
@@ -7730,7 +7747,7 @@ function guardarPadreTutor(){
     guardarDatos(KEY_PADRES_TUTORES,datos);
     registrarAuditoria(idx>=0?"Editar":"Crear","Padres/Tutores",idx>=0?"Actualización de padre/tutor":"Nuevo padre/tutor",obj.id,{anio});
     limpiarPadreTutor(); cargarPadresTutores();
-    alert("Registro de padre/tutor guardado correctamente.");
+    alert(idx>=0?"Registro de padre/tutor actualizado. Se evitó crear un duplicado.":"Registro de padre/tutor guardado correctamente.");
 }
 
 function limpiarPadreTutor(){
