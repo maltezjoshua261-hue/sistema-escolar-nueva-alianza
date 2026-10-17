@@ -2700,7 +2700,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <p class="notice">Registro de responsables familiares vinculado a cada estudiante. El Director puede administrar los datos; el Docente los consulta únicamente para sus grupos asignados.</p>
                     <div class="form-grid">
                         <div class="form-group"><label>Año</label><select id="padreAnio" onchange="cargarEstudiantesPadresTutores()"><option>2026</option><option>2027</option><option>2028</option></select></div>
-                        <div class="form-group"><label>Estudiante</label><select id="padreEstudiante"></select></div>
+                        <div class="form-group"><label>Estudiante</label><select id="padreEstudiante" onfocus="cargarEstudiantesPadresTutores()"></select></div>
                         <div class="form-group"><label>Nombre del padre/tutor</label><input id="padreNombre" placeholder="Nombre completo"></div>
                         <div class="form-group"><label>Parentesco</label><select id="padreParentesco"><option>Madre</option><option>Padre</option><option>Tutor(a)</option><option>Abuelo(a)</option><option>Hermano(a)</option><option>Otro</option></select></div>
                         <div class="form-group"><label>Cédula</label><input id="padreCedula"></div>
