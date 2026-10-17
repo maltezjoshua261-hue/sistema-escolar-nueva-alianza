@@ -4014,7 +4014,9 @@ function cargarEstudiantesExpedienteIntegral(){
     // Mantener el mismo criterio de acceso que ya utiliza la lista Estudiantes para Docentes:
     // mostrar únicamente estudiantes de grupos que el docente tiene asignados.
     if(ses?.rol==="Docente"){
-        lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+        // Usar el mismo alcance que el módulo Estudiantes: grupos visibles en el año base 2027.
+        // El año seleccionado sigue controlando los datos académicos que se muestran en el expediente.
+        lista=lista.filter(e=>estudianteVisibleParaRol(e,2027));
     }else{
         lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
     }
@@ -4027,7 +4029,7 @@ function generarExpedienteIntegral(){
     const id=document.getElementById("expIntEstudiante")?.value||"";
     if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar el expediente integral.</p></div>';return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
-    if(!e||!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    if(!e||!estudianteVisibleParaRol(e,2027)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
     const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
     const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||anio)===String(anio));
     const asi=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(id)&&String((x.fecha||"").slice(0,4))===String(anio));
