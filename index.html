@@ -2699,7 +2699,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <h2>👨‍👩‍👧 Padres y tutores</h2>
                     <p class="notice">Registro de responsables familiares vinculado a cada estudiante. El Director puede administrar los datos; el Docente los consulta únicamente para sus grupos asignados.</p>
                     <div class="form-grid">
-                        <div class="form-group"><label>Año</label><select id="padreAnio"><option>2026</option><option>2027</option><option>2028</option></select></div>
+                        <div class="form-group"><label>Año</label><select id="padreAnio" onchange="cargarEstudiantesPadresTutores()"><option>2026</option><option>2027</option><option>2028</option></select></div>
                         <div class="form-group"><label>Estudiante</label><select id="padreEstudiante"></select></div>
                         <div class="form-group"><label>Nombre del padre/tutor</label><input id="padreNombre" placeholder="Nombre completo"></div>
                         <div class="form-group"><label>Parentesco</label><select id="padreParentesco"><option>Madre</option><option>Padre</option><option>Tutor(a)</option><option>Abuelo(a)</option><option>Hermano(a)</option><option>Otro</option></select></div>
@@ -7601,9 +7601,23 @@ function cargarEstudiantesPadresTutores(){
     const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
     const ses=obtenerSesionActual();
     let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo");
-    if(ses?.rol==="Docente") est=est.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    if(ses?.rol==="Docente"){
+        const codigoSesion=String(ses.codigoCentro||"").trim();
+        est=est.filter(e=>{
+            const codigoEstudiante=String(e.codigo_centro||e.codigoCentro||"").trim();
+            return (!codigoSesion || codigoEstudiante===codigoSesion) &&
+                docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
+        });
+    }
     const prev=sel.value;
     sel.innerHTML='<option value="">Seleccione estudiante</option>';
+    if(!est.length){
+        const vacio=document.createElement("option");
+        vacio.disabled=true;
+        vacio.textContent="No hay estudiantes asignados para el año seleccionado";
+        sel.appendChild(vacio);
+        return;
+    }
     est.forEach(e=>{
         const o=document.createElement("option");
         o.value=e.id;
