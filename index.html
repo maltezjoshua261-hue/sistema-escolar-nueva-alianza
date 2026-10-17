@@ -4091,7 +4091,24 @@ function mostrarSeccion(id, boton){
         boton.classList.add("active");
     }
 
-    if(id === "expedienteIntegral"){cargarEstudiantesExpedienteIntegral();generarExpedienteIntegral();}
+    if(id === "expedienteIntegral"){
+        const actualizarExpedienteIntegral = function(){
+            cargarEstudiantesExpedienteIntegral();
+            generarExpedienteIntegral();
+        };
+        // Sincroniza primero los estudiantes desde Supabase para que el selector
+        // no dependa de una copia local vacía o desactualizada.
+        if(typeof window.NA_syncEstudiantes === "function"){
+            window.NA_syncEstudiantes()
+                .then(actualizarExpedienteIntegral)
+                .catch(function(error){
+                    console.error("No se pudieron sincronizar los estudiantes del expediente integral:", error);
+                    actualizarExpedienteIntegral();
+                });
+        }else{
+            actualizarExpedienteIntegral();
+        }
+    }
     if(id === "reunionesAcuerdos"){prepararReunionesV107();}
     if(id === "reportesOficiales"){prepararReporteOficialV108();}
 
