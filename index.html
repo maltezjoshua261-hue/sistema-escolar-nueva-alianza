@@ -7648,7 +7648,11 @@ function cargarEstudiantesPadresTutores(){
                 gradosCoinciden(a.grado,e.grado) &&
                 normalizarSeccion(a.seccion)===normalizarSeccion(e.seccion)
             );
-            return !!codigoSesion && codigo===codigoSesion && grupoAsignado;
+            // Los perfiles generales de escuela tienen docente_id vacío. En ese caso,
+            // permitir la consulta de estudiantes activos únicamente del centro de sesión.
+            // Cuando sí existe una vinculación individual, conservar el filtro por grupo asignado.
+            const vinculacionIndividual=idsDocente.size>0 || !!docente;
+            return !!codigoSesion && codigo===codigoSesion && (!vinculacionIndividual || grupoAsignado);
         });
     }
     est.sort((a,b)=>String(a.nombre||a.nombre_completo||"").localeCompare(String(b.nombre||b.nombre_completo||""),"es"));
