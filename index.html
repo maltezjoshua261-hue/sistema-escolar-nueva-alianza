@@ -3790,7 +3790,9 @@ function cargarPerfilAcademico(){
     const anio=document.getElementById("perfilAcadAnio")?.value||new Date().getFullYear(),id=document.getElementById("perfilAcadEstudiante")?.value||"",asign=document.getElementById("perfilAcadAsignatura")?.value||"";
     if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div>';return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
-    if(!e||!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    const ses=obtenerSesionActual();
+    const visible=e&&(ses?.rol==="Docente"?docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio):estudianteVisibleParaRol(e,anio));
+    if(!visible){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
     const ev=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.anio)===String(anio)&&String(x.estudianteId)===String(id)&&(!asign||x.asignatura===asign));
     const subjects=[...new Set(ev.map(x=>x.asignatura).filter(Boolean))].sort();
     const situ=x=>situacionPerfil10(x.resultado), counts={s:0,p:0,a:0};
@@ -4009,9 +4011,14 @@ function cargarEstudiantesExpedienteIntegral(){
     const q=limpiarTexto(document.getElementById("expIntBuscar")?.value||"");
     const ses=obtenerSesionActual();
     let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")!=="Retirado"&&String(e.estado||"Activo")!=="Trasladado");
-    lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
+    // Mantener el mismo criterio de acceso que ya utiliza la lista Estudiantes para Docentes:
+    // mostrar únicamente estudiantes de grupos que el docente tiene asignados.
+    if(ses?.rol==="Docente"){
+        lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    }else{
+        lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
+    }
     if(q) lista=lista.filter(e=>limpiarTexto(e.nombre).includes(q));
-    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
     sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre)+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
 }
 function generarExpedienteIntegral(){
