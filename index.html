@@ -7601,24 +7601,30 @@ function cargarEstudiantesPadresTutores(){
     const anioSel=document.getElementById("padreAnio");
     let anio=String(anioSel?.value||new Date().getFullYear());
     const ses=obtenerSesionActual();
-    const normalizarCodigo=c=>String(c??"").trim().replace(/\\.0$/,"");
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
     const activo=e=>String(e?.estado||"Activo").trim().toLocaleLowerCase()==="activo";
     let est=obtenerDatos(KEY_ESTUDIANTES).filter(activo);
     if(ses?.rol==="Docente"){
-        // Si el año elegido no tiene cargas para este docente, usar el año más reciente
-        // en el que sí tenga grupos; evita dejar el selector vacío por defecto en 2026
-        // cuando las cargas del centro ya se prepararon para 2027.
+        // Reconocer al docente tanto por su ID local como por su ID de Supabase.
+        const docente=obtenerDatos(KEY_DOCENTES).find(d=>
+            String(d.id)===String(ses.docenteId||"") ||
+            String(d.supabaseId||"")===String(ses.docenteId||"")
+        );
+        const idsDocente=new Set([ses.docenteId,docente?.id,docente?.supabaseId]
+            .filter(v=>v!==undefined&&v!==null&&String(v)!=="").map(String));
         const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
-            String(a.docenteId||"")===String(ses.docenteId||"") &&
+            (idsDocente.has(String(a.docenteId||"")) ||
+             idsDocente.has(String(a.docenteSupabaseId||""))) &&
             String(a.estado||"Activo").trim().toLocaleLowerCase()==="activo"
         );
-        const hayParaAnio=asignaciones.some(a=>String(a.anio)===anio);
-        if(!hayParaAnio && asignaciones.length){
+        // Si el año inicial no tiene cargas para este docente, elegir el año más reciente
+        // en que sí tenga grupos asignados (por ejemplo, 2027).
+        if(!asignaciones.some(a=>String(a.anio)===anio) && asignaciones.length){
             const anios=[...new Set(asignaciones.map(a=>String(a.anio||"")).filter(Boolean))]
                 .sort((a,b)=>Number(b)-Number(a));
             if(anios.length){
                 anio=anios[0];
-                if(anioSel && [...anioSel.options].some(o=>String(o.value||o.textContent)===anio || String(o.textContent).trim()===anio)){
+                if(anioSel && [...anioSel.options].some(o=>String(o.value||o.textContent).trim()===anio)){
                     anioSel.value=anio;
                 }
             }
@@ -7626,8 +7632,13 @@ function cargarEstudiantesPadresTutores(){
         const codigoSesion=normalizarCodigo(ses.codigoCentro);
         est=est.filter(e=>{
             const codigo=normalizarCodigo(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo);
-            return !!codigoSesion && codigo===codigoSesion &&
-                docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
+            const grupoAsignado=asignaciones.some(a=>
+                String(a.anio)===anio &&
+                normalizarNivel(a.nivel)===normalizarNivel(e.nivel) &&
+                gradosCoinciden(a.grado,e.grado) &&
+                normalizarSeccion(a.seccion)===normalizarSeccion(e.seccion)
+            );
+            return !!codigoSesion && codigo===codigoSesion && grupoAsignado;
         });
     }
     est.sort((a,b)=>String(a.nombre||a.nombre_completo||"").localeCompare(String(b.nombre||b.nombre_completo||""),"es"));
