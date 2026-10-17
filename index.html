@@ -4012,24 +4012,29 @@ async function cargarConsultaEstudiantes(){
     buscarEstudiantesConsulta();
 }
 function estadoConsultaEstudiante(e){
-    const normal=x=>limpiarTexto(String(x||"")).toLowerCase();
+    const normal=x=>limpiarTexto(String(x||"")).toLowerCase().trim();
+    const estadoEstudiante=normal(e.estado||"");
+    // El estado explícito del estudiante no debe quedar oculto por una matrícula histórica.
+    if(estadoEstudiante.includes("retir"))return "Retirado";
+    if(estadoEstudiante.includes("traslad"))return "Trasladado";
+    if(estadoEstudiante==="inactivo"||estadoEstudiante==="inactiva")return "Inactivo";
+
     const centro=String(e.codigo_centro||e.codigoCentro||"").trim();
     const matriculas=obtenerDatos(KEY_MATRICULAS).filter(m=>{
         const mismoId=String(m.estudianteId||"")===String(e.id||"") ||
             (!!e.supabaseId && String(m.estudianteId||"")===String(e.supabaseId));
         const mismoCodigo=!!e.codigo && String(m.codigo||"").trim()===String(e.codigo||"").trim() &&
             String(m.codigo_centro||"").trim()===centro;
-        return mismoId||mismoCodigo;
+        return (mismoId||mismoCodigo) &&
+            (!centro || !m.codigo_centro || String(m.codigo_centro).trim()===centro);
     }).sort((a,b)=>String(b.anio||"").localeCompare(String(a.anio||""))||
         String(b.fecha||"").localeCompare(String(a.fecha||"")));
     const estadoMatricula=normal(matriculas[0]?.estado||"");
     if(estadoMatricula.includes("retir"))return "Retirado";
     if(estadoMatricula.includes("traslad"))return "Trasladado";
-    if(estadoMatricula)return "Activo";
-    const estadoEstudiante=normal(e.estado||"");
-    if(estadoEstudiante.includes("retir"))return "Retirado";
-    if(estadoEstudiante.includes("traslad"))return "Trasladado";
-    if(estadoEstudiante==="activo"||estadoEstudiante==="activa")return "Activo";
+    if(["activo","activa","matriculado","matriculada","vigente"].includes(estadoMatricula))return "Activo";
+    if(estadoMatricula)return matriculas[0].estado;
+    if(["activo","activa"].includes(estadoEstudiante))return "Activo";
     return e.estado||"Sin estado registrado";
 }
 function buscarEstudiantesConsulta(){
