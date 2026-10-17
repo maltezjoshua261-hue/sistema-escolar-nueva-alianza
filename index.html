@@ -6593,7 +6593,7 @@ function generarBoleta(){
         "<div><strong>Sección:</strong> "+escaparHTML(e.seccion||"—")+"</div>"+
         "<div><strong>Responsable:</strong> "+escaparHTML(e.responsable||"—")+"</div>"+
         "<div><strong>Año escolar:</strong> "+escaparHTML(anio)+"</div>";
-    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||"2026")===String(anio)&&(!corteFiltro||String(x.corte||"")===corteFiltro));
+    const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>(String(x.estudianteId)===String(id)||(e.supabaseId&&String(x.estudianteSupabaseId||"")===String(e.supabaseId)))&&String(x.anio||"2026")===String(anio)&&(!corteFiltro||String(x.corte||"")===corteFiltro));
     const asignaturas=[...new Set(cal.map(x=>x.asignatura).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"es"));
     tabla.innerHTML="";
     if(!asignaturas.length){
@@ -7913,7 +7913,7 @@ async function NA_syncCalificaciones(){
     const e=NA_studentLocal(x.estudiante_id);
     const d=docs.find(z=>String(z.supabaseId||"")===String(x.registrado_por));
     const numerica=x.nota!==null&&x.nota!==undefined;
-    return {id:x.id,supabaseId:x.id,anio:x.anio,estudianteId:e?.id||"",estudiante:e?.nombre||"",
+    return {id:x.id,supabaseId:x.id,anio:x.anio,estudianteId:e?.id||"",estudianteSupabaseId:x.estudiante_id||"",estudiante:e?.nombre||"",
       nivel:x.nivel,grado:x.grado,seccion:x.seccion,asignatura:x.asignatura,
       docenteId:d?.id||"",docenteNombre:d?.nombre||"",corte:x.periodo,
       tipo:numerica?"Numerica":"Cualitativa",resultado:numerica?x.nota:x.categoria,
