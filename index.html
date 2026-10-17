@@ -3690,7 +3690,7 @@ function cargarPerfilAcademico(){
     if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar su perfil académico.</p></div>';return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
     const ses=obtenerSesionActual();
-    const visible=e&&(ses?.rol==="Docente"?docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio):estudianteVisibleParaRol(e,anio));
+    const visible=e&&(ses?.rol==="Docente"?docenteTieneGrupoMatricula(e.nivel,e.grado,e.seccion,anio):estudianteVisibleParaRol(e,anio));
     if(!visible){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
     const ev=obtenerDatos(KEY_EVALUACIONES).filter(x=>String(x.anio)===String(anio)&&String(x.estudianteId)===String(id)&&(!asign||x.asignatura===asign));
     const subjects=[...new Set(ev.map(x=>x.asignatura).filter(Boolean))].sort();
@@ -3719,7 +3719,7 @@ function cargarEstudiantesComunicacion(){
     const sel=document.getElementById("comEstudiante");if(!sel)return;
     const anio=document.getElementById("comAnio")?.value||new Date().getFullYear(),ses=obtenerSesionActual();
     let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo");
-    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+    if(ses?.rol==="Docente") lista=lista.filter(e=>docenteTieneGrupoMatricula(e.nivel,e.grado,e.seccion,anio));
     const prev=sel.value;
     sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+e.id+'">'+escaparHTML(e.nombre)+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
     if([...sel.options].some(o=>o.value===prev))sel.value=prev;
