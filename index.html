@@ -7601,7 +7601,7 @@ function cargarEstudiantesPadresTutores(){
     const anioSel=document.getElementById("padreAnio");
     let anio=String(anioSel?.value||new Date().getFullYear());
     const ses=obtenerSesionActual();
-    const normalizarCodigo=c=>String(c??"").trim().replace(/\\.0$/,"");
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
     const activo=e=>String(e?.estado||"Activo").trim().toLocaleLowerCase()==="activo";
     let est=obtenerDatos(KEY_ESTUDIANTES).filter(activo);
     if(ses?.rol==="Docente"){
