@@ -7601,24 +7601,35 @@ function cargarEstudiantesPadresTutores(){
     const anioSel=document.getElementById("padreAnio");
     let anio=String(anioSel?.value||new Date().getFullYear());
     const ses=obtenerSesionActual();
-    const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\\.0$/,"");
     const activo=e=>String(e?.estado||"Activo").trim().toLocaleLowerCase()==="activo";
     let est=obtenerDatos(KEY_ESTUDIANTES).filter(activo);
     if(ses?.rol==="Docente"){
-        // Reconocer al docente tanto por su ID local como por su ID de Supabase.
-        const docente=obtenerDatos(KEY_DOCENTES).find(d=>
-            String(d.id)===String(ses.docenteId||"") ||
-            String(d.supabaseId||"")===String(ses.docenteId||"")
+        const docentes=obtenerDatos(KEY_DOCENTES);
+        const idSesion=String(ses.docenteId||"");
+        const idSupabaseSesion=String(ses.docenteSupabaseId||"");
+        const docente=docentes.find(d=>
+            String(d.id||"")===idSesion ||
+            String(d.supabaseId||"")===idSesion ||
+            (idSupabaseSesion && String(d.supabaseId||"")===idSupabaseSesion)
         );
-        const idsDocente=new Set([ses.docenteId,docente?.id,docente?.supabaseId]
-            .filter(v=>v!==undefined&&v!==null&&String(v)!=="").map(String));
-        const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
-            (idsDocente.has(String(a.docenteId||"")) ||
-             idsDocente.has(String(a.docenteSupabaseId||""))) &&
-            String(a.estado||"Activo").trim().toLocaleLowerCase()==="activo"
-        );
-        // Si el año inicial no tiene cargas para este docente, elegir el año más reciente
-        // en que sí tenga grupos asignados (por ejemplo, 2027).
+        const idsDocente=new Set([
+            ses.docenteId,ses.docenteSupabaseId,docente?.id,docente?.supabaseId
+        ].filter(v=>v!==undefined&&v!==null&&String(v)!=="").map(String));
+        const nombresDocente=new Set([
+            ses.nombreCompleto,ses.nombre,docente?.nombre,docente?.nombre_completo
+        ].map(v=>String(v||"").trim().toLocaleLowerCase()).filter(Boolean));
+        const codigoSesion=normalizarCodigo(ses.codigoCentro||ses.codigo_centro);
+        const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>{
+            const estado=String(a.estado||"Activo").trim().toLocaleLowerCase();
+            const coincideId=idsDocente.has(String(a.docenteId||"")) ||
+                idsDocente.has(String(a.docenteSupabaseId||""));
+            const nombreAsignado=String(a.docenteNombre||a.docente_nombre||"").trim().toLocaleLowerCase();
+            const coincideNombre=nombreAsignado && nombresDocente.has(nombreAsignado);
+            const codigoAsignacion=normalizarCodigo(a.codigo_centro||a.codigoCentro);
+            return (coincideId||coincideNombre) && estado==="activo" &&
+                (!codigoAsignacion || !codigoSesion || codigoAsignacion===codigoSesion);
+        });
         if(!asignaciones.some(a=>String(a.anio)===anio) && asignaciones.length){
             const anios=[...new Set(asignaciones.map(a=>String(a.anio||"")).filter(Boolean))]
                 .sort((a,b)=>Number(b)-Number(a));
@@ -7629,7 +7640,6 @@ function cargarEstudiantesPadresTutores(){
                 }
             }
         }
-        const codigoSesion=normalizarCodigo(ses.codigoCentro);
         est=est.filter(e=>{
             const codigo=normalizarCodigo(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo);
             const grupoAsignado=asignaciones.some(a=>
@@ -7648,7 +7658,7 @@ function cargarEstudiantesPadresTutores(){
         const vacio=document.createElement("option");
         vacio.disabled=true;
         vacio.textContent=ses?.rol==="Docente"
-            ?"No hay estudiantes activos en los grupos asignados para el año "+anio
+            ?"No hay estudiantes activos en los grupos asignados para el año "+anio+". Revise la carga académica del docente."
             :"No hay estudiantes activos disponibles. Compruebe que la lista de estudiantes haya cargado.";
         sel.appendChild(vacio);
         return;
