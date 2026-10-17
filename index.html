@@ -6542,7 +6542,14 @@ function cargarEstudiantesBoleta(){
     const ses=obtenerSesionActual();
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES)
         .filter(e=>(e.estado||"Activo")==="Activo")
-        .filter(e=>!ses || ses.rol!=="Docente" || estudianteVisibleParaRol(e,anio))
+        // La boleta debe listar los estudiantes activos del centro de la docente,
+        // aunque todavía no exista una asignación académica para su grupo.
+        .filter(e=>{
+            if(!ses || ses.rol!=="Docente") return true;
+            const codigoSesion=String(ses.codigoCentro||"").trim();
+            const codigoEstudiante=String(e.codigo_centro||e.codigoCentro||"").trim();
+            return !!codigoSesion && codigoEstudiante===codigoSesion;
+        })
         .sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     select.innerHTML='<option value="">Seleccione un estudiante</option>';
     estudiantes.forEach(e=>{
@@ -6572,7 +6579,10 @@ function generarBoleta(){
     }
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
     if(!e) return;
-    if(!estudianteVisibleParaRol(e,anio)){alert("Este estudiante no pertenece a sus grupos asignados.");return;}
+    const sesBoleta=obtenerSesionActual();
+    if(sesBoleta?.rol==="Docente" && String(e.codigo_centro||e.codigoCentro||"").trim()!==String(sesBoleta.codigoCentro||"").trim()){
+        alert("Solo puede generar boletas de estudiantes de su propio centro educativo.");return;
+    }
     datos.innerHTML=
         "<div><strong>Estudiante:</strong> "+escaparHTML(e.nombre||"")+"</div>"+
         "<div><strong>Código / Cédula:</strong> "+escaparHTML(e.codigo||e.cedula||"—")+"</div>"+
