@@ -7976,7 +7976,10 @@ async function NA_login(){
     if(err)err.textContent="";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
-
+    // V11.30: refrescar las calificaciones centrales y el contador después del inicio de sesión.
+    await NA_syncCalificaciones();
+    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
     // V11.28.9 - BARRERA FINAL DE ROL DESPUÉS DE CARGAR TODO.
     // El Docente nunca puede mostrar el Centro de Control ni módulos administrativos.
     if(NA_sesion()?.rol!=="Director"){
@@ -8412,6 +8415,10 @@ async function NA_restaurarSesion(){
     document.getElementById("app").style.display="flex";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
+    // V11.30: refrescar las calificaciones centrales y el contador después de restaurar la sesión.
+    await NA_syncCalificaciones();
+    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
     // V11.28.8 - aplicar el bloqueo DESPUÉS de restaurar sesión y cargar panel
     if(typeof window.NA_bloquearModulosDirector==="function"){
       window.NA_bloquearModulosDirector();
