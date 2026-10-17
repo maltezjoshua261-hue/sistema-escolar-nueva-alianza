@@ -4478,13 +4478,23 @@ function cargarDocenteCalificacion(){
 
 function cargarDocenteAsistencia(){
     const select=document.getElementById("asisDocente");if(!select)return;
-    const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):"2026",nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
+    const fecha=document.getElementById("asisFecha")?.value||"",anio=fecha?fecha.slice(0,4):String(new Date().getFullYear()),nivel=document.getElementById("asisNivel")?.value,grado=document.getElementById("asisGrado")?.value,seccion=document.getElementById("asisSeccion")?.value;
     const sesion=obtenerSesionActual();
-    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&gradosCoinciden(a.grado,grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion));
-    if(sesion?.rol==="Docente") lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId||""));
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
+        String(a.anio)===String(anio) &&
+        String(a.estado||"Activo").trim().toLowerCase()==="activo" &&
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        gradosCoinciden(a.grado,grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (!sesion?.codigoCentro||String(a.codigo_centro||"")===String(sesion.codigoCentro))
+    );
+    if(sesion?.rol==="Docente" && sesion.docenteId) lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId));
     select.innerHTML='<option value="">Sin asignación</option>';
-    [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
-    if(lista.length===1)select.value=String(lista[0].docenteId);
+    [...new Map(lista.filter(a=>a.docenteId).map(a=>[String(a.docenteId),a])).values()].forEach(a=>{
+        const o=document.createElement("option");o.value=String(a.docenteId);o.textContent=a.docenteNombre||"Docente asignado";select.appendChild(o);
+    });
+    if(sesion?.rol==="Docente" && sesion.docenteId) select.value=String(sesion.docenteId);
+    else if(lista.filter(a=>a.docenteId).length===1) select.value=String(lista.find(a=>a.docenteId).docenteId);
 }
 
 /* =========================================================
@@ -4603,42 +4613,51 @@ function cargarEstudiantesAsistencia(){
 function guardarAsistencia(){
     const fechaCierre=document.getElementById("asisFecha")?.value||"";
     if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
+    const fecha=document.getElementById("asisFecha").value;
+    if(!fecha){alert("Seleccione la fecha.");return;}
     const estudianteId=document.getElementById("asisEstudiante").value;
     if(!estudianteId){alert("Seleccione un estudiante.");return;}
+    const sesionAs=obtenerSesionActual();
     const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
     const estudiante=estudiantes.find(e=>String(e.id)===String(estudianteId));
     if(!estudiante){alert("No se encontró el estudiante.");return;}
-    const fecha=document.getElementById("asisFecha").value;
+    if(sesionAs?.rol==="Docente" && sesionAs.codigoCentro && String(estudiante.codigo_centro||"")!==String(sesionAs.codigoCentro)){
+        alert("Solo puede registrar asistencia a estudiantes de su centro educativo.");return;
+    }
     const estado=document.getElementById("asisEstado").value;
-    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
-    const sesionAs=obtenerSesionActual();
-    const anioAs=fecha?fecha.slice(0,4):"";
+    let docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
+    const anioAs=fecha.slice(0,4);
     const asignacionesAs=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===String(anioAs) &&
-        String(a.estado||"Activo")==="Activo" &&
+        String(a.estado||"Activo").trim().toLowerCase()==="activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(estudiante.nivel) &&
         gradosCoinciden(a.grado,estudiante.grado) &&
-        normalizarSeccion(a.seccion)===normalizarSeccion(estudiante.seccion)
+        normalizarSeccion(a.seccion)===normalizarSeccion(estudiante.seccion) &&
+        (sesionAs?.rol!=="Docente"||!sesionAs.codigoCentro||String(a.codigo_centro||"")===String(sesionAs.codigoCentro))
     );
     if(sesionAs?.rol==="Docente"){
-        if(String(docenteSeleccionado)!==String(sesionAs.docenteId||"")){
-            alert("Seleccione su usuario docente antes de registrar asistencia.");return;
-        }
-        if(!asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId||""))){
-            alert("No tiene asignación activa para este grupo.");return;
+        if(sesionAs.docenteId){
+            if(!asignacionesAs.some(a=>String(a.docenteId)===String(sesionAs.docenteId))){
+                alert("Este grupo no coincide con una asignación de su usuario docente.");return;
+            }
+            docenteSeleccionado=String(sesionAs.docenteId);
+        }else{
+            // Cuenta general del centro: no exige un docente individual ni una asignación para guardar.
+            const asignacionCentro=asignacionesAs.find(a=>!!a.docenteId);
+            docenteSeleccionado=asignacionCentro?String(asignacionCentro.docenteId):"";
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
-    if(!fecha){alert("Seleccione la fecha.");return;}
     const datos=obtenerDatos(KEY_ASISTENCIAS);
     const existe=datos.find(a=>String(a.estudianteId)===String(estudiante.id)&&a.fecha===fecha);
-    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
+    const registro={id:existe?existe.id:Date.now(),fecha,estudianteId:estudiante.id,estudiante:estudiante.nombre,nivel:estudiante.nivel,grado:estudiante.grado,seccion:estudiante.seccion,docenteId:docenteObj?.id||docenteSeleccionado||"",docenteNombre:docenteObj?.nombre||"",codigo_centro:sesionAs?.codigoCentro||docenteObj?.codigo_centro||estudiante.codigo_centro||"",estado};
     if(existe) datos[datos.indexOf(existe)]=registro; else datos.push(registro);
     guardarDatos(KEY_ASISTENCIAS,datos);
     registrarAuditoria(existe?"Editar":"Crear","Asistencia",existe?"Actualización de asistencia":"Registro de asistencia",registro.id,{anio:anioAs});
     alert(existe?"Asistencia actualizada.":"Asistencia guardada correctamente.");
     cargarAsistencias(); actualizarEstadisticas();
 }
+
 function registrarAsistenciaGrupo(){
     const fechaCierre=document.getElementById("asisFecha")?.value||"";
     if(estaCerradoAnio(fechaCierre.slice(0,4))) return;
@@ -4647,21 +4666,35 @@ function registrarAsistenciaGrupo(){
     const grado=document.getElementById("asisGrado").value;
     const seccion=document.getElementById("asisSeccion").value;
     if(!fecha||!nivel||!grado||!seccion){alert("Seleccione fecha, nivel, grado y sección.");return;}
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>normalizarNivel(e.nivel)===normalizarNivel(nivel)&&gradosCoinciden(e.grado,grado)&&normalizarSeccion(e.seccion)===normalizarSeccion(seccion)&&String(e.estado||"Activo")==="Activo");
-    if(!estudiantes.length){alert("No hay estudiantes activos en este grupo.");return;}
-    const estado=document.getElementById("asisEstado").value;
-    const docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
     const sesionGrupo=obtenerSesionActual();
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>
+        normalizarNivel(e.nivel)===normalizarNivel(nivel) &&
+        gradosCoinciden(e.grado,grado) &&
+        normalizarSeccion(e.seccion)===normalizarSeccion(seccion) &&
+        String(e.estado||"Activo")==="Activo" &&
+        (sesionGrupo?.rol!=="Docente"||!sesionGrupo.codigoCentro||String(e.codigo_centro||"")===String(sesionGrupo.codigoCentro))
+    );
+    if(!estudiantes.length){alert("No hay estudiantes activos en este grupo de su centro educativo.");return;}
+    const estado=document.getElementById("asisEstado").value;
+    let docenteSeleccionado=document.getElementById("asisDocente")?.value || "";
     const asignacionesGrupo=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===String(fecha.slice(0,4)) &&
-        String(a.estado||"Activo")==="Activo" &&
+        String(a.estado||"Activo").trim().toLowerCase()==="activo" &&
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
         gradosCoinciden(a.grado,grado) &&
-        normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (sesionGrupo?.rol!=="Docente"||!sesionGrupo.codigoCentro||String(a.codigo_centro||"")===String(sesionGrupo.codigoCentro))
     );
     if(sesionGrupo?.rol==="Docente"){
-        if(String(docenteSeleccionado)!==String(sesionGrupo.docenteId||"") || !asignacionesGrupo.some(a=>String(a.docenteId)===String(sesionGrupo.docenteId||""))){
-            alert("No tiene permiso para registrar asistencia en este grupo.");return;
+        if(sesionGrupo.docenteId){
+            if(!asignacionesGrupo.some(a=>String(a.docenteId)===String(sesionGrupo.docenteId))){
+                alert("No tiene permiso para registrar asistencia en este grupo.");return;
+            }
+            docenteSeleccionado=String(sesionGrupo.docenteId);
+        }else{
+            // Cuenta general del centro: se permite registrar el grupo sin exigir asignación docente.
+            const asignacionCentro=asignacionesGrupo.find(a=>!!a.docenteId);
+            docenteSeleccionado=asignacionCentro?String(asignacionCentro.docenteId):"";
         }
     }
     const docenteObj=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(docenteSeleccionado));
@@ -4669,7 +4702,7 @@ function registrarAsistenciaGrupo(){
     let nuevos=0,actualizados=0;
     estudiantes.forEach(e=>{
         const existe=datos.find(a=>String(a.estudianteId)===String(e.id)&&a.fecha===fecha);
-        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,docenteId:docenteObj?.id||"",docenteNombre:docenteObj?.nombre||"",estado};
+        const registro={id:existe?existe.id:Date.now()+Math.floor(Math.random()*1000000),fecha,estudianteId:e.id,estudiante:e.nombre,nivel:e.nivel,grado:e.grado,seccion:e.seccion,docenteId:docenteObj?.id||docenteSeleccionado||"",docenteNombre:docenteObj?.nombre||"",codigo_centro:sesionGrupo?.codigoCentro||docenteObj?.codigo_centro||e.codigo_centro||"",estado};
         if(existe){datos[datos.indexOf(existe)]=registro;actualizados++;}else{datos.push(registro);nuevos++;}
     });
     guardarDatos(KEY_ASISTENCIAS,datos);
@@ -4677,6 +4710,7 @@ function registrarAsistenciaGrupo(){
     cargarAsistencias(); actualizarEstadisticas();
     alert("Grupo procesado. Nuevos: "+nuevos+" | Actualizados: "+actualizados);
 }
+
 function mostrarEstadoAsistenciaExistente(){
     const id=document.getElementById("asisEstudiante").value;
     const fecha=document.getElementById("asisFecha").value;
@@ -4689,16 +4723,26 @@ function cargarAsistencias(){
     const buscar=(document.getElementById("buscarAsistencia")?.value||"").trim().toLowerCase();
     tabla.innerHTML="";
     const ses=obtenerSesionActual();
-    const lista=datos.filter(a=>ses?.rol==="Docente" ? (String(a.docenteId||"")===String(ses.docenteId||"") && docenteTieneGrupo(a.nivel,a.grado,a.seccion,String(a.fecha||"").slice(0,4))) : true).filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
-    lista.forEach((a,i)=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
+    const lista=datos.filter(a=>{
+        if(ses?.rol!=="Docente") return true;
+        if(ses.docenteId) return String(a.docenteId||"")===String(ses.docenteId);
+        return !!ses.codigoCentro && String(a.codigo_centro||"")===String(ses.codigoCentro);
+    }).filter(a=>!buscar||[a.fecha,a.estudiante,a.nivel,a.grado,a.seccion,a.estado].join(" ").toLowerCase().includes(buscar));
+    lista.forEach(a=>tabla.innerHTML+=`<tr><td>${escaparHTML(a.fecha)}</td><td>${escaparHTML(a.estudiante)}</td><td>${escaparHTML(a.nivel)}</td><td>${escaparHTML(a.grado)}</td><td>${escaparHTML(a.seccion)}</td><td>${escaparHTML(a.docenteNombre||"")}</td><td>${escaparHTML(a.estado)}</td><td><button class="btn-danger" onclick="eliminarAsistencia(${a.id})">Eliminar</button></td></tr>`);
     if(!lista.length) tabla.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#777;">No hay asistencias registradas.</td></tr>';
 }
+
 function eliminarAsistencia(id){
     const registro=obtenerDatos(KEY_ASISTENCIAS).find(a=>String(a.id)===String(id));
     if(!registro)return;
     const ses=obtenerSesionActual();
-    if(ses?.rol==="Docente" && String(registro.docenteId||"")!==String(ses.docenteId||"")){
-        alert("No tiene permiso para eliminar esta asistencia.");return;
+    if(ses?.rol==="Docente"){
+        if(ses.docenteId && String(registro.docenteId||"")!==String(ses.docenteId)){
+            alert("No tiene permiso para eliminar esta asistencia.");return;
+        }
+        if(!ses.docenteId && (!ses.codigoCentro || String(registro.codigo_centro||"")!==String(ses.codigoCentro))){
+            alert("Solo puede eliminar asistencias de su centro educativo.");return;
+        }
     }
     if(estaCerradoAnio(String(registro.fecha||"").slice(0,4)))return;
     if(!confirm("¿Desea eliminar esta asistencia?"))return;
