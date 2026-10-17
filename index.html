@@ -3969,6 +3969,14 @@ function mostrarSeccion(id, boton){
     });
 
     document.getElementById(id).classList.add("active");
+    // V11.33: al volver a Inicio, sincronizar las calificaciones antes de actualizar el contador.
+    if(id==="inicio" && typeof window.NA_syncCalificaciones==="function"){
+        window.NA_syncCalificaciones().then(()=>{
+            if(document.getElementById("inicio")?.classList.contains("active") && typeof actualizarEstadisticas==="function"){
+                actualizarEstadisticas();
+            }
+        }).catch(error=>console.error("No se pudo actualizar el contador de calificaciones en Inicio:",error));
+    }
 
     document.querySelectorAll(".menu button").forEach(btn=>{
         btn.classList.remove("active");
