@@ -7597,14 +7597,19 @@ function obtenerPadresTutoresVisibles(anio){
 }
 
 function cargarEstudiantesPadresTutores(){
-    const sel=document.getElementById("padreEstudiante"); if(!sel)return;
+    const sel=document.getElementById("padreEstudiante");
+    if(!sel)return;
     const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
     const ses=obtenerSesionActual();
-    let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")==="Activo");
+    const estadoActivo=e=>String(e?.estado||"Activo").trim().toLocaleLowerCase()==="activo";
+    let est=obtenerDatos(KEY_ESTUDIANTES).filter(estadoActivo);
     if(ses?.rol==="Docente"){
-        const codigoSesion=String(ses.codigoCentro||"").trim();
+        const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
+        const codigoSesion=normalizarCodigo(ses.codigoCentro);
         est=est.filter(e=>{
-            const codigoEstudiante=String(e.codigo_centro||e.codigoCentro||"").trim();
+            const codigoEstudiante=normalizarCodigo(
+                e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo
+            );
             return !!codigoSesion && codigoEstudiante===codigoSesion &&
                 docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
         });
@@ -7614,14 +7619,17 @@ function cargarEstudiantesPadresTutores(){
     if(!est.length){
         const vacio=document.createElement("option");
         vacio.disabled=true;
-        vacio.textContent="No hay estudiantes asignados para el año seleccionado";
+        vacio.textContent=ses?.rol==="Docente"
+            ?"No hay estudiantes activos en los grupos asignados para el año seleccionado"
+            :"No hay estudiantes activos disponibles";
         sel.appendChild(vacio);
         return;
     }
     est.forEach(e=>{
         const o=document.createElement("option");
         o.value=e.id;
-        o.textContent=e.nombre+" — "+normalizarNivel(e.nivel)+" "+normalizarGrado(e.grado)+" "+normalizarSeccion(e.seccion);
+        o.textContent=(e.nombre||e.nombre_completo||"Estudiante sin nombre")+" — "+
+            normalizarNivel(e.nivel)+" "+normalizarGrado(e.grado)+" "+normalizarSeccion(e.seccion);
         sel.appendChild(o);
     });
     if([...sel.options].some(o=>o.value===prev))sel.value=prev;
