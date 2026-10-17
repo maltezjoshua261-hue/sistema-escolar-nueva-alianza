@@ -3906,17 +3906,23 @@ function imprimirConvivencia(){document.body.setAttribute("data-imprimiendo","co
 ========================================================= */
 function cargarEstudiantesExpedienteIntegral(){
     const sel=document.getElementById("expIntEstudiante"); if(!sel)return;
-    const anio=document.getElementById("expIntAnio")?.value||new Date().getFullYear();
     const q=limpiarTexto(document.getElementById("expIntBuscar")?.value||"");
     const ses=obtenerSesionActual();
-    let lista=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")!=="Retirado"&&String(e.estado||"Activo")!=="Trasladado");
-    // Mantener el mismo criterio de acceso que ya utiliza la lista Estudiantes para Docentes:
-    // mostrar únicamente estudiantes de grupos que el docente tiene asignados.
+    const normalizarCodigo=c=>String(c||"").trim().replace(/\\.0$/,"");
+    const codigoSesion=normalizarCodigo(ses?.codigoCentro||ses?.codigo_centro||ses?.centroCodigo);
+    let lista=depurarDuplicadosEstudiantes().filter(e=>{
+        const estado=String(e.estado||"Activo").trim().toLowerCase();
+        return estado!=="retirado"&&estado!=="trasladado";
+    });
+    // El docente puede consultar el expediente de estudiantes de su propio centro.
+    // El selector no depende de la carga académica del año elegido.
     if(ses?.rol==="Docente"){
-        // Usar el mismo alcance que el módulo Estudiantes: grupos visibles en el año base 2027.
-        // El año seleccionado sigue controlando los datos académicos que se muestran en el expediente.
-        lista=lista.filter(e=>estudianteVisibleParaRol(e,2027));
+        lista=lista.filter(e=>{
+            const codigoEstudiante=normalizarCodigo(e?.codigo_centro||e?.codigoCentro||e?.centro_codigo||e?.codigo_centro_educativo);
+            return !!codigoSesion && !!codigoEstudiante && codigoSesion===codigoEstudiante;
+        });
     }else{
+        const anio=document.getElementById("expIntAnio")?.value||new Date().getFullYear();
         lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
     }
     if(q) lista=lista.filter(e=>limpiarTexto(e.nombre).includes(q));
@@ -3928,7 +3934,13 @@ function generarExpedienteIntegral(){
     const id=document.getElementById("expIntEstudiante")?.value||"";
     if(!id){cont.innerHTML='<div class="card"><p>Seleccione un estudiante para generar el expediente integral.</p></div>';return;}
     const e=obtenerDatos(KEY_ESTUDIANTES).find(x=>String(x.id)===String(id));
-    if(!e||!estudianteVisibleParaRol(e,2027)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    if(!e){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
+    const sesActual=obtenerSesionActual();
+    if(sesActual?.rol==="Docente"){
+        const codSesion=String(sesActual.codigoCentro||sesActual.codigo_centro||sesActual.centroCodigo||"").trim().replace(/\\.0$/,"");
+        const codEst=String(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo||"").trim().replace(/\\.0$/,"");
+        if(!codSesion||!codEst||codSesion!==codEst){cont.innerHTML='<div class="card"><p>El estudiante no pertenece a su centro educativo.</p></div>';return;}
+    }else if(!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
     const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
     const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||anio)===String(anio));
     const asi=obtenerDatos(KEY_ASISTENCIAS).filter(x=>String(x.estudianteId)===String(id)&&String((x.fecha||"").slice(0,4))===String(anio));
