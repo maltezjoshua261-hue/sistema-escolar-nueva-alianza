@@ -4038,6 +4038,15 @@ function mostrarSeccion(id, boton){
 
     if(id === "calificaciones"){
         actualizarCalificaciones();
+        // V11.31: volver a leer las calificaciones centrales cada vez que se abre el módulo.
+        if(typeof window.NA_syncCalificaciones==="function"){
+            window.NA_syncCalificaciones().then(()=>{
+                if(document.getElementById("calificaciones")?.classList.contains("active")){
+                    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+                    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+                }
+            }).catch(error=>console.error("No se pudieron cargar las calificaciones al abrir el módulo:",error));
+        }
     }
 
     if(id === "centroControl"){
@@ -7902,6 +7911,8 @@ async function NA_syncTodo(){
   await NA_syncAsistencias();
   await NA_syncCalificaciones();
 }
+// V11.31: permitir que el módulo de calificaciones solicite una sincronización central.
+window.NA_syncCalificaciones=NA_syncCalificaciones;
 
 async function NA_login(){
   const usuario=(document.getElementById("loginUser")?.value||"").trim();
@@ -7922,6 +7933,10 @@ async function NA_login(){
     if(err)err.textContent="";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
+    // V11.32: refrescar tabla y contador tras iniciar sesión.
+    await NA_syncCalificaciones();
+    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
   }catch(e){
     console.error("V11.25 login:",e);
     if(err)err.textContent=e?.message||"Usuario o contraseña incorrectos.";
@@ -8235,6 +8250,10 @@ async function NA_restaurarSesion(){
     document.getElementById("app").style.display="flex";
     if(typeof aplicarPermisos==="function")aplicarPermisos();
     if(typeof cargarTodo==="function")cargarTodo();
+    // V11.32: refrescar tabla y contador al recuperar una sesión existente.
+    await NA_syncCalificaciones();
+    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
   }catch(e){console.warn("V11.25 restauración:",e);}
 }
 window.cargarEstudiantes=function(){
