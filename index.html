@@ -4371,14 +4371,16 @@ function docenteTieneGrupo(nivel,grado,seccion,anio){
 function docenteTieneGrupoMatricula(nivel,grado,seccion,anio){
     const ses=obtenerSesionActual();
     if(!ses || ses.rol!=="Docente") return true;
+    // Reutilizar el comparador de grados multigrado y aceptar el ID local o el ID de Supabase.
     const coincide=a=>
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
-        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        gradoAsignacionCoincide(a.grado,grado) &&
         normalizarSeccion(a.seccion)===normalizarSeccion(seccion);
     const asignacionesAnio=obtenerAsignacionesDocenteActual(anio);
     if(asignacionesAnio.some(coincide)) return true;
     const todas=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
-        String(a.docenteId||"")===String(ses.docenteId||"") &&
+        (String(a.docenteId||"")===String(ses.docenteId||"") ||
+         (!!ses.docenteSupabaseId && String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId))) &&
         String(a.estado||"Activo")==="Activo"
     );
     return todas.some(coincide);
