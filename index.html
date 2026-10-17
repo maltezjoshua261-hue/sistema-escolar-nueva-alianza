@@ -840,6 +840,41 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 
                 </div>
 
+                <div class="card" style="margin-top:18px;">
+                    <h2>🔎 Consulta de estudiantes</h2>
+                    <p style="margin:8px 0 14px;color:#666;">Consulte el estado y los datos escolares del estudiante. Esta función es únicamente de lectura.</p>
+                    <button class="btn-info" onclick="abrirConsultaEstudiantes(this)">🔎 Consultar estudiantes</button>
+                </div>
+
+            </section>
+
+            <!-- CONSULTA DE ESTUDIANTES · SOLO LECTURA -->
+            <section id="consultaEstudiantes" class="section">
+                <div class="card">
+                    <h1>🔎 Consultar estudiantes</h1>
+                    <p style="margin:8px 0 16px;color:#666;">Busque por nombre completo o código. No se pueden editar ni eliminar datos desde esta pantalla.</p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="consultaEstudiantesBuscar">Nombre o código del estudiante</label>
+                            <input id="consultaEstudiantesBuscar" type="search" placeholder="Escriba el nombre o código..." oninput="buscarEstudiantesConsulta()">
+                        </div>
+                    </div>
+                    <div id="consultaEstudiantesEstado" class="notice">Preparando consulta de solo lectura...</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>#</th><th>Nombre completo</th><th>Código</th><th>Centro educativo</th><th>Nivel</th><th>Grado</th><th>Sección</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody id="tablaConsultaEstudiantes">
+                                <tr><td colspan="8" style="text-align:center;padding:18px;">Abra la consulta para cargar los estudiantes.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="actions no-print" style="margin-top:16px;">
+                        <button class="btn-info" onclick="cargarConsultaEstudiantes()">🔄 Actualizar consulta</button>
+                        <button class="btn-secondary" onclick="mostrarSeccion('inicio',null)">← Volver al Panel principal</button>
+                    </div>
+                </div>
             </section>
 
             <!-- CENTRO DE CONTROL DEL DIRECTOR 8.4 -->
@@ -3956,6 +3991,81 @@ function imprimirExpedienteIntegral(){document.body.setAttribute("data-imprimien
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
+
+/* CONSULTA DE ESTUDIANTES · SOLO LECTURA
+   No guarda ni modifica datos; solo sincroniza lecturas ya existentes. */
+function abrirConsultaEstudiantes(boton){
+    mostrarSeccion("consultaEstudiantes",boton);
+    cargarConsultaEstudiantes();
+}
+async function cargarConsultaEstudiantes(){
+    const estado=document.getElementById("consultaEstudiantesEstado");
+    if(estado)estado.textContent="Actualizando datos para la consulta…";
+    try{
+        if(typeof window.NA_syncEstudiantes==="function")await window.NA_syncEstudiantes();
+        if(typeof window.NA_syncMatriculas==="function")await window.NA_syncMatriculas();
+        if(estado)estado.textContent="Consulta actualizada. Solo lectura: no se modificaron registros en la base de datos.";
+    }catch(error){
+        console.warn("Consulta de estudiantes: se usarán los datos disponibles en esta sesión.",error);
+        if(estado)estado.textContent="No se pudo actualizar desde la base de datos. Se muestran los datos disponibles en esta sesión; no se modificaron registros en la base de datos.";
+    }
+    buscarEstudiantesConsulta();
+}
+function estadoConsultaEstudiante(e){
+    const normal=x=>limpiarTexto(String(x||"")).toLowerCase().trim();
+    const estadoEstudiante=normal(e.estado||"");
+    // El estado explícito del estudiante no debe quedar oculto por una matrícula histórica.
+    if(estadoEstudiante.includes("retir"))return "Retirado";
+    if(estadoEstudiante.includes("traslad"))return "Trasladado";
+    if(estadoEstudiante==="inactivo"||estadoEstudiante==="inactiva")return "Inactivo";
+
+    const centro=String(e.codigo_centro||e.codigoCentro||"").trim();
+    const matriculas=obtenerDatos(KEY_MATRICULAS).filter(m=>{
+        const mismoId=String(m.estudianteId||"")===String(e.id||"") ||
+            (!!e.supabaseId && String(m.estudianteId||"")===String(e.supabaseId));
+        const mismoCodigo=!!e.codigo && String(m.codigo||"").trim()===String(e.codigo||"").trim() &&
+            String(m.codigo_centro||"").trim()===centro;
+        return (mismoId||mismoCodigo) &&
+            (!centro || !m.codigo_centro || String(m.codigo_centro).trim()===centro);
+    }).sort((a,b)=>String(b.anio||"").localeCompare(String(a.anio||""))||
+        String(b.fecha||"").localeCompare(String(a.fecha||"")));
+    const estadoMatricula=normal(matriculas[0]?.estado||"");
+    if(estadoMatricula.includes("retir"))return "Retirado";
+    if(estadoMatricula.includes("traslad"))return "Trasladado";
+    if(["activo","activa","matriculado","matriculada","vigente"].includes(estadoMatricula))return "Activo";
+    if(estadoMatricula)return matriculas[0].estado;
+    if(["activo","activa"].includes(estadoEstudiante))return "Activo";
+    return e.estado||"Sin estado registrado";
+}
+function buscarEstudiantesConsulta(){
+    const tbody=document.getElementById("tablaConsultaEstudiantes");
+    if(!tbody)return;
+    const ses=obtenerSesionActual();
+    if(!ses){
+        tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:18px;">Inicie sesión para consultar estudiantes.</td></tr>';
+        return;
+    }
+    const q=limpiarTexto(document.getElementById("consultaEstudiantesBuscar")?.value||"");
+    const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+    const codigoSesion=String(ses.codigoCentro||"").trim();
+    let lista=obtenerDatos(KEY_ESTUDIANTES);
+    if(ses.rol!=="Director"){
+        lista=lista.filter(e=>codigoSesion && String(e.codigo_centro||e.codigoCentro||"").trim()===codigoSesion);
+    }
+    lista=lista.filter(e=>!q||limpiarTexto([
+        e.nombre,e.nombre_completo,e.codigo,e.codigo_centro,e.nivel,e.grado,e.seccion,estadoConsultaEstudiante(e)
+    ].join(" ")).includes(q));
+    lista.sort((a,b)=>String(a.nombre||a.nombre_completo||"").localeCompare(String(b.nombre||b.nombre_completo||""),"es"));
+    if(!lista.length){
+        tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:18px;">No se encontraron estudiantes con ese nombre o código en el centro autorizado.</td></tr>';
+        return;
+    }
+    tbody.innerHTML=lista.map((e,i)=>{
+        const codigo=String(e.codigo_centro||e.codigoCentro||"").trim();
+        const centro= codigo ? (centros[codigo]||"Centro no reconocido")+" ("+codigo+")" : "Sin centro asignado";
+        return '<tr><td>'+String(i+1)+'</td><td>'+escaparHTML(e.nombre||e.nombre_completo||"—")+'</td><td>'+escaparHTML(e.codigo||"—")+'</td><td>'+escaparHTML(centro)+'</td><td>'+escaparHTML(e.nivel||"—")+'</td><td>'+escaparHTML(e.grado||"—")+'</td><td>'+escaparHTML(e.seccion||"—")+'</td><td><strong>'+escaparHTML(estadoConsultaEstudiante(e))+'</strong></td></tr>';
+    }).join("");
+}
 
 function mostrarSeccion(id, boton){
 
