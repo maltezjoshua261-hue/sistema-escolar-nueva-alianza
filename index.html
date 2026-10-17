@@ -4009,25 +4009,26 @@ function cargarEstudiantesExpedienteIntegral(){
     const sel=document.getElementById("expIntEstudiante"); if(!sel)return;
     const q=limpiarTexto(document.getElementById("expIntBuscar")?.value||"");
     const ses=obtenerSesionActual();
-    const normalizarCodigo=c=>String(c||"").trim().replace(/\\.0$/,"");
-    const codigoSesion=normalizarCodigo(ses?.codigoCentro||ses?.codigo_centro||ses?.centroCodigo);
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
     let lista=depurarDuplicadosEstudiantes().filter(e=>{
         const estado=String(e.estado||"Activo").trim().toLowerCase();
         return estado!=="retirado"&&estado!=="trasladado";
     });
-    // El docente puede consultar el expediente de estudiantes de su propio centro.
-    // El selector no depende de la carga académica del año elegido.
     if(ses?.rol==="Docente"){
-        lista=lista.filter(e=>{
+        const codigoSesion=normalizarCodigo(ses.codigoCentro||ses.codigo_centro||ses.centroCodigo);
+        // Preferir el centro asignado en la sesión. Si los datos antiguos usan otro
+        // campo de centro, aplicar el mismo control de visibilidad del módulo Estudiantes.
+        const porCentro=codigoSesion?lista.filter(e=>{
             const codigoEstudiante=normalizarCodigo(e?.codigo_centro||e?.codigoCentro||e?.centro_codigo||e?.codigo_centro_educativo);
-            return !!codigoSesion && !!codigoEstudiante && codigoSesion===codigoEstudiante;
-        });
+            return !!codigoEstudiante&&codigoSesion===codigoEstudiante;
+        }):[];
+        lista=porCentro.length?porCentro:lista.filter(e=>estudianteVisibleParaRol(e,2027));
     }else{
         const anio=document.getElementById("expIntAnio")?.value||new Date().getFullYear();
         lista=lista.filter(e=>estudianteVisibleParaRol(e,anio));
     }
-    if(q) lista=lista.filter(e=>limpiarTexto(e.nombre).includes(q));
-    sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre)+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
+    if(q) lista=lista.filter(e=>limpiarTexto(e.nombre||e.nombre_completo).includes(q));
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+lista.map(e=>'<option value="'+escaparHTML(String(e.id))+'">'+escaparHTML(e.nombre||e.nombre_completo||"Estudiante")+' — '+escaparHTML((e.grado||"")+" "+(e.seccion||""))+'</option>').join("");
 }
 function generarExpedienteIntegral(){
     const cont=document.getElementById("expedienteIntegralContenido");if(!cont)return;
@@ -4040,7 +4041,7 @@ function generarExpedienteIntegral(){
     if(sesActual?.rol==="Docente"){
         const codSesion=String(sesActual.codigoCentro||sesActual.codigo_centro||sesActual.centroCodigo||"").trim().replace(/\\.0$/,"");
         const codEst=String(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo||"").trim().replace(/\\.0$/,"");
-        if(!codSesion||!codEst||codSesion!==codEst){cont.innerHTML='<div class="card"><p>El estudiante no pertenece a su centro educativo.</p></div>';return;}
+        if(codSesion&&codEst&&codSesion!==codEst&&!estudianteVisibleParaRol(e,2027)){cont.innerHTML='<div class="card"><p>El estudiante no pertenece a su centro educativo.</p></div>';return;}
     }else if(!estudianteVisibleParaRol(e,anio)){cont.innerHTML='<div class="card"><p>El estudiante no está disponible para su usuario.</p></div>';return;}
     const mats=obtenerDatos(KEY_MATRICULAS).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio)===String(anio));
     const cal=obtenerDatos(KEY_CALIFICACIONES).filter(x=>String(x.estudianteId)===String(id)&&String(x.anio||anio)===String(anio));
