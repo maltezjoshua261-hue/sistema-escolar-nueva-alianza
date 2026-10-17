@@ -2678,7 +2678,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         <div class="form-group"><label>Filtrar año</label><select id="padreFiltroAnio"><option value="">Todos</option><option>2026</option><option>2027</option><option>2028</option></select></div>
                         <div class="form-group"><label>Buscar</label><input id="padreBuscar" placeholder="Estudiante, tutor, teléfono..."></div>
                     </div>
-                    <div class="actions"><button class="btn-primary" onclick="cargarPadresTutores()">🔎 Buscar</button><button class="btn-secondary" onclick="imprimirPadresTutores()">🖨️ Imprimir</button></div>
+                    <div class="actions"><button class="btn-primary" onclick="cargarPadresTutores()">🔎 Buscar</button><button class="btn-secondary" onclick="imprimirPadresTutores()">🖨️ Imprimir</button><button id="btnDepurarPadres" class="btn-danger" style="display:none" onclick="depurarDuplicadosPadresTutores()">🧹 Corregir duplicados exactos (Director)</button></div>
                     <div class="table-container"><table><thead><tr><th>Año</th><th>Estudiante</th><th>Padre/Tutor</th><th>Parentesco</th><th>Teléfono</th><th>Principal</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaPadresTutores"></tbody></table></div>
                 </div>
             </section>
@@ -7757,6 +7757,7 @@ function limpiarPadreTutor(){
 }
 
 function cargarPadresTutores(){
+    const btnDepurar=document.getElementById("btnDepurarPadres");if(btnDepurar)btnDepurar.style.display=esDirectorActual()?"inline-block":"none";
     const tbody=document.getElementById("tablaPadresTutores");if(!tbody)return;
     const anio=document.getElementById("padreFiltroAnio")?.value||"";
     const buscar=limpiarTexto(document.getElementById("padreBuscar")?.value||"").toLowerCase();
@@ -7767,6 +7768,40 @@ function cargarPadresTutores(){
         const acciones=esDirectorActual()?'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button> <button class="btn-danger" onclick="eliminarPadreTutor(\''+x.id+'\')">Eliminar</button>':'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button>';
         return "<tr><td>"+escaparHTML(x.anio)+"</td><td>"+escaparHTML(x.estudianteNombre)+"</td><td>"+escaparHTML(x.nombre)+"</td><td>"+escaparHTML(x.parentesco)+"</td><td>"+escaparHTML(x.telefono)+"</td><td>"+escaparHTML(x.principal)+"</td><td>"+escaparHTML(x.estado)+"</td><td>"+acciones+"</td></tr>";
     }).join(""):"<tr><td colspan='8'>Sin registros.</td></tr>";
+}
+
+function depurarDuplicadosPadresTutores(){
+    if(!exigirDirector())return;
+    const datos=obtenerDatos(KEY_PADRES_TUTORES);
+    const normalizar=v=>String(v||"").trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
+    const grupos=new Map();
+    datos.forEach(x=>{
+        const clave=[x.estudianteId,x.anio,normalizar(x.nombre),normalizar(x.parentesco)].join("|");
+        if(!grupos.has(clave))grupos.set(clave,[]);
+        grupos.get(clave).push(x);
+    });
+    const eliminar=new Set();
+    let corregidos=0;
+    grupos.forEach(grupo=>{
+        if(grupo.length<2)return;
+        grupo.sort((a,b)=>(String(b.principal).toLowerCase()==="sí"?1:0)-(String(a.principal).toLowerCase()==="sí"?1:0));
+        const conservar=grupo[0];
+        grupo.slice(1).forEach(duplicado=>{
+            ["cedula","telefono","correo","ocupacion","direccion","emergencia","telefonoEmergencia","observacion"].forEach(campo=>{
+                if(!conservar[campo]&&duplicado[campo])conservar[campo]=duplicado[campo];
+            });
+            if(String(duplicado.principal).toLowerCase()==="sí")conservar.principal="Sí";
+            eliminar.add(String(duplicado.id));
+            corregidos++;
+        });
+    });
+    if(!corregidos){alert("No se encontraron duplicados exactos para corregir.");return;}
+    if(!confirm("Se encontraron "+corregidos+" duplicado(s) exacto(s). Se conservará un registro por estudiante, año, nombre y parentesco, priorizando Principal: Sí y completando datos vacíos. ¿Desea continuar?"))return;
+    const finales=datos.filter(x=>!eliminar.has(String(x.id)));
+    guardarDatos(KEY_PADRES_TUTORES,finales);
+    registrarAuditoria("Editar","Padres/Tutores","Corrección de "+corregidos+" duplicado(s) exacto(s)", "depuracion-duplicados",{eliminados:corregidos});
+    cargarPadresTutores();
+    alert("Corrección terminada. Se consolidaron "+corregidos+" duplicado(s) exacto(s); se conservaron los datos disponibles y el registro principal.");
 }
 
 function editarPadreTutor(id){
