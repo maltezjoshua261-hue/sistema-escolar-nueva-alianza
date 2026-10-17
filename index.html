@@ -2650,7 +2650,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
             <section id="padresTutores" class="section">
                 <div class="card">
                     <h2>👨‍👩‍👧 Padres y tutores</h2>
-                    <p class="notice">Registro de responsables familiares vinculado a cada estudiante. El Director puede administrar los datos; el Docente los consulta únicamente para sus grupos asignados.</p>
+                    <p class="notice">Registro de responsables familiares. El Director administra todos los centros; cada Docente puede registrar y actualizar los datos de las familias de estudiantes de su propia escuela.</p>
                     <div class="form-grid">
                         <div class="form-group"><label>Año</label><select id="padreAnio"><option>2026</option><option>2027</option><option>2028</option></select></div>
                         <div class="form-group"><label>Estudiante</label><select id="padreEstudiante" onfocus="cargarEstudiantesPadresTutores()"></select></div>
@@ -2667,7 +2667,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                         <div class="form-group"><label>Estado</label><select id="padreEstado"><option>Activo</option><option>Inactivo</option></select></div>
                         <div class="form-group" style="grid-column:1/-1"><label>Observación</label><textarea id="padreObservacion" rows="2"></textarea></div>
                     </div>
-                    <div class="actions solo-director">
+                    <div class="actions">
                         <button class="btn-primary" onclick="guardarPadreTutor()">💾 Guardar</button>
                         <button class="btn-secondary" onclick="limpiarPadreTutor()">Limpiar</button>
                     </div>
@@ -7590,9 +7590,21 @@ function obtenerPadresTutoresVisibles(anio){
     const datos=obtenerDatos(KEY_PADRES_TUTORES);
     const ses=obtenerSesionActual();
     if(!ses || ses.rol==="Director") return datos;
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
-    const ids=new Set(estudiantes.map(e=>String(e.id)));
-    return datos.filter(x=>ids.has(String(x.estudianteId)));
+    if(ses.rol!=="Docente") return [];
+    const codigoSesion=String(ses.codigoCentro||ses.codigo_centro||"").trim().replace(/\.0$/,"");
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES);
+    const idsCentro=new Set(estudiantes.filter(e=>String(e.codigo_centro||e.codigoCentro||"").trim().replace(/\.0$/,"")===codigoSesion).map(e=>String(e.id)));
+    return datos.filter(x=>idsCentro.has(String(x.estudianteId)));
+}
+
+function puedeGestionarPadreTutor(estudiante){
+    const ses=obtenerSesionActual();
+    if(!ses)return false;
+    if(ses.rol==="Director")return true;
+    if(ses.rol!=="Docente"||!estudiante)return false;
+    const codigoSesion=String(ses.codigoCentro||ses.codigo_centro||"").trim().replace(/\.0$/,"");
+    const codigoEstudiante=String(estudiante.codigo_centro||estudiante.codigoCentro||"").trim().replace(/\.0$/,"");
+    return !!codigoSesion && codigoSesion===codigoEstudiante;
 }
 
 function cargarEstudiantesPadresTutores(){
@@ -7677,15 +7689,20 @@ function cargarEstudiantesPadresTutores(){
     if([...sel.options].some(o=>String(o.value)===String(anterior)))sel.value=anterior;
 }
 function guardarPadreTutor(){
-    if(!exigirDirector())return;
     const id=document.getElementById("padreId")?.value||"";
     const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
     const estudianteId=document.getElementById("padreEstudiante")?.value||"";
     const estudiante=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(estudianteId));
     const nombre=limpiarTexto(document.getElementById("padreNombre")?.value||"");
     if(!estudianteId||!estudiante){alert("Seleccione un estudiante.");return}
+    if(!puedeGestionarPadreTutor(estudiante)){alert("Solo puede registrar o actualizar familias de estudiantes de su propio centro educativo.");return}
     if(!nombre){alert("Ingrese el nombre del padre o tutor.");return}
     const datos=obtenerDatos(KEY_PADRES_TUTORES);
+    if(id){
+        const existente=datos.find(x=>String(x.id)===String(id));
+        const estudianteAnterior=existente&&obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(existente.estudianteId));
+        if(!existente||!puedeGestionarPadreTutor(estudianteAnterior)){alert("No tiene permiso para modificar este registro.");return}
+    }
     const obj={
         id:id||"PT-"+Date.now(),
         anio:String(anio),
@@ -7730,14 +7747,15 @@ function cargarPadresTutores(){
     if(anio)datos=datos.filter(x=>String(x.anio)===String(anio));
     if(buscar)datos=datos.filter(x=>(x.estudianteNombre+" "+x.nombre+" "+x.telefono+" "+x.parentesco).toLowerCase().includes(buscar));
     tbody.innerHTML=datos.length?datos.map(x=>{
-        const acciones=esDirectorActual()?'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button> <button class="btn-danger" onclick="eliminarPadreTutor(\''+x.id+'\')">Eliminar</button>':"<span>Solo consulta</span>";
+        const acciones=esDirectorActual()?'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button> <button class="btn-danger" onclick="eliminarPadreTutor(\''+x.id+'\')">Eliminar</button>':'<button class="btn-secondary" onclick="editarPadreTutor(\''+x.id+'\')">Editar</button>';
         return "<tr><td>"+escaparHTML(x.anio)+"</td><td>"+escaparHTML(x.estudianteNombre)+"</td><td>"+escaparHTML(x.nombre)+"</td><td>"+escaparHTML(x.parentesco)+"</td><td>"+escaparHTML(x.telefono)+"</td><td>"+escaparHTML(x.principal)+"</td><td>"+escaparHTML(x.estado)+"</td><td>"+acciones+"</td></tr>";
     }).join(""):"<tr><td colspan='8'>Sin registros.</td></tr>";
 }
 
 function editarPadreTutor(id){
-    if(!exigirDirector())return;
     const x=obtenerDatos(KEY_PADRES_TUTORES).find(a=>String(a.id)===String(id));if(!x)return;
+    const estudiante=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(x.estudianteId));
+    if(!puedeGestionarPadreTutor(estudiante)){alert("Solo puede editar registros de familias de su propio centro educativo.");return}
     document.getElementById("padreId").value=x.id;document.getElementById("padreAnio").value=x.anio;document.getElementById("padreEstudiante").value=x.estudianteId;
     document.getElementById("padreNombre").value=x.nombre||"";document.getElementById("padreParentesco").value=x.parentesco||"Madre";document.getElementById("padreCedula").value=x.cedula||"";
     document.getElementById("padreTelefono").value=x.telefono||"";document.getElementById("padreCorreo").value=x.correo||"";document.getElementById("padreOcupacion").value=x.ocupacion||"";
