@@ -1778,7 +1778,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Año escolar</label>
-                            <select id="boletaAnio" onchange="generarBoleta()">
+                            <select id="boletaAnio" onchange="cargarEstudiantesBoleta(); generarBoleta()">
                                 <option value="2026">2026</option>
                                 <option value="2027">2027</option>
                             </select>
@@ -6521,7 +6521,12 @@ function cargarEstudiantesBoleta(){
     const select=document.getElementById("boletaEstudiante");
     if(!select) return;
     const anterior=select.value;
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const anio=document.getElementById("boletaAnio")?.value||String(new Date().getFullYear());
+    const ses=obtenerSesionActual();
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES)
+        .filter(e=>(e.estado||"Activo")==="Activo")
+        .filter(e=>!ses || ses.rol!=="Docente" || estudianteVisibleParaRol(e,anio))
+        .sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     select.innerHTML='<option value="">Seleccione un estudiante</option>';
     estudiantes.forEach(e=>{
         const o=document.createElement("option");
