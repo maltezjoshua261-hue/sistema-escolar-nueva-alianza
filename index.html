@@ -4572,15 +4572,36 @@ function eliminarAsignacion(id){
 }
 
 function buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura){
-    return obtenerDatos(KEY_ASIGNACIONES).find(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(a.asignaturas||[]).includes(asignatura))||null;
+    const ses=obtenerSesionActual();
+    return obtenerDatos(KEY_ASIGNACIONES).find(a=>
+        String(a.anio)===String(anio) &&
+        String(a.estado||"Activo").toLowerCase()==="activo" &&
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        gradoAsignacionCoincide(a.grado,grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (!asignatura||(a.asignaturas||[]).includes(asignatura)) &&
+        (ses?.rol!=="Docente" ||
+         String(a.docenteId||"")===String(ses.docenteId||"") ||
+         (!!ses.docenteSupabaseId && String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId)))
+    )||null;
 }
 
 function cargarDocenteCalificacion(){
     const select=document.getElementById("calDocente");if(!select)return;
     const anio=document.getElementById("calAnio")?.value||"2026",nivel=document.getElementById("calNivel")?.value,grado=document.getElementById("calGrado")?.value,seccion=document.getElementById("calSeccion")?.value,asignatura=document.getElementById("calAsignatura")?.value;
     const sesion=obtenerSesionActual();
-    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>String(a.anio)===String(anio)&&String(a.estado||"Activo")==="Activo"&&normalizarNivel(a.nivel)===normalizarNivel(nivel)&&normalizarGrado(a.grado)===normalizarGrado(grado)&&normalizarSeccion(a.seccion)===normalizarSeccion(seccion)&&(!asignatura||(a.asignaturas||[]).includes(asignatura)));
-    if(sesion?.rol==="Docente") lista=lista.filter(a=>String(a.docenteId)===String(sesion.docenteId||""));
+    let lista=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
+        String(a.anio)===String(anio) &&
+        String(a.estado||"Activo").toLowerCase()==="activo" &&
+        normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
+        gradoAsignacionCoincide(a.grado,grado) &&
+        normalizarSeccion(a.seccion)===normalizarSeccion(seccion) &&
+        (!asignatura||(a.asignaturas||[]).includes(asignatura))
+    );
+    if(sesion?.rol==="Docente") lista=lista.filter(a=>
+        String(a.docenteId||"")===String(sesion.docenteId||"") ||
+        (!!sesion.docenteSupabaseId && String(a.docenteSupabaseId||"")===String(sesion.docenteSupabaseId))
+    );
     select.innerHTML='<option value="">Sin asignación</option>';
     [...new Map(lista.map(a=>[String(a.docenteId),a])).values()].forEach(a=>{const o=document.createElement("option");o.value=a.docenteId;o.textContent=a.docenteNombre;select.appendChild(o);});
     const encontrado=buscarAsignacionDocente(anio,nivel,grado,seccion,asignatura);if(encontrado)select.value=encontrado.docenteId;
@@ -5259,17 +5280,11 @@ function cargarCalificaciones(){
 
     const lista=datos.filter(c=>{
         if(ses?.rol==="Docente"){
-            const mismoCentro=String(c.codigo_centro||ses.codigoCentro||"")===String(ses.codigoCentro||"");
+            const estudianteRelacionado=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(c.estudianteId||""));
+            const centroRegistro=c.codigo_centro||c.codigoCentro||estudianteRelacionado?.codigo_centro||estudianteRelacionado?.codigoCentro||estudianteRelacionado?.centro_codigo||ses.codigoCentro;
+            const mismoCentro=String(centroRegistro)===String(ses.codigoCentro||"");
             const mismoDocente=String(c.docenteId||"")===String(ses.docenteId||"");
-            const grupoAsignado=obtenerDatos(KEY_ASIGNACIONES).some(a=>
-                String(a.anio)===String(c.anio) &&
-                String(a.estado||"Activo")==="Activo" &&
-                normalizarNivel(a.nivel)===normalizarNivel(c.nivel) &&
-                normalizarGrado(a.grado)===normalizarGrado(c.grado) &&
-                normalizarSeccion(a.seccion)===normalizarSeccion(c.seccion) &&
-                (String(a.docenteId||"")===String(ses.docenteId||"") ||
-                 String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId||""))
-            );
+            const grupoAsignado=docenteTieneGrupo(c.nivel,c.grado,c.seccion,c.anio);
             if(!mismoCentro || (!mismoDocente && !grupoAsignado)) return false;
         }
         const texto=limpiarTexto([
