@@ -1827,7 +1827,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Año escolar</label>
-                            <select id="boletaAnio" onchange="generarBoleta()">
+                            <select id="boletaAnio" onchange="cargarEstudiantesBoleta(); generarBoleta()">
                                 <option value="2026">2026</option>
                                 <option value="2027">2027</option>
                             </select>
@@ -4310,7 +4310,8 @@ function obtenerAsignacionesDocenteActual(anio){
     const an=String(anio||new Date().getFullYear());
     return obtenerDatos(KEY_ASIGNACIONES).filter(a=>
         String(a.anio)===an &&
-        String(a.docenteId||"")===String(ses.docenteId||"") &&
+        (String(a.docenteId||"")===String(ses.docenteId||"") ||
+         (!!ses.docenteSupabaseId && String(a.docenteSupabaseId||"")===String(ses.docenteSupabaseId))) &&
         String(a.estado||"Activo")==="Activo"
     );
 }
@@ -4319,7 +4320,7 @@ function docenteTieneGrupo(nivel,grado,seccion,anio){
     if(!ses || ses.rol!=="Docente") return true;
     return obtenerAsignacionesDocenteActual(anio).some(a=>
         normalizarNivel(a.nivel)===normalizarNivel(nivel) &&
-        normalizarGrado(a.grado)===normalizarGrado(grado) &&
+        gradoAsignacionCoincide(a.grado,grado) &&
         normalizarSeccion(a.seccion)===normalizarSeccion(seccion)
     );
 }
@@ -4356,6 +4357,10 @@ function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
 function estudianteVisibleParaRol(e,anio){
     const ses=obtenerSesionActual();
     if(!ses || ses.rol==="Director") return true;
+    if(ses.rol!=="Docente") return false;
+    const codigoSesion=String(ses.codigoCentro||"").trim().replace(/\.0$/,"");
+    const codigoEstudiante=String(e?.codigo_centro||e?.codigoCentro||e?.centro_codigo||e?.codigo_centro_educativo||"").trim().replace(/\.0$/,"");
+    if(!codigoSesion || !codigoEstudiante || codigoSesion!==codigoEstudiante) return false;
     return docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio||new Date().getFullYear());
 }
 function cargarEstudiantes(){
@@ -6643,7 +6648,12 @@ function cargarEstudiantesBoleta(){
     const select=document.getElementById("boletaEstudiante");
     if(!select) return;
     const anterior=select.value;
-    const estudiantes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>(e.estado||"Activo")==="Activo").sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const anio=document.getElementById("boletaAnio")?.value||String(new Date().getFullYear());
+    const ses=obtenerSesionActual();
+    const estudiantes=obtenerDatos(KEY_ESTUDIANTES)
+        .filter(e=>(e.estado||"Activo")==="Activo")
+        .filter(e=>!ses || ses.rol!=="Docente" || estudianteVisibleParaRol(e,anio))
+        .sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
     select.innerHTML='<option value="">Seleccione un estudiante</option>';
     estudiantes.forEach(e=>{
         const o=document.createElement("option");
