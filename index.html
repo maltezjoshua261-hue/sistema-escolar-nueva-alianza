@@ -7605,7 +7605,7 @@ function cargarEstudiantesPadresTutores(){
         const codigoSesion=String(ses.codigoCentro||"").trim();
         est=est.filter(e=>{
             const codigoEstudiante=String(e.codigo_centro||e.codigoCentro||"").trim();
-            return (!codigoSesion || codigoEstudiante===codigoSesion) &&
+            return !!codigoSesion && codigoEstudiante===codigoSesion &&
                 docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
         });
     }
