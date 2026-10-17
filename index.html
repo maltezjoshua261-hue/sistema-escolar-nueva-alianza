@@ -7708,7 +7708,7 @@ function guardarPadreTutor(){
     // Si el formulario es nuevo, reutiliza el registro existente de la misma persona
     // para el mismo estudiante, año y parentesco, en vez de crear un duplicado.
     if(!id){
-        const normalizar=v=>String(v||"").trim().toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/\\s+/g," ");
+        const normalizar=v=>String(v||"").trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
         const coincidencias=datos.filter(x=>
             String(x.estudianteId)===String(estudianteId) &&
             String(x.anio)===String(anio) &&
