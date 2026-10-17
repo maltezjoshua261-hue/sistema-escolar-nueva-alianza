@@ -4004,10 +4004,10 @@ async function cargarConsultaEstudiantes(){
     try{
         if(typeof window.NA_syncEstudiantes==="function")await window.NA_syncEstudiantes();
         if(typeof window.NA_syncMatriculas==="function")await window.NA_syncMatriculas();
-        if(estado)estado.textContent="Consulta actualizada. Solo lectura: no se ha modificado ningún registro.";
+        if(estado)estado.textContent="Consulta actualizada. Solo lectura: no se modificaron registros en la base de datos.";
     }catch(error){
         console.warn("Consulta de estudiantes: se usarán los datos disponibles en esta sesión.",error);
-        if(estado)estado.textContent="No se pudo actualizar desde la base de datos. Se muestran los datos disponibles en esta sesión; no se modificó ningún registro.";
+        if(estado)estado.textContent="No se pudo actualizar desde la base de datos. Se muestran los datos disponibles en esta sesión; no se modificaron registros en la base de datos.";
     }
     buscarEstudiantesConsulta();
 }
