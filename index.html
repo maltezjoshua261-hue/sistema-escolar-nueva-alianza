@@ -4261,7 +4261,7 @@ function docenteTieneAsignatura(nivel,grado,seccion,asignatura,anio){
 
 function estudianteVisibleParaRol(e,anio){
     const ses=obtenerSesionActual();
-    if(!ses || ses.rol==="Director") return true;
+    if(!ses || ["Director","Administrador","Admin","Administrador NER"].includes(String(ses.rol||"").trim())) return true;
     if(ses.rol!=="Docente") return false;
     const codigoSesion=String(ses.codigoCentro||"").trim();
     const codigoEstudiante=String(e?.codigo_centro||e?.codigoCentro||"").trim();
@@ -7980,7 +7980,7 @@ async function NA_profile(user){
 async function NA_syncEstudiantes(){
   const c=await NA_init(), ses=NA_sesion();
   let q=c.from("estudiantes").select("*").order("nombre_completo");
-  if(ses?.rol!=="Director") q=q.eq("codigo_centro",ses.codigoCentro||"");
+  if(!["Director","Administrador","Admin","Administrador NER"].includes(String(ses?.rol||"").trim())) q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;
   if(error)throw error;
   const old=obtenerDatos(KEY_ESTUDIANTES), out=[], usados=new Set();
