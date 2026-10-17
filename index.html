@@ -7598,15 +7598,36 @@ function obtenerPadresTutoresVisibles(anio){
 function cargarEstudiantesPadresTutores(){
     const sel=document.getElementById("padreEstudiante");
     if(!sel)return;
-    const anio=document.getElementById("padreAnio")?.value||new Date().getFullYear();
+    const anioSel=document.getElementById("padreAnio");
+    let anio=String(anioSel?.value||new Date().getFullYear());
     const ses=obtenerSesionActual();
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\\.0$/,"");
     const activo=e=>String(e?.estado||"Activo").trim().toLocaleLowerCase()==="activo";
     let est=obtenerDatos(KEY_ESTUDIANTES).filter(activo);
     if(ses?.rol==="Docente"){
-        const codigoSesion=String(ses.codigoCentro??"").trim().replace(/\.0$/,"");
+        // Si el año elegido no tiene cargas para este docente, usar el año más reciente
+        // en el que sí tenga grupos; evita dejar el selector vacío por defecto en 2026
+        // cuando las cargas del centro ya se prepararon para 2027.
+        const asignaciones=obtenerDatos(KEY_ASIGNACIONES).filter(a=>
+            String(a.docenteId||"")===String(ses.docenteId||"") &&
+            String(a.estado||"Activo").trim().toLocaleLowerCase()==="activo"
+        );
+        const hayParaAnio=asignaciones.some(a=>String(a.anio)===anio);
+        if(!hayParaAnio && asignaciones.length){
+            const anios=[...new Set(asignaciones.map(a=>String(a.anio||"")).filter(Boolean))]
+                .sort((a,b)=>Number(b)-Number(a));
+            if(anios.length){
+                anio=anios[0];
+                if(anioSel && [...anioSel.options].some(o=>String(o.value||o.textContent)===anio || String(o.textContent).trim()===anio)){
+                    anioSel.value=anio;
+                }
+            }
+        }
+        const codigoSesion=normalizarCodigo(ses.codigoCentro);
         est=est.filter(e=>{
-            const codigo=String(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo||"").trim().replace(/\.0$/,"");
-            return (!codigoSesion||codigo===codigoSesion)&&docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
+            const codigo=normalizarCodigo(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo);
+            return !!codigoSesion && codigo===codigoSesion &&
+                docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio);
         });
     }
     est.sort((a,b)=>String(a.nombre||a.nombre_completo||"").localeCompare(String(b.nombre||b.nombre_completo||""),"es"));
@@ -7616,7 +7637,7 @@ function cargarEstudiantesPadresTutores(){
         const vacio=document.createElement("option");
         vacio.disabled=true;
         vacio.textContent=ses?.rol==="Docente"
-            ?"No hay estudiantes activos en los grupos asignados para el año seleccionado"
+            ?"No hay estudiantes activos en los grupos asignados para el año "+anio
             :"No hay estudiantes activos disponibles. Compruebe que la lista de estudiantes haya cargado.";
         sel.appendChild(vacio);
         return;
@@ -7630,7 +7651,6 @@ function cargarEstudiantesPadresTutores(){
     });
     if([...sel.options].some(o=>String(o.value)===String(anterior)))sel.value=anterior;
 }
-
 function guardarPadreTutor(){
     if(!exigirDirector())return;
     const id=document.getElementById("padreId")?.value||"";
