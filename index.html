@@ -3838,11 +3838,29 @@ function cargarEstudiantesConvivencia(){
     const sel=document.getElementById("convEstudiante"); if(!sel)return;
     const anio=document.getElementById("convAnio")?.value||new Date().getFullYear();
     const ses=obtenerSesionActual();
-    let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.estado||"Activo")!=="Retirado"&&String(e.estado||"Activo")!=="Trasladado");
-    const mats=obtenerDatos(KEY_MATRICULAS).filter(m=>String(m.anio)===String(anio));
-    if(mats.length) est=est.filter(e=>mats.some(m=>String(m.estudianteId)===String(e.id)));
-    if(ses?.rol==="Docente") est=est.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
-    sel.innerHTML='<option value="">Seleccione estudiante</option>'+est.map(e=>'<option value="'+escaparHTML(e.id)+'">'+escaparHTML(e.nombre)+'</option>').join("");
+    const normalizarCodigo=c=>String(c??"").trim().replace(/\.0$/,"");
+    let est=obtenerDatos(KEY_ESTUDIANTES).filter(e=>{
+        const estado=String(e.estado||"Activo").trim().toLocaleLowerCase();
+        return estado!=="retirado"&&estado!=="trasladado";
+    });
+    if(ses?.rol==="Docente"){
+        const codigoSesion=normalizarCodigo(ses.codigoCentro||ses.codigo_centro||ses.centroCodigo);
+        if(codigoSesion){
+            est=est.filter(e=>{
+                const codigo=normalizarCodigo(e.codigo_centro||e.codigoCentro||e.centro_codigo||e.codigo_centro_educativo);
+                return !!codigo&&codigo===codigoSesion;
+            });
+        }
+        // Filtrar por grupo solo cuando existen asignaciones individuales para este año.
+        // Así los perfiles docentes generales de una escuela pueden atender a sus estudiantes
+        // aunque aún no tengan matrícula o carga académica individual registrada.
+        const asignaciones=obtenerAsignacionesDocenteActual(anio);
+        if(asignaciones.length){
+            est=est.filter(e=>docenteTieneGrupo(e.nivel,e.grado,e.seccion,anio));
+        }
+    }
+    est.sort((a,b)=>String(a.nombre||a.nombre_completo||"").localeCompare(String(b.nombre||b.nombre_completo||""),"es"));
+    sel.innerHTML='<option value="">Seleccione estudiante</option>'+est.map(e=>'<option value="'+escaparHTML(e.id)+'">'+escaparHTML(e.nombre||e.nombre_completo||"Estudiante")+'</option>').join("");
     cargarDatosConvivenciaEstudiante();
 }
 function cargarDatosConvivenciaEstudiante(){
