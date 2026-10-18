@@ -3533,8 +3533,8 @@ function iniciarSesion(){
 
 
 function normalizarRolSistema(rol){
-    const r=String(rol??"").trim().toLowerCase();
-    if(r==="director") return "Director";
+    const r=String(rol??"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[_-]+/g," ").replace(/\\s+/g," ");
+    if(r==="director" || r==="administrador" || r==="administrador ner" || r==="admin") return "Director";
     return "Docente";
 }
 
