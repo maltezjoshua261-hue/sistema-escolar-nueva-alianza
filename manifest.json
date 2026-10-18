@@ -1,11 +1,11 @@
 {
-  "id": "./",
+  "id": "/sistema-escolar-nueva-alianza/",
   "name": "Sistema Escolar Nueva Alianza",
   "short_name": "Sistema Escolar",
   "description": "Sistema de gestión escolar del NER Nueva Alianza.",
   "lang": "es-NI",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/sistema-escolar-nueva-alianza/",
+  "scope": "/sistema-escolar-nueva-alianza/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f3f6fa",
@@ -23,5 +23,6 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }
