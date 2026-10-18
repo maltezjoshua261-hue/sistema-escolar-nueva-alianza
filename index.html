@@ -7980,7 +7980,7 @@ const NA_CODES = {
 };
 
 function NA_normalizarRol(rol){
-  const r=String(rol??"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[_-]+/g," ").replace(/\\s+/g," ");
+  const r=String(rol??"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[_-]+/g," ").replace(/\s+/g," ");
   // Los roles administrativos del NER necesitan acceso a la vista global; los docentes siguen limitados a su centro.
   if(r==="director" || r==="administrador" || r==="administrador ner" || r==="admin") return "Director";
   return "Docente";
