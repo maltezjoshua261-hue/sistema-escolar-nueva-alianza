@@ -9500,5 +9500,16 @@ else NA_impBoot();
 window.NA_importarEstudiantesExcel={abrir:NA_impOpen,cerrar:NA_impClose,actualizarPermisos:NA_impUpdateRole};
 })();
 </script>
+
+<script>
+// Registro de la aplicación instalable. No modifica datos ni lógica escolar.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function (error) {
+      console.warn("No se pudo registrar el servicio de la aplicación:", error);
+    });
+  });
+}
+</script>
 </body>
 </html>
