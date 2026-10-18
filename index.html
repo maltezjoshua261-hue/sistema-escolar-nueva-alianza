@@ -8073,14 +8073,26 @@ async function NA_syncAsignaciones(){
   let q=c.from("asignaciones").select("*").order("grado");
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
-  const docs=obtenerDatos(KEY_DOCENTES),out=[];
+  const docs=obtenerDatos(KEY_DOCENTES),locales=obtenerDatos(KEY_ASIGNACIONES),out=[];
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
-      id:a.id, supabaseId:a.id, codigo_centro:a.codigo_centro||d?.codigo_centro||"", docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
+      id:a.id, supabaseId:a.id, codigo_centro:a.codigo_centro||d?.codigo_centro||"", docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||d?.nombre_completo||"",
       nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
       asignaturas:a.asignaturas||[],horasSemanales:a.horas_semanales||0,turno:a.turno||"",observacion:a.observacion||""
     });
+  });
+  // Conserva cargas locales aún no sincronizadas, sin duplicar una carga que ya existe en Supabase.
+  // Solo se conservan las del centro de la sesión y no se crean ni modifican filas centrales aquí.
+  const clave=a=>[String(a.codigo_centro||""),String(a.anio||""),normalizarNivel(a.nivel),String(a.grado||"").trim().toLowerCase(),normalizarSeccion(a.seccion),String(a.docenteSupabaseId||a.docenteId||"")].join("|");
+  const clavesCentral=new Set(out.map(clave));
+  locales.forEach(a=>{
+    const centro=String(a.codigo_centro||"").trim();
+    if(!centro || (ses?.rol!=="Director" && centro!==String(ses?.codigoCentro||"").trim()))return;
+    if(a.supabaseId || NA_esUUID(a.id))return;
+    if(clavesCentral.has(clave(a)))return;
+    const docente=docs.find(d=>String(d.id)===String(a.docenteId)||String(d.supabaseId||"")===String(a.docenteSupabaseId||a.docenteId||""));
+    out.push({...a,docenteNombre:a.docenteNombre||docente?.nombre||docente?.nombre_completo||""});
   });
   guardarDatos(KEY_ASIGNACIONES,out);
 }
