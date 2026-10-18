@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#123b6d"/>
+  <path d="M88 148 Q172 112 256 158 Q340 112 424 148 L424 365 Q340 330 256 375 Q172 330 88 365 Z" fill="#ffffff"/>
+  <path d="M256 158 L256 375" stroke="#0d6efd" stroke-width="14" stroke-linecap="round"/>
+  <path d="M120 184 Q177 166 222 190 M120 225 Q177 207 222 231 M120 266 Q177 248 222 272 M290 190 Q345 166 392 184 M290 231 Q345 207 392 225 M290 272 Q345 248 392 266" fill="none" stroke="#123b6d" stroke-width="11" stroke-linecap="round"/>
+  <path d="M256 54 L272 89 L310 94 L282 120 L289 157 L256 139 L223 157 L230 120 L202 94 L240 89 Z" fill="#ffc107"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="700" fill="#ffffff">NER</text>
+</svg>
