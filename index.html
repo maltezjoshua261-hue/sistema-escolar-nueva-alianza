@@ -7220,43 +7220,37 @@ function obtenerAsignacionesPlan(){const a=document.getElementById("planAnio")?.
 function cargarOpcionesPlanificacion(){const s=document.getElementById("planAsignatura"),d=document.getElementById("planDocente");if(!s||!d)return;const a=obtenerAsignacionesPlan(),pa=s.value,pd=d.value,subs=[...new Set(a.flatMap(q=>q.asignaturas||[]))];s.innerHTML='<option value="">Seleccione</option>';subs.forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;s.appendChild(o)});if([...s.options].some(o=>o.value===pa))s.value=pa;cargarDocentesPlanificacion(pd)}
 async function cargarDocentesPlanificacion(prev){
  const d=document.getElementById("planDocente");if(!d)return;
- const p=prev!==undefined?String(prev):String(d.value||"");
+ const anterior=prev!==undefined?String(prev):String(d.value||"");
  const anio=String(document.getElementById("planAnio")?.value||"2026").trim();
  const nivel=document.getElementById("planNivel")?.value||"";
- const ses=typeof NA_sesion==="function"?NA_sesion():null;
+ const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual();
  const centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();
  const porDocente=new Map();
- // Consultar primero las asignaciones centrales del centro del usuario; el caché local puede tener IDs distintos.
  try{
   if(typeof NA_init==="function"&&centro){
    const c=await NA_init();
-   let q=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id").eq("codigo_centro",centro).eq("anio",Number(anio)).eq("estado","Activo");
-   if(nivel)q=q.eq("nivel",nivel);
-   const {data:central,error}=await q;
+   const {data:asignaciones,error}=await c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id").eq("codigo_centro",centro);
    if(error)throw error;
-   const ids=[...new Set((central||[]).map(a=>String(a.docente_id||"")).filter(Boolean))];
+   const cargas=(asignaciones||[]).filter(a=>String(a.anio??"").trim()===anio&&["activo","active",""].includes(limpiarTexto(String(a.estado??"Activo")))&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&String(a.docente_id||"").trim());
+   const ids=[...new Set(cargas.map(a=>String(a.docente_id).trim()))];
    let docentes=[];
    if(ids.length){
-    const {data,error:de}=await c.from("docentes").select("id,nombre_completo,codigo_centro,estado").in("id",ids).eq("codigo_centro",centro);
+    const {data,error:de}=await c.from("docentes").select("id,nombre_completo,codigo_centro,estado").in("id",ids);
     if(de)throw de;
     docentes=data||[];
    }
-   (central||[]).forEach(a=>{
-    const t=docentes.find(x=>String(x.id)===String(a.docente_id));
-    const id=String(a.docente_id||"");if(!id)return;
+   cargas.forEach(a=>{
+    const id=String(a.docente_id).trim();
+    const t=docentes.find(x=>String(x.id)===id&&String(x.codigo_centro||"").trim()===centro);
     const old=porDocente.get(id);
-    porDocente.set(id,{docenteId:id,docenteSupabaseId:id,docenteNombre:String(t?.nombre_completo||old?.docenteNombre||"Docente asignado"),anio:a.anio,nivel:a.nivel,codigo_centro:centro});
+    porDocente.set(id,{docenteId:id,docenteNombre:String(t?.nombre_completo||old?.docenteNombre||"Docente asignado")});
    });
   }
  }catch(error){console.warn("Consulta central de docentes para Nueva planificación falló; se probará el respaldo local.",error)}
  if(!porDocente.size){
   try{if(typeof NA_syncDocentes==="function")await NA_syncDocentes();if(typeof NA_syncAsignaciones==="function")await NA_syncAsignaciones()}catch(error){console.warn("No se pudieron sincronizar docentes/asignaciones de planificación:",error)}
   const docs=obtenerDatos(KEY_DOCENTES)||[];
-  const cargas=(obtenerDatos(KEY_ASIGNACIONES)||[]).filter(q=>
-   String(q.anio??"").trim()===anio &&
-   ["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo"))) &&
-   (!centro||String(q.codigo_centro||"").trim()===centro) &&
-   (!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel)));
+  const cargas=(obtenerDatos(KEY_ASIGNACIONES)||[]).filter(q=>String(q.anio??"").trim()===anio&&["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&(!centro||String(q.codigo_centro||"").trim()===centro)&&(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel)));
   cargas.forEach(q=>{
    const sid=String(q.docenteSupabaseId||"");const did=String(q.docenteId||"");
    const doc=docs.find(z=>(sid&&String(z.supabaseId||"")===sid)||(did&&(String(z.id||"")===did||String(z.supabaseId||"")===did)));
@@ -7265,10 +7259,8 @@ async function cargarDocentesPlanificacion(prev){
   });
  }
  d.innerHTML='<option value="">Seleccione</option>';
- [...porDocente.values()].sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(q=>{
-  const o=document.createElement("option");o.value=String(q.docenteId);o.textContent=q.docenteNombre;d.appendChild(o);
- });
- if([...d.options].some(o=>o.value===p))d.value=p;
+ [...porDocente.values()].sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(q=>{const o=document.createElement("option");o.value=String(q.docenteId);o.textContent=q.docenteNombre;d.appendChild(o)});
+ if([...d.options].some(o=>o.value===anterior))d.value=anterior;
 }
 function actualizarPlanificacionPorDocente(){cargarOpcionesPlanificacion()}
 function limpiarPlanificacion(){["planId","planUnidad","planCompetencia","planIndicador","planCriterios","planConceptual","planProcedimental","planActitudinal","planMetodologia","planInicio","planDesarrollo","planCierre","planRecursos","planEvaluacion","planObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});const f=document.getElementById("planFecha");if(f)f.value=new Date().toISOString().slice(0,10);const b=document.getElementById("btnGuardarPlan");if(b)b.textContent="💾 Guardar planificación";const h=document.getElementById("horarioRelacionadoPlan");if(h)h.style.display="none"}
