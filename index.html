@@ -8257,6 +8257,7 @@ window.guardarEstudiante=async function(){
       if(error)throw error;
       await NA_syncEstudiantes();
       limpiarEstudiante();cargarEstudiantes();
+      if(typeof cargarEstudiantesMatricula==="function")cargarEstudiantesMatricula();
       if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
       if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
       registrarAuditoria("Crear","Estudiantes","Nuevo estudiante registrado por docente en su centro",data?.id||"");
