@@ -9605,5 +9605,84 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
+
+<script>
+/* Refuerzo de activación del formulario tras iniciar sesión: no toca datos. */
+(function(){
+  function sesion(){
+    try{
+      const s=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+      if(!s)return null;
+      const r=String(s.rol||"").trim().toLowerCase();
+      if(r==="docente")s.rol="Docente";
+      if(["director","admin","administrador","administrador ner"].includes(r))s.rol="Director";
+      return s;
+    }catch(e){return null;}
+  }
+  function activar(){
+    const s=sesion();
+    if(!s||s.rol!=="Docente")return;
+    const sec=document.getElementById("estudiantes");
+    if(!sec)return;
+    const form=sec.querySelector(".card");
+    if(!form)return;
+    form.hidden=false;
+    form.removeAttribute("hidden");
+    form.style.setProperty("display","block","important");
+    form.style.setProperty("visibility","visible","important");
+    form.style.setProperty("opacity","1","important");
+    const h=form.querySelector("h2");
+    if(h)h.textContent="👨‍🎓 Registro de estudiantes de mi escuela";
+    let n=document.getElementById("notaRegistroDocente");
+    if(!n){
+      n=document.createElement("p");n.id="notaRegistroDocente";
+      n.style.cssText="padding:10px 12px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:6px;margin:10px 0 16px";
+      n.textContent="Registre estudiantes nuevos o de reingreso que aún no aparecen en la lista. Se asignarán automáticamente a su escuela.";
+      if(h)h.insertAdjacentElement("afterend",n);
+    }
+  }
+  const oldShow=window.mostrarSeccion;
+  if(typeof oldShow==="function"&&!oldShow.__registroDocenteHook){
+    const wrapped=function(id){
+      const r=oldShow.apply(this,arguments);
+      if(id==="estudiantes")activar();
+      setTimeout(activar,0);
+      return r;
+    };
+    wrapped.__registroDocenteHook=true;window.mostrarSeccion=wrapped;
+  }
+  const oldApply=window.aplicarPermisos;
+  if(typeof oldApply==="function"&&!oldApply.__registroDocenteHook){
+    const wrapped=function(){
+      const r=oldApply.apply(this,arguments);
+      setTimeout(activar,0);
+      return r;
+    };
+    wrapped.__registroDocenteHook=true;window.aplicarPermisos=wrapped;
+  }
+  const oldLogin=window.iniciarSesion;
+  if(typeof oldLogin==="function"&&!oldLogin.__registroDocenteHook){
+    const wrapped=async function(){
+      const r=await oldLogin.apply(this,arguments);
+      setTimeout(activar,0);setTimeout(activar,300);setTimeout(activar,1000);
+      return r;
+    };
+    wrapped.__registroDocenteHook=true;window.iniciarSesion=wrapped;
+  }
+  if(typeof window.NA_setSesion==="function"&&!window.NA_setSesion.__registroDocenteHook){
+    const oldSet=window.NA_setSesion;
+    const wrapped=function(){const r=oldSet.apply(this,arguments);setTimeout(activar,0);return r;};
+    wrapped.__registroDocenteHook=true;window.NA_setSesion=wrapped;
+  }
+  document.addEventListener("click",function(ev){
+    if(ev.target.closest && ev.target.closest("button"))setTimeout(activar,0);
+  },true);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",activar);
+  else activar();
+  let intentos=0;
+  const timer=setInterval(function(){activar();if(++intentos>=120)clearInterval(timer);},500);
+})();
+</script>
+
 </body>
 </html>
