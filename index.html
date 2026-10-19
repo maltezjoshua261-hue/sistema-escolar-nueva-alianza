@@ -9511,5 +9511,99 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<script>
+/* Corrección segura 2026-10: formulario de registro para docentes por centro.
+   No altera registros existentes ni habilita la edición/importación al docente. */
+(function(){
+  const rolDocente=()=>{try{return typeof obtenerSesionActual==="function" && obtenerSesionActual()?.rol==="Docente";}catch(e){return false;}};
+  function prepararFormularioDocente(){
+    if(!rolDocente())return;
+    const sec=document.getElementById("estudiantes");
+    if(!sec)return;
+    const cards=sec.querySelectorAll(":scope > .card");
+    const form=cards[0];
+    if(form){
+      form.style.display="block";
+      form.style.visibility="visible";
+      const h=form.querySelector("h2");
+      if(h)h.textContent="👨‍🎓 Registro de estudiantes de mi escuela";
+      let note=form.querySelector("#notaRegistroDocente");
+      if(!note){
+        note=document.createElement("p"); note.id="notaRegistroDocente";
+        note.style.cssText="padding:10px 12px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:6px;margin:10px 0 16px";
+        note.textContent="Registre aquí estudiantes nuevos o de reingreso que todavía no aparecen en la lista. Se asignarán automáticamente a su escuela. Los registros existentes no se editan desde esta cuenta.";
+        const h2=form.querySelector("h2"); if(h2)h2.insertAdjacentElement("afterend",note);
+      }
+      const id=document.getElementById("estId");
+      if(id)id.value="";
+      const btn=document.getElementById("btnGuardarEstudiante");
+      if(btn)btn.textContent="💾 Registrar estudiante";
+    }
+  }
+  const guardarOriginal=window.guardarEstudiante;
+  window.guardarEstudiante=async function(){
+    if(!rolDocente())return guardarOriginal.apply(this,arguments);
+    const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual();
+    const centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim().replace(/\.0$/,"");
+    if(!centro){alert("No se encontró el código de la escuela en su sesión. No se guardó ningún dato; avise al Director.");return;}
+    const id=document.getElementById("estId")?.value||"";
+    if(id){alert("La cuenta docente solo puede registrar estudiantes nuevos. No puede modificar registros existentes.");return;}
+    const valor=id=>document.getElementById(id)?.value?.trim()||"";
+    const nombre=valor("estNombre"), nivel=valor("estNivel"), grado=valor("estGrado"), seccion=valor("estSeccion");
+    if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel educativo, grado/nivel y sección.");return;}
+    const codigo=valor("estCodigo");
+    const datos=typeof obtenerDatos==="function"?obtenerDatos(KEY_ESTUDIANTES):[];
+    const normal=s=>String(s||"").trim().toLocaleLowerCase("es");
+    const duplicado=datos.some(e=>{
+      const c=String(e.codigo_centro||e.codigoCentro||"").trim().replace(/\.0$/,"");
+      if(c!==centro)return false;
+      if(codigo && normal(e.codigo)===normal(codigo))return true;
+      return !codigo && normal(e.nombre)===normal(nombre) && normal(e.nivel)===normal(nivel) && normal(e.grado)===normal(grado) && normal(e.seccion)===normal(seccion);
+    });
+    if(duplicado){alert("Este estudiante parece estar registrado en su escuela. Revise la lista antes de continuar.");return;}
+    const btn=document.getElementById("btnGuardarEstudiante");
+    if(btn)btn.disabled=true;
+    try{
+      const db=await NA_init();
+      const row={
+        codigo:codigo||null,nombre_completo:nombre,sexo:valor("estSexo")||null,
+        nacimiento:valor("estNacimiento")||null,nivel,grado,seccion,
+        responsable:valor("estResponsable")||null,telefono:valor("estTelefono")||null,
+        direccion:valor("estDireccion")||null,estado:valor("estEstado")||"Activo",
+        codigo_centro:centro
+      };
+      if(codigo){
+        const check=await db.from("estudiantes").select("id").eq("codigo_centro",centro).eq("codigo",codigo).limit(1);
+        if(check.error)throw check.error;
+        if(check.data?.length){alert("Ese código ya existe en la base central de su escuela. No se creó otro registro.");return;}
+      }
+      const result=await db.from("estudiantes").insert(row).select().single();
+      if(result.error)throw result.error;
+      if(typeof NA_syncEstudiantes==="function")await NA_syncEstudiantes();
+      if(typeof cargarEstudiantes==="function")cargarEstudiantes();
+      if(typeof cargarEstudiantesMatricula==="function")cargarEstudiantesMatricula();
+      if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+      if(typeof limpiarEstudiante==="function")limpiarEstudiante();
+      alert("Estudiante registrado correctamente en la base central de su escuela. Ya puede buscarlo en Matrícula.");
+    }catch(err){
+      console.error("Registro docente de estudiante:",err);
+      alert("No se pudo guardar el estudiante en la base central. No vuelva a enviarlo varias veces; avise al Director. Detalle: "+(err?.message||"error desconocido"));
+    }finally{if(btn)btn.disabled=false;prepararFormularioDocente();}
+  };
+  const aplicarOriginal=window.aplicarPermisos;
+  if(typeof aplicarOriginal==="function"){
+    window.aplicarPermisos=function(){const r=aplicarOriginal.apply(this,arguments);prepararFormularioDocente();return r;};
+  }
+  const mostrarOriginal=window.mostrarSeccion;
+  if(typeof mostrarOriginal==="function"){
+    window.mostrarSeccion=function(){const r=mostrarOriginal.apply(this,arguments);prepararFormularioDocente();return r;};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",prepararFormularioDocente);
+  else prepararFormularioDocente();
+  window.NA_prepararRegistroDocente=prepararFormularioDocente;
+})();
+</script>
+
 </body>
 </html>
