@@ -3516,6 +3516,9 @@ function aplicarPermisos(){
     const sesion=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
     if(!sesion) return;
     const esDirector=sesion.rol==="Director";
+    // V11.33: mantener visible el formulario de registro para Director y Docente.
+    const formularioRegistroEstudiante=document.querySelector("#estudiantes > .card");
+    if(formularioRegistroEstudiante) formularioRegistroEstudiante.style.display="";
     const titulo=document.querySelector(".topbar strong");
     if(titulo) titulo.textContent=esDirector?"Panel del Director":"Panel del Docente";
     document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"":"none");
