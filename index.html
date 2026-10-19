@@ -3518,7 +3518,18 @@ function aplicarPermisos(){
     const esDirector=sesion.rol==="Director";
     const titulo=document.querySelector(".topbar strong");
     if(titulo) titulo.textContent=esDirector?"Panel del Director":"Panel del Docente";
-    document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"block":"none");
+    document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"":"none");
+    const tituloEst=document.querySelector("#estudiantes .card h2");
+    if(tituloEst) tituloEst.textContent=esDirector?"👨‍🎓 Registro de estudiantes":"👨‍🎓 Registro de estudiantes de mi escuela";
+    const ayudaId="ayudaRegistroDocente";
+    let ayuda=document.getElementById(ayudaId);
+    if(!esDirector&&!ayuda&&tituloEst){
+      ayuda=document.createElement("p");ayuda.id=ayudaId;
+      ayuda.style.cssText="margin:8px 0 14px;padding:10px 12px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:6px;color:#1e3a8a";
+      ayuda.textContent="Registre aquí únicamente estudiantes nuevos o de reingreso de su centro. La escuela se asigna automáticamente y el estudiante se guarda en la base central para Matrícula 2027.";
+      tituloEst.insertAdjacentElement("afterend",ayuda);
+    }
+    if(esDirector&&ayuda) ayuda.remove();
     const top=document.querySelector(".topbar div:last-child");
     if(top) top.textContent=sesion.usuario+" · "+sesion.rol;
 }
@@ -4324,7 +4335,7 @@ function cargarEstudiantes(){
     const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
     const centroDe=e=>{const c=String(e?.codigo_centro||e?.codigoCentro||"").trim();return c?(centros[c]||"Centro no reconocido")+" ("+c+")":"Sin centro asignado";};
     const lista=datos
-        .filter(e=>!ses||ses.rol==="Director"||estudianteVisibleParaRol(e,2027))
+        .filter(e=>!ses||ses.rol==="Director"||(ses.rol==="Docente"&&String(e.codigo_centro||e.codigoCentro||"").trim()===String(ses.codigoCentro||"").trim()))
         .filter(e=>!buscar||[e.nombre,e.codigo,e.codigo_centro,e.codigoCentro,centroDe(e),e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((e,i)=>{
         const acciones=(!ses||ses.rol==="Director")
@@ -8210,31 +8221,78 @@ window.iniciarSesion=NA_login;
 
 const oldGuardarEstudiante=window.guardarEstudiante;
 window.guardarEstudiante=async function(){
+  const ses=NA_sesion();
   const idLocal=document.getElementById("estId")?.value||"";
+  const nombre=document.getElementById("estNombre")?.value.trim()||"";
   const codigo=document.getElementById("estCodigo")?.value.trim()||"";
-  const previo=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(idLocal)||(!idLocal&&String(e.codigo||"")===codigo));
+  const nivel=document.getElementById("estNivel")?.value||"";
+  const grado=document.getElementById("estGrado")?.value||"";
+  const seccion=document.getElementById("estSeccion")?.value||"";
+  if(!nombre||!nivel||!grado||!seccion){alert("Complete nombre, nivel, grado y sección.");return;}
+  if(ses?.rol==="Docente"){
+    if(idLocal){alert("Los docentes solo pueden registrar estudiantes nuevos. Para modificar un registro existente, comuníquese con el Director.");return;}
+    const centro=String(ses.codigoCentro||"").trim();
+    if(!centro){alert("Su usuario docente no tiene un centro educativo asignado. El Director debe revisar su perfil.");return;}
+    const estudiante={
+      codigo:codigo||null,nombre_completo:nombre,
+      sexo:document.getElementById("estSexo")?.value||null,
+      nacimiento:document.getElementById("estNacimiento")?.value||null,
+      nivel,grado,seccion,
+      responsable:document.getElementById("estResponsable")?.value.trim()||null,
+      telefono:document.getElementById("estTelefono")?.value.trim()||null,
+      direccion:document.getElementById("estDireccion")?.value.trim()||null,
+      estado:document.getElementById("estEstado")?.value||"Activo",
+      codigo_centro:centro
+    };
+    const clave=claveUnicaEstudiante({codigo:estudiante.codigo,nombre:estudiante.nombre_completo,nacimiento:estudiante.nacimiento,responsable:estudiante.responsable,nivel,grado,seccion});
+    const existentes=obtenerDatos(KEY_ESTUDIANTES).filter(e=>String(e.codigo_centro||e.codigoCentro||"").trim()===centro);
+    if(existentes.some(e=>claveUnicaEstudiante({...e,nombre:e.nombre||e.nombre_completo})===clave)){
+      alert("Este estudiante ya aparece registrado en su escuela. Revise el listado antes de continuar.");return;
+    }
+    const boton=document.getElementById("btnGuardarEstudiante");
+    if(boton){boton.disabled=true;boton.textContent="Guardando...";}
+    try{
+      const c=await NA_init();
+      const {data,error}=await c.from("estudiantes").insert(estudiante).select("id").single();
+      if(error)throw error;
+      await NA_syncEstudiantes();
+      limpiarEstudiante();cargarEstudiantes();
+      if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+      if(typeof actualizarCalificaciones==="function")actualizarCalificaciones();
+      registrarAuditoria("Crear","Estudiantes","Nuevo estudiante registrado por docente en su centro",data?.id||"");
+      alert("Estudiante guardado correctamente en su escuela. Ya puede buscarlo en Matrícula 2027.");
+    }catch(error){
+      console.error("Registro de estudiante docente:",error);
+      alert("No se pudo guardar el estudiante en la base central. No se agregó al listado. Detalle: "+(error?.message||"Error desconocido"));
+    }finally{
+      if(boton){boton.disabled=false;boton.textContent="💾 Guardar estudiante";}
+    }
+    return;
+  }
+  const antes=obtenerDatos(KEY_ESTUDIANTES);
+  const idsAntes=new Set(antes.map(e=>String(e.id)));
   oldGuardarEstudiante();
-  const actual=obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.id)===String(idLocal)) ||
-               obtenerDatos(KEY_ESTUDIANTES).find(e=>String(e.codigo||"")===codigo);
+  const despues=obtenerDatos(KEY_ESTUDIANTES);
+  const actual=idLocal?despues.find(e=>String(e.id)===String(idLocal)):despues.find(e=>!idsAntes.has(String(e.id)));
   if(!actual)return;
-  const ses=NA_sesion(), c=await NA_init();
+  const sesion=NA_sesion(), c=await NA_init();
   const row={
-    codigo:actual.codigo||null,nombre_completo:actual.nombre,
+    codigo:actual.codigo||null,nombre_completo:actual.nombre||actual.nombre_completo,
     sexo:actual.sexo||null,nacimiento:actual.nacimiento||null,
     nivel:actual.nivel,grado:actual.grado,seccion:actual.seccion,
     responsable:actual.responsable||null,telefono:actual.telefono||null,
     direccion:actual.direccion||null,estado:actual.estado||"Activo",
-    codigo_centro:ses?.codigoCentro||actual.codigo_centro||null
+    codigo_centro:actual.codigo_centro||sesion?.codigoCentro||null
   };
   let q;
   if(actual.supabaseId){
     q=await c.from("estudiantes").update(row).eq("id",actual.supabaseId).select().single();
   }else{
     q=await c.from("estudiantes").insert(row).select().single();
-    if(!q.error&&q.data){actual.supabaseId=q.data.id;guardarDatos(KEY_ESTUDIANTES,obtenerDatos(KEY_ESTUDIANTES).map(e=>String(e.id)===String(actual.id)?actual:e));}
+    if(!q.error&&q.data){actual.supabaseId=q.data.id;actual.codigo_centro=row.codigo_centro;guardarDatos(KEY_ESTUDIANTES,despues.map(e=>String(e.id)===String(actual.id)?actual:e));}
   }
   if(q.error){console.error(q.error);alert("Guardado local, pero no se pudo sincronizar con Supabase: "+q.error.message);return;}
-  await NA_syncEstudiantes(); cargarEstudiantes();
+  await NA_syncEstudiantes();cargarEstudiantes();
 };
 
 const oldGuardarMatricula=window.guardarMatricula;
@@ -9026,7 +9084,7 @@ function NA_impInitUI(){
  style.textContent=".na-imp-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}.na-imp-btn{background:#176b45;color:#fff;padding:10px 14px;border-radius:8px}.na-imp-modal{position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.68);display:none;align-items:center;justify-content:center;padding:18px}.na-imp-panel{background:#fff;color:#1f2937;border-radius:14px;width:min(1050px,98vw);max-height:92vh;overflow:auto;padding:22px;box-shadow:0 20px 70px rgba(0,0,0,.28)}.na-imp-panel h3{margin:0 0 10px}.na-imp-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin:12px 0}.na-imp-stats div{border:1px solid #d1d5db;border-radius:10px;padding:12px}.na-imp-stats b{display:block;font-size:24px}.na-imp-stats span{font-size:12px;color:#4b5563}.na-imp-table{overflow:auto;max-height:300px;margin-top:10px}.na-imp-table table{width:100%;border-collapse:collapse;font-size:13px}.na-imp-table th,.na-imp-table td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}.na-imp-table th{position:sticky;top:0;background:#f3f4f6}.na-imp-note{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:10px;margin:10px 0;font-size:13px}.na-imp-footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.na-imp-status{margin:10px 0;font-weight:600;white-space:normal}@media(max-width:650px){.na-imp-stats{grid-template-columns:repeat(2,minmax(100px,1fr))}.na-imp-panel{padding:14px}}";
  document.head.appendChild(style);
  const actions=document.createElement("div");actions.className="na-imp-actions";
- const open=document.createElement("button");open.id="naImportOpen";open.className="na-imp-btn";open.type="button";open.textContent="📥 Importar estudiantes desde Excel";open.onclick=NA_impOpen;actions.appendChild(open);
+ const open=document.createElement("button");open.id="naImportOpen";open.className="na-imp-btn solo-director";open.type="button";open.textContent="📥 Importar estudiantes desde Excel";open.onclick=NA_impOpen;actions.appendChild(open);
  const help=document.createElement("span");help.style.cssText="font-size:13px;color:#4b5563;align-self:center";help.textContent="Solo para Director · Vista previa antes de guardar";actions.appendChild(help);
  heading.insertAdjacentElement("afterend",actions);
  const modal=document.createElement("div");modal.id="naImportModal";modal.className="na-imp-modal";
