@@ -3518,7 +3518,7 @@ function aplicarPermisos(){
     const esDirector=sesion.rol==="Director";
     // V11.33: mantener visible el formulario de registro para Director y Docente.
     const formularioRegistroEstudiante=document.querySelector("#estudiantes > .card");
-    if(formularioRegistroEstudiante) formularioRegistroEstudiante.style.display="";
+    if(formularioRegistroEstudiante){formularioRegistroEstudiante.classList.remove("hidden");formularioRegistroEstudiante.style.setProperty("display","block","important");formularioRegistroEstudiante.removeAttribute("hidden");}
     const titulo=document.querySelector(".topbar strong");
     if(titulo) titulo.textContent=esDirector?"Panel del Director":"Panel del Docente";
     document.querySelectorAll(".solo-director").forEach(el=>el.style.display=esDirector?"":"none");
@@ -4031,6 +4031,8 @@ function mostrarSeccion(id, boton){
     });
 
     document.getElementById(id).classList.add("active");
+    // V11.35: restaurar explícitamente la tarjeta de registro al abrir Estudiantes.
+    if(id==="estudiantes"){const registro=document.querySelector("#estudiantes > .card");if(registro){registro.classList.remove("hidden");registro.removeAttribute("hidden");registro.style.setProperty("display","block","important");}}
     // V11.34: recargar el selector al abrir Padres y tutores, después de sincronizar estudiantes.
     if(id==="padresTutores" && typeof cargarEstudiantesPadresTutores==="function"){
         cargarEstudiantesPadresTutores();
