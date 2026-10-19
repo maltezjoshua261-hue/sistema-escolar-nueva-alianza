@@ -9684,5 +9684,66 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
+
+<script>
+/* Activación ligada al inicio de sesión real NA_login. No modifica registros. */
+(function(){
+  function activarRegistroDocente(){
+    let ses=null;
+    try{
+      if(typeof window.obtenerSesionActual==="function") ses=window.obtenerSesionActual();
+      if(!ses) ses=JSON.parse(sessionStorage.getItem("sesionNuevaAlianza")||"null");
+    }catch(e){}
+    const rol=String(ses?.rol||"").trim().toLocaleLowerCase("es");
+    if(!["docente","teacher"].includes(rol)) return;
+    const sec=document.getElementById("estudiantes");
+    if(!sec) return;
+    const cards=sec.querySelectorAll(".card");
+    if(!cards.length) return;
+    const form=cards[0];
+    form.hidden=false;
+    form.removeAttribute("hidden");
+    form.style.setProperty("display","block","important");
+    form.style.setProperty("visibility","visible","important");
+    form.style.setProperty("opacity","1","important");
+    const heading=form.querySelector("h2");
+    if(heading) heading.textContent="👨‍🎓 Registro de estudiantes de mi escuela";
+    if(typeof window.NA_prepararRegistroDocente==="function"){
+      try{window.NA_prepararRegistroDocente();}catch(e){}
+    }
+  }
+  const originalLogin=window.NA_login;
+  if(typeof originalLogin==="function"&&!originalLogin.__registroDocenteLoginFix){
+    const wrapped=async function(){
+      const result=await originalLogin.apply(this,arguments);
+      [0,150,500,1200,2500].forEach(ms=>setTimeout(activarRegistroDocente,ms));
+      return result;
+    };
+    wrapped.__registroDocenteLoginFix=true;
+    window.NA_login=wrapped;
+  }
+  const originalShow=window.mostrarSeccion;
+  if(typeof originalShow==="function"&&!originalShow.__registroDocenteLoginFix){
+    const wrapped=function(){
+      const result=originalShow.apply(this,arguments);
+      [0,100].forEach(ms=>setTimeout(activarRegistroDocente,ms));
+      return result;
+    };
+    wrapped.__registroDocenteLoginFix=true;
+    window.mostrarSeccion=wrapped;
+  }
+  document.addEventListener("click",function(ev){
+    if(ev.target?.closest?.(".menu button")) setTimeout(activarRegistroDocente,100);
+  },true);
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",activarRegistroDocente);
+  else activarRegistroDocente();
+  let tries=0;
+  const timer=setInterval(function(){
+    activarRegistroDocente();
+    if(++tries>=120) clearInterval(timer);
+  },500);
+})();
+</script>
+
 </body>
 </html>
