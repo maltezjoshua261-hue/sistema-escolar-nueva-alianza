@@ -8717,6 +8717,8 @@ window.cargarEstudiantes=function(){
     return encontrado?encontrado[1]+" ("+encontrado[0]+")":codigo;
   };
   let lista=obtenerDatos(KEY_ESTUDIANTES);
+  // Mostrar solo estudiantes activos; los egresados conservan su historial en Supabase.
+  lista=lista.filter(e=>String(e.estado||"Activo").trim().toLowerCase()==="activo");
   if(ses?.rol==="Docente"){
     lista=lista.filter(e=>String(e.codigo_centro||e.codigoCentro||ses.codigoCentro||"")===String(ses.codigoCentro||""));
   }
