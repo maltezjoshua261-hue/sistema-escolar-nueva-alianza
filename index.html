@@ -4340,6 +4340,14 @@ function cargarEstudiantes(){
     const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
     const centroDe=e=>{const c=String(e?.codigo_centro||e?.codigoCentro||"").trim();return c?(centros[c]||"Centro no reconocido")+" ("+c+")":"Sin centro asignado";};
     const lista=datos
+        // Excluir de la lista activa a los egresados de 11.º de Nueva Alianza.
+        // Se conservan sus registros en la base de datos para el historial académico.
+        .filter(e=>!(
+            String(e.codigo_centro||e.codigoCentro||"").trim()==="17683" &&
+            String(e.nivel||"").trim().toLowerCase()==="secundaria" &&
+            String(e.grado||"").trim()==="11" &&
+            String(e.estado||"Activo").trim().toLowerCase()==="inactivo"
+        ))
         .filter(e=>!ses||ses.rol==="Director"||(ses.rol==="Docente"&&String(e.codigo_centro||e.codigoCentro||"").trim()===String(ses.codigoCentro||"").trim()))
         .filter(e=>!buscar||[e.nombre,e.codigo,e.codigo_centro,e.codigoCentro,centroDe(e),e.nivel,e.grado,e.seccion,e.responsable,e.telefono,e.direccion,e.estado].join(" ").toLowerCase().includes(buscar));
     lista.forEach((e,i)=>{
