@@ -8329,10 +8329,27 @@ window.guardarMatricula=async function(){
   if(!e?.supabaseId)return;
   const c=await NA_init();
   const row={estudiante_id:e.supabaseId,anio:Number(r.anio),nivel:r.nivel,grado:r.grado,seccion:r.seccion,fecha_matricula:r.fecha,estado:r.estado||"Activa",codigo_centro:NA_sesion()?.codigoCentro||e.codigo_centro||null,responsable:r.responsable||null,telefono:r.telefono||null,direccion:r.direccion||null,tipo_matricula:r.tipoMatricula||null,procedencia:r.procedencia||null,documentos:r.documentos||null,observacion:r.observacion||null};
-  const q=r.supabaseId?await c.from("matriculas").update(row).eq("id",r.supabaseId).select().single():await c.from("matriculas").insert(row).select().single();
+  let q;
+  if(r.supabaseId){
+    q=await c.from("matriculas").update(row).eq("id",r.supabaseId).select().single();
+  }else{
+    // Busca primero por estudiante y año: la combinación debe tener una sola matrícula.
+    let previo=await c.from("matriculas").select("id").eq("estudiante_id",e.supabaseId).eq("anio",Number(r.anio)).maybeSingle();
+    if(previo.error)throw previo.error;
+    if(previo.data?.id){
+      q=await c.from("matriculas").update(row).eq("id",previo.data.id).select().single();
+    }else{
+      q=await c.from("matriculas").insert(row).select().single();
+      // Cubre también dos intentos simultáneos sin volver a mostrar el error de clave duplicada.
+      if(q.error?.code==="23505"){
+        previo=await c.from("matriculas").select("id").eq("estudiante_id",e.supabaseId).eq("anio",Number(r.anio)).maybeSingle();
+        if(!previo.error&&previo.data?.id)q=await c.from("matriculas").update(row).eq("id",previo.data.id).select().single();
+      }
+    }
+  }
   if(q.error){
     console.error("Matrícula Supabase:",q.error);
-    alert("La matrícula quedó en el navegador, pero no se confirmó en la base de datos. No vuelva a registrarla todavía. Detalle: "+q.error.message);
+    alert("No se pudo confirmar la matrícula: "+q.error.message+". No la vuelva a registrar; actualice la lista para verificar.");
     return;
   }
   try{await NA_syncMatriculas(); if(typeof cargarMatriculas==="function")cargarMatriculas();}
