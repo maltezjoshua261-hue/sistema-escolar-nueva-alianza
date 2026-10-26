@@ -8320,12 +8320,10 @@ async function NA_login(){
       }
     }
 
-    // V11.28.0 - Verificación final del panel del Director.
-    // Supabase es la fuente oficial; si está vacío, no se permite
-    // que una copia local antigua vuelva a mostrarse en los contadores.
+    // V11.28.0 - Supabase es la fuente oficial.
+    // No borrar las copias locales recién sincronizadas: los módulos del sistema
+    // las leen desde localStorage para mostrar estudiantes, docentes y registros.
     if(NA_sesion()?.rol==="Director"){
-      [KEY_ESTUDIANTES,KEY_DOCENTES,KEY_ASISTENCIAS,KEY_CALIFICACIONES].forEach(k=>localStorage.removeItem(k));
-      localStorage.removeItem(KEY_AUDITORIA);
       if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
       if(typeof cargarBitacora==="function")cargarBitacora();
     }
