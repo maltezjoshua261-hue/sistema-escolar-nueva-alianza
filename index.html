@@ -565,6 +565,26 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
   display:none;
 }
 </style>
+
+<style>
+/* Corrección de interacción táctil del inicio de sesión en Android */
+#loginScreen .login-box,
+#loginScreen .login-box label,
+#loginScreen .login-box input,
+#loginScreen .login-box button {
+  pointer-events: auto !important;
+}
+#loginScreen .login-box input {
+  position: relative !important;
+  z-index: 2 !important;
+  touch-action: manipulation;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+</style>
+
 </head>
 
 <body>
