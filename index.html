@@ -585,6 +585,70 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 }
 </style>
 
+
+<style id="na-mobile-fit-v1">
+/* V11.30 - Ajuste compacto para teléfonos sin alterar los datos ni las funciones */
+@media screen and (max-width: 650px) {
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { width:100%; max-width:100%; overflow-x:hidden; font-size:14px; }
+  .sidebar {
+    position:relative !important; inset:auto !important; width:100% !important;
+    min-height:0 !important; height:auto !important; padding:0 !important;
+    overflow:visible !important;
+  }
+  .logo { padding:10px 12px !important; text-align:center; }
+  .logo h2 { font-size:17px !important; margin:0 0 3px !important; }
+  .logo small { font-size:11px !important; margin-top:2px !important; }
+  .menu {
+    display:flex !important; flex-wrap:nowrap !important; gap:5px !important;
+    padding:7px !important; overflow-x:auto !important; overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch; scrollbar-width:thin;
+  }
+  .menu button {
+    flex:0 0 auto !important; width:auto !important; max-width:85vw;
+    margin:0 !important; padding:8px 10px !important; font-size:12px !important;
+    line-height:1.25 !important; white-space:nowrap !important; border-radius:7px !important;
+  }
+  .main { margin:0 !important; min-width:0 !important; width:100% !important; }
+  .topbar { padding:10px 12px !important; min-height:0 !important; gap:8px !important; }
+  .topbar h1, .topbar h2 { font-size:18px !important; line-height:1.25 !important; }
+  .content, .main-content { padding:10px !important; min-width:0 !important; }
+  .section { min-width:0 !important; width:100% !important; }
+  .section h1 { font-size:20px !important; line-height:1.25 !important; }
+  .section h2, .card h2 { font-size:17px !important; margin-bottom:9px !important; }
+  .card { padding:12px !important; margin-bottom:12px !important; border-radius:10px !important; min-width:0 !important; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:8px !important; }
+  .stat { padding:10px !important; min-width:0 !important; border-radius:9px !important; }
+  .stat h3, .stat strong { font-size:18px !important; overflow-wrap:anywhere; }
+  .stat p, .stat span { font-size:11px !important; }
+  .form-grid, .eval10-filtros, .control-stats, .plan-indicadores {
+    grid-template-columns:minmax(0,1fr) !important; gap:8px !important;
+  }
+  label { font-size:12px !important; }
+  input, select, textarea {
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    padding:9px !important; margin-top:4px !important; margin-bottom:8px !important;
+    font-size:14px !important; border-radius:7px !important;
+  }
+  textarea { min-height:85px !important; }
+  button, .btn, .btn-primary, .btn-success, .btn-danger, .btn-secondary {
+    max-width:100%; font-size:12px; padding:8px 10px; overflow-wrap:anywhere;
+  }
+  table {
+    display:block !important; width:100% !important; max-width:100% !important;
+    overflow-x:auto !important; -webkit-overflow-scrolling:touch;
+    border-collapse:collapse; font-size:11px !important;
+  }
+  th, td { padding:6px !important; font-size:11px !important; }
+  img, canvas, iframe, video { max-width:100%; }
+  .modal, .modal-content, .na-imp-modal, .na-imp-panel {
+    max-width:calc(100vw - 16px) !important;
+  }
+  .na-imp-panel { padding:12px !important; }
+  .login-box { width:100% !important; max-width:92vw !important; padding:22px !important; }
+}
+</style>
+
 </head>
 
 <body>
