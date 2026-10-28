@@ -8201,6 +8201,10 @@ async function NA_syncEstudiantes(){
   const {data,error}=await q;
   if(error)throw error;
   const old=obtenerDatos(KEY_ESTUDIANTES), out=[];
+  if((data||[]).length===0 && old.length>0){
+    console.warn("Supabase devolvió cero estudiantes; se conserva la copia local para revisión.");
+    return;
+  }
   (data||[]).forEach(e=>{
     const id=NA_localId(old,e.id);
     const previo=old.find(x=>String(x.supabaseId||"")===String(e.id));
@@ -8232,6 +8236,10 @@ async function NA_syncAsignaciones(){
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
   const docs=obtenerDatos(KEY_DOCENTES),locales=obtenerDatos(KEY_ASIGNACIONES),out=[];
+  if((data||[]).length===0 && locales.length>0){
+    console.warn("Supabase devolvió cero asignaciones; se conserva la copia local para revisión.");
+    return;
+  }
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
@@ -8259,6 +8267,11 @@ async function NA_syncMatriculas(){
   let q=c.from("matriculas").select("*").order("fecha_matricula",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_MATRICULAS);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero matrículas; se conserva la copia local para revisión.");
+    return;
+  }
   const out=(data||[]).map(m=>{
     const e=NA_studentLocal(m.estudiante_id);
     return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
@@ -8272,6 +8285,11 @@ async function NA_syncAsistencias(){
   let q=c.from("asistencias").select("*").order("fecha",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_ASISTENCIAS);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero asistencias; se conserva la copia local para revisión.");
+    return;
+  }
   const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(a=>{
     const e=NA_studentLocal(a.estudiante_id);
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.registrado_por));
@@ -8286,6 +8304,11 @@ async function NA_syncCalificaciones(){
   let q=c.from("calificaciones").select("*").order("created_at",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_CALIFICACIONES);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero calificaciones; se conserva la copia local para revisión.");
+    return;
+  }
   const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(x=>{
     const e=NA_studentLocal(x.estudiante_id);
     const d=docs.find(z=>String(z.supabaseId||"")===String(x.registrado_por));
@@ -8312,24 +8335,10 @@ window.NA_syncTodo = NA_syncTodo;
 window.NA_syncCalificaciones = NA_syncCalificaciones;
 
 async function NA_limpiarCacheCentralAntesDeMostrarPanel(){
-  // V11.27.9 - Limpieza reforzada antes de sincronizar.\n  // V11.27.8 - Los datos de estudiantes/docentes/asistencia/calificaciones
-  // son centralizados en Supabase. Se elimina cualquier copia local anterior
-  // antes de sincronizar para evitar que aparezcan datos de prueba antiguos.
-  [
-    KEY_ESTUDIANTES,
-    KEY_ASISTENCIAS,
-    KEY_CALIFICACIONES
-  ].forEach(k=>localStorage.removeItem(k));
-  // Conservamos KEY_DOCENTES: si la tabla central aún está vacía, no borrar la lista local de docentes.
-
-  // La bitácora histórica era local. Se limpia una sola vez durante la
-  // puesta en producción y luego queda disponible para el uso normal.
-  if(localStorage.getItem("NA_migracion_limpieza_11278")!=="1"){
-    localStorage.removeItem(KEY_AUDITORIA);
-    localStorage.setItem("NA_migracion_limpieza_11278","1");
-  }
+  // Protección de datos: no borrar localStorage automáticamente al iniciar sesión.
+  // La migración hacia Supabase requiere respaldo verificado y validación explícita.
+  console.info("Se conservan los datos locales; no se ejecuta limpieza automática antes de sincronizar.");
 }
-
 async function NA_login(){
   const usuario=(document.getElementById("loginUser")?.value||"").trim();
   const password=(document.getElementById("loginPass")?.value||"").trim();
@@ -8794,8 +8803,7 @@ async function NA_restaurarSesion(){
     const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
     if(!s?.user)return;
     await NA_profile(s.user);
-    // V11.29: limpiar calificaciones locales de prueba antes de sincronizar la base central.
-    localStorage.removeItem(KEY_CALIFICACIONES);
+    // No borrar calificaciones locales automáticamente al restaurar una sesión.
     await NA_syncTodo();
     const ses=NA_sesion();
     document.getElementById("loginScreen").style.display="none";
@@ -9044,21 +9052,8 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 
 </script>
 <script>
-/* V11.27.7 - Limpieza automática de datos locales de prueba en producción */
-(function(){
-  try{
-    if(localStorage.getItem("NA_v11277_limpieza_local_aplicada")!=="1"){
-      [
-        "estudiantesNuevaAlianza",
-        "docentesNuevaAlianza",
-        "asistenciasNuevaAlianza",
-        "calificacionesNuevaAlianza",
-        "auditoriaNuevaAlianza"
-      ].forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem("NA_v11277_limpieza_local_aplicada","1");
-    }
-  }catch(e){ console.warn("V11.27.7 - No se pudo limpiar almacenamiento local:",e); }
-})();
+/* Auditoría: se desactiva la limpieza automática de datos locales.
+   La eliminación debe ser manual, explícita y precedida por un respaldo. */
 </script>
 
 
