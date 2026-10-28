@@ -8312,24 +8312,10 @@ window.NA_syncTodo = NA_syncTodo;
 window.NA_syncCalificaciones = NA_syncCalificaciones;
 
 async function NA_limpiarCacheCentralAntesDeMostrarPanel(){
-  // V11.27.9 - Limpieza reforzada antes de sincronizar.\n  // V11.27.8 - Los datos de estudiantes/docentes/asistencia/calificaciones
-  // son centralizados en Supabase. Se elimina cualquier copia local anterior
-  // antes de sincronizar para evitar que aparezcan datos de prueba antiguos.
-  [
-    KEY_ESTUDIANTES,
-    KEY_ASISTENCIAS,
-    KEY_CALIFICACIONES
-  ].forEach(k=>localStorage.removeItem(k));
-  // Conservamos KEY_DOCENTES: si la tabla central aún está vacía, no borrar la lista local de docentes.
-
-  // La bitácora histórica era local. Se limpia una sola vez durante la
-  // puesta en producción y luego queda disponible para el uso normal.
-  if(localStorage.getItem("NA_migracion_limpieza_11278")!=="1"){
-    localStorage.removeItem(KEY_AUDITORIA);
-    localStorage.setItem("NA_migracion_limpieza_11278","1");
-  }
+  // Protección de datos: no borrar localStorage automáticamente al iniciar sesión.
+  // La migración hacia Supabase requiere respaldo verificado y validación explícita.
+  console.info("Se conservan los datos locales; no se ejecuta limpieza automática antes de sincronizar.");
 }
-
 async function NA_login(){
   const usuario=(document.getElementById("loginUser")?.value||"").trim();
   const password=(document.getElementById("loginPass")?.value||"").trim();
@@ -8794,8 +8780,7 @@ async function NA_restaurarSesion(){
     const c=await NA_init(), s=(await c.auth.getSession()).data?.session;
     if(!s?.user)return;
     await NA_profile(s.user);
-    // V11.29: limpiar calificaciones locales de prueba antes de sincronizar la base central.
-    localStorage.removeItem(KEY_CALIFICACIONES);
+    // No borrar calificaciones locales automáticamente al restaurar una sesión.
     await NA_syncTodo();
     const ses=NA_sesion();
     document.getElementById("loginScreen").style.display="none";
@@ -9044,21 +9029,8 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 
 </script>
 <script>
-/* V11.27.7 - Limpieza automática de datos locales de prueba en producción */
-(function(){
-  try{
-    if(localStorage.getItem("NA_v11277_limpieza_local_aplicada")!=="1"){
-      [
-        "estudiantesNuevaAlianza",
-        "docentesNuevaAlianza",
-        "asistenciasNuevaAlianza",
-        "calificacionesNuevaAlianza",
-        "auditoriaNuevaAlianza"
-      ].forEach(function(k){ localStorage.removeItem(k); });
-      localStorage.setItem("NA_v11277_limpieza_local_aplicada","1");
-    }
-  }catch(e){ console.warn("V11.27.7 - No se pudo limpiar almacenamiento local:",e); }
-})();
+/* Auditoría: se desactiva la limpieza automática de datos locales.
+   La eliminación debe ser manual, explícita y precedida por un respaldo. */
 </script>
 
 
