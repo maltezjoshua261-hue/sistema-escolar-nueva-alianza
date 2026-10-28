@@ -8201,6 +8201,10 @@ async function NA_syncEstudiantes(){
   const {data,error}=await q;
   if(error)throw error;
   const old=obtenerDatos(KEY_ESTUDIANTES), out=[];
+  if((data||[]).length===0 && old.length>0){
+    console.warn("Supabase devolvió cero estudiantes; se conserva la copia local para revisión.");
+    return;
+  }
   (data||[]).forEach(e=>{
     const id=NA_localId(old,e.id);
     const previo=old.find(x=>String(x.supabaseId||"")===String(e.id));
@@ -8232,6 +8236,10 @@ async function NA_syncAsignaciones(){
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
   const docs=obtenerDatos(KEY_DOCENTES),locales=obtenerDatos(KEY_ASIGNACIONES),out=[];
+  if((data||[]).length===0 && locales.length>0){
+    console.warn("Supabase devolvió cero asignaciones; se conserva la copia local para revisión.");
+    return;
+  }
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
@@ -8259,6 +8267,11 @@ async function NA_syncMatriculas(){
   let q=c.from("matriculas").select("*").order("fecha_matricula",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_MATRICULAS);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero matrículas; se conserva la copia local para revisión.");
+    return;
+  }
   const out=(data||[]).map(m=>{
     const e=NA_studentLocal(m.estudiante_id);
     return {id:m.id,supabaseId:m.id,estudianteId:e?.id||"",estudiante:e?.nombre||"",
@@ -8272,6 +8285,11 @@ async function NA_syncAsistencias(){
   let q=c.from("asistencias").select("*").order("fecha",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_ASISTENCIAS);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero asistencias; se conserva la copia local para revisión.");
+    return;
+  }
   const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(a=>{
     const e=NA_studentLocal(a.estudiante_id);
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.registrado_por));
@@ -8286,6 +8304,11 @@ async function NA_syncCalificaciones(){
   let q=c.from("calificaciones").select("*").order("created_at",{ascending:false});
   if(ses?.rol!=="Director")q=q.eq("codigo_centro",ses.codigoCentro||"");
   const {data,error}=await q;if(error)throw error;
+  const local=obtenerDatos(KEY_CALIFICACIONES);
+  if((data||[]).length===0 && local.length>0){
+    console.warn("Supabase devolvió cero calificaciones; se conserva la copia local para revisión.");
+    return;
+  }
   const docs=obtenerDatos(KEY_DOCENTES),out=(data||[]).map(x=>{
     const e=NA_studentLocal(x.estudiante_id);
     const d=docs.find(z=>String(z.supabaseId||"")===String(x.registrado_por));
