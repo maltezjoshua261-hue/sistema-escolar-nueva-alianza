@@ -62,3 +62,13 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - `gradebook.js` ahora permite guardar notas como borradores y publicar o retirar la publicación explícitamente. No permite sobrescribir una nota publicada mientras siga publicada.
 - Se comprobó la sintaxis JavaScript del script de la interfaz y de las APIs de estudiantes, asignaturas, docentes, asignaciones, evaluaciones y calificaciones: todas pasaron la comprobación básica.
 - La verificación anterior es de sintaxis, no una prueba de funcionamiento integral. No se ejecutaron cambios de datos con estas APIs, no se desplegó y producción permanece intacta.
+
+## Avance de integración — 28 de octubre de 2026 (continuación)
+- La interfaz aislada integra paneles de estudiantes, asignaturas, docentes, asignaciones docentes, evaluaciones, calificaciones y reportes.
+- La ruta `src/api/students.js` está creada con el nombre que requiere `/api/students`.
+- `src/api/gradebook.js` soporta consulta administrativa, guardado de nota como borrador y publicación o retirada de publicación mediante una acción explícita.
+- Se añadió `src/api/reports.js` para reportes de cuatro cortes, promedios por semestre y promedio anual solo cuando las cuatro notas existen.
+- Se pasó comprobación de sintaxis a la interfaz y a las siete rutas de API: estudiantes, asignaturas, docentes, asignaciones, evaluaciones, calificaciones y reportes. También se verificó que las referencias directas a IDs de la interfaz existen.
+- **Límite de verificación:** no se ejecutaron pruebas de extremo a extremo ni operaciones de escritura desde la interfaz. La rama de respaldo sigue sin asignaturas, evaluaciones, calificaciones, docentes ni asignaciones cargadas; no se inventaron datos de prueba.
+- Falta diseñar un acceso seguro para consulta individual de estudiantes; no se expone el listado de calificaciones a visitantes sin autenticar.
+- No desplegar ni conectar a producción hasta completar las pruebas aisladas.
