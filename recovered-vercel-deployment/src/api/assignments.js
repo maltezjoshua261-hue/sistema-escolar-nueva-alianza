@@ -1,0 +1,13 @@
+// API experimental de asignación docente-asignatura-sección para 2027.
+const { neon } = require('@neondatabase/serverless');
+function auth(req,res){const p=process.env.DIRECTOR_PASSWORD;if(!p||req.headers['x-director-password']!==p){res.status(401).json({ok:false,message:'Debes iniciar sesión como Dirección.'});return false;}return true;}
+module.exports=async function(req,res){
+ res.setHeader('Cache-Control','no-store');if(!auth(req,res))return;if(!process.env.DATABASE_URL)return res.status(503).json({ok:false,message:'Base de datos no configurada.'});
+ const sql=neon(process.env.DATABASE_URL),id=req.query&&req.query.id;
+ try{
+  if(req.method==='GET'){const assignments=await sql`SELECT ad.id,ad.docente_id,ad.asignatura_id,ad.seccion,ad.anio_escolar,ad.activa,d.codigo_docente,d.nombres AS docente_nombres,d.apellidos AS docente_apellidos,a.nombre AS asignatura,a.grado FROM asignaciones_docente ad JOIN docentes d ON d.id=ad.docente_id JOIN asignaturas a ON a.id=ad.asignatura_id WHERE ad.activa=true AND ad.anio_escolar=2027 ORDER BY a.grado,a.nombre,d.apellidos`;return res.status(200).json({ok:true,assignments});}
+  if(req.method==='POST'){const b=req.body||{},teacher=String(b.docente_id||''),subject=String(b.asignatura_id||''),section=b.seccion?String(b.seccion).trim():null;if(!teacher||!subject)return res.status(400).json({ok:false,message:'Selecciona docente y asignatura.'});const rows=await sql`INSERT INTO asignaciones_docente(docente_id,asignatura_id,seccion,anio_escolar,activa) SELECT d.id,a.id,${section},2027,true FROM docentes d,asignaturas a WHERE d.id=${teacher} AND d.activo=true AND a.id=${subject} AND a.activa=true RETURNING id,docente_id,asignatura_id,seccion,anio_escolar,activa`;if(!rows.length)return res.status(400).json({ok:false,message:'El docente o la asignatura no existen o están inactivos.'});return res.status(201).json({ok:true,assignment:rows[0]});}
+  if(req.method==='DELETE'){if(!id)return res.status(400).json({ok:false,message:'Falta el identificador de la asignación.'});const rows=await sql`UPDATE asignaciones_docente SET activa=false WHERE id=${id} AND activa=true RETURNING id,docente_id,asignatura_id,seccion,anio_escolar,activa`;if(!rows.length)return res.status(404).json({ok:false,message:'Asignación activa no encontrada.'});return res.status(200).json({ok:true,assignment:rows[0]});}
+  res.setHeader('Allow','GET, POST, DELETE');return res.status(405).json({ok:false,message:'Método no permitido.'});
+ }catch(e){if(e&&e.code==='23505')return res.status(409).json({ok:false,message:'La asignación ya existe para ese docente, asignatura, sección y año.'});console.error('assignments API error',e&&e.message);return res.status(500).json({ok:false,message:'Error interno de asignaciones.'});}
+};
