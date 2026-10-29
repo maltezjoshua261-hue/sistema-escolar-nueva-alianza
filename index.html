@@ -3757,7 +3757,7 @@ function aplicarPermisos(){
     const esDirector=sesion.rol==="Director";
     const soloDirector=[
         "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-        "docentes","asignaciones","horarios","reportes","reportesOficiales",
+        "estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales",
         "matricula","expediente","reporteMatricula","rendimiento",
         "evaluacionAcademica","perfilAcademico","planesMejora",
         "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
@@ -4299,7 +4299,7 @@ function mostrarSeccion(id, boton){
     })();
     const modulosSoloDirector=[
         "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-        "docentes","asignaciones","horarios","reportes","reportesOficiales",
+        "estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales",
         "matricula","expediente","reporteMatricula","rendimiento",
         "evaluacionAcademica","perfilAcademico","planesMejora",
         "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
@@ -8443,7 +8443,7 @@ async function NA_login(){
     if(NA_sesion()?.rol!=="Director"){
       const soloDirectorFinal=[
         "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-        "docentes","asignaciones","horarios","reportes","reportesOficiales",
+        "estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales",
         "matricula","expediente","reporteMatricula","rendimiento",
         "evaluacionAcademica","perfilAcademico","planesMejora",
         "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
@@ -9049,7 +9049,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
 (function(){
   const SOLO_DIRECTOR=[
     "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-    "docentes","asignaciones","horarios",
+    "estudiantes","docentes","asignaciones","horarios",
     "reportes","reportesOficiales","matricula","expediente","reporteMatricula",
     "rendimiento","evaluacionAcademica","perfilAcademico","planesMejora",
     "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
@@ -9077,7 +9077,7 @@ window.cargarCalificaciones=window.cargarCalificacionesFinal;
     });
 
     if(!director){
-      const idsSoloDirector=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
+      const idsSoloDirector=["centroControl","dashboardAcademico","seguimiento","alertasPreventivas","estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales","matricula","expediente","reporteMatricula","rendimiento","evaluacionAcademica","perfilAcademico","planesMejora","consolidacionEvaluacion","historialAcademico","promocion","estadisticas","cierreAnual","documentosOficiales","bitacora","reunionesAcuerdos","configuracion"];
       idsSoloDirector.forEach(id=>{
         const sec=document.getElementById(id);
         if(sec){
@@ -9234,7 +9234,7 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
 
   const SOLO_DIRECTOR = [
     "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales",
     "matricula","expediente","reporteMatricula","rendimiento",
     "evaluacionAcademica","perfilAcademico","planesMejora",
     "consolidacionEvaluacion","historialAcademico","promocion","estadisticas",
@@ -9395,7 +9395,7 @@ body[data-na-rol="Docente"] .menu button[data-na-director-final="1"]{
   "use strict";
   const SOLO_DIRECTOR_IDS=[
     "centroControl","dashboardAcademico","seguimiento","alertasPreventivas",
-    "docentes","asignaciones","horarios","reportes","reportesOficiales",
+    "estudiantes","docentes","asignaciones","horarios","reportes","reportesOficiales",
     "matricula","expediente","reporteMatricula","rendimiento",
     "evaluacionAcademica","perfilAcademico","planesMejora",
     "consolidacionEvaluacion","historialAcademico","promocion",
