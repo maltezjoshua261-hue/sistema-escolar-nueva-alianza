@@ -29,8 +29,8 @@ async function teacherPortal(req,res,sql,body){
  if(!teacherCredentials(req,res))return;
  if(req.method==='POST'&&body.action==='add-student'){
   const code=typeof body.codigo_estudiante==='string'?body.codigo_estudiante.trim():''; 
-  const names=typeof body.nombres==='string'?body.nombres.trim().replace(/\\s+/g,' '):'';
-  const surnames=typeof body.apellidos==='string'?body.apellidos.trim().replace(/\\s+/g,' '):'';
+  const names=typeof body.nombres==='string'?body.nombres.trim().replace(/\s+/g,' '):'';
+  const surnames=typeof body.apellidos==='string'?body.apellidos.trim().replace(/\s+/g,' '):'';
   const grade=Number(body.grado),section=typeof body.seccion==='string'?body.seccion.trim().toUpperCase():'';
   if(!code||!names||!surnames||!section||code.length>100||names.length>120||surnames.length>120||section.length>20||![7,8,9,10,11].includes(grade)){
    return res.status(400).json({ok:false,message:'Completa código, nombres, apellidos, grado y sección válidos.'});
