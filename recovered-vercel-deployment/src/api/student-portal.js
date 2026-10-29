@@ -27,6 +27,26 @@ function teacherCredentials(req,res){
 }
 async function teacherPortal(req,res,sql,body){
  if(!teacherCredentials(req,res))return;
+ if(req.method==='POST'&&body.action==='add-student'){
+  const code=typeof body.codigo_estudiante==='string'?body.codigo_estudiante.trim():''; 
+  const names=typeof body.nombres==='string'?body.nombres.trim().replace(/\\s+/g,' '):'';
+  const surnames=typeof body.apellidos==='string'?body.apellidos.trim().replace(/\\s+/g,' '):'';
+  const grade=Number(body.grado),section=typeof body.seccion==='string'?body.seccion.trim().toUpperCase():'';
+  if(!code||!names||!surnames||!section||code.length>100||names.length>120||surnames.length>120||section.length>20||![7,8,9,10,11].includes(grade)){
+   return res.status(400).json({ok:false,message:'Completa código, nombres, apellidos, grado y sección válidos.'});
+  }
+  try{
+   const duplicate=await sql`SELECT id FROM estudiantes WHERE codigo_estudiante=${code} LIMIT 1`;
+   if(duplicate.length)return res.status(409).json({ok:false,message:'Ya existe un estudiante con ese código. Verifica el código antes de continuar.'});
+   const created=await sql`INSERT INTO estudiantes(codigo_estudiante,nombres,apellidos,grado,seccion,activo,anio_escolar)
+    VALUES(${code},${names},${surnames},${grade},${section},true,2027)
+    RETURNING id,codigo_estudiante,nombres,apellidos,grado,seccion,activo,anio_escolar`;
+   return res.status(201).json({ok:true,message:'Estudiante agregado al padrón de secundaria 2027.',student:created[0]});
+  }catch(error){
+   if(error&&error.code==='23505')return res.status(409).json({ok:false,message:'Ya existe un estudiante con ese código.'});
+   throw error;
+  }
+ }
  if(req.method==='GET'){
   const records=await sql`
    SELECT a.id AS asignatura_id,a.nombre AS asignatura,a.grado,
