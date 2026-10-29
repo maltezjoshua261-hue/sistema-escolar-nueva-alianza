@@ -33,10 +33,7 @@ async function teacherPortal(req,res,sql,body){
     e.id AS evaluacion_id,e.semestre,e.corte,s.id AS estudiante_id,s.codigo_estudiante,s.nombres,s.apellidos,s.seccion,
     c.id AS calificacion_id,c.nota,c.publicada
    FROM asignaturas a
-   JOIN asignaciones_docente ad ON ad.asignatura_id=a.id AND ad.activa=true AND ad.anio_escolar=2027
-   JOIN docentes d ON d.id=ad.docente_id AND d.activo=true
    JOIN estudiantes s ON s.grado=a.grado AND s.activo=true AND s.anio_escolar=2027
-    AND (ad.seccion IS NULL OR trim(ad.seccion)='' OR lower(trim(ad.seccion))=lower(trim(s.seccion)))
    LEFT JOIN evaluaciones e ON e.asignatura_id=a.id AND e.anio=2027
    LEFT JOIN calificaciones c ON c.estudiante_id=s.id AND c.evaluacion_id=e.id
    WHERE a.activa=true
