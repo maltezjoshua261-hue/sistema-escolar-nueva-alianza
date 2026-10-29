@@ -81,3 +81,11 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - Se intentó preparar un proyecto Vercel separado para la recuperación, con raíz `recovered-vercel-deployment/src`, pero Vercel rechazó la conexión automática al repositorio porque falta una conexión de inicio de sesión de GitHub en la cuenta. No se cambió el proyecto Vercel existente ni se desplegó nada.
 - **Bloqueo para completar el cierre:** falta habilitar la conexión GitHub↔Vercel y realizar pruebas de extremo a extremo usando exclusivamente la rama Neon aislada. El proyecto actual no se debe reconfigurar porque podría afectar el despliegue existente.
 - La base de producción sigue sin la tabla `accesos_estudiantes`; no aplicar la migración a producción ni publicar el portal hasta aprobar y superar las pruebas aisladas.
+
+
+## Preparación del entorno Vercel aislado — 29 de octubre de 2026
+- Se creó el proyecto separado `sinfo-secundaria-2027-pruebas` (ID `prj_nvBx7v7IAkRu2SiVIrytlrMVpcB8`) con protección SSO activada; no se vinculó dominio personalizado.
+- Se configuraron variables cifradas de prueba para la rama Neon aislada como entorno Preview.
+- Se intentó enviar una compilación inline con los archivos de recuperación, pero Vercel la interpretó como destino `production` del proyecto de pruebas. Se canceló inmediatamente: deployment `dpl_BcDufQSFSdfgF6uhGZm2dsAFGyj3`, estado `CANCELED`. No se publicó un despliegue utilizable.
+- La conexión GitHub↔Vercel sigue sin habilitarse y es necesaria para poder crear un deployment Preview normal. El proyecto Vercel original `sinfo-secundaria-2027` no se modificó.
+- Antes de probar, verificar que las variables de entorno de Preview se apliquen a un deployment de rama y que la protección SSO permanezca activa. No publicar en el proyecto original ni modificar producción.
