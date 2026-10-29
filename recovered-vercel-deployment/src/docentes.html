@@ -55,7 +55,7 @@ function cutNumber(r){
 function getVisible(){const q=$('#search').value.trim().toLowerCase(),g=$('#grade').value,s=$('#section').value,c=Number($('#cut').value);return records.filter(r=>r.evaluacion_id&&cutNumber(r)===c&&(!g||String(r.grado)===g)&&(!s||String(r.seccion||'').toUpperCase()===s)&&(!q||String(r.nombres+' '+r.apellidos+' '+r.codigo_estudiante).toLowerCase().includes(q)))}
 const SUBJECTS=['MAT','LYL','INGLES','CCNN','QUIMICA','FISICA','BIOLOGIA','HIST','GEOGRAFIA','SOCIOLOGIA','ECONOMIA','FILO','VP','TAC','DDM'];
 function canonicalSubject(value){
- const n=String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ const n=String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
  const aliases={
   MAT:['MAT','MATEMATICA','MATEMATICAS'],
   LYL:['LYL','LENGUAYLITERATURA','ESPANOL','LENGUAESPANOLA'],
