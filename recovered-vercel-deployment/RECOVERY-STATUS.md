@@ -8,10 +8,13 @@ Esta carpeta es una copia de trabajo de recuperación. No está conectada a Verc
 - `src/package.json`: dependencia de Neon recuperada.
 - `src/api/status.js`: endpoint de estado reconstruido a partir del archivo recuperado.
 - `src/api/students.reconstructed.js`: reconstrucción parcial, solo GET/POST.
-- `src/api/students.full-reconstruction.js`: reconstrucción experimental para GET/POST/PUT y desactivación lógica.
+- `src/api/students.full-reconstruction.js`: archivo de referencia experimental para GET/POST/PUT y desactivación lógica.
+- `src/api/students.js`: ruta `/api/students` conectada a esa reconstrucción para que coincida con la interfaz.
 - `src/api/teachers.js`: API experimental para listar, registrar, editar y desactivar docentes.
 - `src/api/subjects.js`: API experimental para administrar asignaturas por grado.
 - `src/api/assignments.js`: API experimental para asignar docente, asignatura y sección en 2027.
+- `src/api/evaluations.js`: consulta y creación de evaluaciones 2027, validando la correspondencia de semestre y corte.
+- `src/api/gradebook.js`: consulta de notas, guardado de borradores y publicación/retirada explícita de publicación.
 
 ## Compatibilidad observada
 La interfaz recuperada llama a la API de estudiantes usando GET, POST, PUT y DELETE con `?id=...`. La API original completa no se ha podido recuperar; los archivos nuevos son reconstrucciones basadas en el contrato visible de la interfaz y el esquema de respaldo.
@@ -32,9 +35,9 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - Las APIs de docentes, asignaturas y asignaciones están guardadas, pero aún requieren verificación sintáctica y pruebas de integración.
 
 ## Pendiente
-- Completar y verificar el módulo de evaluaciones/calificaciones de cuatro cortes.
+- Completar la consulta pública segura de notas individuales para estudiantes, sin exponer el listado general.
 - Probar autenticación, consultas y operaciones CRUD contra una instancia aislada conectada únicamente a la rama de respaldo.
-- Integrar las APIs a la interfaz recuperada y comprobar el flujo completo.
+- Probar el flujo completo en entorno aislado antes de considerar cualquier despliegue.
 - Preparar pruebas de publicación individual de notas y reportes antes de cualquier despliegue.
 
 ## Seguridad
@@ -51,3 +54,11 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - Las seis APIs candidatas se verificaron con comprobación básica de sintaxis JavaScript.
 - Consulta de solo lectura en el respaldo: 264 estudiantes; asignaturas, evaluaciones, calificaciones, docentes y asignaciones aún en 0.
 - Falta la prueba integral y falta completar el guardado/edición/publicación de notas. No desplegar.
+
+
+## Avance adicional del 28 de octubre de 2026
+- La interfaz aislada ya integra formularios y listados para estudiantes, asignaturas, docentes, asignaciones, evaluaciones y calificaciones.
+- Se conectó la ruta `src/api/students.js` que espera la interfaz.
+- `gradebook.js` ahora permite guardar notas como borradores y publicar o retirar la publicación explícitamente. No permite sobrescribir una nota publicada mientras siga publicada.
+- Se comprobó la sintaxis JavaScript del script de la interfaz y de las APIs de estudiantes, asignaturas, docentes, asignaciones, evaluaciones y calificaciones: todas pasaron la comprobación básica.
+- La verificación anterior es de sintaxis, no una prueba de funcionamiento integral. No se ejecutaron cambios de datos con estas APIs, no se desplegó y producción permanece intacta.
