@@ -44,12 +44,12 @@ function authHeaders(){return {'Content-Type':'application/json','x-teacher-user
 async function api(method,body){const r=await fetch('/api/student-portal',{method,cache:'no-store',headers:authHeaders(),body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||'Error al consultar el servidor');return d}
 async function load(){const d=await api('GET');records=d.records||[];$('#welcome').textContent='Docente: '+((d.teacher&&d.teacher.nombres)||'Maestros');lastUpdated=new Date();render()}
 function cutNumber(r){
- const raw=String(r.corte??'').trim().toUpperCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
+ const raw=String(r.corte??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
  const n=Number(raw);
  if(Number.isInteger(n)&&n>=1&&n<=4)return n;
- const match=raw.match(/^(I{1,3}|IV)(?:\\s*CORTE)?$/);
+ const match=raw.match(/^(I{1,3}|IV)(?:\s*CORTE)?$/);
  if(match)return ({I:1,II:2,III:3,IV:4})[match[1]]||0;
- const arabic=raw.match(/^([1-4])(?:\\s*CORTE)?$/);
+ const arabic=raw.match(/^([1-4])(?:\s*CORTE)?$/);
  return arabic?Number(arabic[1]):0;
 }
 function getVisible(){const q=$('#search').value.trim().toLowerCase(),g=$('#grade').value,s=$('#section').value,c=Number($('#cut').value);return records.filter(r=>r.evaluacion_id&&cutNumber(r)===c&&(!g||String(r.grado)===g)&&(!s||String(r.seccion||'').toUpperCase()===s)&&(!q||String(r.nombres+' '+r.apellidos+' '+r.codigo_estudiante).toLowerCase().includes(q)))}
