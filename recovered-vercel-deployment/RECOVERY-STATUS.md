@@ -43,3 +43,11 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - No conectar esta rama de recuperación a producción.
 - No desplegar estos archivos candidatos directamente.
 - No borrar datos; las APIs candidatas usan desactivación lógica.
+
+
+## Avance del 28 de octubre de 2026
+- Se añadieron APIs candidatas para docentes, asignaturas, asignaciones y evaluaciones de los cuatro cortes.
+- Se añadió un endpoint de consulta de calificaciones 2027.
+- Las seis APIs candidatas se verificaron con comprobación básica de sintaxis JavaScript.
+- Consulta de solo lectura en el respaldo: 264 estudiantes; asignaturas, evaluaciones, calificaciones, docentes y asignaciones aún en 0.
+- Falta la prueba integral y falta completar el guardado/edición/publicación de notas. No desplegar.
