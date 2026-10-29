@@ -45,13 +45,57 @@ async function api(method,body){const r=await fetch('/api/student-portal',{metho
 async function load(){const d=await api('GET');records=d.records||[];$('#welcome').textContent='Docente: '+((d.teacher&&d.teacher.nombres)||'Maestros');lastUpdated=new Date();render()}
 function cutNumber(r){const n=Number(r.corte);if(n>=1&&n<=4)return n;return ({I:1,II:2,III:3,IV:4})[String(r.corte).toUpperCase()]||0}
 function getVisible(){const q=$('#search').value.trim().toLowerCase(),g=$('#grade').value,s=$('#section').value,c=Number($('#cut').value);return records.filter(r=>r.evaluacion_id&&cutNumber(r)===c&&(!g||String(r.grado)===g)&&(!s||String(r.seccion||'').toUpperCase()===s)&&(!q||String(r.nombres+' '+r.apellidos+' '+r.codigo_estudiante).toLowerCase().includes(q)))}
+const SUBJECTS=['MAT','LYL','INGLES','CCNN','QUIMICA','FISICA','BIOLOGIA','HIST','GEOGRAFIA','SOCIOLOGIA','ECONOMIA','FILO','VP','TAC','DDM'];
+function canonicalSubject(value){
+ const n=String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ const aliases={
+  MAT:['MAT','MATEMATICA','MATEMATICAS'],
+  LYL:['LYL','LENGUAYLITERATURA','ESPANOL','LENGUAESPANOLA'],
+  INGLES:['INGLES','ENGLISH'],
+  CCNN:['CCNN','CIENCIASNATURALES','CIENCIANATURAL'],
+  QUIMICA:['QUIMICA'],
+  FISICA:['FISICA'],
+  BIOLOGIA:['BIOLOGIA'],
+  HIST:['HIST','HISTORIA'],
+  GEOGRAFIA:['GEOGRAFIA'],
+  SOCIOLOGIA:['SOCIOLOGIA'],
+  ECONOMIA:['ECONOMIA'],
+  FILO:['FILO','FILOSOFIA'],
+  VP:['VP','VALORESYPRINCIPIOS','VALORES','CONVIVENCIA'],
+  TAC:['TAC','TECNOLOGIASDEAPRENDIZAJEYCOMUNICACION','TECNOLOGIA','INFORMATICA'],
+  DDM:['DDM','DESARROLLODELMUNDO','DESARROLLO']
+ };
+ for(const subject of SUBJECTS){if(aliases[subject].includes(n))return subject}
+ return null;
+}
 function render(){
- const rows=getVisible(),students=new Map(),subjects=[];
- for(const r of rows){const name=String(r.asignatura||'Asignatura');if(!subjects.includes(name))subjects.push(name);const id=String(r.estudiante_id);if(!students.has(id))students.set(id,{id,nombres:r.nombres,apellidos:r.apellidos,codigo:r.codigo_estudiante,grado:r.grado,seccion:r.seccion,subjects:{}});students.get(id).subjects[name]=r}
- subjects.sort((a,b)=>a.localeCompare(b,'es'));
- $('#tableHead').innerHTML='<tr><th>Estudiante</th>'+subjects.map(s=>'<th>'+esc(s)+'</th>').join('')+'</tr>';
- $('#tableBody').innerHTML=[...students.values()].map(st=>'<tr><td><div class="student-name">'+esc(st.apellidos+', '+st.nombres)+'</div><div class="student-meta">Código: '+esc(st.codigo)+' · '+esc(st.grado)+'º / '+esc(st.seccion||'—')+'</div></td>'+subjects.map(sub=>{const r=st.subjects[sub];if(!r)return '<td>—</td>';const key=String(r.estudiante_id)+'|'+String(r.evaluacion_id),pending=dirty.has(key),val=pending?dirty.get(key):r.nota;const cls=pending?'changed':(val!==null&&val!==''&&Number(val)<60?'low':'');return '<td><input type="number" min="0" max="100" step="0.01" aria-label="'+esc(st.nombres+' '+st.apellidos+' '+sub)+'" data-key="'+esc(key)+'" data-student="'+esc(r.estudiante_id)+'" data-evaluation="'+esc(r.evaluacion_id)+'" value="'+(val??'')+'" '+(r.publicada?'disabled':'')+' class="'+cls+'" '+(r.publicada?'title="Nota publicada; solicita a Dirección si requiere corrección"':'')+'>'+(r.publicada?'<span class="published">Publicada</span>':'')+'</td>'}).join('')+'</tr>').join('');
- $('#empty').classList.toggle('hidden',students.size>0);$('#studentCount').textContent=students.size+' estudiantes';$('#cellCount').textContent=rows.filter(r=>r.nota!==null&&r.nota!==''&&r.nota!==undefined).length+' casillas con nota';$('#changedCount').textContent=dirty.size+' cambios sin guardar';$('#updated').textContent=lastUpdated?'Actualizado: '+lastUpdated.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'}):'Sin actualizar';$('#saveAll').disabled=dirty.size===0;
+ const rows=getVisible(),students=new Map();
+ for(const r of rows){
+  const subject=canonicalSubject(r.asignatura);
+  if(!subject)continue;
+  const id=String(r.estudiante_id);
+  if(!students.has(id))students.set(id,{id,nombres:r.nombres,apellidos:r.apellidos,codigo:r.codigo_estudiante,grado:r.grado,seccion:r.seccion,subjects:{}});
+  students.get(id).subjects[subject]=r;
+ }
+ $('#tableHead').innerHTML='<tr><th>Estudiante</th>'+SUBJECTS.map(s=>'<th>'+s+'</th>').join('')+'<th>PROMEDIO</th></tr>';
+ $('#tableBody').innerHTML=[...students.values()].map(st=>{
+  const cells=SUBJECTS.map(sub=>{
+   const r=st.subjects[sub];
+   if(!r)return '<td>—</td>';
+   const key=String(r.estudiante_id)+'|'+String(r.evaluacion_id),pending=dirty.has(key),val=pending?dirty.get(key):r.nota;
+   const cls=pending?'changed':(val!==null&&val!==''&&Number(val)<60?'low':'');
+   return '<td><input type="number" min="0" max="100" step="0.01" aria-label="'+esc(st.nombres+' '+st.apellidos+' '+sub)+'" data-key="'+esc(key)+'" data-student="'+esc(r.estudiante_id)+'" data-evaluation="'+esc(r.evaluacion_id)+'" value="'+(val??'')+'" '+(r.publicada?'disabled':'')+' class="'+cls+'" '+(r.publicada?'title="Nota publicada; solicita a Dirección si requiere corrección"':'')+'>'+(r.publicada?'<span class="published">Publicada</span>':'')+'</td>';
+  }).join('');
+  const vals=SUBJECTS.map(sub=>{const r=st.subjects[sub];if(!r)return null;const key=String(r.estudiante_id)+'|'+String(r.evaluacion_id);const v=dirty.has(key)?dirty.get(key):r.nota;return v!==null&&v!==''&&Number.isFinite(Number(v))?Number(v):null}).filter(v=>v!==null);
+  const avg=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):'—';
+  return '<tr><td><div class="student-name">'+esc(st.apellidos+', '+st.nombres)+'</div><div class="student-meta">Código: '+esc(st.codigo)+' · '+esc(st.grado)+'º / '+esc(st.seccion||'—')+'</div></td>'+cells+'<td><strong>'+avg+'</strong></td></tr>';
+ }).join('');
+ $('#empty').classList.toggle('hidden',students.size>0);
+ $('#studentCount').textContent=students.size+' estudiantes';
+ $('#cellCount').textContent=rows.filter(r=>canonicalSubject(r.asignatura)&&r.nota!==null&&r.nota!==''&&r.nota!==undefined).length+' casillas con nota';
+ $('#changedCount').textContent=dirty.size+' cambios sin guardar';
+ $('#updated').textContent=lastUpdated?'Actualizado: '+lastUpdated.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'}):'Sin actualizar';
+ $('#saveAll').disabled=dirty.size===0;
 }
 $('#loginForm').addEventListener('submit',async e=>{e.preventDefault();$('#loginBtn').disabled=true;credentials={user:$('#code').value.trim(),password:$('#pin').value};try{await load();$('#login').classList.add('hidden');$('#panel').classList.remove('hidden');$('#pin').value=''}catch(err){credentials=null;$('#loginMsg').textContent=err.message;$('#loginMsg').className='status err';$('#loginMsg').classList.remove('hidden')}finally{$('#loginBtn').disabled=false}});
 $('#tableBody').addEventListener('input',e=>{const el=e.target;if(!el.matches('input[data-key]'))return;const key=el.dataset.key,val=el.value;const original=records.find(r=>String(r.estudiante_id)+'|'+String(r.evaluacion_id)===key);if(val===''||(original&&String(original.nota??'')===val))dirty.delete(key);else dirty.set(key,val);el.classList.toggle('changed',dirty.has(key));el.classList.toggle('low',val!==''&&Number(val)<60);$('#changedCount').textContent=dirty.size+' cambios sin guardar';$('#saveAll').disabled=dirty.size===0});
