@@ -68,7 +68,7 @@ module.exports = async function studentPortal(req, res) {
       LIMIT 1
     `;
     const account = accounts[0];
-    if (!account) return res.status(401).json({ ok: false, message: 'Código o PIN incorrecto, o acceso no configurado.' });
+    if (!account) return res.status(401).json({ ok: false, message: 'Código o PIN incorrecto.' });
     if (account.bloqueado_hasta && new Date(account.bloqueado_hasta).getTime() > Date.now()) {
       return res.status(429).json({ ok: false, message: 'Acceso temporalmente bloqueado por intentos fallidos. Intenta más tarde.' });
     }
