@@ -649,6 +649,34 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 }
 </style>
 
+
+<style id="calGrupoCorteStyles">
+#calGrupoCorte .cal-corte-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0}
+#calGrupoCorte .cal-corte-tab{border:1px solid #cbd5e1;border-radius:9px;padding:12px 8px;background:#f8fafc;color:#1f2937;font-weight:700;cursor:pointer}
+#calGrupoCorte .cal-corte-tab.active{background:#1d4ed8;color:white;border-color:#1d4ed8}
+#calGrupoCorte .cal-grupo-filtros{margin-bottom:12px}
+#calGrupoCorte .cal-grupo-resumen{padding:12px 14px;background:#eff6ff;border-radius:8px;margin:12px 0;font-weight:600}
+#calGrupoCorte .cal-grupo-leyenda{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 14px;font-size:13px;color:#475569}
+#calGrupoCorte .cal-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+#calGrupoCorte .cal-dirty{background:#f59e0b} #calGrupoCorte .cal-low{background:#dc2626}
+#calGrupoCorte .cal-grupo-tabla-wrap{max-height:65vh;overflow:auto;border:1px solid #dbe2ea;border-radius:8px}
+#calGrupoCorte .cal-grupo-tabla{border-collapse:separate;border-spacing:0;min-width:1450px;width:100%;font-size:13px}
+#calGrupoCorte .cal-grupo-tabla th{position:sticky;top:0;background:#eaf0f8;z-index:2;padding:10px 8px;white-space:normal;min-width:95px}
+#calGrupoCorte .cal-grupo-tabla th:first-child{left:0;z-index:4;min-width:44px}
+#calGrupoCorte .cal-grupo-tabla th:nth-child(2){left:44px;z-index:4;min-width:230px}
+#calGrupoCorte .cal-grupo-tabla td{padding:6px;border-bottom:1px solid #e5e7eb;text-align:center;background:white}
+#calGrupoCorte .cal-grupo-tabla td:first-child{position:sticky;left:0;background:#f8fafc;z-index:1}
+#calGrupoCorte .cal-grupo-tabla td:nth-child(2){position:sticky;left:44px;text-align:left;min-width:230px;background:white;z-index:1}
+#calGrupoCorte .cal-grupo-tabla input,#calGrupoCorte .cal-grupo-tabla select{width:78px;min-width:68px;padding:8px 4px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;text-align:center}
+#calGrupoCorte .cal-grupo-tabla .cal-celda-sucia{background:#fffbeb;border-color:#f59e0b}
+#calGrupoCorte .cal-grupo-tabla .cal-nota-baja{background:#fef2f2;border-color:#dc2626;color:#991b1b;font-weight:700}
+#calGrupoCorte .cal-grupo-tabla .cal-retirado td{background:#f3f4f6;color:#6b7280}
+#calGrupoCorte .cal-grupo-tabla .cal-retirado td:nth-child(2){background:#f3f4f6}
+#calGrupoCorte .cal-grupo-acciones{align-items:center;margin-top:14px}
+#calGrupoCorte #calGrupoEstado{font-size:13px;color:#475569}
+@media(max-width:700px){#calGrupoCorte{padding:12px!important}#calGrupoCorte .cal-corte-tabs{gap:4px}#calGrupoCorte .cal-corte-tab{padding:10px 3px;font-size:12px}#calGrupoCorte .cal-grupo-filtros{grid-template-columns:repeat(2,minmax(0,1fr))}#calGrupoCorte .cal-grupo-tabla{min-width:1200px}#calGrupoCorte .cal-grupo-resumen{font-size:13px}}
+</style>
+
 </head>
 
 <body>
@@ -1534,6 +1562,64 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 
             <!-- CALIFICACIONES -->
             <section id="calificaciones" class="section">
+
+                <div class="card" id="calGrupoCorte" style="border:2px solid #d7e3f4;">
+                    <h2>📝 Digitación grupal de calificaciones</h2>
+                    <p>Seleccione el corte y el grupo. Edite las notas directamente en la tabla y guarde únicamente las casillas modificadas.</p>
+                    <div class="cal-corte-tabs" role="tablist" aria-label="Corte evaluativo">
+                        <button type="button" class="cal-corte-tab" data-corte="I Corte" onclick="seleccionarCorteGrupo('I Corte')">I Corte</button>
+                        <button type="button" class="cal-corte-tab" data-corte="II Corte" onclick="seleccionarCorteGrupo('II Corte')">II Corte</button>
+                        <button type="button" class="cal-corte-tab active" data-corte="III Corte" onclick="seleccionarCorteGrupo('III Corte')">III Corte</button>
+                        <button type="button" class="cal-corte-tab" data-corte="IV Corte" onclick="seleccionarCorteGrupo('IV Corte')">IV Corte</button>
+                    </div>
+                    <div class="form-grid cal-grupo-filtros">
+                        <div class="form-group">
+                            <label for="calGrupoAnio">Año escolar</label>
+                            <select id="calGrupoAnio" onchange="cargarTablaGrupoCalificaciones()">
+                                <option value="2027" selected>2027</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calGrupoNivel">Nivel</label>
+                            <select id="calGrupoNivel" disabled><option value="Secundaria">Secundaria</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calGrupoGrado">Grado</label>
+                            <select id="calGrupoGrado" onchange="cargarTablaGrupoCalificaciones()">
+                                <option value="7" selected>Séptimo</option>
+                                <option value="8">Octavo</option>
+                                <option value="9">Noveno</option>
+                                <option value="10">Décimo</option>
+                                <option value="11">Undécimo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calGrupoSeccion">Sección</label>
+                            <select id="calGrupoSeccion" onchange="cargarTablaGrupoCalificaciones()">
+                                <option value="A" selected>A</option><option value="B">B</option><option value="C">C</option><option value="Única">Única</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="cal-grupo-resumen" id="calGrupoResumen" aria-live="polite">Cargando estudiantes del grupo…</div>
+                    <div class="cal-grupo-leyenda">
+                        <span><i class="cal-dot cal-dirty"></i> Cambio sin guardar</span>
+                        <span><i class="cal-dot cal-low"></i> Nota menor a 60</span>
+                        <span>Enter: pasar a la siguiente casilla</span>
+                    </div>
+                    <div class="table-container cal-grupo-tabla-wrap">
+                        <table class="cal-grupo-tabla">
+                            <thead id="calGrupoCabecera"></thead>
+                            <tbody id="calGrupoCuerpo"><tr><td>Seleccione el grupo para cargar sus estudiantes.</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="actions cal-grupo-acciones">
+                        <button type="button" class="btn-success" id="btnGuardarGrupoCal" onclick="guardarCambiosGrupoCalificaciones()">💾 Guardar notas modificadas</button>
+                        <button type="button" class="btn-info" onclick="cargarTablaGrupoCalificaciones()">↻ Actualizar tabla</button>
+                        <span id="calGrupoEstado" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
 
                 <div class="card">
 
@@ -9856,6 +9942,185 @@ if ("serviceWorker" in navigator) {
     if(++tries>=120) clearInterval(timer);
   },500);
 })();
+</script>
+
+
+<script id="calGrupoCorteLogic">
+/* Digitación grupal: conserva el formato de registros de calificaciones existente. */
+let calGrupoCorteSeleccionado = "III Corte";
+const calGrupoAsignaturas = [...new Set([...(window.BASICAS_NUMERICAS||[]), ...(window.DISCIPLINAS_CUALITATIVAS||[])])];
+function seleccionarCorteGrupo(corte){
+    calGrupoCorteSeleccionado=corte;
+    document.querySelectorAll("#calGrupoCorte .cal-corte-tab").forEach(b=>{
+        const activo=b.dataset.corte===corte;
+        b.classList.toggle("active",activo);
+        b.setAttribute("aria-selected",activo?"true":"false");
+    });
+    cargarTablaGrupoCalificaciones();
+}
+function calGrupoEscape(value){
+    return typeof escaparHTML==="function" ? escaparHTML(String(value??"")) : String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function calGrupoDatos(clave){ return typeof obtenerDatos==="function" ? obtenerDatos(clave) : []; }
+function calGrupoNombreGrado(g){
+    return ({"7":"Séptimo","8":"Octavo","9":"Noveno","10":"Décimo","11":"Undécimo"})[String(g)]||String(g);
+}
+function calGrupoEstadoRetirado(e){
+    return ["retirado","trasladado"].includes(String(e?.estado||"Activo").trim().toLowerCase());
+}
+function calGrupoCoincide(e,nivel,grado,seccion){
+    return normalizarNivel(e.nivel)==="secundaria" &&
+        normalizarGrado(e.grado)===normalizarGrado(grado) &&
+        normalizarSeccion(e.seccion)===normalizarSeccion(seccion);
+}
+function calGrupoRegistro(estudiante,asignatura,anio){
+    return calGrupoDatos(KEY_CALIFICACIONES).find(c=>
+        String(c.estudianteId)===String(estudiante.id) &&
+        normalizarNivel(c.nivel)==="secundaria" &&
+        normalizarGrado(c.grado)===normalizarGrado(document.getElementById("calGrupoGrado").value) &&
+        normalizarSeccion(c.seccion)===normalizarSeccion(document.getElementById("calGrupoSeccion").value) &&
+        c.asignatura===asignatura && c.corte===calGrupoCorteSeleccionado &&
+        String(c.anio||"2026")===String(anio)
+    );
+}
+function cargarTablaGrupoCalificaciones(){
+    const body=document.getElementById("calGrupoCuerpo"), head=document.getElementById("calGrupoCabecera");
+    const resumen=document.getElementById("calGrupoResumen"), estado=document.getElementById("calGrupoEstado");
+    if(!body||!head)return;
+    const anio=document.getElementById("calGrupoAnio").value;
+    const grado=document.getElementById("calGrupoGrado").value;
+    const seccion=document.getElementById("calGrupoSeccion").value;
+    const ses=typeof obtenerSesionActual==="function"?obtenerSesionActual():null;
+    if(typeof estaCerradoAnio==="function" && estaCerradoAnio(anio) && ses?.rol==="Docente"){
+        body.innerHTML='<tr><td colspan="20">El año escolar está cerrado. Consulte a Dirección.</td></tr>'; return;
+    }
+    if(ses?.rol==="Docente" && typeof docenteTieneGrupo==="function" && !docenteTieneGrupo("Secundaria",grado,seccion,anio)){
+        head.innerHTML=""; body.innerHTML='<tr><td colspan="20">No tiene asignado este grupo para el año seleccionado.</td></tr>';
+        resumen.textContent=calGrupoNombreGrado(grado)+' '+seccion+' · '+calGrupoCorteSeleccionado;
+        if(estado)estado.textContent=""; return;
+    }
+    const asignaturas=calGrupoAsignaturas.length?calGrupoAsignaturas:[
+        "Lengua y Literatura","Matemática","Ciencias Sociales","Ciencias Naturales","Inglés","Educación Física","Creciendo en Valores","Aprender, Emprender y Prosperar","Derecho y Dignidad de la Mujer","Taller de Arte y Cultura","Conociendo Mi Mundo"
+    ];
+    head.innerHTML='<tr><th>N.º</th><th>Estudiante</th>'+asignaturas.map(a=>'<th>'+calGrupoEscape(a)+'</th>').join('')+'<th>Prom.</th></tr>';
+    const estudiantes=calGrupoDatos(KEY_ESTUDIANTES).filter(e=>calGrupoCoincide(e,"Secundaria",grado,seccion));
+    estudiantes.sort((a,b)=>String(a.nombre||"").localeCompare(String(b.nombre||""),"es"));
+    const activos=estudiantes.filter(e=>!calGrupoEstadoRetirado(e));
+    const retirados=estudiantes.length-activos.length;
+    resumen.textContent=calGrupoCorteSeleccionado+' · '+calGrupoNombreGrado(grado)+' "'+seccion+'" · SECUNDARIA · '+activos.length+' estudiantes activos · '+retirados+' retirados · '+asignaturas.length+' asignaturas · Año '+anio;
+    if(!estudiantes.length){
+        body.innerHTML='<tr><td colspan="'+(asignaturas.length+3)+'" style="padding:20px;text-align:center">No hay estudiantes registrados para este grupo en los datos disponibles.</td></tr>';
+        if(estado)estado.textContent="No se encontraron estudiantes."; return;
+    }
+    body.innerHTML=estudiantes.map((e,index)=>{
+        const retirado=calGrupoEstadoRetirado(e);
+        const cells=asignaturas.map(a=>{
+            const reg=calGrupoRegistro(e,a,anio);
+            const value=reg?reg.resultado:"";
+            const numerica=typeof esAsignaturaNumericaPorGrado==="function" ? esAsignaturaNumericaPorGrado("Secundaria",grado,a) : true;
+            if(retirado)return '<td>—</td>';
+            const id=calGrupoEscape(e.id), asignatura=calGrupoEscape(a), initial=calGrupoEscape(value);
+            if(numerica){
+                return '<td><input type="number" min="0" max="100" step="any" inputmode="decimal" aria-label="'+calGrupoEscape(e.nombre)+' · '+asignatura+'" data-student="'+id+'" data-subject="'+asignatura+'" data-initial="'+initial+'" value="'+initial+'" oninput="marcarCeldaGrupoCal(this)" onkeydown="moverCeldaGrupoCal(event,this)" class="'+(value!==""&&Number(value)<60?"cal-nota-baja":"")+'"></td>';
+            }
+            const options=typeof categoriasPorNivelGrado==="function"?categoriasPorNivelGrado("Secundaria",grado):["AA","AS","AF"];
+            return '<td><select aria-label="'+calGrupoEscape(e.nombre)+' · '+asignatura+'" data-student="'+id+'" data-subject="'+asignatura+'" data-initial="'+initial+'" onchange="marcarCeldaGrupoCal(this)" onkeydown="moverCeldaGrupoCal(event,this)"><option value="">—</option>'+options.map(o=>'<option value="'+calGrupoEscape(o)+'" '+(String(value)===String(o)?"selected":"")+'>'+calGrupoEscape(o)+'</option>').join("")+'</select></td>';
+        }).join("");
+        const numericValues=asignaturas.map(a=>calGrupoRegistro(e,a,anio)).filter(r=>r&&r.tipo==="Numerica"&&Number.isFinite(Number(r.resultado))).map(r=>Number(r.resultado));
+        const promedio=numericValues.length?(numericValues.reduce((x,y)=>x+y,0)/numericValues.length).toFixed(1).replace(/\.0$/,""):"—";
+        return '<tr class="'+(retirado?"cal-retirado":"")+'"><td>'+(index+1)+'</td><td><strong>'+calGrupoEscape(e.nombre||"Sin nombre")+'</strong>'+(retirado?'<div>Retirado · No editable</div>':'')+'</td>'+cells+'<td><strong>'+promedio+'</strong></td></tr>';
+    }).join("");
+    if(estado)estado.textContent="Sin cambios pendientes.";
+}
+function marcarCeldaGrupoCal(el){
+    const inicial=String(el.dataset.initial??"");
+    const actual=String(el.value??"");
+    const sucia=actual!==inicial;
+    el.classList.toggle("cal-celda-sucia",sucia);
+    if(el.type==="number")el.classList.toggle("cal-nota-baja",actual!==""&&Number(actual)<60);
+    const n=document.querySelectorAll("#calGrupoCuerpo [data-student].cal-celda-sucia").length;
+    const estado=document.getElementById("calGrupoEstado");
+    if(estado)estado.textContent=n?n+" casilla(s) con cambios sin guardar.":"Sin cambios pendientes.";
+}
+function moverCeldaGrupoCal(event,el){
+    if(event.key!=="Enter")return;
+    event.preventDefault();
+    const cells=[...document.querySelectorAll("#calGrupoCuerpo input[data-student],#calGrupoCuerpo select[data-student]")].filter(x=>!x.disabled);
+    const index=cells.indexOf(el); if(index>=0&&cells[index+1]){cells[index+1].focus();if(cells[index+1].select)cells[index+1].select();}
+}
+function guardarCambiosGrupoCalificaciones(){
+    const anio=document.getElementById("calGrupoAnio").value;
+    const grado=document.getElementById("calGrupoGrado").value;
+    const seccion=document.getElementById("calGrupoSeccion").value;
+    const nivel="Secundaria", ses=typeof obtenerSesionActual==="function"?obtenerSesionActual():null;
+    if(typeof estaCerradoAnio==="function"&&estaCerradoAnio(anio))return;
+    if(ses?.rol==="Docente"&&typeof docenteTieneGrupo==="function"&&!docenteTieneGrupo(nivel,grado,seccion,anio)){
+        alert("No tiene permiso para editar las calificaciones de este grupo.");return;
+    }
+    const dirty=[...document.querySelectorAll("#calGrupoCuerpo [data-student].cal-celda-sucia")];
+    if(!dirty.length){alert("No hay casillas modificadas para guardar.");return;}
+    const estudiantes=calGrupoDatos(KEY_ESTUDIANTES), datos=calGrupoDatos(KEY_CALIFICACIONES);
+    const cambios=[];
+    for(const el of dirty){
+        const estudiante=estudiantes.find(e=>String(e.id)===String(el.dataset.student));
+        if(!estudiante||calGrupoEstadoRetirado(estudiante)){alert("Se omitió una fila de estudiante que no está activo.");return;}
+        const asignatura=el.dataset.subject, valor=String(el.value??"").trim();
+        const numerica=typeof esAsignaturaNumericaPorGrado==="function"?esAsignaturaNumericaPorGrado(nivel,grado,asignatura):true;
+        if(numerica&&valor!==""&&(!Number.isFinite(Number(valor))||Number(valor)<0||Number(valor)>100)){
+            alert("Las notas numéricas deben estar entre 0 y 100. Revise la casilla de "+(estudiante.nombre||"estudiante")+" en "+asignatura+".");el.focus();return;
+        }
+        if(!numerica&&valor!==""&&!(typeof categoriasPorNivelGrado==="function"?categoriasPorNivelGrado(nivel,grado):["AA","AS","AF"]).includes(valor)){
+            alert("Seleccione una categoría válida en "+asignatura+".");el.focus();return;
+        }
+        const existentes=datos.filter(c=>String(c.estudianteId)===String(estudiante.id)&&normalizarNivel(c.nivel)==="secundaria"&&normalizarGrado(c.grado)===normalizarGrado(grado)&&normalizarSeccion(c.seccion)===normalizarSeccion(seccion)&&c.asignatura===asignatura&&c.corte===calGrupoCorteSeleccionado&&String(c.anio||"2026")===String(anio));
+        if(existentes.length>1){alert("Hay registros duplicados para "+estudiante.nombre+" · "+asignatura+". Revise la tabla de calificaciones antes de guardar.");return;}
+        cambios.push({el,estudiante,asignatura,valor,numerica,existente:existentes[0]||null});
+    }
+    for(const c of cambios){
+        if(ses?.rol==="Docente"){
+            const centroEst=String(c.estudiante.codigo_centro||c.estudiante.codigoCentro||c.estudiante.centro_codigo||"");
+            if(ses.codigoCentro&&centroEst&&centroEst!==String(ses.codigoCentro)){alert("El estudiante "+c.estudiante.nombre+" no pertenece a su centro educativo.");return;}
+        }
+        const existente=c.existente;
+        if(c.valor===""){
+            if(existente)datos.splice(datos.findIndex(x=>String(x.id)===String(existente.id)),1);
+            c.el.dataset.initial=""; c.el.classList.remove("cal-celda-sucia","cal-nota-baja"); continue;
+        }
+        const docenteId=String(ses?.docenteId||existente?.docenteId||"");
+        if(ses?.rol==="Docente"&&existente&&String(existente.docenteId||"")&&String(existente.docenteId)!==String(ses.docenteId||"")){
+            alert("No puede modificar una nota registrada por otro docente: "+c.estudiante.nombre+" · "+c.asignatura+".");return;
+        }
+        const docente=calGrupoDatos(KEY_DOCENTES).find(d=>String(d.id)===docenteId);
+        const registro={
+            id:existente?existente.id:Date.now()+Math.floor(Math.random()*100000),
+            anio:String(anio),estudianteId:c.estudiante.id,estudiante:c.estudiante.nombre,
+            nivel:nivel,grado:grado,seccion:seccion,asignatura:c.asignatura,
+            docenteId:docenteId,docenteNombre:docente?.nombre||existente?.docenteNombre||"",
+            corte:calGrupoCorteSeleccionado,tipo:c.numerica?"Numerica":"Cualitativa",
+            resultado:c.numerica?Number(c.valor):c.valor,observacion:existente?.observacion||""
+        };
+        if(existente){
+            const ix=datos.findIndex(x=>String(x.id)===String(existente.id)); if(ix>=0)datos[ix]=registro; else datos.push(registro);
+        }else datos.push(registro);
+        c.el.dataset.initial=c.valor;c.el.classList.remove("cal-celda-sucia");
+        if(c.el.type==="number")c.el.classList.toggle("cal-nota-baja",Number(c.valor)<60);
+    }
+    guardarDatos(KEY_CALIFICACIONES,datos);
+    if(typeof registrarAuditoria==="function")registrarAuditoria("Editar","Calificaciones","Digitación grupal · "+calGrupoCorteSeleccionado+" · "+calGrupoNombreGrado(grado)+" "+seccion+" · "+cambios.length+" casillas",{},{anio:anio});
+    if(typeof cargarCalificaciones==="function")cargarCalificaciones();
+    if(typeof actualizarEstadisticas==="function")actualizarEstadisticas();
+    cargarTablaGrupoCalificaciones();
+    const estado=document.getElementById("calGrupoEstado");
+    if(estado)estado.textContent="Guardado correctamente: "+cambios.length+" casilla(s) procesadas.";
+    alert("Notas guardadas correctamente. Casillas procesadas: "+cambios.length+".");
+}
+document.addEventListener("DOMContentLoaded",function(){
+    const corteAnterior=document.getElementById("calCorte");
+    if(corteAnterior)corteAnterior.value="III Corte";
+    const anioAnterior=document.getElementById("calAnio");
+    if(anioAnterior)anioAnterior.value="2027";
+    seleccionarCorteGrupo("III Corte");
+});
 </script>
 
 </body>
