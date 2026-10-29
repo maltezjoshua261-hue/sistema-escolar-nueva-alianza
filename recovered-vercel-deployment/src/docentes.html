@@ -13,7 +13,7 @@ const $=s=>document.querySelector(s);let credentials=null,records=[];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function message(id,t,err=false){$(id).textContent=t;$(id).className='status '+(err?'err':'ok');$(id).classList.remove('hidden')}
 async function api(method,body){const r=await fetch('/api/student-portal',{method,cache:'no-store',headers:{'Content-Type':'application/json','x-teacher-user':credentials.user,'x-teacher-password':credentials.password},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||'Error al consultar el servidor');return d}
-async function load(){const d=await api('GET');records=d.records||[];$('#welcome').textContent='Docente: '+d.teacher.nombres+' '+d.teacher.apellidos;render()}
+async function load(){const d=await api('GET');records=d.records||[];const teacher=d.teacher||{};const teacherName=[teacher.nombres,teacher.apellidos].filter(v=>typeof v==='string'&&v.trim()).join(' ').trim()||'Maestros';$('#welcome').textContent='Docente: '+teacherName;render()}
 function render(){
  const q=$('#filter').value.trim().toLowerCase(),grade=$('#gradeFilter').value,section=$('#sectionFilter').value;
  const filtered=records.filter(r=>r.evaluacion_id&&String(r.nombres+' '+r.apellidos+' '+r.codigo_estudiante+' '+r.asignatura).toLowerCase().includes(q)&&(!grade||String(r.grado)===grade)&&(!section||String(r.seccion||'')===section));
