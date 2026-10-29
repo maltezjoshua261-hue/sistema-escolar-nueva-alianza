@@ -72,3 +72,12 @@ El esquema fue consultado en la rama de respaldo `sinfo-2027-respaldo-antes-de-c
 - **Límite de verificación:** no se ejecutaron pruebas de extremo a extremo ni operaciones de escritura desde la interfaz. La rama de respaldo sigue sin asignaturas, evaluaciones, calificaciones, docentes ni asignaciones cargadas; no se inventaron datos de prueba.
 - Falta diseñar un acceso seguro para consulta individual de estudiantes; no se expone el listado de calificaciones a visitantes sin autenticar.
 - No desplegar ni conectar a producción hasta completar las pruebas aisladas.
+
+
+## Continuación de cierre — 28/29 de octubre de 2026
+- Se creó la rama Neon aislada `sinfo-2027-pruebas-aisladas-20261028` (`br-long-sunset-b4t6960i`) como hija de la rama de respaldo. No se insertaron ni modificaron datos en ella.
+- Se volvió a comprobar el respaldo: 264 estudiantes; 0 asignaturas, 0 evaluaciones 2027, 0 calificaciones, 0 docentes, 0 asignaciones y 0 accesos PIN.
+- Se verificaron los nombres y tipos de columnas usados por las APIs del portal y del libro de notas contra el esquema real.
+- Se intentó preparar un proyecto Vercel separado para la recuperación, con raíz `recovered-vercel-deployment/src`, pero Vercel rechazó la conexión automática al repositorio porque falta una conexión de inicio de sesión de GitHub en la cuenta. No se cambió el proyecto Vercel existente ni se desplegó nada.
+- **Bloqueo para completar el cierre:** falta habilitar la conexión GitHub↔Vercel y realizar pruebas de extremo a extremo usando exclusivamente la rama Neon aislada. El proyecto actual no se debe reconfigurar porque podría afectar el despliegue existente.
+- La base de producción sigue sin la tabla `accesos_estudiantes`; no aplicar la migración a producción ni publicar el portal hasta aprobar y superar las pruebas aisladas.
