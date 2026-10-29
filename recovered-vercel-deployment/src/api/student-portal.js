@@ -33,7 +33,10 @@ async function teacherPortal(req,res,sql,body){
     e.id AS evaluacion_id,e.semestre,e.corte,s.id AS estudiante_id,s.codigo_estudiante,s.nombres,s.apellidos,s.seccion,
     c.id AS calificacion_id,c.nota,c.publicada
    FROM asignaturas a
+   JOIN asignaciones_docente ad ON ad.asignatura_id=a.id AND ad.activa=true AND ad.anio_escolar=2027
+   JOIN docentes d ON d.id=ad.docente_id AND d.activo=true
    JOIN estudiantes s ON s.grado=a.grado AND s.activo=true AND s.anio_escolar=2027
+    AND (ad.seccion IS NULL OR trim(ad.seccion)='' OR lower(trim(ad.seccion))=lower(trim(s.seccion)))
    LEFT JOIN evaluaciones e ON e.asignatura_id=a.id AND e.anio=2027
    LEFT JOIN calificaciones c ON c.estudiante_id=s.id AND c.evaluacion_id=e.id
    WHERE a.activa=true
@@ -43,7 +46,7 @@ async function teacherPortal(req,res,sql,body){
  }
  const studentId=String(body.estudiante_id||''),evaluationId=String(body.evaluacion_id||''),score=Number(body.nota);
  if(!studentId||!evaluationId||body.nota===''||body.nota===null||body.nota===undefined||!Number.isFinite(score)||score<0||score>100)return res.status(400).json({ok:false,message:'Selecciona estudiante, corte y nota entre 0 y 100.'});
- const allowed=await sql`SELECT s.id FROM estudiantes s JOIN evaluaciones e ON e.id=${evaluationId} AND e.anio=2027 JOIN asignaturas a ON a.id=e.asignatura_id AND a.grado=s.grado AND a.activa=true WHERE s.id=${studentId} AND s.activo=true AND s.anio_escolar=2027 LIMIT 1`;
+ const allowed=await sql`SELECT s.id FROM estudiantes s JOIN evaluaciones e ON e.id=${evaluationId} AND e.anio=2027 JOIN asignaturas a ON a.id=e.asignatura_id AND a.grado=s.grado AND a.activa=true JOIN asignaciones_docente ad ON ad.asignatura_id=a.id AND ad.activa=true AND ad.anio_escolar=2027 JOIN docentes d ON d.id=ad.docente_id AND d.activo=true WHERE s.id=${studentId} AND s.activo=true AND s.anio_escolar=2027 AND (ad.seccion IS NULL OR trim(ad.seccion)='' OR lower(trim(ad.seccion))=lower(trim(s.seccion))) LIMIT 1`;
  if(!allowed.length)return res.status(403).json({ok:false,message:'No se encontró esa asignación de estudiante, asignatura y corte.'});
  const saved=await sql`INSERT INTO calificaciones(estudiante_id,evaluacion_id,nota,publicada) VALUES(${studentId},${evaluationId},${score},false)
  ON CONFLICT(estudiante_id,evaluacion_id) DO UPDATE SET nota=EXCLUDED.nota,actualizada_en=now() WHERE calificaciones.publicada=false RETURNING id,nota,publicada`;
@@ -82,10 +85,10 @@ module.exports = async function studentPortal(req,res){
   }
   if(body.action!=='consult')return res.status(400).json({ok:false,message:'Acción no válida.'});
   const code=typeof body.codigo_estudiante==='string'?body.codigo_estudiante.trim():'';
-  const fullName=typeof body.nombre_completo==='string'?body.nombre_completo.trim().replace(/\\s+/g,' ').toLocaleLowerCase('es'):'';
+  const fullName=typeof body.nombre_completo==='string'?body.nombre_completo.trim().replace(/\s+/g,' ').toLocaleLowerCase('es'):'';
   if(!code||!fullName||code.length>100||fullName.length>200)return res.status(400).json({ok:false,message:'Introduce tu nombre completo y código de estudiante.'});
   const accounts=await sql`SELECT s.id,s.codigo_estudiante,s.nombres,s.apellidos,s.grado,s.seccion
-   FROM estudiantes s WHERE s.codigo_estudiante=${code} AND lower(regexp_replace(trim(s.nombres||' '||s.apellidos),'\\s+',' ','g'))=${fullName} AND s.activo=true AND s.anio_escolar=2027 LIMIT 1`;
+   FROM estudiantes s WHERE s.codigo_estudiante=${code} AND lower(regexp_replace(trim(s.nombres||' '||s.apellidos),'[[:space:]]+',' ','g'))=${fullName} AND s.activo=true AND s.anio_escolar=2027 LIMIT 1`;
   const account=accounts[0];if(!account)return res.status(401).json({ok:false,message:'El nombre completo o el código no coinciden.'});
   const grades=await sql`SELECT a.nombre AS asignatura,e.semestre,e.corte,c.nota,c.actualizada_en FROM calificaciones c JOIN evaluaciones e ON e.id=c.evaluacion_id AND e.anio=2027 JOIN asignaturas a ON a.id=e.asignatura_id AND a.activa=true WHERE c.estudiante_id=${account.id} AND c.publicada=true ORDER BY a.nombre,e.corte`;
   const averages=await sql`SELECT a.nombre AS asignatura,ROUND(AVG(c.nota) FILTER(WHERE e.corte IN(1,2)),2) AS promedio_semestre_1,ROUND(AVG(c.nota) FILTER(WHERE e.corte IN(3,4)),2) AS promedio_semestre_2,CASE WHEN COUNT(DISTINCT e.corte)=4 THEN ROUND(AVG(c.nota),2) ELSE NULL END AS promedio_anual FROM calificaciones c JOIN evaluaciones e ON e.id=c.evaluacion_id AND e.anio=2027 JOIN asignaturas a ON a.id=e.asignatura_id AND a.activa=true WHERE c.estudiante_id=${account.id} AND c.publicada=true GROUP BY a.id,a.nombre ORDER BY a.nombre`;
