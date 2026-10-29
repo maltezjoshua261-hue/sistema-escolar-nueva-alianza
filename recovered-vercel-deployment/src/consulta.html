@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#10243a"><title>Consulta de notas · SINFO 2027</title>
+<meta name="theme-color" content="#10243a"><title>Ingresar a mis notas · SINFO 2027</title>
 <style>
 :root{--navy:#10243a;--blue:#2457d6;--bg:#f3f6fb;--line:#dce4ef;--muted:#637188}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#172338;font:16px system-ui,-apple-system,Segoe UI,sans-serif}
@@ -12,16 +12,16 @@ label{display:block;font-size:14px;font-weight:650;margin:10px 0 5px;color:#4151
 </style>
 </head>
 <body>
-<header><div><h1>Consulta de calificaciones</h1><p>SINFO Secundaria 2027 · Portal privado del estudiante</p></div></header>
+<header><div><h1>Portal de estudiantes</h1><p>SINFO Secundaria 2027 · Portal privado del estudiante</p></div></header>
 <main>
-<section id="login" class="card"><h2>Ingresar a mis notas</h2><p class="muted">Escribe tu nombre completo tal como está registrado y tu código de estudiante. Solo podrás consultar las calificaciones asociadas a esos datos.</p>
-<form id="form"><label for="name">Nombre completo</label><input id="name" autocomplete="name" maxlength="200" required placeholder="Nombres y apellidos"><label for="code">Código de estudiante</label><input id="code" autocomplete="username" maxlength="100" required placeholder="Tu código escolar"><button id="submit" type="submit">Consultar mis notas</button></form><div id="message" class="status hidden" role="status"></div></section>
+<section id="login" class="card"><h2>Ingresar a mis notas</h2><p class="muted">Escribe tus nombres y apellidos completos como aparecen registrados. Tu código de persona será tu contraseña.</p>
+<form id="form"><label for="name">Nombre de usuario (nombres y apellidos)</label><input id="name" autocomplete="username" maxlength="200" required placeholder="Escribe tus nombres y apellidos"><label for="code">Contraseña (código de persona)</label><input id="code" type="password" autocomplete="current-password" maxlength="100" required placeholder="Escribe tu código de persona"><button id="submit" type="submit">Iniciar sesión</button></form><div id="message" class="status hidden" role="status"></div></section>
 <section id="results" class="hidden">
 <div class="card"><div id="student" class="student"></div><div id="meta" class="muted"></div><p class="muted">Aquí aparecen únicamente las calificaciones que Dirección haya publicado.</p><button id="exit" type="button" style="background:#475569">Cerrar consulta</button></div>
 <div class="card"><h3>Promedios por asignatura</h3><div id="averages" class="grid"></div></div>
 <div class="card"><h3>Detalle de calificaciones</h3><div class="tablewrap"><table><thead><tr><th>Asignatura</th><th>Semestre</th><th>Corte</th><th>Nota</th></tr></thead><tbody id="rows"></tbody></table></div><p id="empty" class="muted hidden">Todavía no hay notas publicadas.</p></div>
 </section>
-<p class="foot">Protege tu código de estudiante y cierra la consulta si usas un dispositivo compartido. Si tus datos no coinciden exactamente, consulta a Dirección.</p>
+<p class="foot">Protege tu código de persona y cierra la sesión si usas un dispositivo compartido. Si tus datos no coinciden exactamente, consulta a Dirección.</p>
 </main>
 <script>
 const $=s=>document.querySelector(s);let lastStudent=null;
