@@ -649,6 +649,120 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 }
 </style>
 
+
+<style id="na-mobile-responsive-v2">
+/* Adaptación móvil V2: solo presentación; conserva módulos, permisos y datos */
+@media screen and (max-width: 650px) {
+  html, body { width:100%; max-width:100%; overflow-x:hidden; }
+  body { font-size:15px; }
+  #app { width:100%; min-width:0; }
+  #app .sidebar {
+    position:fixed !important; inset:0 auto 0 0 !important;
+    width:min(86vw,310px) !important; height:100dvh !important;
+    min-height:0 !important; overflow-y:auto !important;
+    z-index:10020 !important; transform:translateX(-105%);
+    transition:transform .22s ease; box-shadow:8px 0 28px rgba(0,0,0,.22);
+  }
+  #app.mobile-menu-open .sidebar { transform:translateX(0); }
+  #app.mobile-menu-open::after {
+    content:""; position:fixed; inset:0; z-index:10010;
+    background:rgba(15,23,42,.48);
+  }
+  #app .main { margin-left:0 !important; width:100%; min-width:0; }
+  #app .topbar {
+    position:sticky; top:0; z-index:10005; min-height:58px;
+    padding:10px 12px !important; gap:10px; flex-wrap:wrap;
+  }
+  #app .topbar > div { min-width:0; overflow-wrap:anywhere; }
+  #app .topbar > div:last-child { font-size:12px; text-align:right; }
+  #naMobileMenuButton {
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    flex:0 0 auto; min-height:42px; padding:9px 12px;
+    color:#fff; background:#123b6d; border-radius:9px; font-size:14px;
+    touch-action:manipulation;
+  }
+  #app .content { padding:12px !important; min-width:0; }
+  #app .card, #app .stat, #app .dash9-panel, #app .dash9-kpi {
+    min-width:0; padding:14px !important; border-radius:11px;
+  }
+  #app .stats, #app .form-grid, #app .boleta-datos,
+  #app .control-grid, #app .control-stats, #app .dash9-kpis,
+  #app .dash9-filtros, #app .dash9-grid, #app .dash9-grid-3,
+  #app .plan-form-grid, #app .doc-datos, #app .doc-resumen {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+  #app input, #app select, #app textarea {
+    width:100% !important; max-width:100%; min-height:44px;
+    font-size:16px !important; margin-bottom:10px;
+  }
+  #app button { min-height:42px; max-width:100%; }
+  #app .actions, #app .dash9-actions { gap:8px; }
+  #app .actions button, #app .dash9-actions button { flex:1 1 145px; }
+  #app .table-container, #app .na-imp-table {
+    display:block; width:100%; max-width:100%; overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #app table { min-width:620px; }
+  #app th, #app td { white-space:nowrap; }
+  #app .control-header { padding:16px !important; }
+  #app .control-header h1 { font-size:22px; }
+  #app .documento-oficial, #app .boleta-documento {
+    padding:14px !important; overflow-wrap:anywhere;
+  }
+  #app .boleta-firmas, #app .doc-firmas { grid-template-columns:1fr !important; gap:28px; }
+  #app .grafico-barras { max-width:100%; }
+  #app .na-imp-panel { width:100% !important; max-height:94dvh !important; padding:14px !important; }
+  #loginScreen { padding:16px !important; min-height:100dvh; }
+  #loginScreen .login-box { width:100% !important; max-width:430px !important; padding:24px 18px !important; }
+}
+@media screen and (min-width:651px) {
+  #naMobileMenuButton { display:none !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #app .sidebar { transition:none !important; }
+}
+</style>
+<script id="na-mobile-menu-v2">
+(function(){
+  function activarMenuMovil(){
+    const app=document.getElementById('app');
+    const topbar=app&&app.querySelector('.topbar');
+    const sidebar=app&&app.querySelector('.sidebar');
+    if(!app||!topbar||!sidebar||document.getElementById('naMobileMenuButton'))return;
+    const btn=document.createElement('button');
+    btn.id='naMobileMenuButton'; btn.type='button';
+    btn.setAttribute('aria-label','Abrir menú de navegación');
+    btn.setAttribute('aria-expanded','false'); btn.textContent='☰ Menú';
+    btn.addEventListener('click',function(){
+      const abierto=app.classList.toggle('mobile-menu-open');
+      btn.setAttribute('aria-expanded',String(abierto));
+      btn.textContent=abierto?'✕ Cerrar':'☰ Menú';
+    });
+    topbar.insertBefore(btn,topbar.firstChild);
+    sidebar.querySelectorAll('.menu button').forEach(function(item){
+      item.addEventListener('click',function(){
+        app.classList.remove('mobile-menu-open');
+        btn.setAttribute('aria-expanded','false'); btn.textContent='☰ Menú';
+      });
+    });
+    app.addEventListener('click',function(ev){
+      if(app.classList.contains('mobile-menu-open') && ev.target===app){
+        app.classList.remove('mobile-menu-open');
+        btn.setAttribute('aria-expanded','false'); btn.textContent='☰ Menú';
+      }
+    });
+    document.addEventListener('keydown',function(ev){
+      if(ev.key==='Escape'){
+        app.classList.remove('mobile-menu-open');
+        btn.setAttribute('aria-expanded','false'); btn.textContent='☰ Menú';
+      }
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',activarMenuMovil);
+  else activarMenuMovil();
+})();
+</script>
+
 </head>
 
 <body>
