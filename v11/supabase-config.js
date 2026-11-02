@@ -74,13 +74,15 @@ window.addEventListener("load", function(){
       if(error?.error) throw error.error;
       const todoVacio=resultados.every(r=>Number(r.count||0)===0);
       if(todoVacio){
-        ["estudiantesNuevaAlianza","docentesNuevaAlianza","asistenciasNuevaAlianza","calificacionesNuevaAlianza","auditoriaNuevaAlianza"].forEach(k=>localStorage.removeItem(k));
-        localStorage.setItem("NA_produccion_limpia_v11274","1");
+        // Protección de datos: una base remota vacía NO autoriza borrar copias locales.
+        // La migración debe ser explícita, revisada y respaldada antes de sincronizar.
+        console.warn("Supabase no contiene registros. Se conservan intactos los datos locales; no se ejecuta limpieza automática.");
+        return;
       }
       for(let i=0;i<50;i++){
         if(typeof window.NA_syncTodo==="function"){
           await window.NA_syncTodo();
-          localStorage.removeItem("auditoriaNuevaAlianza");
+          // Se conserva el registro local de auditoría; no borrarlo automáticamente.
           return;
         }
         await new Promise(resolve=>setTimeout(resolve,100));
@@ -153,9 +155,6 @@ window.addEventListener("load", function(){
     let rolFinal=String(perfil.rol||"").trim();
     if(rolFinal.toLowerCase()==="director") rolFinal="Director";
     if(rolFinal.toLowerCase()==="docente") rolFinal="Docente";
-    const emailFinal=String(user.email||"").trim().toLowerCase();
-    if(emailFinal==="nuevaalianza@nernuevaalianza.edu.ni") rolFinal="Docente";
-    if(emailFinal==="maltezjoshua261@gmail.com") rolFinal="Director";
 
     const sesion={
       usuario:perfil.usuario || user.email,
