@@ -722,6 +722,47 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
   #app .sidebar { transition:none !important; }
 }
 </style>
+<style id="na-central-modules-v1">
+/* Presentación central de módulos; la navegación original permanece como respaldo desplegable. */
+#naCentralModules{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:14px;max-width:1240px;margin:26px auto 22px;
+}
+#naCentralModules .na-module-card{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:82px;padding:16px;background:#fff;color:#123b6d;
+  border:1px solid #dbe4ef;border-radius:14px;
+  box-shadow:0 3px 12px rgba(18,59,109,.08);font-size:14px;
+  line-height:1.35;white-space:normal;
+}
+#naCentralModules .na-module-card:hover,
+#naCentralModules .na-module-card.active{
+  background:#eaf2ff;border-color:#0d6efd;color:#0b4fa8;
+}
+#naCentralModules .na-module-card.solo-director{display:none;}
+#app.na-centered-ui .sidebar{
+  transform:translateX(-105%);transition:transform .22s ease;
+  z-index:10020;box-shadow:8px 0 28px rgba(0,0,0,.22);
+}
+#app.na-centered-ui.mobile-menu-open .sidebar{transform:translateX(0);}
+#app.na-centered-ui.mobile-menu-open::after{
+  content:"";position:fixed;inset:0;z-index:10010;background:rgba(15,23,42,.48);
+}
+#app.na-centered-ui .main{margin-left:0!important;width:100%;min-width:0;}
+#app.na-centered-ui #naMobileMenuButton{
+  display:inline-flex!important;align-items:center;justify-content:center;
+  gap:7px;min-height:42px;padding:9px 12px;color:#fff;background:#123b6d;
+  border-radius:9px;font-size:14px;touch-action:manipulation;
+}
+#app.na-centered-ui .topbar{gap:12px;flex-wrap:wrap;}
+@media(max-width:650px){
+  #naCentralModules{grid-template-columns:1fr;gap:10px;margin:18px auto;}
+  #naCentralModules .na-module-card{min-height:58px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #app.na-centered-ui .sidebar{transition:none!important;}
+}
+</style>
 <script id="na-mobile-menu-v2">
 (function(){
   function activarMenuMovil(){
@@ -729,6 +770,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
     const topbar=app&&app.querySelector('.topbar');
     const sidebar=app&&app.querySelector('.sidebar');
     if(!app||!topbar||!sidebar||document.getElementById('naMobileMenuButton'))return;
+    app.classList.add('na-centered-ui');
     const btn=document.createElement('button');
     btn.id='naMobileMenuButton'; btn.type='button';
     btn.setAttribute('aria-label','Abrir menú de navegación');
@@ -739,6 +781,18 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
       btn.textContent=abierto?'✕ Cerrar':'☰ Menú';
     });
     topbar.insertBefore(btn,topbar.firstChild);
+    const central=document.getElementById('naCentralModules');
+    if(central && !central.dataset.ready){
+      central.dataset.ready='true';
+      sidebar.querySelectorAll('.menu button').forEach(function(item){
+        if((item.getAttribute('onclick')||'').includes('cerrarSesion'))return;
+        const card=item.cloneNode(true);
+        card.type='button';
+        card.classList.add('na-module-card');
+        card.setAttribute('aria-label',(item.textContent||'').trim());
+        central.appendChild(card);
+      });
+    }
     sidebar.querySelectorAll('.menu button').forEach(function(item){
       item.addEventListener('click',function(){
         app.classList.remove('mobile-menu-open');
@@ -1051,6 +1105,10 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                 <p style="margin:8px 0 20px;">
                     Sistema de gestión escolar - Centro Escolar Nueva Alianza
                 </p>
+
+                <h2 style="text-align:center;color:#123b6d;margin:22px 0 8px;">Módulos del sistema</h2>
+                <p style="text-align:center;color:#64748b;margin-bottom:10px;">Seleccione el módulo que desea abrir.</p>
+                <div id="naCentralModules" aria-label="Módulos del sistema"></div>
 
                 <div class="card no-print" style="margin:18px 0;border-left:5px solid #dc3545;">
                     <h2 style="margin-bottom:8px;">🧹 Limpieza de datos locales de prueba</h2>
@@ -4345,7 +4403,7 @@ function mostrarSeccion(id, boton){
 
     document.getElementById(id).classList.add("active");
 
-    document.querySelectorAll(".menu button").forEach(btn=>{
+    document.querySelectorAll(".menu button, #naCentralModules button").forEach(btn=>{
         btn.classList.remove("active");
     });
 
