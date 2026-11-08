@@ -4682,7 +4682,7 @@ function cargarAsignaciones(){
     tabla.innerHTML="";
     lista.forEach((a,i)=>{const docenteActual=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(a.docenteId));const centroActual=obtenerCentroDocenteAsignacion(docenteActual);const escuela=a.escuelaAsignada||centroActual.escuela;const codigoCentro=a.codigo_centro||centroActual.codigo;tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(escuela)+'</td><td>'+escaparHTML(codigoCentro)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(horasSemanalesPorNivel(a.nivel)||a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button type="button" class="btn-warning" title="Editar esta asignación" data-asig-id="'+escaparHTML(String(a.id))+'" onclick="editarAsignacion(this.dataset.asigId)">✏️ Editar</button> <button type="button" class="btn-danger" onclick="eliminarAsignacion(&quot;'+escaparHTML(String(a.id))+'&quot;)">Eliminar</button></td></tr>';});
     if(!lista.length)tabla.innerHTML='<tr><td colspan="13" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
-    const claveDocente=a=>[String(a.codigo_centro||a.codigoCentro||""),limpiarTexto(a.docenteNombre||"")].join("|");
+    const claveDocente=a=>[String(a.codigo_centro||a.codigoCentro||""),limpiarTexto(a.docenteNombre||"")||String(a.docenteId||"")].join("|");
     const docentesUnicos=new Set(lista.map(claveDocente).filter(k=>!k.endsWith("|")));
     const cargasUnicas=new Map();
     lista.forEach(a=>{
