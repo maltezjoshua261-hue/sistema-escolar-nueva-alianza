@@ -4572,7 +4572,7 @@ function actualizarTodaCarga2027(){
     const ids=new Set(pendientes.map(a=>String(a.id)));
     const actualizados=datos.map(a=>ids.has(String(a.id))?{...a,anio:"2027"}:a);
     guardarDatos(KEY_ASIGNACIONES,actualizados);
-    registrarAuditoria("Actualización masiva","Carga académica","Se trasladaron "+pendientes.length+" asignaciones del año 2026 al 2027",{},{anio:"2027"});
+    registrarAuditoria("Actualización masiva","Carga académica","Se trasladaron "+pendientes.length+" asignaciones del año 2026 al 2027","",{anio:"2027"});
     const filtro=document.getElementById("filtroAsigAnio");if(filtro)filtro.value="2027";
     cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
     alert("Actualización completada: "+pendientes.length+" asignaciones pasaron de 2026 a 2027 sin crear duplicados.");
