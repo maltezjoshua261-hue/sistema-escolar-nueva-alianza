@@ -1185,7 +1185,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     </div>
                     <div class="form-group"><label>Asignaturas que imparte</label><select id="asigAsignaturas" multiple size="8"></select><small style="color:#666;">Mantenga presionada Ctrl (Windows) para seleccionar varias asignaturas.</small></div>
                     <div class="form-group"><label>Observación</label><textarea id="asigObservacion" rows="2" placeholder="Ej.: responsable del grupo, multigrado, apoyo, etc."></textarea></div>
-                    <div class="actions"><button id="btnGuardarAsignacion" class="btn-success" onclick="guardarAsignacion()">💾 Guardar asignación</button><button class="btn-secondary" onclick="limpiarAsignacion()">Limpiar</button></div>
+                    <div class="actions"><button id="btnGuardarAsignacion" class="btn-success" onclick="guardarAsignacion()">💾 Guardar asignación</button><button class="btn-secondary" onclick="limpiarAsignacion()">Limpiar</button><button type="button" class="btn-info solo-director" onclick="actualizarTodaCarga2027()">↗ Pasar todas las asignaciones 2026 a 2027</button></div>
                 </div>
                 <div class="card">
                     <h2>📋 Carga académica registrada</h2>
@@ -4551,6 +4551,31 @@ function guardarAsignacion(){
     registrarAuditoria(i>=0?"Editar":"Crear","Carga académica",i>=0?"Actualización de carga académica":"Nueva carga académica",registro.id,{anio:anio});
     limpiarAsignacion();cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
     alert(id?"Asignación actualizada correctamente.":"Carga académica guardada correctamente.");
+    return true;
+}
+
+function actualizarTodaCarga2027(){
+    if(!exigirDirector())return false;
+    const datos=obtenerDatos(KEY_ASIGNACIONES);
+    const pendientes=datos.filter(a=>String(a.anio).trim()==="2026");
+    if(!pendientes.length){alert("No hay asignaciones del año 2026 para actualizar.");return false;}
+    // Evitar duplicar grupos si ya existe en 2027 una asignación del mismo docente y grupo.
+    const clave=a=>[String(a.docenteId||""),String(a.codigo_centro||""),normalizarNivel(a.nivel),limpiarTexto(a.grado),normalizarSeccion(a.seccion)].join("|");
+    const claves2027=new Set(datos.filter(a=>String(a.anio).trim()==="2027").map(clave));
+    const choques=pendientes.filter(a=>claves2027.has(clave({...a,anio:"2027"})));
+    if(choques.length){
+        const detalle=choques.slice(0,8).map(a=>(a.docenteNombre||"Docente")+" · "+(a.escuelaAsignada||a.codigo_centro||"Centro")+" · "+(a.nivel||"")+" "+(a.grado||"")+" "+(a.seccion||"")).join("\n");
+        alert("No se actualizó ningún registro para evitar duplicados. Hay "+choques.length+" asignación(es) de 2026 que ya tienen el mismo docente y grupo registrado en 2027:\n\n"+detalle+(choques.length>8?"\n… y "+(choques.length-8)+" más.":"")+"\n\nRevise esas coincidencias antes de continuar.");
+        return false;
+    }
+    if(!confirm("Se actualizarán "+pendientes.length+" asignaciones académicas de 2026 a 2027. Se conservarán docentes, centros, niveles, grados, secciones, asignaturas, horas, turnos, estados, observaciones e identificadores. No se crearán filas nuevas. ¿Desea continuar?"))return false;
+    const ids=new Set(pendientes.map(a=>String(a.id)));
+    const actualizados=datos.map(a=>ids.has(String(a.id))?{...a,anio:"2027"}:a);
+    guardarDatos(KEY_ASIGNACIONES,actualizados);
+    registrarAuditoria("Actualización masiva","Carga académica","Se trasladaron "+pendientes.length+" asignaciones del año 2026 al 2027",{},{anio:"2027"});
+    const filtro=document.getElementById("filtroAsigAnio");if(filtro)filtro.value="2027";
+    cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
+    alert("Actualización completada: "+pendientes.length+" asignaciones pasaron de 2026 a 2027 sin crear duplicados.");
     return true;
 }
 
