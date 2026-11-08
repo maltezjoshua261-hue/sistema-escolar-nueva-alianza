@@ -9,6 +9,15 @@ Modernizar la presentación de todos los módulos del Sistema Escolar Nueva Alia
 - Rama exclusiva de trabajo: `modernizacion/institucional-mined`.
 - La rama publicada `v11-centralizacion` no se modifica durante el trabajo.
 - No se integra ni publica ningún cambio sin revisión y pruebas aprobadas.
+- El respaldo Git protege el código fuente versionado; no es una exportación de la base de datos ni de los objetos de Storage.
+
+## Respaldo de Supabase: requisito antes de tocar datos
+- Proyecto identificado: `nueva-alianza-escolar`, actualmente en plan Free.
+- No se ha ejecutado ninguna escritura, migración ni modificación en Supabase.
+- Antes de cualquier futura intervención que pudiera afectar datos, exportar un respaldo lógico de la base de datos con Supabase CLI y guardar una copia segura fuera del proyecto.
+- Respaldar por separado los objetos de Storage: los respaldos de base de datos no incluyen los archivos almacenados mediante Storage API.
+- El plan Free recomienda exportaciones periódicas mediante `supabase db dump`; no asumir que hay descargas de respaldos diarios disponibles en el Dashboard.
+- Para esta modernización visual, la base de datos y Storage quedan fuera del alcance y no deben modificarse.
 
 ## Límites inviolables
 No modificar:
@@ -50,5 +59,7 @@ Si una fase falla, detener el trabajo y revertir únicamente los commits de esa 
 ## Estado inicial
 - Respaldo Git creado y verificado.
 - Rama de trabajo creada desde el respaldo.
-- Aún no se han cambiado archivos de aplicación ni datos.
+- Documento de intervención guardado en la rama de trabajo.
+- No se han cambiado archivos de aplicación, datos, permisos ni configuración de despliegue.
 - Pendiente: inventario técnico y línea base de pruebas antes de cualquier modificación visual.
+- El respaldo independiente de la base de datos y los archivos de Storage queda pendiente; no se declarará completo hasta exportarlo y verificarlo.
