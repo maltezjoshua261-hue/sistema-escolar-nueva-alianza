@@ -1185,7 +1185,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
                     </div>
                     <div class="form-group"><label>Asignaturas que imparte</label><select id="asigAsignaturas" multiple size="8"></select><small style="color:#666;">Mantenga presionada Ctrl (Windows) para seleccionar varias asignaturas.</small></div>
                     <div class="form-group"><label>Observación</label><textarea id="asigObservacion" rows="2" placeholder="Ej.: responsable del grupo, multigrado, apoyo, etc."></textarea></div>
-                    <div class="actions"><button id="btnGuardarAsignacion" class="btn-success" onclick="guardarAsignacion()">💾 Guardar asignación</button><button class="btn-secondary" onclick="limpiarAsignacion()">Limpiar</button><button type="button" class="btn-info solo-director" onclick="actualizarTodaCarga2027()">↗ Pasar todas las asignaciones 2026 a 2027</button></div>
+                    <div class="actions"><button id="btnGuardarAsignacion" class="btn-success" onclick="guardarAsignacion()">💾 Guardar asignación</button><button class="btn-secondary" onclick="limpiarAsignacion()">Limpiar</button><button type="button" class="btn-info solo-director" onclick="actualizarTodaCarga2027()">↗ Pasar todas las asignaciones 2026 a 2027</button><button type="button" class="btn-info solo-director" onclick="actualizarCargaNuevaAlianza2027()">Actualizar docentes de Nueva Alianza 2027</button></div>
                 </div>
                 <div class="card">
                     <h2>📋 Carga académica registrada</h2>
@@ -4576,6 +4576,57 @@ function actualizarTodaCarga2027(){
     const filtro=document.getElementById("filtroAsigAnio");if(filtro)filtro.value="2027";
     cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
     alert("Actualización completada: "+pendientes.length+" asignaciones pasaron de 2026 a 2027 sin crear duplicados.");
+    return true;
+}
+
+function actualizarCargaNuevaAlianza2027(){
+    if(!exigirDirector())return false;
+    const nombres=[
+        "BETTY ESTHER LANDERO MONTENEGRO",
+        "FRANCISCA ARACELLY RIVERA RENDEROS",
+        "JOSE GABRIEL CRUZ AGUINAGAS",
+        "JUAN EUDES ALANIZ HERNANDEZ",
+        "MARIA ELIETH TINOCO LOPEZ",
+        "MARICELA CENTENO",
+        "VICENTA DEL CARMEN GONZELEZ RIZO",
+        "YURIS LISSETH CENTENO"
+    ];
+    const normalizarNombre=n=>limpiarTexto(n).replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+    const permitidos=new Set(nombres.map(normalizarNombre));
+    const datos=obtenerDatos(KEY_ASIGNACIONES);
+    const seleccionados=datos.filter(a=>normalizarNombre(a.docenteNombre)&&permitidos.has(normalizarNombre(a.docenteNombre))&&String(a.codigo_centro||"")==="17683");
+    if(!seleccionados.length){alert("No se encontraron asignaciones de los docentes indicados en el centro 17683 en este navegador.");return false;}
+    const de2026=seleccionados.filter(a=>String(a.anio).trim()==="2026");
+    const grupos=new Map();
+    const clave=a=>[
+        String(a.docenteId||normalizarNombre(a.docenteNombre)),
+        String(a.codigo_centro||""),
+        normalizarNivel(a.nivel),
+        limpiarTexto(a.grado),
+        normalizarSeccion(a.seccion)
+    ].join("|");
+    seleccionados.filter(a=>["2026","2027"].includes(String(a.anio).trim())).forEach(a=>{
+        const k=clave(a);if(!grupos.has(k))grupos.set(k,[]);grupos.get(k).push(a);
+    });
+    const duplicados=[...grupos.values()].filter(g=>g.length>1);
+    const cantidadDuplicados=duplicados.reduce((n,g)=>n+g.length-1,0);
+    if(!confirm("Se encontraron "+seleccionados.length+" asignaciones de los 8 docentes indicados en Nueva Alianza (código 17683), incluidas "+de2026.length+" de 2026 y "+cantidadDuplicados+" fila(s) repetida(s) por docente y grupo. Se pasarán a 2027 y se unificarán las filas repetidas conservando la unión de asignaturas y los datos de la fila principal. ¿Continuar?"))return false;
+    const idsEliminar=new Set();
+    const reemplazos=new Map();
+    for(const grupo of grupos.values()){
+        const principal=[...grupo].sort((a,b)=>(String(b.anio)==="2027"?1:0)-(String(a.anio)==="2027"?1:0))[0];
+        const fusion={...principal,anio:"2027"};
+        fusion.asignaturas=[...new Set(grupo.flatMap(a=>Array.isArray(a.asignaturas)?a.asignaturas:[]))];
+        for(const otro of grupo){if(String(otro.id)!==String(principal.id))idsEliminar.add(String(otro.id));}
+        reemplazos.set(String(principal.id),fusion);
+    }
+    const actualizados=datos.filter(a=>!idsEliminar.has(String(a.id))).map(a=>reemplazos.get(String(a.id))||a);
+    guardarDatos(KEY_ASIGNACIONES,actualizados);
+    const totalPasados=de2026.length;
+    registrarAuditoria("Actualización selectiva","Carga académica","Actualizados a 2027 los registros de docentes seleccionados de Nueva Alianza; filas duplicadas unificadas: "+cantidadDuplicados,"",{anio:"2027"});
+    const filtro=document.getElementById("filtroAsigAnio");if(filtro)filtro.value="2027";
+    cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
+    alert("Proceso completado. "+totalPasados+" asignaciones de 2026 pasaron a 2027. Se unificaron "+cantidadDuplicados+" filas repetidas. Los registros de otros centros y docentes no se modificaron.");
     return true;
 }
 
