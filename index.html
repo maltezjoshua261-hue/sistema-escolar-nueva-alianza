@@ -4591,43 +4591,75 @@ function actualizarCargaNuevaAlianza2027(){
         "VICENTA DEL CARMEN GONZELEZ RIZO",
         "YURIS LISSETH CENTENO"
     ];
-    const normalizarNombre=n=>limpiarTexto(n).replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+    const normalizarNombre=n=>limpiarTexto(n||"").replace(/[^a-z0-9 ]/g,"").replace(/\\s+/g," ").trim();
     const permitidos=new Set(nombres.map(normalizarNombre));
+    const docentes=obtenerDatos(KEY_DOCENTES);
+    const porId=new Map(docentes.map(d=>[String(d.id),d]));
     const datos=obtenerDatos(KEY_ASIGNACIONES);
-    const seleccionados=datos.filter(a=>normalizarNombre(a.docenteNombre)&&permitidos.has(normalizarNombre(a.docenteNombre))&&String(a.codigo_centro||"")==="17683");
-    if(!seleccionados.length){alert("No se encontraron asignaciones de los docentes indicados en el centro 17683 en este navegador.");return false;}
+    // El código y el nombre pueden estar guardados solamente en la ficha del docente.
+    const seleccionados=datos.filter(a=>{
+        const docente=porId.get(String(a.docenteId));
+        const nombre=normalizarNombre(a.docenteNombre||docente?.nombre);
+        const codigo=String(a.codigo_centro||a.codigoCentro||docente?.codigo_centro||docente?.codigoCentro||"");
+        return permitidos.has(nombre)&&codigo==="17683";
+    });
+    if(!seleccionados.length){
+        alert("No se encontraron asignaciones de esos docentes en Nueva Alianza (17683). Verifique que la sesión esté usando los datos guardados en este navegador.");
+        return false;
+    }
     const de2026=seleccionados.filter(a=>String(a.anio).trim()==="2026");
     const grupos=new Map();
-    const clave=a=>[
-        String(a.docenteId||normalizarNombre(a.docenteNombre)),
-        String(a.codigo_centro||""),
-        normalizarNivel(a.nivel),
-        limpiarTexto(a.grado),
-        normalizarSeccion(a.seccion)
-    ].join("|");
+    const clave=a=>{
+        const docente=porId.get(String(a.docenteId));
+        const nombre=normalizarNombre(a.docenteNombre||docente?.nombre);
+        return [
+            String(a.docenteId||nombre),
+            "17683",
+            normalizarNivel(a.nivel),
+            limpiarTexto(a.grado),
+            normalizarSeccion(a.seccion)
+        ].join("|");
+    };
     seleccionados.filter(a=>["2026","2027"].includes(String(a.anio).trim())).forEach(a=>{
-        const k=clave(a);if(!grupos.has(k))grupos.set(k,[]);grupos.get(k).push(a);
+        const k=clave(a);
+        if(!grupos.has(k))grupos.set(k,[]);
+        grupos.get(k).push(a);
     });
     const duplicados=[...grupos.values()].filter(g=>g.length>1);
     const cantidadDuplicados=duplicados.reduce((n,g)=>n+g.length-1,0);
-    if(!confirm("Se encontraron "+seleccionados.length+" asignaciones de los 8 docentes indicados en Nueva Alianza (código 17683), incluidas "+de2026.length+" de 2026 y "+cantidadDuplicados+" fila(s) repetida(s) por docente y grupo. Se pasarán a 2027 y se unificarán las filas repetidas conservando la unión de asignaturas y los datos de la fila principal. ¿Continuar?"))return false;
-    const idsEliminar=new Set();
+    if(!confirm("Se encontraron "+seleccionados.length+" asignaciones de los 8 docentes de Nueva Alianza (17683), incluidas "+de2026.length+" de 2026 y "+cantidadDuplicados+" fila(s) repetida(s). Se actualizarán a 2027 y se unirán las asignaturas repetidas. ¿Continuar?"))return false;
+    const eliminar=new Set();
     const reemplazos=new Map();
     for(const grupo of grupos.values()){
         const principal=[...grupo].sort((a,b)=>(String(b.anio)==="2027"?1:0)-(String(a.anio)==="2027"?1:0))[0];
-        const fusion={...principal,anio:"2027"};
+        const docente=porId.get(String(principal.docenteId));
+        const fusion={
+            ...principal,
+            anio:"2027",
+            codigo_centro:"17683",
+            docenteNombre:principal.docenteNombre||docente?.nombre||""
+        };
         fusion.asignaturas=[...new Set(grupo.flatMap(a=>Array.isArray(a.asignaturas)?a.asignaturas:[]))];
-        for(const otro of grupo){if(String(otro.id)!==String(principal.id))idsEliminar.add(String(otro.id));}
-        reemplazos.set(String(principal.id),fusion);
+        grupo.forEach(otro=>{if(otro!==principal)eliminar.add(otro);});
+        reemplazos.set(principal,fusion);
     }
-    const actualizados=datos.filter(a=>!idsEliminar.has(String(a.id))).map(a=>reemplazos.get(String(a.id))||a);
+    const actualizados=datos.filter(a=>!eliminar.has(a)).map(a=>reemplazos.get(a)||a);
     guardarDatos(KEY_ASIGNACIONES,actualizados);
-    const totalPasados=de2026.length;
-    registrarAuditoria("Actualización selectiva","Carga académica","Actualizados a 2027 los registros de docentes seleccionados de Nueva Alianza; filas duplicadas unificadas: "+cantidadDuplicados,"",{anio:"2027"});
-    const filtro=document.getElementById("filtroAsigAnio");if(filtro)filtro.value="2027";
-    cargarAsignaciones();cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
-    alert("Proceso completado. "+totalPasados+" asignaciones de 2026 pasaron a 2027. Se unificaron "+cantidadDuplicados+" filas repetidas. Los registros de otros centros y docentes no se modificaron.");
-    return true;
+    const restantes2026=actualizados.filter(a=>{
+        const docente=porId.get(String(a.docenteId));
+        const nombre=normalizarNombre(a.docenteNombre||docente?.nombre);
+        const codigo=String(a.codigo_centro||a.codigoCentro||docente?.codigo_centro||docente?.codigoCentro||"");
+        return permitidos.has(nombre)&&codigo==="17683"&&String(a.anio).trim()==="2026";
+    }).length;
+    registrarAuditoria("Actualización selectiva","Carga académica","Actualización de docentes de Nueva Alianza a 2027; duplicados unificados: "+cantidadDuplicados+"; registros 2026 restantes: "+restantes2026,"",{anio:"2027"});
+    const filtro=document.getElementById("filtroAsigAnio");
+    if(filtro)filtro.value="";
+    cargarAsignaciones();
+    if(filtro)filtro.value="2027";
+    cargarAsignaciones();
+    cargarDocentesAsignacion();cargarDocenteCalificacion();cargarDocenteAsistencia();
+    alert("Revisión terminada. Se pasaron "+de2026.length+" asignaciones de 2026 a 2027 y se unificaron "+cantidadDuplicados+" filas duplicadas. Registros de esos 8 docentes que aún permanecen en 2026: "+restantes2026+".");
+    return restantes2026===0;
 }
 
 function cargarAsignaciones(){
