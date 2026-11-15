@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#10243a">
+<meta name="application-name" content="SINFO Secundaria 2027">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
 <title>SINFO Secundaria 2027 · Accesos</title>
 <style>
 :root{--navy:#10243a;--blue:#2457d6;--bg:#f3f6fb;--line:#dce4ef;--muted:#637188}
@@ -67,5 +70,14 @@ body{background-color:var(--bg,#f3f6fb)!important;background-image:url("data:ima
 </section>
 <p class="note">SINFO Secundaria 2027 · Acceso según el perfil de cada usuario</p>
 </main>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(function (error) {
+      console.warn("No se pudo activar SINFO como aplicación instalable:", error);
+    });
+  });
+}
+</script>
 </body>
 </html>
