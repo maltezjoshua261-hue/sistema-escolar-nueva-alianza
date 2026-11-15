@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="104" fill="#10243a"/>
+  <path d="M82 186 256 112l174 74-174 74z" fill="#18b8bd"/>
+  <path d="M128 224v112c0 16 57 48 128 48s128-32 128-48V224l-128 74z" fill="#f5f8fc"/>
+  <path d="M256 298v86" stroke="#2457d6" stroke-width="14" stroke-linecap="round"/>
+  <path d="M112 220v122" stroke="#18b8bd" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="112" cy="356" r="18" fill="#18b8bd"/>
+  <text x="256" y="458" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="800" letter-spacing="5" fill="#fff">SINFO</text>
+</svg>
