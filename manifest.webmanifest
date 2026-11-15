@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "Sistema Escolar Nueva Alianza",
+  "short_name": "Nueva Alianza",
+  "description": "Sistema Escolar del NER Nueva Alianza.",
+  "lang": "es-NI",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f6fa",
+  "theme_color": "#123b6d",
+  "icons": [
+    {
+      "src": "./sinfo-pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false
+}
