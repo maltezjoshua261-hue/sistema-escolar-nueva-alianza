@@ -1,10 +1,10 @@
 {
-  "id": "/consulta.html",
+  "id": "/",
   "name": "SINFO Secundaria 2027",
   "short_name": "SINFO 2027",
-  "description": "Portal privado para consultar calificaciones de Secundaria 2027.",
+  "description": "Sistema escolar SINFO Secundaria 2027 con accesos para Dirección, Docentes y Estudiantes.",
   "lang": "es-NI",
-  "start_url": "/consulta.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
