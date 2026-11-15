@@ -9,13 +9,13 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f3f6fb",
-  "theme_color": "#10243a",
+  "theme_color": "#0755b8",
   "icons": [
     {
       "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "prefer_related_applications": false
