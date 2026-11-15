@@ -39,11 +39,7 @@ body{background-color:var(--bg,#f3f6fb)!important;background-image:url("data:ima
 <div class="card"><h3>Promedios por asignatura</h3><div id="averages" class="grid"></div></div>
 <div class="card"><h3>Detalle de calificaciones</h3><div class="tablewrap"><table><thead><tr><th>Asignatura</th><th>Semestre</th><th>Corte</th><th>Nota</th></tr></thead><tbody id="rows"></tbody></table></div><p id="empty" class="muted hidden">Todavía no hay notas publicadas.</p></div>
 </section>
-<p class="foot">Protege tu código de persona y cierra la sesión si usas un dispositivo compartido. Si tus datos no coinciden exactamente, consulta a Dirección.</p>
-<div class="foot" style="text-align:center">
-  <button id="install-sinfo" type="button" style="margin-top:4px">Instalar aplicación SINFO</button>
-  <div id="install-help" class="status hidden" style="text-align:left;margin-top:10px" role="status"></div>
-</div>
+
 </main>
 <script>
 const $=s=>document.querySelector(s);let lastStudent=null;
@@ -54,7 +50,7 @@ $('#exit').onclick=()=>{lastStudent=null;$('#results').classList.add('hidden');$
 </script>
 
 <script>
-/* SINFO PWA: permite instalar el portal; no almacena ni intercepta notas o datos privados. */
+/* Registro PWA; la instalación se realiza desde el menú del navegador. */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(function (error) {
@@ -62,30 +58,5 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
-</script>
-
-<script>
-/* Instalación guiada: el botón usa el aviso nativo cuando el navegador lo ofrece. */
-let deferredInstallPrompt = null;
-const installButton = document.getElementById("install-sinfo");
-const installHelp = document.getElementById("install-help");
-window.addEventListener("beforeinstallprompt", function (event) {
-  event.preventDefault();
-  deferredInstallPrompt = event;
-});
-installButton.addEventListener("click", async function () {
-  if (deferredInstallPrompt) {
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    installHelp.textContent = "Si aceptaste la instalación, SINFO aparecerá entre tus aplicaciones.";
-  } else {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    installHelp.textContent = isIOS
-      ? "Para instalar en iPhone: abre esta página en Safari, pulsa Compartir y selecciona “Añadir a pantalla de inicio”."
-      : "Para instalar en Android: abre esta página en Chrome, pulsa el menú ⋮ y selecciona “Instalar aplicación” o “Agregar a pantalla principal”.";
-  }
-  installHelp.classList.remove("hidden");
-});
 </script>
 </body></html>
