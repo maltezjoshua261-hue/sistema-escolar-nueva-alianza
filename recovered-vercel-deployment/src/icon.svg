@@ -1,9 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="104" fill="#10243a"/>
-  <path d="M82 186 256 112l174 74-174 74z" fill="#18b8bd"/>
-  <path d="M128 224v112c0 16 57 48 128 48s128-32 128-48V224l-128 74z" fill="#f5f8fc"/>
-  <path d="M256 298v86" stroke="#2457d6" stroke-width="14" stroke-linecap="round"/>
-  <path d="M112 220v122" stroke="#18b8bd" stroke-width="12" stroke-linecap="round"/>
-  <circle cx="112" cy="356" r="18" fill="#18b8bd"/>
-  <text x="256" y="458" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="800" letter-spacing="5" fill="#fff">SINFO</text>
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#1595ff"/><stop offset="1" stop-color="#062c83"/></linearGradient>
+ <linearGradient id="book" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#c9e7ff"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<path d="M38 205 256 92l218 113v48H38z" fill="#073a91" stroke="#fff" stroke-width="10"/>
+<path d="M85 210h342v135H85z" fill="#f7c96a" stroke="#fff" stroke-width="8"/>
+<path d="M115 235h72v65h-72zm105 0h72v65h-72zm105 0h72v65h-72z" fill="#1455a6" stroke="#fff" stroke-width="7"/>
+<path d="M45 350Q150 315 256 366q106-51 211-16v73q-105-37-211 15Q150 386 45 423z" fill="url(#book)" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+<path d="M256 366v72" stroke="#1d5ac4" stroke-width="9" stroke-linecap="round"/>
+<path d="M130 365q55-20 106 5v37q-51-25-106-5zm252 0q-55-20-106 5v37q51-25 106-5z" fill="#9ccfff"/>
+<circle cx="256" cy="126" r="39" fill="#fff"/>
+<path d="m220 120 36-23 36 23-36 22z" fill="#f6b800"/>
+<path d="M237 139v18q19 14 38 0v-18" fill="none" stroke="#f6b800" stroke-width="7"/>
+<text x="256" y="485" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="62" font-weight="900" letter-spacing="4" fill="#fff" stroke="#073a91" stroke-width="2" paint-order="stroke">SINFO</text>
 </svg>
