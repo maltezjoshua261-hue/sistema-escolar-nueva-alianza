@@ -518,7 +518,7 @@ body[data-imprimiendo="historialAcademico"] #historialAcademicoDocumento .no-pri
  body[data-imprimiendo="reporteSeguimiento"] .seguimiento-toolbar,
  body[data-imprimiendo="reporteSeguimiento"] .form-actions{display:none!important}
 }
-<style>
+
 .alertas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}.alerta-kpi{padding:16px;border-radius:14px;background:#fff;border:1px solid #e5e7eb;text-align:center}.alerta-kpi strong{display:block;font-size:28px}.alerta-kpi span{font-size:13px;color:#666}.alerta-alta{border-left:5px solid #dc3545!important}.alerta-media{border-left:5px solid #fd7e14!important}.alerta-baja{border-left:5px solid #ffc107!important}.riesgo-badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}.riesgo-alto{background:#f8d7da;color:#842029}.riesgo-medio{background:#ffe5d0;color:#8a3d00}.riesgo-bajo{background:#fff3cd;color:#664d03}.alerta-acciones{display:flex;gap:5px;flex-wrap:wrap}.alerta-acciones button{padding:5px 8px;font-size:12px}.alertas-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:18px}.alerta-detalle{background:#f8fafc;border-radius:12px;padding:16px}.alerta-detalle h3{margin-top:0}.alerta-filtros{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end}.alerta-filtros label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}.alerta-filtros input,.alerta-filtros select{width:100%;padding:9px;border:1px solid #d1d5db;border-radius:8px}@media(max-width:900px){.alertas-kpis{grid-template-columns:repeat(2,1fr)}.alertas-grid{grid-template-columns:1fr}.alerta-filtros{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="alertasPreventivas"] .no-print{display:none!important}body[data-imprimiendo="alertasPreventivas"] .section:not(#alertasPreventivas){display:none!important}body[data-imprimiendo="alertaEstudiante"] .section:not(#alertasPreventivas){display:none!important}}
 /* BITÁCORA V9.7 */
 .audit-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:20px;border-radius:14px;margin-bottom:18px}.audit-header h2{color:#fff;margin-bottom:5px}.audit-header p{opacity:.9}.audit-stats{grid-template-columns:repeat(5,1fr)}@media(max-width:900px){.audit-stats{grid-template-columns:repeat(2,1fr)}}@media print{body[data-imprimiendo="bitacora"] *{visibility:hidden!important}body[data-imprimiendo="bitacora"] #bitacora,body[data-imprimiendo="bitacora"] #bitacora *{visibility:visible!important}body[data-imprimiendo="bitacora"] #bitacora{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none}body[data-imprimiendo="bitacora"] #bitacora .actions,body[data-imprimiendo="bitacora"] #bitacora .notice{display:none!important}}
@@ -534,6 +534,101 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 
 /* V10.8 REPORTES OFICIALES AVANZADOS */
 .v108-header{background:linear-gradient(135deg,#123b6d,#0d6efd);color:#fff;padding:24px;border-radius:16px;margin-bottom:20px}.v108-header h2{color:#fff;margin-bottom:6px}.v108-header p{opacity:.92}.v108-filtros{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.v108-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0}.v108-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center}.v108-kpi strong{display:block;font-size:24px;color:#0d6efd;margin-top:5px}.v108-doc{background:#fff;border:1px solid #d9dee7;border-radius:12px;padding:30px;box-shadow:0 3px 12px rgba(0,0,0,.06)}.v108-doc-head{text-align:center;border-bottom:2px solid #123b6d;padding-bottom:14px;margin-bottom:18px}.v108-doc-head h1{font-size:17px;color:#123b6d}.v108-doc-head h2{font-size:20px;margin:5px 0}.v108-doc-head p{font-size:12px;margin:3px}.v108-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}.v108-resumen div{border:1px solid #ddd;border-radius:9px;padding:12px;text-align:center}.v108-resumen strong{display:block;font-size:21px;color:#123b6d;margin-top:4px}.v108-alerta{padding:12px;border-left:4px solid #ffc107;background:#fff8df;border-radius:8px;margin:12px 0}.v108-firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;text-align:center;margin-top:60px;font-size:12px}.v108-firma{border-top:1px solid #333;padding-top:7px}.v108-table{overflow-x:auto}.v108-table table{font-size:12px}.v108-table th,.v108-table td{text-align:center}.v108-table td:first-child{text-align:left}.v108-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:1100px){.v108-filtros{grid-template-columns:repeat(2,1fr)}.v108-kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.v108-filtros,.v108-kpis,.v108-resumen,.v108-firmas{grid-template-columns:1fr}.v108-doc{padding:18px}}@media print{body[data-imprimiendo="reportesOficiales"] *{visibility:hidden!important}body[data-imprimiendo="reportesOficiales"] #reportesOficiales,body[data-imprimiendo="reportesOficiales"] #reportesOficiales *{visibility:visible!important}body[data-imprimiendo="reportesOficiales"] #reportesOficiales{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:none;padding:0}.v108-no-print{display:none!important}}
+
+/* =========================================================
+   MODERNIZACIÓN VISUAL 2026 — CAPA DE PRESENTACIÓN
+   Solo estilos: conserva estructura, datos y lógica existente.
+========================================================= */
+:root{
+  --ner-navy:#123b6d;
+  --ner-blue:#1769c2;
+  --ner-blue-soft:#eaf2fc;
+  --ner-bg:#f4f7fb;
+  --ner-border:#e2e8f0;
+  --ner-text:#1e293b;
+  --ner-muted:#64748b;
+  --ner-radius:16px;
+  --ner-shadow:0 8px 24px rgba(15,42,75,.07);
+}
+body{background:var(--ner-bg);color:var(--ner-text);line-height:1.45}
+button{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(23,105,194,.22);outline-offset:2px
+}
+.sidebar{
+  background:linear-gradient(180deg,#123b6d 0%,#0e315a 100%);
+  box-shadow:5px 0 24px rgba(15,42,75,.12);
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.3) transparent
+}
+.logo{
+  background:rgba(5,28,54,.34);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  padding:24px 16px
+}
+.logo h2{letter-spacing:.2px}
+.menu{padding:14px 11px}
+.menu button{
+  border:1px solid transparent;border-radius:10px;
+  padding:11px 13px;margin:4px 0;
+  color:rgba(255,255,255,.9)
+}
+.menu button:hover,.menu button.active{
+  background:rgba(255,255,255,.15);
+  border-color:rgba(255,255,255,.13);
+  box-shadow:inset 3px 0 0 #8fc4ff;
+  transform:translateX(2px)
+}
+.main{background:var(--ner-bg)}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  min-height:66px;padding:14px 26px;
+  border-bottom:1px solid var(--ner-border);
+  box-shadow:0 3px 14px rgba(15,42,75,.045);
+  backdrop-filter:blur(12px)
+}
+.content{padding:26px clamp(16px,2.2vw,34px)}
+.card,.stat{
+  border:1px solid rgba(226,232,240,.9);
+  border-radius:var(--ner-radius);
+  box-shadow:var(--ner-shadow);
+  transition:box-shadow .2s ease,transform .2s ease
+}
+.card{padding:22px}
+.card h2{letter-spacing:-.25px}
+.stat{padding:21px}
+.stat strong{color:var(--ner-blue);letter-spacing:-.8px}
+input,select,textarea{
+  border:1px solid #d8e0eb;border-radius:10px;
+  background:#fff;color:var(--ner-text);
+  transition:border-color .18s ease,box-shadow .18s ease
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:#6aa5e8;
+  box-shadow:0 0 0 3px rgba(23,105,194,.12)
+}
+.btn-primary{background:linear-gradient(135deg,#1769c2,#0d57a5);box-shadow:0 3px 9px rgba(23,105,194,.18)}
+.btn-success{box-shadow:0 3px 9px rgba(25,135,84,.14)}
+.btn-danger{box-shadow:0 3px 9px rgba(220,53,69,.12)}
+button:hover{opacity:1;filter:brightness(1.04)}
+.btn-primary:hover,.btn-success:hover,.btn-danger:hover,.btn-secondary:hover,.btn-warning:hover,.btn-info:hover{
+  transform:translateY(-1px);box-shadow:0 5px 13px rgba(15,42,75,.15)
+}
+table{border-collapse:separate;border-spacing:0}
+th{font-weight:700}
+@media(max-width:900px){
+  .topbar{padding:12px 16px}
+  .content{padding:18px 14px}
+  .card{padding:18px}
+}
+@media(max-width:650px){
+  .topbar{min-height:58px}
+  .card,.stat{border-radius:13px}
+  button{min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
 </style>
 </head>
 
@@ -1210,7 +1305,7 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 <div class="notice">El Docente puede registrar su propia planificación y el Director puede administrar todas. La planificación se vincula con la carga académica activa.</div>
 <input type="hidden" id="planId">
 <div class="plan-form-grid">
-<div class="form-group"><label>Año</label><select id="planAnio" onchange="cargarOpcionesPlanificacion()"><option>2026</option><option>2027</option><option>2028</option></select></div>
+<div class="form-group"><label>Año</label><select id="planAnio" disabled><option selected>2027</option></select></div>
 <div class="form-group"><label>Docente</label><select id="planDocente" onchange="actualizarPlanificacionPorDocente()"><option value="">Seleccione</option></select></div>
 <div class="form-group"><label>Nivel</label><select id="planNivel" onchange="actualizarGradosPlanificacion();cargarOpcionesPlanificacion()"><option value="">Seleccione</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option></select></div>
 <div class="form-group"><label>Grado</label><select id="planGrado" onchange="cargarOpcionesPlanificacion()"><option value="">Seleccione</option></select></div>
@@ -7381,53 +7476,65 @@ function imprimirHorarioDocente(){
 /* PLANIFICACIÓN DOCENTE 8.9 */
 function actualizarGradosPlanificacion(){const n=document.getElementById("planNivel")?.value,s=document.getElementById("planGrado");if(!s)return;let l=n==="Inicial"?GRADOS_INICIAL:n==="Primaria"?[...GRADOS_PRIMARIA,"1° y 2°","3° y 4°","5° y 6°","1° a 3°","4° a 6°","1° a 6°"]:n==="Secundaria"?GRADOS_SECUNDARIA:[],p=s.value;s.innerHTML='<option value="">Seleccione</option>';l.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(n==="Primaria"&&/( y | a )/.test(g))?g:(n==="Primaria"||n==="Secundaria")?g+"º grado":g;s.appendChild(o)});if([...s.options].some(o=>o.value===p))s.value=p}
 function actualizarGradosFiltroPlan(){const n=document.getElementById("filtroPlanNivel")?.value,s=document.getElementById("filtroPlanGrado");if(!s)return;const l=n==="Inicial"?GRADOS_INICIAL:n==="Primaria"?GRADOS_PRIMARIA:n==="Secundaria"?GRADOS_SECUNDARIA:[],p=s.value;s.innerHTML='<option value="">Todos</option>';l.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=(n==="Primaria"||n==="Secundaria")?g+"º grado":g;s.appendChild(o)});if([...s.options].some(o=>o.value===p))s.value=p}
-function obtenerAsignacionesPlan(){const a=String(document.getElementById("planAnio")?.value||"2026").trim(),n=document.getElementById("planNivel")?.value||"",g=document.getElementById("planGrado")?.value||"",s=document.getElementById("planSeccion")?.value||"",d=String(document.getElementById("planDocente")?.value||""),x=document.getElementById("planAsignatura")?.value||"",ses=typeof NA_sesion==="function"?NA_sesion():null,centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();return (obtenerDatos(KEY_ASIGNACIONES)||[]).filter(q=>String(q.anio??"").trim()===a&&["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&(!centro||String(q.codigo_centro||"").trim()===centro)&&(!n||normalizarNivel(q.nivel)===normalizarNivel(n))&&(!g||(typeof gradosCoinciden==="function"?gradosCoinciden(q.grado,g):normalizarGrado(q.grado)===normalizarGrado(g)))&&(!s||normalizarSeccion(q.seccion)===normalizarSeccion(s))&&(!d||String(q.docenteId||"")===d||String(q.docenteSupabaseId||"")===d)&&(!x||(q.asignaturas||[]).includes(x)))}
-function cargarOpcionesPlanificacion(){const s=document.getElementById("planAsignatura"),d=document.getElementById("planDocente");if(!s||!d)return;const a=obtenerAsignacionesPlan(),pa=s.value,pd=d.value,subs=[...new Set(a.flatMap(q=>q.asignaturas||[]))];s.innerHTML='<option value="">Seleccione</option>';subs.forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;s.appendChild(o)});if([...s.options].some(o=>o.value===pa))s.value=pa;cargarDocentesPlanificacion(pd)}
-async function cargarDocentesPlanificacion(prev){
- const d=document.getElementById("planDocente");if(!d)return;
- const anterior=prev!==undefined?String(prev):String(d.value||"");
- const anio=String(document.getElementById("planAnio")?.value||"2026").trim();
- const nivel=document.getElementById("planNivel")?.value||"";
- const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual();
- const centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();
- const porDocente=new Map();
- try{
-  if(typeof NA_init==="function"&&centro){
-   const c=await NA_init();
-   const {data:asignaciones,error}=await c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id").eq("codigo_centro",centro);
-   if(error)throw error;
-   const cargas=(asignaciones||[]).filter(a=>String(a.anio??"").trim()===anio&&["activo","active",""].includes(limpiarTexto(String(a.estado??"Activo")))&&(!nivel||normalizarNivel(a.nivel)===normalizarNivel(nivel))&&String(a.docente_id||"").trim());
-   const ids=[...new Set(cargas.map(a=>String(a.docente_id).trim()))];
-   let docentes=[];
-   if(ids.length){
-    const {data,error:de}=await c.from("docentes").select("id,nombre_completo,codigo_centro,estado").in("id",ids);
-    if(de)throw de;
-    docentes=data||[];
-   }
-   cargas.forEach(a=>{
-    const id=String(a.docente_id).trim();
-    const t=docentes.find(x=>String(x.id)===id&&String(x.codigo_centro||"").trim()===centro);
-    const old=porDocente.get(id);
-    porDocente.set(id,{docenteId:id,docenteNombre:String(t?.nombre_completo||old?.docenteNombre||"Docente asignado")});
-   });
-  }
- }catch(error){console.warn("Consulta central de docentes para Nueva planificación falló; se probará el respaldo local.",error)}
- if(!porDocente.size){
-  try{if(typeof NA_syncDocentes==="function")await NA_syncDocentes();if(typeof NA_syncAsignaciones==="function")await NA_syncAsignaciones()}catch(error){console.warn("No se pudieron sincronizar docentes/asignaciones de planificación:",error)}
-  const docs=obtenerDatos(KEY_DOCENTES)||[];
-  const cargas=(obtenerDatos(KEY_ASIGNACIONES)||[]).filter(q=>String(q.anio??"").trim()===anio&&["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&(!centro||String(q.codigo_centro||"").trim()===centro)&&(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel)));
-  cargas.forEach(q=>{
-   const sid=String(q.docenteSupabaseId||"");const did=String(q.docenteId||"");
-   const doc=docs.find(z=>(sid&&String(z.supabaseId||"")===sid)||(did&&(String(z.id||"")===did||String(z.supabaseId||"")===did)));
-   const id=String(doc?.supabaseId||doc?.id||sid||did||"");if(!id)return;
-   porDocente.set(id,{docenteId:id,docenteNombre:String(q.docenteNombre||doc?.nombre||doc?.nombreCompleto||doc?.nombre_completo||"Docente asignado")});
-  });
- }
- d.innerHTML='<option value="">Seleccione</option>';
- [...porDocente.values()].sort((a,b)=>String(a.docenteNombre).localeCompare(String(b.docenteNombre),"es")).forEach(q=>{const o=document.createElement("option");o.value=String(q.docenteId);o.textContent=q.docenteNombre;d.appendChild(o)});
- if([...d.options].some(o=>o.value===anterior))d.value=anterior;
+async function obtenerAsignacionesPlan(){
+ const anio="2027",nivel=document.getElementById("planNivel")?.value||"",grado=document.getElementById("planGrado")?.value||"",seccion=document.getElementById("planSeccion")?.value||"",docente=String(document.getElementById("planDocente")?.value||""),asignatura=document.getElementById("planAsignatura")?.value||"";
+ const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual(),centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();
+ if(typeof NA_init!=="function")return [];
+ const c=await NA_init();
+ let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);
+ if(centro)consulta=consulta.eq("codigo_centro",centro);
+ const {data,error}=await consulta;
+ if(error)throw error;
+ let cargas=(data||[]).filter(q=>["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&String(q.docente_id||"").trim()&&(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel))&&(!grado||(typeof gradosCoinciden==="function"?gradosCoinciden(q.grado,grado):normalizarGrado(q.grado)===normalizarGrado(grado)))&&(!seccion||normalizarSeccion(q.seccion)===normalizarSeccion(seccion)));
+ if(docente)cargas=cargas.filter(q=>String(q.docente_id)===docente);
+ if(asignatura)cargas=cargas.filter(q=>(q.asignaturas||[]).includes(asignatura));
+ return cargas;
 }
-function actualizarPlanificacionPorDocente(){cargarOpcionesPlanificacion()}
+async function cargarOpcionesPlanificacion(prevDoc){
+ const s=document.getElementById("planAsignatura"),d=document.getElementById("planDocente"),y=document.getElementById("planAnio");
+ if(!s||!d)return;
+ if(y)y.value="2027";
+ const anteriorDoc=prevDoc!==undefined?String(prevDoc):String(d.value||""),anteriorAsig=String(s.value||"");
+ const nivel=document.getElementById("planNivel")?.value||"",grado=document.getElementById("planGrado")?.value||"",seccion=document.getElementById("planSeccion")?.value||"";
+ const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual(),centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();
+ d.innerHTML='<option value="">Seleccione</option>';s.innerHTML='<option value="">Seleccione</option>';
+ if(typeof NA_init!=="function")return;
+ try{
+  const c=await NA_init();
+  let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);
+  if(centro)consulta=consulta.eq("codigo_centro",centro);
+  const {data,error}=await consulta;
+  if(error)throw error;
+  const cargas=(data||[]).filter(q=>["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&String(q.docente_id||"").trim());
+  const grupo=cargas.filter(q=>(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel))&&(!grado||(typeof gradosCoinciden==="function"?gradosCoinciden(q.grado,grado):normalizarGrado(q.grado)===normalizarGrado(grado)))&&(!seccion||normalizarSeccion(q.seccion)===normalizarSeccion(seccion)));
+  const ids=[...new Set(grupo.map(q=>String(q.docente_id).trim()))];
+  let docentes=[];
+  if(ids.length){
+   const {data:docs,error:de}=await c.from("docentes").select("id,nombre_completo,codigo_centro,estado").in("id",ids);
+   if(de)throw de;
+   docentes=docs||[];
+  }
+  const docentesCentro=new Map(docentes.filter(x=>limpiarTexto(String(x.estado??"Activo"))!=="inactivo").map(x=>[String(x.id),{nombre:String(x.nombre_completo||"Docente asignado"),centro:String(x.codigo_centro||"").trim()}]));
+  const grupoValido=grupo.filter(q=>{const t=docentesCentro.get(String(q.docente_id));return !!t&&t.centro===String(q.codigo_centro||"").trim()&&(!centro||t.centro===centro)});
+  let filasDoc=grupoValido;
+  if(anteriorAsig){const coinciden=grupoValido.filter(q=>(q.asignaturas||[]).includes(anteriorAsig));if(coinciden.length)filasDoc=coinciden;}
+  const opcionesDoc=[...new Map(filasDoc.map(q=>[String(q.docente_id),{id:String(q.docente_id),nombre:docentesCentro.get(String(q.docente_id)).nombre}])).values()].sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  opcionesDoc.forEach(q=>{const o=document.createElement("option");o.value=q.id;o.textContent=q.nombre;d.appendChild(o)});
+  const docValido=opcionesDoc.some(q=>q.id===anteriorDoc)?anteriorDoc:"";
+  d.value=docValido;
+  let filasAsig=grupoValido;
+  if(docValido){const coinciden=grupoValido.filter(q=>String(q.docente_id)===docValido);if(coinciden.length)filasAsig=coinciden;}
+  const materias=[...new Set(filasAsig.flatMap(q=>Array.isArray(q.asignaturas)?q.asignaturas:[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+  materias.forEach(x=>{const o=document.createElement("option");o.value=x;o.textContent=x;s.appendChild(o)});
+  s.value=materias.includes(anteriorAsig)?anteriorAsig:"";
+ }catch(error){
+  console.error("No se pudieron cargar las cargas académicas 2027 para planificación:",error);
+  d.innerHTML='<option value="">No se pudieron cargar docentes</option>';
+  s.innerHTML='<option value="">No se pudieron cargar asignaturas</option>';
+ }
+}
+function cargarDocentesPlanificacion(prev){return cargarOpcionesPlanificacion(prev)}
+function actualizarPlanificacionPorDocente(){return cargarOpcionesPlanificacion()}
 function limpiarPlanificacion(){["planId","planUnidad","planCompetencia","planIndicador","planCriterios","planConceptual","planProcedimental","planActitudinal","planMetodologia","planInicio","planDesarrollo","planCierre","planRecursos","planEvaluacion","planObservacion"].forEach(id=>{const e=document.getElementById(id);if(e)e.value=""});const f=document.getElementById("planFecha");if(f)f.value=new Date().toISOString().slice(0,10);const b=document.getElementById("btnGuardarPlan");if(b)b.textContent="💾 Guardar planificación";const h=document.getElementById("horarioRelacionadoPlan");if(h)h.style.display="none"}
 function guardarPlanificacion(){const ses=obtenerSesionActual();if(!ses){alert("Debe iniciar sesión.");return}const a=document.getElementById("planAnio")?.value||"2026";if(estaCerradoAnio(a))return;const id=document.getElementById("planId")?.value,d=document.getElementById("planDocente")?.value,n=document.getElementById("planNivel")?.value,g=document.getElementById("planGrado")?.value,s=document.getElementById("planSeccion")?.value,x=document.getElementById("planAsignatura")?.value,f=document.getElementById("planFecha")?.value;if(!d||!n||!g||!s||!x||!f||!document.getElementById("planUnidad")?.value.trim()){alert("Complete docente, grupo, asignatura, fecha y unidad/contenido central.");return}const as=obtenerDatos(KEY_ASIGNACIONES).find(q=>String(q.anio)===String(a)&&String(q.docenteId)===String(d)&&normalizarNivel(q.nivel)===normalizarNivel(n)&&gradosCoinciden(q.grado,g)&&normalizarSeccion(q.seccion)===normalizarSeccion(s)&&(q.asignaturas||[]).includes(x)&&String(q.estado||"Activo")==="Activo");if(!as){alert("La carga académica activa no coincide con el docente, grupo y asignatura seleccionados.");return}if(ses.rol!=="Director"&&String(d)!==String(ses.docenteId||"")){alert("Este usuario Docente no está vinculado a ese docente.");return}const datos=obtenerDatos(KEY_PLANIFICACIONES),o={id:id||Date.now().toString(),anio:a,docenteId:String(d),docenteNombre:as.docenteNombre,nivel:n,grado:g,seccion:s,asignatura:x,fecha:f,estado:document.getElementById("planEstado")?.value||"Planificada",unidad:document.getElementById("planUnidad")?.value.trim()||"",competencia:document.getElementById("planCompetencia")?.value.trim()||"",indicador:document.getElementById("planIndicador")?.value.trim()||"",criterios:document.getElementById("planCriterios")?.value.trim()||"",conceptual:document.getElementById("planConceptual")?.value.trim()||"",procedimental:document.getElementById("planProcedimental")?.value.trim()||"",actitudinal:document.getElementById("planActitudinal")?.value.trim()||"",metodologia:document.getElementById("planMetodologia")?.value.trim()||"",inicio:document.getElementById("planInicio")?.value.trim()||"",desarrollo:document.getElementById("planDesarrollo")?.value.trim()||"",cierre:document.getElementById("planCierre")?.value.trim()||"",recursos:document.getElementById("planRecursos")?.value.trim()||"",evaluacion:document.getElementById("planEvaluacion")?.value.trim()||"",observacion:document.getElementById("planObservacion")?.value.trim()||"",actualizadoPor:ses.usuario||""};const i=datos.findIndex(q=>String(q.id)===String(id));if(i>=0)datos[i]=o;else datos.push(o);guardarDatos(KEY_PLANIFICACIONES,datos);registrarAuditoria(i>=0?"Editar":"Crear","Planificación",i>=0?"Actualización de planificación docente":"Nueva planificación docente",o.id,{anio:a});limpiarPlanificacion();cargarPlanificaciones();alert(id?"Planificación actualizada correctamente.":"Planificación guardada correctamente.")}
 function cargarDocentesFiltroPlan(){const s=document.getElementById("filtroPlanDocente");if(!s)return;const p=s.value,a=document.getElementById("filtroPlanAnio")?.value||"2026",ses=obtenerSesionActual();let l=obtenerDatos(KEY_PLANIFICACIONES).filter(q=>String(q.anio)===String(a));if(ses?.rol==="Docente")l=l.filter(q=>String(q.docenteId)===String(ses.docenteId||""));const m=[...new Map(l.map(q=>[String(q.docenteId),q])).values()];s.innerHTML='<option value="">Todos</option>';m.sort((u,v)=>String(u.docenteNombre).localeCompare(String(v.docenteNombre),"es")).forEach(q=>{const o=document.createElement("option");o.value=q.docenteId;o.textContent=q.docenteNombre;s.appendChild(o)});if([...s.options].some(o=>o.value===p))s.value=p}
@@ -7439,7 +7546,7 @@ function eliminarPlanificacion(id){const p=obtenerDatos(KEY_PLANIFICACIONES).fin
 function detectarPlanificacionesPendientes(){const a=document.getElementById("filtroPlanAnio")?.value||"2026",h=new Date().toISOString().slice(0,10),l=obtenerDatos(KEY_PLANIFICACIONES).filter(p=>String(p.anio)===String(a)&&p.estado!=="Ejecutada"&&String(p.fecha)<h);alert(l.length?"⚠️ Hay "+l.length+" planificación(es) vencida(s) o pendientes.":"✅ No se encontraron planificaciones vencidas o pendientes.")}
 function imprimirPlanificacionActual(){const a=document.getElementById("filtroPlanAnio")?.value||"2026",d=document.getElementById("filtroPlanDocente")?.value||"",n=document.getElementById("filtroPlanNivel")?.value||"",g=document.getElementById("filtroPlanGrado")?.value||"",ses=obtenerSesionActual();let l=obtenerDatos(KEY_PLANIFICACIONES).filter(p=>String(p.anio)===String(a)&&(!d||String(p.docenteId)===String(d))&&(!n||normalizarNivel(p.nivel)===normalizarNivel(n))&&(!g||gradosCoinciden(p.grado,g)));if(ses?.rol==="Docente")l=l.filter(p=>String(p.docenteId)===String(ses.docenteId||""));if(!l.length){alert("No hay planificación para imprimir con los filtros seleccionados.");return}verPlanificacion(l[0].id);document.body.setAttribute("data-imprimiendo","planificacion");window.print();document.body.removeAttribute("data-imprimiendo")}
 function imprimirReportePlanificacion(){const a=document.getElementById("filtroPlanAnio")?.value||"2026",ses=obtenerSesionActual();let l=obtenerDatos(KEY_PLANIFICACIONES).filter(p=>String(p.anio)===String(a));if(ses?.rol==="Docente")l=l.filter(p=>String(p.docenteId)===String(ses.docenteId||""));const d=document.getElementById("planDocumento");if(!d)return;const por={};l.forEach(p=>{por[p.docenteNombre]=(por[p.docenteNombre]||0)+1});d.style.display="block";d.innerHTML='<h3>📊 Reporte de planificación docente — '+escaparHTML(a)+'</h3><div class="plan-meta"><div><b>Total:</b> '+l.length+'</div><div><b>Ejecutadas:</b> '+l.filter(p=>p.estado==="Ejecutada").length+'</div><div><b>Pendientes:</b> '+l.filter(p=>p.estado==="Pendiente").length+'</div></div><table><thead><tr><th>Docente</th><th>Planificaciones</th><th>Ejecutadas</th><th>Pendientes</th></tr></thead><tbody>'+Object.entries(por).map(([n,t])=>{const q=l.filter(p=>p.docenteNombre===n);return '<tr><td>'+escaparHTML(n)+'</td><td>'+t+'</td><td>'+q.filter(x=>x.estado==="Ejecutada").length+'</td><td>'+q.filter(x=>x.estado!=="Ejecutada").length+'</td></tr>'}).join("")+'</tbody></table>';d.scrollIntoView({behavior:"smooth"});document.body.setAttribute("data-imprimiendo","planificacion");window.print();document.body.removeAttribute("data-imprimiendo")}
-function cargarPlanificacionInicial(){const f=document.getElementById("planFecha");if(f&&!f.value)f.value=new Date().toISOString().slice(0,10);actualizarGradosPlanificacion();actualizarGradosFiltroPlan();cargarOpcionesPlanificacion();cargarPlanificaciones()}
+function cargarPlanificacionInicial(){const y=document.getElementById("planAnio");if(y)y.value="2027";const f=document.getElementById("planFecha");if(f&&!f.value)f.value=new Date().toISOString().slice(0,10);actualizarGradosPlanificacion();actualizarGradosFiltroPlan();cargarOpcionesPlanificacion();cargarPlanificaciones()}
 
 /* DASHBOARD ACADÉMICO V9.0 */
 function actualizarGradosDashboard9(){
@@ -9292,6 +9399,7 @@ window.NA_importarEstudiantesExcel={abrir:NA_impOpen,cerrar:NA_impClose,actualiz
 })();
 </script>
 
+<script src="v11/padres-tutores-supabase.js"></script>
 
 <!-- Registro PWA: no modifica autenticación ni almacena datos escolares -->
 <script>
