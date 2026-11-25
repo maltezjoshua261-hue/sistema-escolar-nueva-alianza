@@ -7481,7 +7481,9 @@ async function obtenerAsignacionesPlan(){
  const ses=typeof NA_sesion==="function"?NA_sesion():obtenerSesionActual(),centro=String(ses?.codigoCentro||ses?.codigo_centro||"").trim();
  if(typeof NA_init!=="function")return [];
  const c=await NA_init();
- let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);\n if(centro)consulta=consulta.eq("codigo_centro",centro);\n const {data,error}=await consulta;
+ let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);
+ if(centro)consulta=consulta.eq("codigo_centro",centro);
+ const {data,error}=await consulta;
  if(error)throw error;
  let cargas=(data||[]).filter(q=>["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&String(q.docente_id||"").trim()&&(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel))&&(!grado||(typeof gradosCoinciden==="function"?gradosCoinciden(q.grado,grado):normalizarGrado(q.grado)===normalizarGrado(grado)))&&(!seccion||normalizarSeccion(q.seccion)===normalizarSeccion(seccion)));
  if(docente)cargas=cargas.filter(q=>String(q.docente_id)===docente);
@@ -7499,7 +7501,9 @@ async function cargarOpcionesPlanificacion(prevDoc){
  if(typeof NA_init!=="function")return;
  try{
   const c=await NA_init();
-  let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);\n  if(centro)consulta=consulta.eq("codigo_centro",centro);\n  const {data,error}=await consulta;
+  let consulta=c.from("asignaciones").select("id,anio,codigo_centro,nivel,grado,seccion,estado,docente_id,asignaturas").eq("anio",2027);
+  if(centro)consulta=consulta.eq("codigo_centro",centro);
+  const {data,error}=await consulta;
   if(error)throw error;
   const cargas=(data||[]).filter(q=>["activo","active",""].includes(limpiarTexto(String(q.estado??"Activo")))&&String(q.docente_id||"").trim());
   const grupo=cargas.filter(q=>(!nivel||normalizarNivel(q.nivel)===normalizarNivel(nivel))&&(!grado||(typeof gradosCoinciden==="function"?gradosCoinciden(q.grado,grado):normalizarGrado(q.grado)===normalizarGrado(grado)))&&(!seccion||normalizarSeccion(q.seccion)===normalizarSeccion(seccion)));
@@ -7510,8 +7514,8 @@ async function cargarOpcionesPlanificacion(prevDoc){
    if(de)throw de;
    docentes=docs||[];
   }
-  const docentesCentro=new Map(docentes.filter(x=>String(x.codigo_centro||"").trim()===centro&&limpiarTexto(String(x.estado??"Activo"))!=="inactivo").map(x=>[String(x.id),String(x.nombre_completo||"Docente asignado")]));
-  const grupoValido=grupo.filter(q=>docentesCentro.has(String(q.docente_id)));
+  const docentesCentro=new Map(docentes.filter(x=>limpiarTexto(String(x.estado??"Activo"))!=="inactivo").map(x=>[String(x.id),{nombre:String(x.nombre_completo||"Docente asignado"),centro:String(x.codigo_centro||"").trim()}]));
+  const grupoValido=grupo.filter(q=>{const t=docentesCentro.get(String(q.docente_id));return !!t&&t.centro===String(q.codigo_centro||"").trim()&&(!centro||t.centro===centro)});
   let filasDoc=grupoValido;
   if(anteriorAsig){const coinciden=grupoValido.filter(q=>(q.asignaturas||[]).includes(anteriorAsig));if(coinciden.length)filasDoc=coinciden;}
   const opcionesDoc=[...new Map(filasDoc.map(q=>[String(q.docente_id),{id:String(q.docente_id),nombre:docentesCentro.get(String(q.docente_id)).nombre}])).values()].sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
