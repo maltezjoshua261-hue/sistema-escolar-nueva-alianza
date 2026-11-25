@@ -565,6 +565,8 @@ body[data-imprimiendo="expedienteIntegral"] .section:not(#expedienteIntegral){di
 :root{
   --ner-navy:#123b6d;
   --ner-blue:#1769c2;
+  --ner-gold:#c6a34a;
+  --ner-gold-soft:#f7f1df;
   --ner-blue-soft:#eaf2fc;
   --ner-bg:#f4f7fb;
   --ner-border:#e2e8f0;
@@ -585,7 +587,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 .logo{
   background:rgba(5,28,54,.34);
-  border-bottom:1px solid rgba(255,255,255,.12);
+  border-bottom:2px solid rgba(198,163,74,.62);
   padding:24px 16px
 }
 .logo h2{letter-spacing:.2px}
@@ -598,7 +600,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .menu button:hover,.menu button.active{
   background:rgba(255,255,255,.15);
   border-color:rgba(255,255,255,.13);
-  box-shadow:inset 3px 0 0 #8fc4ff;
+  box-shadow:inset 3px 0 0 var(--ner-gold);
   transform:translateX(2px)
 }
 .main{background:var(--ner-bg)}
