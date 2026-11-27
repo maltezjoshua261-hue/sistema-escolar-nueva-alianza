@@ -8768,7 +8768,7 @@ window.guardarAsignacion=async function(){
   const d=obtenerDatos(KEY_DOCENTES).find(x=>String(x.id)===String(local.docenteId));
   const ses=NA_sesion(), c=await NA_init();
   const docenteId=d?.supabaseId||local.docenteSupabaseId||local.docenteId;
-  const row={docente_id:docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:ses?.codigoCentro||local.codigo_centro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
+  const row={docente_id:docenteId,nivel:local.nivel,grado:local.grado,seccion:local.seccion,anio:Number(local.anio),estado:local.estado||"Activo",codigo_centro:local.codigo_centro||d?.codigo_centro||ses?.codigoCentro||null,asignaturas:local.asignaturas||[],horas_semanales:Number(local.horasSemanales||0),turno:local.turno||null,observacion:local.observacion||null};
   if(!row.docente_id){alert("La carga académica no tiene docente válido.");return;}
   try{
     const q=local.supabaseId
