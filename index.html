@@ -4774,12 +4774,18 @@ function actualizarCargaNuevaAlianza2027(){
     return restantes2026===0;
 }
 
+function obtenerCentroRegistroAsignacion(asignacion){
+    const centros={"17683":"Nueva Alianza","39183":"Hugo Chávez Frías","29271":"Rosa Sarmiento","17751":"La Esperanza","17858":"La Unión N.º 3","17880":"Santa Lucía","37038":"Sector del Limón","30870":"Nueva Jerusalén"};
+    const codigo=String(asignacion?.codigo_centro||asignacion?.codigoCentro||"").trim();
+    return {codigo,escuela:centros[codigo]||asignacion?.escuelaAsignada||"Sin asignar"};
+}
+
 function cargarAsignaciones(){
     const tabla=document.getElementById("tablaAsignaciones");if(!tabla)return;
     const buscar=limpiarTexto(document.getElementById("buscarAsignacion")?.value||""), filtro=document.getElementById("filtroAsigAnio")?.value||"", datos=obtenerDatos(KEY_ASIGNACIONES);
-    const lista=datos.filter(a=>{const docenteActual=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(a.docenteId));const centroActual=obtenerCentroDocenteAsignacion(docenteActual);const escuela=a.escuelaAsignada||centroActual.escuela;const codigoCentro=a.codigo_centro||centroActual.codigo;const texto=limpiarTexto([a.anio,a.docenteNombre,escuela,codigoCentro,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
+    const lista=datos.filter(a=>{const centroAsignacion=obtenerCentroRegistroAsignacion(a);const escuela=centroAsignacion.escuela;const codigoCentro=centroAsignacion.codigo;const texto=limpiarTexto([a.anio,a.docenteNombre,escuela,codigoCentro,a.nivel,a.grado,a.seccion,(a.asignaturas||[]).join(" "),a.turno,a.estado].join(" "));return (!buscar||texto.includes(buscar))&&(!filtro||String(a.anio)===String(filtro));}).sort((a,b)=>String(a.docenteNombre||"").localeCompare(String(b.docenteNombre||""),"es"));
     tabla.innerHTML="";
-    lista.forEach((a,i)=>{const docenteActual=obtenerDatos(KEY_DOCENTES).find(d=>String(d.id)===String(a.docenteId));const centroActual=obtenerCentroDocenteAsignacion(docenteActual);const escuela=a.escuelaAsignada||centroActual.escuela;const codigoCentro=a.codigo_centro||centroActual.codigo;tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(escuela)+'</td><td>'+escaparHTML(codigoCentro)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(horasSemanalesPorNivel(a.nivel)||a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button type="button" class="btn-warning" title="Editar esta asignación" data-asig-id="'+escaparHTML(String(a.id))+'" onclick="editarAsignacion(this.dataset.asigId)">✏️ Editar</button> <button type="button" class="btn-danger" onclick="eliminarAsignacion(&quot;'+escaparHTML(String(a.id))+'&quot;)">Eliminar</button></td></tr>';});
+    lista.forEach((a,i)=>{const centroAsignacion=obtenerCentroRegistroAsignacion(a);const escuela=centroAsignacion.escuela;const codigoCentro=centroAsignacion.codigo;tabla.innerHTML+='<tr><td>'+(i+1)+'</td><td>'+escaparHTML(a.anio)+'</td><td>'+escaparHTML(a.docenteNombre)+'</td><td>'+escaparHTML(escuela)+'</td><td>'+escaparHTML(codigoCentro)+'</td><td>'+escaparHTML(a.nivel)+'</td><td>'+escaparHTML(a.grado)+'</td><td>'+escaparHTML(a.seccion)+'</td><td>'+escaparHTML((a.asignaturas||[]).join(", "))+'</td><td>'+escaparHTML(horasSemanalesPorNivel(a.nivel)||a.horasSemanales)+'</td><td>'+escaparHTML(a.turno)+'</td><td>'+escaparHTML(a.estado)+'</td><td><button type="button" class="btn-warning" title="Editar esta asignación" data-asig-id="'+escaparHTML(String(a.id))+'" onclick="editarAsignacion(this.dataset.asigId)">✏️ Editar</button> <button type="button" class="btn-danger" onclick="eliminarAsignacion(&quot;'+escaparHTML(String(a.id))+'&quot;)">Eliminar</button></td></tr>';});
     if(!lista.length)tabla.innerHTML='<tr><td colspan="13" style="text-align:center;padding:20px;color:#777;">No hay asignaciones registradas.</td></tr>';
     const claveDocente=a=>[String(a.codigo_centro||a.codigoCentro||""),limpiarTexto(a.docenteNombre||"")||String(a.docenteId||"")].join("|");
     const docentesUnicos=new Set(lista.map(claveDocente).filter(k=>!k.endsWith("|")));
@@ -8388,7 +8394,7 @@ async function NA_syncAsignaciones(){
   (data||[]).forEach(a=>{
     const d=docs.find(x=>String(x.supabaseId||"")===String(a.docente_id));
     out.push({
-      id:a.id, supabaseId:a.id, docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
+      id:a.id, supabaseId:a.id, codigo_centro:a.codigo_centro||d?.codigo_centro||"", docenteId:d?.id||a.docente_id, docenteSupabaseId:a.docente_id, docenteNombre:d?.nombre||"",
       nivel:a.nivel,grado:a.grado,seccion:a.seccion,anio:a.anio,estado:a.estado||"Activo",
       asignaturas:a.asignaturas||[],horasSemanales:a.horas_semanales||0,turno:a.turno||"",observacion:a.observacion||""
     });
